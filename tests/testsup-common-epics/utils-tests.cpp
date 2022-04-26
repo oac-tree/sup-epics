@@ -19,6 +19,8 @@
 
 #include "sup/epics/utils.h"
 
+#include "AnyValue.h"
+
 #include <gtest/gtest.h>
 
 using namespace ::sup::epics;
@@ -31,4 +33,7 @@ class UtilsTest : public ::testing::Test
 TEST_F(UtilsTest, GetHelloWorld)
 {
   EXPECT_EQ(GetHelloWorldString(), std::string("Hello World!"));
+
+  sup::dto::AnyValue anyvalue{sup::dto::Boolean};
+  anyvalue = true;
 }
