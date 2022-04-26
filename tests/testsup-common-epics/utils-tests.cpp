@@ -20,6 +20,8 @@
 #include "sup/epics/utils.h"
 
 #include "AnyValue.h"
+#include <pvxs/data.h>
+#include <pvxs/nt.h>
 
 #include <gtest/gtest.h>
 

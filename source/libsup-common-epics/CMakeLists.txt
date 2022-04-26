@@ -6,13 +6,16 @@ if (SUPCOMMONEPICS_CODAC)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto)
   target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup)
   target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib)
+  target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
+
 else()
-  target_link_libraries(${library_name} PUBLIC pthread COACompact::sup-dto)
+  find_package(EPICS REQUIRED)
+  target_link_directories(${library_name} PUBLIC ${EPICS_LINK_DIRECTORIES})
+  target_link_libraries(${library_name} PUBLIC pthread COACompact::sup-dto ${EPICS_LIBRARIES})
+  target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}$<SEMICOLON>${EPICS_INCLUDE_DIRECTORIES}>)
 endif()
 
 add_subdirectory(sup)
-
-target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
 
 # -- Installation --
 
