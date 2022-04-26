@@ -3,9 +3,9 @@ set(library_name sup-common-epics)
 add_library(${library_name} SHARED "")
 
 if (SUPCOMMONEPICS_CODAC)
-  target_link_libraries(${library_name} PUBLIC pthread sup-dto)
-  target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup)
-  target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib)
+  target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
+  target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup $ENV{CODAC_ROOT}/epics/include)
+  target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib $ENV{CODAC_ROOT}/epics/lib/linux-x86_64)
   target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
 
 else()
