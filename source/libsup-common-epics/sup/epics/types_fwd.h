@@ -17,24 +17,20 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/utils.h"
+#ifndef SUP_EPICS_TYPES_FWD_H
+#define SUP_EPICS_TYPES_FWD_H
 
-#include "AnyValueHelper.h"
-#include "pvxs/data.h"
-#include "sup/epics/pvxsvaluebuilder.h"
+//! @file types_fwd.h
+//! Forward declaration of necessary types.
 
-namespace sup::epics
+namespace sup::dto
 {
-std::string GetHelloWorldString()
-{
-  return "Hello World!";
+class AnyValue;
 }
 
-pvxs::Value GetPVXSValue(const dto::AnyValue &any_value)
+namespace pvxs
 {
-  PvxsValueBuilder builder;
-  sup::dto::SerializeAnyValue(any_value, builder);
-  return builder.GetPVXSValue();
+class Value;
 }
 
-}  // namespace sup::epics
+#endif  // SUP_EPICS_TYPES_FWD_H

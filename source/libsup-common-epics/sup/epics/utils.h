@@ -20,16 +20,9 @@
 #ifndef SUP_EPICS_UTILS_H
 #define SUP_EPICS_UTILS_H
 
+#include "sup/epics/types_fwd.h"
+
 #include <string>
-
-namespace sup::dto
-{
-class AnyValue;
-}
-
-namespace pvxs {
-class Value;
-}
 
 namespace sup::epics
 {
@@ -37,6 +30,6 @@ std::string GetHelloWorldString();
 
 ::pvxs::Value GetPVXSValue(const ::sup::dto::AnyValue& any_value);
 
-}
+}  // namespace sup::epics
 
-#endif
+#endif  // SUP_EPICS_UTILS_H
