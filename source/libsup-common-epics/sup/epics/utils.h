@@ -22,9 +22,21 @@
 
 #include <string>
 
+namespace sup::dto
+{
+class AnyValue;
+}
+
+namespace pvxs {
+class Value;
+}
+
 namespace sup::epics
 {
 std::string GetHelloWorldString();
+
+::pvxs::Value GetPVXSValue(const ::sup::dto::AnyValue& any_value);
+
 }
 
 #endif

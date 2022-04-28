@@ -17,13 +17,12 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include "AnyValue.h"
 #include "sup/epics/utils.h"
 
-#include "AnyValue.h"
+#include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
-
-#include <gtest/gtest.h>
 
 using namespace ::sup::epics;
 
@@ -31,11 +30,11 @@ class UtilsTest : public ::testing::Test
 {
 };
 
-//! Testing Insert method.
-TEST_F(UtilsTest, GetHelloWorld)
-{
-  EXPECT_EQ(GetHelloWorldString(), std::string("Hello World!"));
+//! Get PVXS value from empty AnyValue.
 
-  sup::dto::AnyValue anyvalue{sup::dto::Boolean};
-  anyvalue = true;
+TEST_F(UtilsTest, GetPVXSValueFromEmpty)
+{
+  sup::dto::AnyValue any_value;
+  auto pvxs_value = GetPVXSValue(any_value);
+  EXPECT_FALSE(pvxs_value.valid());
 }

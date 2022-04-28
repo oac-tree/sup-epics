@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include "sup/epics/utils.h"
+#include "pvxs/data.h"
 
 namespace sup::epics
 {
@@ -26,4 +27,9 @@ std::string GetHelloWorldString()
   return "Hello World!";
 }
 
+pvxs::Value GetPVXSValue(const dto::AnyValue &any_value)
+{
+  return {};
 }
+
+}  // namespace sup::epics
