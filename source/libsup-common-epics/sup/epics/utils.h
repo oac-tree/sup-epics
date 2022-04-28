@@ -28,7 +28,12 @@ namespace sup::epics
 {
 std::string GetHelloWorldString();
 
+//! Returns PVXS value from AnyValue.
 ::pvxs::Value GetPVXSValue(const ::sup::dto::AnyValue& any_value);
+
+//! Returns PVXS value from scalar like AnyValue.
+pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
+
 
 }  // namespace sup::epics
 
