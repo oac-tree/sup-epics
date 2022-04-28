@@ -176,16 +176,16 @@ TEST_F(UtilsTest, GetPVXSValueFromScalar)
   }
 }
 
-//! Get PVXS value from empty AnyValue.
+//! Build PVXS value from empty AnyValue.
 
-TEST_F(UtilsTest, GetPVXSValueFromEmpty)
+TEST_F(UtilsTest, BuildPVXSValueFromEmpty)
 {
   // investigating default constructed PVXS
   pvxs::Value pvxs_default;
 
   // constructing from empty AnyValue
   sup::dto::AnyValue any_value;
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_FALSE(pvxs_value.valid());
   EXPECT_TRUE(pvxs_value.equalType(pvxs_default));
   EXPECT_TRUE(pvxs_value.equalInst(pvxs_default));  // Shouldn't it be false?

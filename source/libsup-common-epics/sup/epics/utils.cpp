@@ -60,17 +60,6 @@ const std::map<sup::dto::TypeCode, pair_t> kConversionMap = {
 
 namespace sup::epics
 {
-std::string GetHelloWorldString()
-{
-  return "Hello World!";
-}
-
-pvxs::Value GetPVXSValue(const dto::AnyValue& any_value)
-{
-  PvxsValueBuilder builder;
-  sup::dto::SerializeAnyValue(any_value, builder);
-  return builder.GetPVXSValue();
-}
 
 pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {
@@ -95,5 +84,12 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
   assign_function(any_value, result);
   return result;
 };
+
+pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
+{
+  PvxsValueBuilder builder;
+  sup::dto::SerializeAnyValue(any_value, builder);
+  return builder.GetPVXSValue();
+}
 
 }  // namespace sup::epics
