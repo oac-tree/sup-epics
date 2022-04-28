@@ -174,6 +174,12 @@ TEST_F(UtilsTest, GetPVXSValueFromScalar)
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::String);
     EXPECT_EQ(result.as<std::string>(), std::string(1025, 'a'));
   }
+
+  {  // attempt to construct from AnyValue based on structure
+    sup::dto::AnyValue any_value = {
+        {{"signed", {sup::dto::SignedInteger32, 42}}, {"bool", {sup::dto::Boolean, true}}}};
+    EXPECT_THROW(GetPVXSValueFromScalar(any_value), std::runtime_error);
+  }
 }
 
 //! Build PVXS value from empty AnyValue.
@@ -188,5 +194,19 @@ TEST_F(UtilsTest, BuildPVXSValueFromEmpty)
   auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_FALSE(pvxs_value.valid());
   EXPECT_TRUE(pvxs_value.equalType(pvxs_default));
-  EXPECT_TRUE(pvxs_value.equalInst(pvxs_default));  // Shouldn't it be false?
+}
+
+//! Build PVXS value from scalar like AnyValue.
+
+TEST_F(UtilsTest, BuildPVXSValueFromSignedInteger32)
+{
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
+  any_value = 42;
+
+  auto pvxs_value = BuildPVXSValue(any_value);
+  EXPECT_TRUE(pvxs_value.valid());
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
+
+  // other basic types are performed via GetPVXSValueFromScalar testing
 }

@@ -34,6 +34,7 @@ class PvxsValueBuilder : public sup::dto::IAnyVisitor<const sup::dto::AnyValue>
 {
 public:
   PvxsValueBuilder();
+  ~PvxsValueBuilder() override;
 
   pvxs::Value GetPVXSValue() const;
 
@@ -55,7 +56,8 @@ public:
   void ScalarEpilog(const sup::dto::AnyValue* anyvalue) override;
 
 private:
-  std::unique_ptr<pvxs::Value> m_value;
+  struct PvxsValueBuilderImpl;
+  std::unique_ptr<PvxsValueBuilderImpl> p_impl;
 };
 
 }  // namespace sup::epics

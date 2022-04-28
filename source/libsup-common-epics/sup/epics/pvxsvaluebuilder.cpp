@@ -19,6 +19,8 @@
 
 #include "sup/epics/pvxsvaluebuilder.h"
 
+#include "sup/epics/utils.h"
+
 #include <pvxs/data.h>
 
 #include <iostream>
@@ -27,11 +29,20 @@
 namespace sup::epics
 {
 
-PvxsValueBuilder::PvxsValueBuilder() : m_value(new pvxs::Value) {}
+struct PvxsValueBuilder::PvxsValueBuilderImpl
+{
+  pvxs::Value m_result;            //!< place for the result
+  pvxs::Value m_scalar;            //!< last processed scalar value
+  pvxs::Value *m_parent{nullptr};  //! current parent
+};
+
+PvxsValueBuilder::PvxsValueBuilder() : p_impl(new PvxsValueBuilderImpl) {}
+
+PvxsValueBuilder::~PvxsValueBuilder() = default;
 
 pvxs::Value PvxsValueBuilder::GetPVXSValue() const
 {
-  return *m_value;
+  return p_impl->m_result;
 }
 
 void PvxsValueBuilder::EmptyProlog(const sup::dto::AnyValue *anyvalue)
@@ -89,11 +100,18 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarProlog() value:" << anyvalue << std::endl;
+  p_impl->m_scalar = GetPVXSValueFromScalar(*anyvalue);
 }
 
 void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarEpilog() value:" << anyvalue << std::endl;
+  if (!p_impl->m_parent)
+  {
+    // If no parent exists, then we are processing scalar based AnyValue.
+    // We asume that this should be our result.
+    p_impl->m_result = p_impl->m_scalar;
+  }
 }
 
 }  // namespace sup::epics
