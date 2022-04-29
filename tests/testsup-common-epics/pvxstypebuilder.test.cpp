@@ -28,18 +28,23 @@
 
 using namespace ::sup::epics;
 
+//! Testing PvxsTypeBuilder class to build pvxs::TypeDef from AnyType's.
+
 class PvxsTypeBuilderTest : public ::testing::Test
 {
 public:
+  //! Creates pvxs::TypeDef from sup::dto::AnyType. Main helper method to test the builder.
   static pvxs::TypeDef GetPVXSType(const sup::dto::AnyType& any_type)
   {
     PvxsTypeBuilder builder;
     sup::dto::SerializeAnyType(any_type, builder);
     return builder.GetPVXSType();
   }
+
+
 };
 
-//! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like AnyType's.
+//! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like types.
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 {
@@ -50,5 +55,16 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
   auto pvxs_value = GetPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value.nmembers(), 0);
+}
+
+//! Build PVXS value from AnyValue representing a struct with single field.
+
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
+{
+  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32}}};
+  auto pvxs_value = GetPVXSType(any_type).create();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 0);
 }

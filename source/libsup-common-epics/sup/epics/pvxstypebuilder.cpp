@@ -33,7 +33,13 @@ namespace sup::epics
 struct PvxsTypeBuilder::PvxsTypeBuilderImpl
 {
   pvxs::TypeDef m_result;
+  pvxs::TypeDef *m_parent{nullptr};
   std::stack<pvxs::TypeCode> m_type_code;
+
+  bool IsAtTop() const
+  {
+    return m_type_code.empty();
+  }
 };
 
 PvxsTypeBuilder::PvxsTypeBuilder() : p_impl(new PvxsTypeBuilderImpl) {}
@@ -58,6 +64,15 @@ void PvxsTypeBuilder::EmptyEpilog(const sup::dto::AnyType* anytype)
 void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
   std::cout << "StructProlog() value:" << anytype << " item:" << std::endl;
+
+  auto type_code = GetPVXSTypeCode(*anytype);
+  if (p_impl->IsAtTop())
+  {
+    std::cout << "    >>" << GetPVXSTypeCode(*anytype) << std::endl;
+    p_impl->m_result = pvxs::TypeDef(type_code);
+    p_impl->m_parent = &p_impl->m_result;
+    p_impl->m_type_code.push(type_code);
+  }
 }
 
 void PvxsTypeBuilder::StructMemberSeparator()
@@ -111,7 +126,7 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 
   // Empty stack means that the given scalar was the single constituent of AnyType.
   // So this must be our result.
-  if (p_impl->m_type_code.empty())
+  if (p_impl->IsAtTop())
   {
     p_impl->m_result = pvxs::TypeDef(type_code);
   }
