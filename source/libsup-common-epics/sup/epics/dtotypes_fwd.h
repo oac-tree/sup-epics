@@ -33,6 +33,7 @@ namespace pvxs
 {
 class Value;
 class TypeDef;
+struct TypeCode;
 }  // namespace pvxs
 
 #endif  // SUP_EPICS_DTOTYPES_FWD_H

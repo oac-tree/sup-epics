@@ -41,6 +41,25 @@ void AssignScalar(const sup::dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 using function_t = std::function<void(const sup::dto::AnyValue& anyvalue, pvxs::Value& pvxs_value)>;
 using pair_t = std::pair<pvxs::TypeCode, function_t>;
 
+//! Correspondance of AnyValue type code to PVXS TypeCode.
+const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
+    {sup::dto::TypeCode::Empty, pvxs::TypeCode::Null},
+    {sup::dto::TypeCode::Bool, pvxs::TypeCode::Bool},
+    {sup::dto::TypeCode::Char8, pvxs::TypeCode::UInt8},  // is it Ok?
+    {sup::dto::TypeCode::Int8, pvxs::TypeCode::Int8},
+    {sup::dto::TypeCode::UInt8, pvxs::TypeCode::UInt8},
+    {sup::dto::TypeCode::Int16, pvxs::TypeCode::Int16},
+    {sup::dto::TypeCode::UInt16, pvxs::TypeCode::UInt16},
+    {sup::dto::TypeCode::Int32, pvxs::TypeCode::Int32},
+    {sup::dto::TypeCode::UInt32, pvxs::TypeCode::UInt32},
+    {sup::dto::TypeCode::Int64, pvxs::TypeCode::Int64},
+    {sup::dto::TypeCode::UInt64, pvxs::TypeCode::UInt64},
+    {sup::dto::TypeCode::Float32, pvxs::TypeCode::Float32},
+    {sup::dto::TypeCode::Float64, pvxs::TypeCode::Float64},
+    {sup::dto::TypeCode::String, pvxs::TypeCode::String},
+    {sup::dto::TypeCode::Struct, pvxs::TypeCode::Struct},
+};
+
 //! Correspondance of AnyValue type code to PVXS enumerator and assign function.
 const std::map<sup::dto::TypeCode, pair_t> kConversionMap = {
     // sup::dto::TypeCode::Char8 is not implemented
@@ -60,6 +79,16 @@ const std::map<sup::dto::TypeCode, pair_t> kConversionMap = {
 
 namespace sup::epics
 {
+
+pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
+{
+  auto it = kTypeCodeMap.find(any_type.GetTypeCode());
+  if (it == kTypeCodeMap.end())
+  {
+    throw std::runtime_error("Unknxxown AnyType code");
+  }
+  return it->second;
+}
 
 pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {

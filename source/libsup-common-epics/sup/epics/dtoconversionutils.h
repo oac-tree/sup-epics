@@ -29,6 +29,10 @@
 
 namespace sup::epics
 {
+
+//! Returns PVXS TypeCode corresponding to the given AnyType.
+pvxs::TypeCode GetPVXSTypeCode(const ::sup::dto::AnyType& any_type);
+
 //! Returns PVXS value from scalar like AnyValue.
 pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 

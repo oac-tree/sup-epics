@@ -17,18 +17,46 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "AnyValue.h"
 #include "sup/epics/dtoconversionutils.h"
+
+#include "AnyValue.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+
+#include <iostream>
 
 using namespace ::sup::epics;
 
 class DtoConversionUtilsTest : public ::testing::Test
 {
 };
+
+//! Checks GetPVXSTypeCode method to construct PVXS TypeCode from AnyType.
+
+TEST_F(DtoConversionUtilsTest, GetPVXSTypeCode)
+{
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::EmptyType), ::pvxs::TypeCode::Null);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Boolean), ::pvxs::TypeCode::Bool);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Character8), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger8), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger8), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger16), ::pvxs::TypeCode::Int16);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger16), ::pvxs::TypeCode::UInt16);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger32), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger32), ::pvxs::TypeCode::UInt32);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger64), ::pvxs::TypeCode::Int64);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger64), ::pvxs::TypeCode::UInt64);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Float32), ::pvxs::TypeCode::Float32);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Float64), ::pvxs::TypeCode::Float64);
+  EXPECT_EQ(GetPVXSTypeCode(sup::dto::String), ::pvxs::TypeCode::String);
+
+  {  // AnyType based on struct
+    ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8}}};
+    EXPECT_EQ(GetPVXSTypeCode(any_type), ::pvxs::TypeCode::Struct);
+  }
+}
 
 //! Checks GetPVXSValueFromScalar helper method to construct PVXS value from scalar based AnyValue.
 

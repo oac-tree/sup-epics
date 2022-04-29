@@ -39,7 +39,7 @@ public:
   }
 };
 
-TEST_F(PvxsTypeBuilderTest, ScalarBasedPVXSType)
+TEST_F(PvxsTypeBuilderTest, PVXSTypeDefBasics)
 {
-  EXPECT_EQ(1, 1);
+  auto pvxs_type = pvxs::TypeDef(pvxs::TypeCode::Int32);
 }
