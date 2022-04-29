@@ -31,7 +31,7 @@ using namespace ::sup::epics;
 class PvxsTypeBuilderTest : public ::testing::Test
 {
 public:
-  pvxs::TypeDef GetPVXSType(const sup::dto::AnyType& any_type)
+ static  pvxs::TypeDef GetPVXSType(const sup::dto::AnyType& any_type)
   {
     PvxsTypeBuilder builder;
     sup::dto::SerializeAnyType(any_type, builder);
