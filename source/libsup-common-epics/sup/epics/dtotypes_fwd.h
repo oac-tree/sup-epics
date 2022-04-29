@@ -17,22 +17,22 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_TYPES_FWD_H
-#define SUP_EPICS_TYPES_FWD_H
+#ifndef SUP_EPICS_DTOTYPES_FWD_H
+#define SUP_EPICS_DTOTYPES_FWD_H
 
-//! @file types_fwd.h
-//! Forward declaration of necessary types.
+//! @file dtotypes_fwd.h
+//! Forward declaration of some external types related to the data transfer.
 
 namespace sup::dto
 {
 class AnyValue;
 class AnyType;
-}
+}  // namespace sup::dto
 
 namespace pvxs
 {
 class Value;
 class TypeDef;
-}
+}  // namespace pvxs
 
-#endif  // SUP_EPICS_TYPES_FWD_H
+#endif  // SUP_EPICS_DTOTYPES_FWD_H

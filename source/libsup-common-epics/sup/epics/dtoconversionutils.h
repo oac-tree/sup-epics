@@ -23,7 +23,7 @@
 //! @file dtoconversionutils.h
 //! Collection of utility functions to convert sup-dto's AnyValue to PVXS values and back.
 
-#include "sup/epics/types_fwd.h"
+#include "sup/epics/dtotypes_fwd.h"
 
 #include <string>
 

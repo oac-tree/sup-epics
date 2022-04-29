@@ -21,7 +21,7 @@
 #define SUP_EPICS_PVXSVALUEBUILDER_H
 
 #include "IAnyVisitor.h"
-#include "sup/epics/types_fwd.h"
+#include "sup/epics/dtotypes_fwd.h"
 
 #include <memory>
 
