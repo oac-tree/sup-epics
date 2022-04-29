@@ -17,8 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_UTILS_H
-#define SUP_EPICS_UTILS_H
+#ifndef SUP_EPICS_DTOCONVERSIONUTILS_H
+#define SUP_EPICS_DTOCONVERSIONUTILS_H
+
+//! @file dtoconversionutils.h
+//! Collection of utility functions to convert sup-dto's AnyValue to PVXS values and back.
 
 #include "sup/epics/types_fwd.h"
 
@@ -34,4 +37,4 @@ pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 
 }  // namespace sup::epics
 
-#endif  // SUP_EPICS_UTILS_H
+#endif  // SUP_EPICS_DTOCONVERSIONUTILS_H

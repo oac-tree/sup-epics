@@ -18,7 +18,7 @@
  *****************************************************************************/
 
 #include "AnyValue.h"
-#include "sup/epics/utils.h"
+#include "sup/epics/dtoconversionutils.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
@@ -26,13 +26,13 @@
 
 using namespace ::sup::epics;
 
-class UtilsTest : public ::testing::Test
+class DtoConversionUtilsTest : public ::testing::Test
 {
 };
 
 //! Investigating PVXS value itself,
 
-TEST_F(UtilsTest, ScalarBasedPVXSValue)
+TEST_F(DtoConversionUtilsTest, ScalarBasedPVXSValue)
 {
   // default constructed
   pvxs::Value pvxs_default1;
@@ -56,7 +56,7 @@ TEST_F(UtilsTest, ScalarBasedPVXSValue)
 
 //! Checks GetPVXSValueFromScalar helper method to construct PVXS value from scalar based AnyValue.
 
-TEST_F(UtilsTest, GetPVXSValueFromScalar)
+TEST_F(DtoConversionUtilsTest, GetPVXSValueFromScalar)
 {
   {  // from Bool
     sup::dto::AnyValue any_value{sup::dto::Boolean};
@@ -184,7 +184,7 @@ TEST_F(UtilsTest, GetPVXSValueFromScalar)
 
 //! Build PVXS value from empty AnyValue.
 
-TEST_F(UtilsTest, BuildPVXSValueFromEmpty)
+TEST_F(DtoConversionUtilsTest, BuildPVXSValueFromEmpty)
 {
   // investigating default constructed PVXS
   pvxs::Value pvxs_default;
@@ -198,7 +198,7 @@ TEST_F(UtilsTest, BuildPVXSValueFromEmpty)
 
 //! Build PVXS value from scalar like AnyValue.
 
-TEST_F(UtilsTest, BuildPVXSValueFromSignedInteger32)
+TEST_F(DtoConversionUtilsTest, BuildPVXSValueFromSignedInteger32)
 {
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
   any_value = 42;
@@ -207,6 +207,20 @@ TEST_F(UtilsTest, BuildPVXSValueFromSignedInteger32)
   EXPECT_TRUE(pvxs_value.valid());
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
+
+  // other basic types are performed via GetPVXSValueFromScalar testing
+}
+
+//! Build PVXS value from AnyValue representing a struct with single field.
+
+TEST_F(DtoConversionUtilsTest, BuildPVXSValueFromStructWithSingleField)
+{
+  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32, 42}}}};
+
+  auto pvxs_value = BuildPVXSValue(any_value);
+  //  EXPECT_TRUE(pvxs_value.valid());
+  //  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
+  //  EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
 
   // other basic types are performed via GetPVXSValueFromScalar testing
 }

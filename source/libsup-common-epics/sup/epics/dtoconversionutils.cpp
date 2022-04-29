@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/utils.h"
+#include "sup/epics/dtoconversionutils.h"
 
 #include "AnyValue.h"
 #include "AnyValueHelper.h"
