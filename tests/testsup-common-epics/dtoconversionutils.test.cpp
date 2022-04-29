@@ -71,6 +71,15 @@ TEST_F(DtoConversionUtilsTest, GetPVXSValueFromScalar)
     EXPECT_EQ(result.as<bool>(), true);
   }
 
+  {  // from Char
+    sup::dto::AnyValue any_value{sup::dto::Character8};
+    any_value = 'w';
+    auto result = GetPVXSValueFromScalar(any_value);
+    EXPECT_TRUE(result.valid());
+    EXPECT_EQ(result.type(), ::pvxs::TypeCode::UInt8);
+    EXPECT_EQ(result.as<char>(), 'w');
+  }
+
   {  // from Int8
     sup::dto::AnyValue any_value{sup::dto::SignedInteger8};
     any_value = 42;
