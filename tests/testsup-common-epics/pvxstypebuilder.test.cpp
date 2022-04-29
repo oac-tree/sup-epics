@@ -31,7 +31,7 @@ using namespace ::sup::epics;
 class PvxsTypeBuilderTest : public ::testing::Test
 {
 public:
- static  pvxs::TypeDef GetPVXSType(const sup::dto::AnyType& any_type)
+  static pvxs::TypeDef GetPVXSType(const sup::dto::AnyType& any_type)
   {
     PvxsTypeBuilder builder;
     sup::dto::SerializeAnyType(any_type, builder);
@@ -39,7 +39,16 @@ public:
   }
 };
 
-TEST_F(PvxsTypeBuilderTest, PVXSTypeDefBasics)
+//! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like AnyType's.
+
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 {
-  auto pvxs_type = pvxs::TypeDef(pvxs::TypeCode::Int32);
+  sup::dto::AnyType any_type(sup::dto::SignedInteger32);
+
+  // The only way to check if pvxs::TypeDef is correctly created is to create
+  // a pvxs::Value from it, and check it's type code.
+  auto pvxs_value = GetPVXSType(any_type).create();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value.nmembers(), 0);
 }

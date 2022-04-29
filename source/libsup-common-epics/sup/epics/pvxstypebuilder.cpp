@@ -19,9 +19,12 @@
 
 #include "sup/epics/pvxstypebuilder.h"
 
+#include "sup/epics/dtoconversionutils.h"
+
 #include <pvxs/data.h>
 
 #include <iostream>
+#include <stack>
 #include <stdexcept>
 
 namespace sup::epics
@@ -29,6 +32,8 @@ namespace sup::epics
 
 struct PvxsTypeBuilder::PvxsTypeBuilderImpl
 {
+  pvxs::TypeDef m_result;
+  std::stack<pvxs::TypeCode> m_type_code;
 };
 
 PvxsTypeBuilder::PvxsTypeBuilder() : p_impl(new PvxsTypeBuilderImpl) {}
@@ -37,7 +42,7 @@ PvxsTypeBuilder::~PvxsTypeBuilder() = default;
 
 pvxs::TypeDef PvxsTypeBuilder::GetPVXSType() const
 {
-  return {};
+  return p_impl->m_result;
 }
 
 void PvxsTypeBuilder::EmptyProlog(const sup::dto::AnyType* anytype)
@@ -92,9 +97,24 @@ void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "ScalarProlog() value:" << anytype << std::endl;
+  p_impl->m_type_code.push(GetPVXSTypeCode(*anytype));
+  std::cout << "ScalarProlog() value:" << anytype << "typecode:" << p_impl->m_type_code.top()
+            << std::endl;
 }
 
-void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype) {}
+void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
+{
+  std::cout << "ScalarEpilog() value:" << anytype << std::endl;
+
+  auto type_code = p_impl->m_type_code.top();
+  p_impl->m_type_code.pop();
+
+  // Empty stack means that the given scalar was the single constituent of AnyType.
+  // So this must be our result.
+  if (p_impl->m_type_code.empty())
+  {
+    p_impl->m_result = pvxs::TypeDef(type_code);
+  }
+}
 
 }  // namespace sup::epics
