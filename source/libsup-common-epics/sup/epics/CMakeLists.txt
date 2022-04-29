@@ -4,4 +4,6 @@ target_sources(${library_name} PRIVATE
   dtoconversionutils.h
   pvxsvaluebuilder.cpp
   pvxsvaluebuilder.h
+  pvxstypebuilder.cpp
+  pvxstypebuilder.h
 )

@@ -26,11 +26,13 @@
 namespace sup::dto
 {
 class AnyValue;
+class AnyType;
 }
 
 namespace pvxs
 {
 class Value;
+class TypeDef;
 }
 
 #endif  // SUP_EPICS_TYPES_FWD_H
