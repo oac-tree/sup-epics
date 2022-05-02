@@ -102,3 +102,30 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
   EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value["bool"].type(), ::pvxs::TypeCode::Bool);
 }
+
+//! Build PVXS value from AnyValue representing a struct with two fields.
+
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
+{
+  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32}},
+                                   {"bool", {sup::dto::Boolean}}};
+  sup::dto::AnyType any_type = {{"scalars", two_scalars}};
+
+  auto pvxs_value = GetPVXSType(any_type).create();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 1);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"scalars"}));
+
+  auto nested_value = pvxs_value["scalars"];
+  EXPECT_EQ(nested_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(nested_value.nmembers(), 0);
+
+  //  auto nested_names = GetMemberNames(pvxs_value["scalars"]);
+  //  EXPECT_EQ(nested_names, std::vector<std::string>({"signed", "bool"}));
+
+  //  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  //  EXPECT_EQ(pvxs_value["scalars.bool"].type(), ::pvxs::TypeCode::Bool);
+}

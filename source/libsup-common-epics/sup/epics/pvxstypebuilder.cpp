@@ -19,6 +19,7 @@
 
 #include "sup/epics/pvxstypebuilder.h"
 
+#include "AnyType.h"
 #include "sup/epics/dtoconversionutils.h"
 
 #include <pvxs/data.h>
@@ -32,7 +33,9 @@ namespace sup::epics
 
 struct PvxsTypeBuilder::PvxsTypeBuilderImpl
 {
+  ::pvxs::TypeDef m_result;
   std::stack<::pvxs::TypeDef> m_struct_def;
+  ::pvxs::TypeDef m_last_struct;
 
   bool IsAtTop() const { return m_struct_def.empty(); }
 };
@@ -43,7 +46,7 @@ PvxsTypeBuilder::~PvxsTypeBuilder() = default;
 
 pvxs::TypeDef PvxsTypeBuilder::GetPVXSType() const
 {
-  return p_impl->m_struct_def.top();
+  return p_impl->m_result;
 }
 
 void PvxsTypeBuilder::EmptyProlog(const sup::dto::AnyType* anytype)
@@ -60,6 +63,8 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
   std::cout << "StructProlog() value:" << anytype << std::endl;
   p_impl->m_struct_def.push(GetPVXSTypeCode(*anytype));
+  std::cout << "top_address" << &p_impl->m_struct_def.top() << std::endl;
+  std::cout << "xxx " << p_impl->m_struct_def.size() << std::endl;
 }
 
 void PvxsTypeBuilder::StructMemberSeparator()
@@ -70,6 +75,9 @@ void PvxsTypeBuilder::StructMemberSeparator()
 void PvxsTypeBuilder::StructEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "StructEpilog() value:" << anytype << std::endl;
+  p_impl->m_result = p_impl->m_struct_def.top();
+  p_impl->m_last_struct = p_impl->m_struct_def.top();
+  p_impl->m_struct_def.pop();
 }
 
 void PvxsTypeBuilder::MemberProlog(const sup::dto::AnyType* anytype, const std::string& member_name)
@@ -81,8 +89,13 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
 {
   std::cout << "MemberEpilog() " << anytype << " " << member_name << " "
             << GetPVXSTypeCode(*anytype) << std::endl;
+  std::cout << "top_address" << &p_impl->m_struct_def.top() << std::endl;
   auto& top = p_impl->m_struct_def.top();
+
+  // ??? How to add structure inside
   top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
+
+  std::cout << "xxx " << p_impl->m_struct_def.size() << std::endl;
 }
 
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
@@ -111,7 +124,10 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 
   if (p_impl->IsAtTop())
   {
-    p_impl->m_struct_def.push(GetPVXSTypeCode(*anytype));
+    // If there was no structure created, than AnyType is a scalar-based.
+    // We assume that TypeDef corresponding to our scalar is the main result.
+    p_impl->m_result = GetPVXSTypeCode(*anytype);
+    //    p_impl->m_struct_def.push(GetPVXSTypeCode(*anytype));
   }
 }
 
