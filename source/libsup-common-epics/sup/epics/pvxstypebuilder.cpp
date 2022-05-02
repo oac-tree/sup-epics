@@ -32,23 +32,9 @@ namespace sup::epics
 
 struct PvxsTypeBuilder::PvxsTypeBuilderImpl
 {
-  pvxs::TypeDef m_result;
-  pvxs::TypeDef* m_parent{nullptr};
+  std::stack<::pvxs::TypeDef> m_struct_def;
 
-  using pair_t = std::pair<pvxs::TypeCode, std::string>;
-
-  std::stack<pair_t> m_type_code;
-
-  bool IsAtTop() const { return m_type_code.empty(); }
-
-  void Add(pvxs::TypeCode code, const std::string& name = {}) { m_type_code.push({code, name}); }
-
-  pvxs::TypeCode Take()
-  {
-    auto type_code = m_type_code.top();
-    m_type_code.pop();
-    return type_code.first;
-  }
+  bool IsAtTop() const { return m_struct_def.empty(); }
 };
 
 PvxsTypeBuilder::PvxsTypeBuilder() : p_impl(new PvxsTypeBuilderImpl) {}
@@ -57,7 +43,7 @@ PvxsTypeBuilder::~PvxsTypeBuilder() = default;
 
 pvxs::TypeDef PvxsTypeBuilder::GetPVXSType() const
 {
-  return p_impl->m_result;
+  return p_impl->m_struct_def.top();
 }
 
 void PvxsTypeBuilder::EmptyProlog(const sup::dto::AnyType* anytype)
@@ -72,18 +58,8 @@ void PvxsTypeBuilder::EmptyEpilog(const sup::dto::AnyType* anytype)
 
 void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "StructProlog() value:" << anytype << " item:" << std::endl;
-
-  auto type_code = GetPVXSTypeCode(*anytype);
-
-  if (p_impl->IsAtTop())
-  {
-    std::cout << "    >>" << GetPVXSTypeCode(*anytype) << std::endl;
-    p_impl->m_result = pvxs::TypeDef(type_code);
-    p_impl->m_parent = &p_impl->m_result;
-
-    p_impl->Add(type_code);
-  }
+  std::cout << "StructProlog() value:" << anytype << std::endl;
+  p_impl->m_struct_def.push(GetPVXSTypeCode(*anytype));
 }
 
 void PvxsTypeBuilder::StructMemberSeparator()
@@ -103,7 +79,10 @@ void PvxsTypeBuilder::MemberProlog(const sup::dto::AnyType* anytype, const std::
 
 void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::string& member_name)
 {
-  std::cout << "MemberEpilog() " << anytype << " " << member_name << std::endl;
+  std::cout << "MemberEpilog() " << anytype << " " << member_name << " "
+            << GetPVXSTypeCode(*anytype) << std::endl;
+  auto& top = p_impl->m_struct_def.top();
+  top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
 }
 
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
@@ -123,7 +102,6 @@ void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)
 {
-  p_impl->Add(GetPVXSTypeCode(*anytype));
   std::cout << "ScalarProlog() value:" << anytype << std::endl;
 }
 
@@ -131,13 +109,9 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "ScalarEpilog() value:" << anytype << std::endl;
 
-  auto type_code = p_impl->Take();
-
-  // Empty stack means that the given scalar was the single constituent of AnyType.
-  // So this must be our result.
   if (p_impl->IsAtTop())
   {
-    p_impl->m_result = pvxs::TypeDef(type_code);
+    p_impl->m_struct_def.push(GetPVXSTypeCode(*anytype));
   }
 }
 

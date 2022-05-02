@@ -68,5 +68,5 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
   auto pvxs_value = GetPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
-  EXPECT_EQ(pvxs_value.nmembers(), 0);
+  EXPECT_EQ(pvxs_value.nmembers(), 1);
 }
