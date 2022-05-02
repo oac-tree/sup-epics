@@ -56,6 +56,8 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value.nmembers(), 0);
+
+  // more tests are done via DtoConversionUtilsTest::GetPVXSTypeCode
 }
 
 //! Build PVXS value from AnyValue representing a struct with single field.
