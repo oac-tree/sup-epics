@@ -26,6 +26,8 @@
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 
+#include <iostream>
+
 using namespace ::sup::epics;
 
 //! Testing PvxsTypeBuilder class to build pvxs::TypeDef from AnyType's.
@@ -41,7 +43,15 @@ public:
     return builder.GetPVXSType();
   }
 
-
+  std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
+  {
+    std::vector<std::string> result;
+    for (auto fld : pvxs_value.ichildren())
+    {
+      result.push_back(pvxs_value.nameOf(fld));
+    }
+    return result;
+  }
 };
 
 //! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like types.
@@ -57,7 +67,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value.nmembers(), 0);
 
-  // more tests are done via DtoConversionUtilsTest::GetPVXSTypeCode
+  // tests for other basic scalars are done in DtoConversionUtilsTest::GetPVXSTypeCode
 }
 
 //! Build PVXS value from AnyValue representing a struct with single field.
@@ -69,4 +79,26 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 1);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed"}));
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+}
+
+//! Build PVXS value from AnyValue representing a struct with two fields.
+
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
+{
+  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32}},
+                                {"bool", {sup::dto::Boolean}}};
+  auto pvxs_value = GetPVXSType(any_type).create();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 2);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed", "bool"}));
+
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["bool"].type(), ::pvxs::TypeCode::Bool);
 }
