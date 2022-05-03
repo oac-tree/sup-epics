@@ -37,6 +37,8 @@ struct PvxsTypeBuilder::PvxsTypeBuilderImpl
   std::stack<::pvxs::TypeDef> m_struct_def;
   ::pvxs::TypeDef m_last_struct;
 
+  //  std::stack<::pvxs::Member> m_members;
+
   bool IsAtTop() const { return m_struct_def.empty(); }
 };
 
@@ -93,7 +95,17 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
   auto& top = p_impl->m_struct_def.top();
 
   // ??? How to add structure inside
-  top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
+
+  if (anytype->GetTypeCode() == ::sup::dto::TypeCode::Struct)
+  {
+    // We use DefType::as method which the developer of PVXS package has luckily provided.
+    // But frankly speaking, we find such a way of constructing an object tree a bit cumbersome.
+    top += {p_impl->m_last_struct.as(member_name)};
+  }
+  else
+  {
+    top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
+  }
 
   std::cout << "xxx " << p_impl->m_struct_def.size() << std::endl;
 }

@@ -121,11 +121,11 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
 
   auto nested_value = pvxs_value["scalars"];
   EXPECT_EQ(nested_value.type(), ::pvxs::TypeCode::Struct);
-  EXPECT_EQ(nested_value.nmembers(), 0);
+  EXPECT_EQ(nested_value.nmembers(), 2);
 
-  //  auto nested_names = GetMemberNames(pvxs_value["scalars"]);
-  //  EXPECT_EQ(nested_names, std::vector<std::string>({"signed", "bool"}));
+  auto nested_names = GetMemberNames(pvxs_value["scalars"]);
+  EXPECT_EQ(nested_names, std::vector<std::string>({"signed", "bool"}));
 
-  //  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
-  //  EXPECT_EQ(pvxs_value["scalars.bool"].type(), ::pvxs::TypeCode::Bool);
+  EXPECT_EQ(pvxs_value["scalars.signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["scalars.bool"].type(), ::pvxs::TypeCode::Bool);
 }
