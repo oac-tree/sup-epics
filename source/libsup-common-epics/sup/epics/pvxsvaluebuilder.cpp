@@ -26,12 +26,47 @@
 #include <iostream>
 #include <stdexcept>
 
+namespace
+{
+
+//! Creates pvxs::Value from given type definition.
+pvxs::Value CreateValueFromType(const ::pvxs::TypeDef &type_def)
+{
+  // We want to create pvxs::Value from given PVXS TypeDef. However, if TypeDef is an empty type,
+  // we want to return default constructed pvxs::Value.
+
+  // The method is just an equivalent of
+  // return type_def.SsEmpty() ? pvxs::Value() : type_def.create();
+  // when no IsEmpty() method was provided by the developer.
+
+  const std::string kEmptyTypeDefWhat("Empty TypeDef");
+
+  pvxs::Value result;
+
+  // The strange try/catch block is because we can't check if TypeDef is empty before trying to
+  // construct pvxs::Value from it.
+  try
+  {
+    result = type_def.create();
+  }
+  catch (const std::logic_error &ex)
+  {
+    if (ex.what() != kEmptyTypeDefWhat)
+    {
+      throw;
+    }
+  }
+  return result;
+}
+
+}  // namespace
+
 namespace sup::epics
 {
 
 struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
-  pvxs::Value m_result;            //!< place for the result
+  pvxs::Value m_result;             //!< place for the result
   pvxs::Value *m_current{nullptr};  //! current position
   //  pvxs::Value m_scalar;            //!< last processed scalar value
   //  pvxs::Value *m_parent{nullptr};  //! current parent
@@ -39,7 +74,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
 {
-  p_impl->m_result = type_def.create();
+  p_impl->m_result = CreateValueFromType(type_def);
 }
 
 PvxsValueBuilder::~PvxsValueBuilder() = default;
@@ -104,18 +139,18 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarProlog() value:" << anyvalue << std::endl;
-//  p_impl->m_scalar = GetPVXSValueFromScalar(*anyvalue);
+  //  p_impl->m_scalar = GetPVXSValueFromScalar(*anyvalue);
 }
 
 void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarEpilog() value:" << anyvalue << std::endl;
-//  if (!p_impl->m_parent)
-//  {
-//    // If no parent exists, then we are processing scalar based AnyValue.
-//    // We asume that this should be our result.
-//    p_impl->m_result = p_impl->m_scalar;
-//  }
+  //  if (!p_impl->m_parent)
+  //  {
+  //    // If no parent exists, then we are processing scalar based AnyValue.
+  //    // We asume that this should be our result.
+  //    p_impl->m_result = p_impl->m_scalar;
+  //  }
 }
 
 }  // namespace sup::epics

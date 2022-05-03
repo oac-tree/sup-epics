@@ -55,6 +55,21 @@ public:
   }
 };
 
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromEmptyType)
+{
+  sup::dto::AnyType any_type;
+  auto pvxs_type = GetPVXSType(any_type);
+
+  // There is no good way to check if type is empty. Where are no any getters, and it is not
+  // allowed to construct pvxs::Value from it.
+
+  const std::string empty_type_string("<Empty>\n");
+  std::ostringstream ostr;
+  ostr << pvxs_type;
+
+  EXPECT_EQ(ostr.str(), empty_type_string);
+}
+
 //! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like types.
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)

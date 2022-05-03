@@ -70,17 +70,17 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasics)
 
 //! Build PVXS value from empty AnyValue.
 
-//TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
-//{
-//  // investigating default constructed PVXS
-//  pvxs::Value pvxs_default;
+TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
+{
+  // investigating default constructed PVXS
+  pvxs::Value pvxs_default;
 
-//  // constructing from empty AnyValue
-//  sup::dto::AnyValue any_value;
-//  auto pvxs_value = GetPVXSValue(any_value);
-//  EXPECT_FALSE(pvxs_value.valid());
-//  EXPECT_TRUE(pvxs_value.equalType(pvxs_default));
-//}
+  // constructing from empty AnyValue
+  sup::dto::AnyValue any_value;
+  auto pvxs_value = GetPVXSValue(any_value);
+  EXPECT_FALSE(pvxs_value.valid());
+  EXPECT_TRUE(pvxs_value.equalType(pvxs_default));
+}
 
 //! Build PVXS value from scalar like AnyValue.
 
