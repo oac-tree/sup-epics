@@ -64,7 +64,7 @@ void PvxsTypeBuilder::EmptyEpilog(const sup::dto::AnyType* anytype)
 void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
   std::cout << "StructProlog() value:" << anytype << std::endl;
-  p_impl->m_struct_def.push(::pvxs::TypeDef(GetPVXSBaseTypeCode(*anytype), anytype->GetTypeName(), {}));
+  p_impl->m_struct_def.push(::pvxs::TypeDef(GetPVXSTypeCode(*anytype), anytype->GetTypeName(), {}));
   std::cout << "top_address" << &p_impl->m_struct_def.top() << std::endl;
   std::cout << "xxx " << p_impl->m_struct_def.size() << std::endl;
 }

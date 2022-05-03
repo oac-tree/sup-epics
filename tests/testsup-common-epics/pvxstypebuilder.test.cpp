@@ -70,7 +70,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
   // tests for other basic scalars are done in DtoConversionUtilsTest::GetPVXSTypeCode
 }
 
-//! Build PVXS value from AnyValue representing a struct with single field.
+//! Build PVXS type from AnyType representing a struct with single field.
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
 {
@@ -103,7 +103,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
   EXPECT_EQ(pvxs_value["bool"].type(), ::pvxs::TypeCode::Bool);
 }
 
-//! Build PVXS value from AnyValue representing a struct with two fields.
+//! Build PVXS type from AnyType representing a struct with two fields nested in parent struct.
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
 {
@@ -129,6 +129,8 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
   EXPECT_EQ(pvxs_value["scalars.signed"].type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value["scalars.bool"].type(), ::pvxs::TypeCode::Bool);
 }
+
+//! Build PVXS type from AnyType representing a struct with two nested structs.
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 {
@@ -171,3 +173,51 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
   EXPECT_EQ(pvxs_value["struct2.first"].type(), ::pvxs::TypeCode::Int8);
   EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
 }
+
+//! Building array of PVXS values.
+
+TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayOfIntegers)
+{
+  auto value1 = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+  EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
+
+  ::pvxs::shared_array<int32_t> array({42, 43});
+  value1 = array.freeze();
+
+  EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
+  auto data = value1.as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 42);
+  EXPECT_EQ(data[1], 43);
+}
+
+//! Building array of PVXS values.
+
+TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
+{
+  pvxs::TypeDef type_def(pvxs::TypeCode::Struct, "simple_t",
+                         {pvxs::Member(pvxs::TypeCode::Int32A, "field")});
+
+  auto value = type_def.create();
+  EXPECT_EQ(value.type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(value["field"].type(), pvxs::TypeCode::Int32A);
+
+  ::pvxs::shared_array<int32_t> array({42, 43});
+  value["field"] = array.freeze();
+  auto data = value["field"].as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 42);
+  EXPECT_EQ(data[1], 43);
+}
+
+//! Build PVXS type from AnyType representing an array of integers.
+
+// TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
+//{
+//   const int n_elements = 42;
+//   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
+
+//  auto pvxs_value = GetPVXSType(any_type).create();
+
+////  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+//}
