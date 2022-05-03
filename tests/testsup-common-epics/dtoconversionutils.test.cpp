@@ -33,28 +33,52 @@ class DtoConversionUtilsTest : public ::testing::Test
 {
 };
 
-//! Checks GetPVXSTypeCode method to construct PVXS TypeCode from AnyType.
+//! Checks GetPVXSBaseTypeCode method to construct PVXS TypeCode from AnyType (base types).
 
-TEST_F(DtoConversionUtilsTest, GetPVXSTypeCode)
+TEST_F(DtoConversionUtilsTest, GetPVXSBaseTypeCode)
 {
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::EmptyType), ::pvxs::TypeCode::Null);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Boolean), ::pvxs::TypeCode::Bool);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Character8), ::pvxs::TypeCode::UInt8);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger8), ::pvxs::TypeCode::Int8);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger8), ::pvxs::TypeCode::UInt8);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger16), ::pvxs::TypeCode::Int16);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger16), ::pvxs::TypeCode::UInt16);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger32), ::pvxs::TypeCode::Int32);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger32), ::pvxs::TypeCode::UInt32);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::SignedInteger64), ::pvxs::TypeCode::Int64);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::UnsignedInteger64), ::pvxs::TypeCode::UInt64);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Float32), ::pvxs::TypeCode::Float32);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::Float64), ::pvxs::TypeCode::Float64);
-  EXPECT_EQ(GetPVXSTypeCode(sup::dto::String), ::pvxs::TypeCode::String);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::EmptyType), ::pvxs::TypeCode::Null);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::Boolean), ::pvxs::TypeCode::Bool);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::Character8), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::SignedInteger8), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::UnsignedInteger8), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::SignedInteger16), ::pvxs::TypeCode::Int16);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::UnsignedInteger16), ::pvxs::TypeCode::UInt16);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::SignedInteger32), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::UnsignedInteger32), ::pvxs::TypeCode::UInt32);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::SignedInteger64), ::pvxs::TypeCode::Int64);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::UnsignedInteger64), ::pvxs::TypeCode::UInt64);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::Float32), ::pvxs::TypeCode::Float32);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::Float64), ::pvxs::TypeCode::Float64);
+  EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::String), ::pvxs::TypeCode::String);
 
   {  // AnyType based on struct
     ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8}}};
-    EXPECT_EQ(GetPVXSTypeCode(any_type), ::pvxs::TypeCode::Struct);
+    EXPECT_EQ(GetPVXSBaseTypeCode(any_type), ::pvxs::TypeCode::Struct);
+  }
+}
+
+//! Checks GetPVXSElementTypeCode method to construct PVXS TypeCode from AnyType (array elements).
+
+TEST_F(DtoConversionUtilsTest, GetPVXSElementTypeCode)
+{
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::Boolean), ::pvxs::TypeCode::BoolA);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::Character8), ::pvxs::TypeCode::UInt8A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::SignedInteger8), ::pvxs::TypeCode::Int8A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::UnsignedInteger8), ::pvxs::TypeCode::UInt8A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::SignedInteger16), ::pvxs::TypeCode::Int16A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::UnsignedInteger16), ::pvxs::TypeCode::UInt16A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::SignedInteger32), ::pvxs::TypeCode::Int32A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::UnsignedInteger32), ::pvxs::TypeCode::UInt32A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::SignedInteger64), ::pvxs::TypeCode::Int64A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::UnsignedInteger64), ::pvxs::TypeCode::UInt64A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::Float32), ::pvxs::TypeCode::Float32A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::Float64), ::pvxs::TypeCode::Float64A);
+  EXPECT_EQ(GetPVXSElementTypeCode(sup::dto::String), ::pvxs::TypeCode::StringA);
+
+  {  // AnyType based on struct
+    ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8}}};
+    EXPECT_EQ(GetPVXSElementTypeCode(any_type), ::pvxs::TypeCode::StructA);
   }
 }
 

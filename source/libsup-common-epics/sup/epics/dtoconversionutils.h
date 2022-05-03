@@ -30,8 +30,15 @@
 namespace sup::epics
 {
 
-//! Returns PVXS TypeCode corresponding to the given AnyType.
+//! Returns PVXS TypeCode corresponding to the given base AnyType.
+//! Distinguishes base types and array elements.
 pvxs::TypeCode GetPVXSTypeCode(const ::sup::dto::AnyType& any_type);
+
+//! Returns PVXS TypeCode corresponding to the given AnyType (for base types).
+pvxs::TypeCode GetPVXSBaseTypeCode(const ::sup::dto::AnyType& any_type);
+
+//! Returns PVXS TypeCode corresponding to the given AnyType (for array elements).
+pvxs::TypeCode GetPVXSElementTypeCode(const ::sup::dto::AnyType& any_type);
 
 //! Returns PVXS value from scalar like AnyValue.
 pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);

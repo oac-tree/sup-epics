@@ -59,7 +59,25 @@ const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
     {sup::dto::TypeCode::Struct, pvxs::TypeCode::Struct},
 };
 
-//! Correspondance of AnyValue type code to PVXS enumerator and assign function.
+//! Correspondance of AnyValue element type code to PVXS TypeCode (arrays).
+const std::map<sup::dto::TypeCode, pvxs::TypeCode> kElementTypeCodeMap = {
+    {sup::dto::TypeCode::Bool, pvxs::TypeCode::BoolA},
+    {sup::dto::TypeCode::Char8, pvxs::TypeCode::UInt8A},  // is it Ok?
+    {sup::dto::TypeCode::Int8, pvxs::TypeCode::Int8A},
+    {sup::dto::TypeCode::UInt8, pvxs::TypeCode::UInt8A},
+    {sup::dto::TypeCode::Int16, pvxs::TypeCode::Int16A},
+    {sup::dto::TypeCode::UInt16, pvxs::TypeCode::UInt16A},
+    {sup::dto::TypeCode::Int32, pvxs::TypeCode::Int32A},
+    {sup::dto::TypeCode::UInt32, pvxs::TypeCode::UInt32A},
+    {sup::dto::TypeCode::Int64, pvxs::TypeCode::Int64A},
+    {sup::dto::TypeCode::UInt64, pvxs::TypeCode::UInt64A},
+    {sup::dto::TypeCode::Float32, pvxs::TypeCode::Float32A},
+    {sup::dto::TypeCode::Float64, pvxs::TypeCode::Float64A},
+    {sup::dto::TypeCode::String, pvxs::TypeCode::StringA},
+    {sup::dto::TypeCode::Struct, pvxs::TypeCode::StructA},
+};
+
+//! Correspondance of AnyValue type code to PVXS value assign function.
 const std::map<sup::dto::TypeCode, function_t> kConversionMap = {
     {sup::dto::TypeCode::Bool, AssignScalar<sup::dto::boolean>},
     {sup::dto::TypeCode::Char8, AssignScalar<sup::dto::uint8>},  // is it Ok?
@@ -81,10 +99,29 @@ namespace sup::epics
 
 pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
 {
+  if (::sup::dto::IsArrayType(any_type))
+  {
+    return GetPVXSElementTypeCode(any_type);
+  }
+  return GetPVXSBaseTypeCode(any_type);
+}
+
+pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
+{
   auto it = kTypeCodeMap.find(any_type.GetTypeCode());
   if (it == kTypeCodeMap.end())
   {
-    throw std::runtime_error("Unknxxown AnyType code");
+    throw std::runtime_error("Unknown AnyType code");
+  }
+  return it->second;
+}
+
+pvxs::TypeCode GetPVXSElementTypeCode(const dto::AnyType& any_type)
+{
+  auto it = kElementTypeCodeMap.find(any_type.GetTypeCode());
+  if (it == kElementTypeCodeMap.end())
+  {
+    throw std::runtime_error("Unknown AnyType element code");
   }
   return it->second;
 }
@@ -103,7 +140,7 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
     throw std::runtime_error("Not a known AnyValue scalar type code");
   }
 
-  auto pvxs_typecode = GetPVXSTypeCode(any_value.GetType());
+  auto pvxs_typecode = GetPVXSBaseTypeCode(any_value.GetType());
   auto result = pvxs::TypeDef(pvxs_typecode).create();
 
   it->second(any_value, result);  // calling assign function
