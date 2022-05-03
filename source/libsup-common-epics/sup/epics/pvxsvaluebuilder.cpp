@@ -68,6 +68,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
   pvxs::Value m_result;   //!< place for the result
   pvxs::Value m_current;  //! current position
+  pvxs::Value m_current_struct;  //! current position
   //  pvxs::Value m_scalar;            //!< last processed scalar value
   //  pvxs::Value *m_parent{nullptr};  //! current parent
 };
@@ -99,6 +100,7 @@ void PvxsValueBuilder::EmptyEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::StructProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructProlog() value:" << anyvalue << " item:" << std::endl;
+  p_impl->m_current_struct = p_impl->m_result;
 }
 
 void PvxsValueBuilder::StructMemberSeparator()
@@ -116,8 +118,6 @@ void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
 {
   std::cout << "MemberProlog() " << anyvalue << " " << member_name << std::endl;
 
-  //  ::pvxs::Value val = (*p_impl->m_current)[member_name];
-
   p_impl->m_current = p_impl->m_current[member_name];
 }
 
@@ -125,6 +125,7 @@ void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
                                     const std::string &member_name)
 {
   std::cout << "MemberEpilog() " << anyvalue << " " << member_name << std::endl;
+  p_impl->m_current = p_impl->m_current_struct;
 }
 
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)

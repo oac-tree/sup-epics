@@ -161,3 +161,24 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
   EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
 }
+
+//! Build PVXS value from AnyValue representing a struct with two fields.
+
+TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
+{
+  sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32, 42}},
+                                  {"bool", {sup::dto::Boolean, true}}};
+
+  auto pvxs_value = GetPVXSValue(any_value);
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 2);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed", "bool"}));
+
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
+  EXPECT_EQ(pvxs_value["bool"].type(), ::pvxs::TypeCode::Bool);
+  EXPECT_EQ(pvxs_value["bool"].as<bool>(), true);
+}
