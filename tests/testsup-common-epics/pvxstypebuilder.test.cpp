@@ -193,10 +193,10 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayOfIntegers)
 
 //! Build PVXS type from AnyType representing an array of integers.
 
- TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 {
-   const int n_elements = 42;
-   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
+  const int n_elements = 42;
+  sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
 
   auto pvxs_value = GetPVXSType(any_type).create();
 
@@ -224,4 +224,20 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
   EXPECT_EQ(data.size(), 2);
   EXPECT_EQ(data[0], 42);
   EXPECT_EQ(data[1], 43);
+}
+
+//! Build PVXS type from AnyType representing an array of integers inside the struct.
+
+TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
+{
+  const int n_elements = 42;
+  sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32);
+  sup::dto::AnyType any_type = {{"array", any_array}};
+
+  auto pvxs_value = GetPVXSType(any_type).create();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
+  auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 0);
 }
