@@ -24,6 +24,7 @@
 #include <pvxs/data.h>
 
 #include <iostream>
+#include <stack>
 #include <stdexcept>
 
 namespace
@@ -36,15 +37,17 @@ pvxs::Value CreateValueFromType(const ::pvxs::TypeDef &type_def)
   // we want to return default constructed pvxs::Value.
 
   // The method is just an equivalent of
-  // return type_def.SsEmpty() ? pvxs::Value() : type_def.create();
-  // when no IsEmpty() method was provided by the developer.
+  // return type_def.IsEmpty() ? pvxs::Value() : type_def.create();
+
+  // Unfortunately it can't be implemented like that since IsEmpty() method wasn't provided by the
+  // developer.
 
   const std::string kEmptyTypeDefWhat("Empty TypeDef");
 
   pvxs::Value result;
 
-  // The strange try/catch block is because we can't check if TypeDef is empty before trying to
-  // construct pvxs::Value from it.
+  // We try to create pvxs::Value, and if exception was thrown, and the description denotes
+  // that TypeDef is empty, we return deault constructed value.
   try
   {
     result = type_def.create();
@@ -68,7 +71,9 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
   pvxs::Value m_result;   //!< place for the result
   pvxs::Value m_current;  //! current position
-  pvxs::Value m_current_struct;  //! current position
+
+  std::stack<::pvxs::Value> m_struct_def;
+
   //  pvxs::Value m_scalar;            //!< last processed scalar value
   //  pvxs::Value *m_parent{nullptr};  //! current parent
 };
@@ -100,7 +105,7 @@ void PvxsValueBuilder::EmptyEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::StructProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructProlog() value:" << anyvalue << " item:" << std::endl;
-  p_impl->m_current_struct = p_impl->m_result;
+  p_impl->m_struct_def.push(p_impl->m_current);
 }
 
 void PvxsValueBuilder::StructMemberSeparator()
@@ -111,6 +116,8 @@ void PvxsValueBuilder::StructMemberSeparator()
 void PvxsValueBuilder::StructEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructEpilog() value:" << anyvalue << std::endl;
+  p_impl->m_current = p_impl->m_struct_def.top();
+  p_impl->m_struct_def.pop();
 }
 
 void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
@@ -125,7 +132,7 @@ void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
                                     const std::string &member_name)
 {
   std::cout << "MemberEpilog() " << anyvalue << " " << member_name << std::endl;
-  p_impl->m_current = p_impl->m_current_struct;
+  p_impl->m_current = p_impl->m_struct_def.top();
 }
 
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
