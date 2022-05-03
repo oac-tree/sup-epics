@@ -279,3 +279,127 @@ TEST_F(DtoConversionUtilsTest, GetPVXSValueFromScalar)
     EXPECT_THROW(GetPVXSValueFromScalar(any_value), std::runtime_error);
   }
 }
+
+//! Checks GetPVXSValueFromScalar helper method to construct PVXS value from scalar based AnyValue.
+
+TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalar)
+{
+  {  // from Bool
+    sup::dto::AnyValue any_value{sup::dto::Boolean};
+    any_value = true;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Bool).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<bool>(), true);
+  }
+
+  {  // from Char
+    sup::dto::AnyValue any_value{sup::dto::Character8};
+    any_value = 'w';
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<char>(), 'w');
+  }
+
+  {  // from Int8
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger8};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int8).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<int8_t>(), 42);
+  }
+
+  {  // from UInt8
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<uint8_t>(), 42);
+  }
+
+  {  // from Int16
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger16};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int16).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<int16_t>(), 42);
+  }
+
+  {  // from UInt16
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger16};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt16).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<uint16_t>(), 42);
+  }
+
+  {  // from Int32
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
+  }
+
+  {  // from UInt32
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger32};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt32).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<uint32_t>(), 42);
+  }
+
+  {  // from Int64
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger64};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<int64_t>(), 42);
+  }
+
+  {  // from UInt64
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger64};
+    any_value = 42;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt64).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<uint64_t>(), 42);
+  }
+
+  {  // from Float32
+    sup::dto::AnyValue any_value{sup::dto::Float32};
+    any_value = 42.1;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Float32).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_FLOAT_EQ(pvxs_value.as<float>(), 42.1);
+  }
+
+  {  // from Float64
+    sup::dto::AnyValue any_value{sup::dto::Float64};
+    any_value = 42.1;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Float64).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_DOUBLE_EQ(pvxs_value.as<double>(), 42.1);
+  }
+
+  {  // from string
+    sup::dto::AnyValue any_value{sup::dto::String};
+    any_value = std::string("abc");
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<std::string>(), std::string("abc"));
+  }
+
+  {  // from long string
+    sup::dto::AnyValue any_value{sup::dto::String};
+    any_value = std::string(1025, 'a');
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
+    AssignPVXSValueFromScalar(any_value, pvxs_value);
+    EXPECT_EQ(pvxs_value.as<std::string>(), std::string(1025, 'a'));
+  }
+
+  {  // attempt to construct from AnyValue based on structure
+    sup::dto::AnyValue any_value = {
+        {{"signed", {sup::dto::SignedInteger32, 42}}, {"bool", {sup::dto::Boolean, true}}}};
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
+    EXPECT_THROW(AssignPVXSValueFromScalar(any_value, pvxs_value), std::runtime_error);
+  }
+}
