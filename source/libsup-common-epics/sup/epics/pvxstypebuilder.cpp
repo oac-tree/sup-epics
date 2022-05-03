@@ -91,17 +91,20 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
             << GetPVXSTypeCode(*anytype) << std::endl;
   auto& top = p_impl->m_struct_def.top();
 
-  if (anytype->GetTypeCode() == ::sup::dto::TypeCode::Struct)
-  {
-    // We arrive here when our member is a struct.
-    // We use DefType::as method which the developer of PVXS package has luckily provided.
-    // But frankly speaking, we find such a way of constructing an object tree a bit cumbersome.
-    top += {p_impl->m_last_processed.as(member_name)};
-  }
-  else
-  {
-    top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
-  }
+  //  if (anytype->GetTypeCode() == ::sup::dto::TypeCode::Struct)
+  //  {
+  //    // We arrive here when our member is a struct.
+  //    // We use DefType::as method which the developer of PVXS package has luckily provided.
+  //    // But frankly speaking, we find such a way of constructing an object tree a bit cumbersome.
+  //    top += {p_impl->m_last_processed.as(member_name)};
+  //  }
+  //  else
+  //  {
+  //    top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
+  //  }
+
+  //  p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
+  top += {p_impl->m_last_processed.as(member_name)};
 }
 
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
@@ -118,13 +121,15 @@ void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "AddArrayEpilog() value:" << anytype << std::endl;
 
-  if (p_impl->IsAtTop())
-  {
-    // If there was no structure created, than AnyType is a scalar-based.
-    // We assume that TypeDef corresponding to our scalar is the main result.
-    p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
-  }
+  p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
+  // F
 
+  //  if (p_impl->IsAtTop())
+  //  {
+  //    // If there was no structure created, than AnyType is a scalar-based.
+  //    // We assume that TypeDef corresponding to our scalar is the main result.
+  //    p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
+  //  }
 }
 
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)
@@ -136,12 +141,17 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "ScalarEpilog() value:" << anytype << std::endl;
 
-  if (p_impl->IsAtTop() && !::sup::dto::IsArrayType(*anytype))
-  {
-    // If there was no structure created, then AnyType is a scalar-based.
-    // We assume that TypeDef corresponding to our scalar is the main result.
+//  if (!::sup::dto::IsArrayType(*anytype))
+//  {
     p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
-  }
+//  }
+
+  //  if (p_impl->IsAtTop() && !::sup::dto::IsArrayType(*anytype))
+  //  {
+  //    // If there was no structure created, then AnyType is a scalar-based.
+  //    // We assume that TypeDef corresponding to our scalar is the main result.
+  //    p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
+  //  }
 }
 
 }  // namespace sup::epics
