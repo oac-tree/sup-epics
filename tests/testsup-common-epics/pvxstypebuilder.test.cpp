@@ -146,6 +146,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 2);
+  EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
 
   auto names = GetMemberNames(pvxs_value);
   EXPECT_EQ(names, std::vector<std::string>({"struct1", "struct2"}));
