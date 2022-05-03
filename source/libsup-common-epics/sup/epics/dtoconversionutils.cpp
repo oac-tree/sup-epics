@@ -19,10 +19,13 @@
 
 #include "sup/epics/dtoconversionutils.h"
 
+#include "AnyType.h"
+#include "AnyTypeHelper.h"
 #include "AnyValue.h"
 #include "AnyValueHelper.h"
 #include "BasicScalarTypes.h"
 #include "pvxs/data.h"
+#include "sup/epics/pvxstypebuilder.h"
 #include "sup/epics/pvxsvaluebuilder.h"
 
 #include <map>
@@ -148,9 +151,16 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
   return result;
 };
 
+pvxs::TypeDef BuildPVXSType(const dto::AnyType& any_type)
+{
+  PvxsTypeBuilder type_builder;
+  sup::dto::SerializeAnyType(any_type, type_builder);
+  return type_builder.GetPVXSType();
+}
+
 pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
 {
-  PvxsValueBuilder builder;
+  PvxsValueBuilder builder(BuildPVXSType(any_value.GetType()));
   sup::dto::SerializeAnyValue(any_value, builder);
   return builder.GetPVXSValue();
 }

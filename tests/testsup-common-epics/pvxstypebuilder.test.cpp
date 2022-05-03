@@ -43,7 +43,8 @@ public:
     return builder.GetPVXSType();
   }
 
-  std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
+  //! Returns vector of field names in a given `pvxs_value`.
+  static std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
   {
     std::vector<std::string> result;
     for (auto fld : pvxs_value.ichildren())
