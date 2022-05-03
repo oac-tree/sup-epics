@@ -90,7 +90,7 @@ void PvxsTypeBuilder::MemberProlog(const sup::dto::AnyType* anytype, const std::
 void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::string& member_name)
 {
   std::cout << "MemberEpilog() " << anytype << " " << member_name << " "
-            << GetPVXSBaseTypeCode(*anytype) << std::endl;
+            << GetPVXSTypeCode(*anytype) << std::endl;
   std::cout << "top_address" << &p_impl->m_struct_def.top() << std::endl;
   auto& top = p_impl->m_struct_def.top();
 
@@ -102,7 +102,7 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
   }
   else
   {
-    top += {::pvxs::Member(GetPVXSBaseTypeCode(*anytype), member_name)};
+    top += {::pvxs::Member(GetPVXSTypeCode(*anytype), member_name)};
   }
 
   std::cout << "xxx " << p_impl->m_struct_def.size() << std::endl;
@@ -121,6 +121,14 @@ void PvxsTypeBuilder::ArrayElementSeparator()
 void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "AddArrayEpilog() value:" << anytype << std::endl;
+
+  if (p_impl->IsAtTop())
+  {
+    // If there was no structure created, than AnyType is a scalar-based.
+    // We assume that TypeDef corresponding to our scalar is the main result.
+    p_impl->m_result = GetPVXSTypeCode(*anytype);
+  }
+
 }
 
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)
@@ -132,11 +140,11 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "ScalarEpilog() value:" << anytype << std::endl;
 
-  if (p_impl->IsAtTop())
+  if (p_impl->IsAtTop() && !::sup::dto::IsArrayType(*anytype))
   {
     // If there was no structure created, than AnyType is a scalar-based.
     // We assume that TypeDef corresponding to our scalar is the main result.
-    p_impl->m_result = GetPVXSBaseTypeCode(*anytype);
+    p_impl->m_result = GetPVXSTypeCode(*anytype);
     //    p_impl->m_struct_def.push(GetPVXSTypeCode(*anytype));
   }
 }

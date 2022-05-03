@@ -174,7 +174,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
   EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
 }
 
-//! Building array of PVXS values.
+//! Building array of PVXS values (exercise to understand PVXS better).
 
 TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayOfIntegers)
 {
@@ -191,7 +191,23 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayOfIntegers)
   EXPECT_EQ(data[1], 43);
 }
 
-//! Building array of PVXS values.
+//! Build PVXS type from AnyType representing an array of integers.
+
+ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
+{
+   const int n_elements = 42;
+   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
+
+  auto pvxs_value = GetPVXSType(any_type).create();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
+  auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 0);
+
+  // we can't check much here, since n_elements is not a part of pvxs::TypeDef
+}
+
+//! Building array of PVXS values  (exercise to understand PVXS better).
 
 TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
 {
@@ -209,15 +225,3 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
   EXPECT_EQ(data[0], 42);
   EXPECT_EQ(data[1], 43);
 }
-
-//! Build PVXS type from AnyType representing an array of integers.
-
-// TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
-//{
-//   const int n_elements = 42;
-//   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
-
-//  auto pvxs_value = GetPVXSType(any_type).create();
-
-////  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
-//}
