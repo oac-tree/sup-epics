@@ -101,7 +101,7 @@ pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
 {
   if (::sup::dto::IsArrayType(any_type))
   {
-    return GetPVXSElementTypeCode(any_type);
+    return GetPVXSElementTypeCode(any_type.ElementType());
   }
   return GetPVXSBaseTypeCode(any_type);
 }
