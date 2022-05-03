@@ -43,6 +43,8 @@ pvxs::TypeCode GetPVXSElementTypeCode(const ::sup::dto::AnyType& any_type);
 //! Returns PVXS value from scalar like AnyValue.
 pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 
+void AssignPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value, ::pvxs::Value& pvxs_value);
+
 //! Returns PVXS type from AnyType.
 ::pvxs::TypeDef BuildPVXSType(const ::sup::dto::AnyType& any_type);
 

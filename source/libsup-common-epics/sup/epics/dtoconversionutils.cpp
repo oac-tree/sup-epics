@@ -131,7 +131,6 @@ pvxs::TypeCode GetPVXSElementTypeCode(const dto::AnyType& any_type)
 
 pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {
-  using sup::dto::TypeCode;
   if (!sup::dto::IsScalarValue(any_value))
   {
     throw std::runtime_error("Method is intended for scalar AnyValue");
@@ -150,6 +149,22 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 
   return result;
 };
+
+void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
+{
+  if (!sup::dto::IsScalarValue(any_value))
+  {
+    throw std::runtime_error("Method is intended for scalar AnyValue");
+  }
+
+  auto it = kConversionMap.find(any_value.GetTypeCode());
+  if (it == kConversionMap.end())
+  {
+    throw std::runtime_error("Not a known AnyValue scalar type code");
+  }
+
+  it->second(any_value, pvxs_value);  // calling assign function
+}
 
 pvxs::TypeDef BuildPVXSType(const dto::AnyType& any_type)
 {

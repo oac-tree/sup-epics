@@ -66,15 +66,17 @@ namespace sup::epics
 
 struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
-  pvxs::Value m_result;             //!< place for the result
-  pvxs::Value *m_current{nullptr};  //! current position
+  pvxs::Value m_result;   //!< place for the result
+  pvxs::Value m_current;  //! current position
   //  pvxs::Value m_scalar;            //!< last processed scalar value
   //  pvxs::Value *m_parent{nullptr};  //! current parent
 };
 
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
 {
+  std::cout << " ----------------\n";
   p_impl->m_result = CreateValueFromType(type_def);
+  p_impl->m_current = p_impl->m_result;
 }
 
 PvxsValueBuilder::~PvxsValueBuilder() = default;
@@ -113,6 +115,10 @@ void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
                                     const std::string &member_name)
 {
   std::cout << "MemberProlog() " << anyvalue << " " << member_name << std::endl;
+
+  //  ::pvxs::Value val = (*p_impl->m_current)[member_name];
+
+  p_impl->m_current = p_impl->m_current[member_name];
 }
 
 void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
@@ -151,6 +157,8 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
   //    // We asume that this should be our result.
   //    p_impl->m_result = p_impl->m_scalar;
   //  }
+  //  p_impl->m_current = GetPVXSValueFromScalar(*anyvalue);
+  AssignPVXSValueFromScalar(*anyvalue, p_impl->m_current);
 }
 
 }  // namespace sup::epics

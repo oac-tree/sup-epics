@@ -42,6 +42,18 @@ public:
     sup::dto::SerializeAnyValue(any_value, value_builder);
     return value_builder.GetPVXSValue();
   }
+
+  //! Returns vector of field names in a given `pvxs_value`.
+  //! Remove duplication with PvxsTypeBuilderTest::GetMemberNames
+  static std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
+  {
+    std::vector<std::string> result;
+    for (auto fld : pvxs_value.ichildren())
+    {
+      result.push_back(pvxs_value.nameOf(fld));
+    }
+    return result;
+  }
 };
 
 //! Investigating PVXS value itself.
@@ -68,6 +80,43 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasics)
   EXPECT_FALSE(pvxs_int1.equalInst(pvxs_int2));
 }
 
+//! Studying how to assign to PVXS value
+
+TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToScalar)
+{
+  pvxs::Value pvxs_int1 = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
+  pvxs_int1 = 42;
+  EXPECT_TRUE(pvxs_int1.valid());
+  EXPECT_EQ(pvxs_int1.as<int>(), 42);
+
+  pvxs::Value pvxs_int2 = pvxs_int1;
+  EXPECT_EQ(pvxs_int2.as<int>(), 42);
+
+  pvxs::Value pvxs_int3;
+  pvxs_int3 = pvxs_int1;
+  EXPECT_EQ(pvxs_int3.as<int>(), 42);
+
+  pvxs_int3 = 45;
+  EXPECT_EQ(pvxs_int1.as<int>(), 45);
+}
+
+//! Studying how to assign to PVXS value
+
+TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToStruct)
+{
+  pvxs::TypeDef type_def(pvxs::TypeCode::Struct, "simple_t",
+                         {pvxs::Member(pvxs::TypeCode::Int32, "field")});
+
+  auto value = type_def.create();
+  value["field"] = 42;
+
+  EXPECT_EQ(value["field"].as<int32_t>(), 42);
+
+  auto field_value = value["field"];  // copy
+  field_value = 43;
+  EXPECT_EQ(value["field"].as<int32_t>(), 43);  // seems there is an implicit sharing inside
+}
+
 //! Build PVXS value from empty AnyValue.
 
 TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
@@ -84,29 +133,31 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
 
 //! Build PVXS value from scalar like AnyValue.
 
-// TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
-//{
-//   sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
-//   any_value = 42;
+TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
+{
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
+  any_value = 42;
 
-//  auto pvxs_value = GetPVXSValue(any_value);
-//  EXPECT_TRUE(pvxs_value.valid());
-//  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
-//  EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
+  auto pvxs_value = GetPVXSValue(any_value);
+  EXPECT_TRUE(pvxs_value.valid());
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
 
-//  // other basic types are performed via DtoConversionUtilsTest::GetPVXSValueFromScalar testing
-//}
+  // other basic types are performed via DtoConversionUtilsTest::GetPVXSValueFromScalar testing
+}
 
-////! Build PVXS value from AnyValue representing a struct with single field.
+//! Build PVXS value from AnyValue representing a struct with single field.
 
-// TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
-//{
-//   sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32, 42}}}};
+TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
+{
+  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32, 42}}}};
 
-//  auto pvxs_value = GetPVXSValue(any_value);
-//  //  EXPECT_TRUE(pvxs_value.valid());
-//  //  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
-//  //  EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
+  auto pvxs_value = GetPVXSValue(any_value);
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 1);
 
-//  // other basic types are performed via GetPVXSValueFromScalar testing
-//}
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed"}));
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
+}
