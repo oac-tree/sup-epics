@@ -232,9 +232,10 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
 {
   const int n_elements = 42;
   sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32);
-  sup::dto::AnyType any_type = {{"array", any_array}};
+  sup::dto::AnyType any_type = {{{"array", any_array}}, "struct_name"};
 
   auto pvxs_value = GetPVXSType(any_type).create();
+  EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
