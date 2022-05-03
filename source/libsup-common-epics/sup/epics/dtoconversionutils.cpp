@@ -95,6 +95,18 @@ const std::map<sup::dto::TypeCode, function_t> kConversionMap = {
     {sup::dto::TypeCode::Float32, AssignScalar<sup::dto::float32>},
     {sup::dto::TypeCode::Float64, AssignScalar<sup::dto::float64>},
     {sup::dto::TypeCode::String, AssignScalar<std::string>}};
+
+template <typename T>
+pvxs::TypeCode FindTypeCode(const T& container, const sup::dto::AnyType& any_type)
+{
+  auto it = container.find(any_type.GetTypeCode());
+  if (it == container.end())
+  {
+    throw std::runtime_error("Unknown AnyType code");
+  }
+  return it->second;
+}
+
 }  // namespace
 
 namespace sup::epics
@@ -111,24 +123,15 @@ pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
 
 pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
 {
-  auto it = kTypeCodeMap.find(any_type.GetTypeCode());
-  if (it == kTypeCodeMap.end())
-  {
-    throw std::runtime_error("Unknown AnyType code");
-  }
-  return it->second;
+  return FindTypeCode(kTypeCodeMap, any_type);
 }
 
 pvxs::TypeCode GetPVXSElementTypeCode(const dto::AnyType& any_type)
 {
-  auto it = kElementTypeCodeMap.find(any_type.GetTypeCode());
-  if (it == kElementTypeCodeMap.end())
-  {
-    throw std::runtime_error("Unknown AnyType element code");
-  }
-  return it->second;
+  return FindTypeCode(kElementTypeCodeMap, any_type);
 }
 
+// FIXME method is not used, consider removal
 pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {
   if (!sup::dto::IsScalarValue(any_value))
@@ -152,9 +155,9 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 
 void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
-  if (!sup::dto::IsScalarValue(any_value))
+  if (GetPVXSBaseTypeCode(any_value.GetType()) != pvxs_value.type())
   {
-    throw std::runtime_error("Method is intended for scalar AnyValue");
+    throw std::runtime_error("Given PVXS value doesn't intended for given scalar AnyType");
   }
 
   auto it = kConversionMap.find(any_value.GetTypeCode());

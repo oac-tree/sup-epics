@@ -396,10 +396,18 @@ TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalar)
     EXPECT_EQ(pvxs_value.as<std::string>(), std::string(1025, 'a'));
   }
 
-  {  // attempt to construct from AnyValue based on structure
+  {  // attempt to assign from AnyValue based on structure
     sup::dto::AnyValue any_value = {
         {{"signed", {sup::dto::SignedInteger32, 42}}, {"bool", {sup::dto::Boolean, true}}}};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
+    EXPECT_THROW(AssignPVXSValueFromScalar(any_value, pvxs_value), std::runtime_error);
+  }
+
+  {  // attempt to assign from similar but not coinciding types
+    sup::dto::AnyValue any_value{sup::dto::Float32};
+    any_value = 42.1;
+    pvxs::Value pvxs_value =
+        pvxs::TypeDef(pvxs::TypeCode::Float64).create();  // deliberately Float64, and not Float32
     EXPECT_THROW(AssignPVXSValueFromScalar(any_value, pvxs_value), std::runtime_error);
   }
 }
