@@ -212,3 +212,52 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromNestedStruct)
   EXPECT_EQ(pvxs_value["scalars.signed"].as<int32_t>(), 42);
   EXPECT_EQ(pvxs_value["scalars.bool"].as<bool>(), true);
 }
+
+//! Build PVXS value from AnyValue representing a struct with two nested structs.
+
+TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
+{
+  const std::string struct_name = "struct_name";
+  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32, 42}},
+                                    {"bool", {sup::dto::Boolean, true}}};
+
+  sup::dto::AnyValue any_value{
+      {{"struct1", two_scalars},
+       {"struct2",
+        {{"first", {sup::dto::SignedInteger8, 1}}, {"second", {sup::dto::SignedInteger8, 2}}}}},
+      struct_name};
+
+  auto pvxs_value = GetPVXSValue(any_value);
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 2);
+  EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"struct1", "struct2"}));
+
+  // first branch
+  auto struct1_value = pvxs_value["struct1"];
+  EXPECT_EQ(struct1_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(struct1_value.nmembers(), 2);
+
+  auto struct1_fields = GetMemberNames(struct1_value);
+  EXPECT_EQ(struct1_fields, std::vector<std::string>({"signed", "bool"}));
+  EXPECT_EQ(pvxs_value["struct1.signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["struct1.bool"].type(), ::pvxs::TypeCode::Bool);
+
+  EXPECT_EQ(pvxs_value["struct1.signed"].as<int32_t>(), 42);
+  EXPECT_EQ(pvxs_value["struct1.bool"].as<bool>(), true);
+
+  // second branch
+  auto struct2_value = pvxs_value["struct2"];
+  EXPECT_EQ(struct2_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(struct2_value.nmembers(), 2);
+
+  auto struct2_fields = GetMemberNames(struct2_value);
+  EXPECT_EQ(struct2_fields, std::vector<std::string>({"first", "second"}));
+  EXPECT_EQ(pvxs_value["struct2.first"].type(), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), 1);
+  EXPECT_EQ(pvxs_value["struct2.second"].as<int32_t>(), 2);
+}
