@@ -194,20 +194,22 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
 TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
 {
-  auto value1 = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
-  EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
+  { // studying impliced sharing
+    auto value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+    EXPECT_EQ(value.type(), pvxs::TypeCode::Int32A);
 
-  ::pvxs::shared_array<int32_t> array({42, 43});
+    ::pvxs::shared_array<int32_t> array({42, 43});
 
-  EXPECT_EQ(array.size(), 2);
-  value1 = array.freeze();
-  EXPECT_EQ(array.size(), 0); // array dissapears after the assignment
+    EXPECT_EQ(array.size(), 2);
+    value = array.freeze();
+    EXPECT_EQ(array.size(), 0);  // array dissapears after the assignment
 
-  EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
-  auto data = value1.as<::pvxs::shared_array<const int32_t>>();
-  EXPECT_EQ(data.size(), 2);
-  EXPECT_EQ(data[0], 42);
-  EXPECT_EQ(data[1], 43);
+    EXPECT_EQ(value.type(), pvxs::TypeCode::Int32A);
+    auto data = value.as<::pvxs::shared_array<const int32_t>>();
+    EXPECT_EQ(data.size(), 2);
+    EXPECT_EQ(data[0], 42);
+    EXPECT_EQ(data[1], 43);
+  }
 }
 
 //! Build PVXS type from AnyType representing an array of integers.

@@ -28,22 +28,37 @@
 #include "sup/epics/pvxstypebuilder.h"
 #include "sup/epics/pvxsvaluebuilder.h"
 
+#include <pvxs/nt.h>
+
 #include <map>
 #include <stdexcept>
+#include <iostream>
 
 namespace
 {
 
-//! Assigns scalar value from AnyValue to PVXS value.
+//! Assigns scalar value from AnyValue to pre-created PVXS value.
 template <typename T>
 void AssignScalar(const sup::dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
   pvxs_value = any_value.As<T>();
 }
 
+//! Assign array elements from AnyValue to pre-created PVXS value.
+template <typename T>
+void AssignScalarArray(const sup::dto::AnyValue& any_value, pvxs::Value& pvxs_value)
+{
+  auto result = ::pvxs::shared_array<T>(any_value.NumberOfElements());
+  for (size_t i = 0; i < any_value.NumberOfElements(); ++i)
+  {
+    result[i] = any_value[i].As<T>();
+  }
+  pvxs_value = result.freeze(); // this is how ::pvxs wants arrays are assigned
+}
+
 using function_t = std::function<void(const sup::dto::AnyValue& anyvalue, pvxs::Value& pvxs_value)>;
 
-//! Correspondance of AnyValue type code to PVXS TypeCode.
+//! Correspondance of AnyValue type code to PVXS TypeCode (base types).
 const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
     {sup::dto::TypeCode::Empty, pvxs::TypeCode::Null},
     {sup::dto::TypeCode::Bool, pvxs::TypeCode::Bool},
@@ -80,7 +95,7 @@ const std::map<sup::dto::TypeCode, pvxs::TypeCode> kArrayTypeCodeMap = {
     {sup::dto::TypeCode::Struct, pvxs::TypeCode::StructA},
 };
 
-//! Correspondance of AnyValue type code to PVXS value assign function.
+//! Correspondance of AnyValue type code to PVXS value function to assign scalars.
 const std::map<sup::dto::TypeCode, function_t> kAssignScalarMap = {
     {sup::dto::TypeCode::Bool, AssignScalar<sup::dto::boolean>},
     {sup::dto::TypeCode::Char8, AssignScalar<sup::dto::uint8>},  // is it Ok?
@@ -96,6 +111,23 @@ const std::map<sup::dto::TypeCode, function_t> kAssignScalarMap = {
     {sup::dto::TypeCode::Float64, AssignScalar<sup::dto::float64>},
     {sup::dto::TypeCode::String, AssignScalar<std::string>}};
 
+//! Correspondance of AnyValue type code to PVXS value function to assign scalar arrays.
+const std::map<sup::dto::TypeCode, function_t> kAssignScalarArrayMap = {
+    {sup::dto::TypeCode::Bool, AssignScalarArray<sup::dto::boolean>},
+    {sup::dto::TypeCode::Char8, AssignScalarArray<sup::dto::uint8>},  // is it Ok?
+    {sup::dto::TypeCode::Int8, AssignScalarArray<sup::dto::int8>},
+    {sup::dto::TypeCode::UInt8, AssignScalarArray<sup::dto::uint8>},
+    {sup::dto::TypeCode::Int16, AssignScalarArray<sup::dto::int16>},
+    {sup::dto::TypeCode::UInt16, AssignScalarArray<sup::dto::uint16>},
+    {sup::dto::TypeCode::Int32, AssignScalarArray<sup::dto::int32>},
+    {sup::dto::TypeCode::UInt32, AssignScalarArray<sup::dto::uint32>},
+    {sup::dto::TypeCode::Int64, AssignScalarArray<sup::dto::int64>},
+    {sup::dto::TypeCode::UInt64, AssignScalarArray<sup::dto::uint64>},
+    {sup::dto::TypeCode::Float32, AssignScalarArray<sup::dto::float32>},
+    {sup::dto::TypeCode::Float64, AssignScalarArray<sup::dto::float64>},
+    {sup::dto::TypeCode::String, AssignScalarArray<std::string>}};
+
+//! Finds pvxs::TypeCode corresponding to the given AnyType. Use provided container.
 template <typename T>
 pvxs::TypeCode FindTypeCode(const T& container, const sup::dto::AnyType& any_type)
 {
@@ -128,6 +160,7 @@ pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
 
 pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
+  std::cout << "qqq" << static_cast<int>(any_type.GetTypeCode()) << std::endl;
   return FindTypeCode(kArrayTypeCodeMap, any_type);
 }
 
@@ -155,6 +188,11 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 
 void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
+  if (!sup::dto::IsScalarValue(any_value))
+  {
+    throw std::runtime_error("Method is intended for array like AnyValues");
+  }
+
   if (GetPVXSBaseTypeCode(any_value.GetType()) != pvxs_value.type())
   {
     throw std::runtime_error("Given AnyValue type doesn't match PVXS value type");
@@ -176,14 +214,21 @@ void AssignPVXSValueFromScalarArray(const dto::AnyValue& any_value, pvxs::Value&
     throw std::runtime_error("Method is intended for array like AnyValues");
   }
 
-  if (GetPVXSArrayTypeCode(any_value.GetType()) != pvxs_value.type())
+  auto element_type = any_value.GetType().ElementType();
+
+  if (GetPVXSArrayTypeCode(element_type) != pvxs_value.type())
   {
     throw std::runtime_error("Type of AnyValue array element doesn't match type of PVXS value");
   }
 
-  for (size_t i = 0; i < any_value.NumberOfElements(); ++i)
+  auto it = kAssignScalarArrayMap.find(element_type.GetTypeCode());
+  if (it == kAssignScalarArrayMap.end())
   {
+    throw std::runtime_error("Not a known AnyValue scalar type code");
   }
+
+  it->second(any_value, pvxs_value);  // calling assign function
+
 }
 
 pvxs::TypeDef BuildPVXSType(const dto::AnyType& any_type)

@@ -280,8 +280,8 @@ TEST_F(DtoConversionUtilsTest, GetPVXSValueFromScalar)
   }
 }
 
-//! Checks GetPVXSValueFromScalar helper method to construct PVXS value from scalar based AnyValue.
-
+//! Checks GetPVXSValueFromScalar helper method to assign scalar-like AnyValue to PVXS
+//! value (pre-created with correct type).
 TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalar)
 {
   {  // from Bool
@@ -410,4 +410,22 @@ TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalar)
         pvxs::TypeDef(pvxs::TypeCode::Float64).create();  // deliberately Float64, and not Float32
     EXPECT_THROW(AssignPVXSValueFromScalar(any_value, pvxs_value), std::runtime_error);
   }
+}
+
+//! Checks AssignPVXSValueFromScalarArray helper method to assign PVXS arrays from array-like
+//! AnyValues. FIXME add tests for all types.
+
+TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalarArray)
+{
+  const int n_elements = 2;
+  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32);
+  any_value[0] = 42;
+
+  pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+  AssignPVXSValueFromScalarArray(any_value, pvxs_value);
+
+  auto pvxs_data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(pvxs_data.size(), 2);
+  EXPECT_EQ(pvxs_data[0], 42);
+  EXPECT_EQ(pvxs_data[1], 0);
 }
