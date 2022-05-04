@@ -72,11 +72,8 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   pvxs::Value m_result;   //!< place for the result
   pvxs::Value m_current;  //! current position
 
-  std::stack<::pvxs::Value> m_struct_def;
+  std::stack<::pvxs::Value> m_struct_stack;
   bool m_array_mode{false};
-
-  //  pvxs::Value m_scalar;            //!< last processed scalar value
-  //  pvxs::Value *m_parent{nullptr};  //! current parent
 };
 
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
@@ -106,7 +103,7 @@ void PvxsValueBuilder::EmptyEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::StructProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructProlog() value:" << anyvalue << " item:" << std::endl;
-  p_impl->m_struct_def.push(p_impl->m_current);
+  p_impl->m_struct_stack.push(p_impl->m_current);
 }
 
 void PvxsValueBuilder::StructMemberSeparator()
@@ -117,8 +114,8 @@ void PvxsValueBuilder::StructMemberSeparator()
 void PvxsValueBuilder::StructEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructEpilog() value:" << anyvalue << std::endl;
-  p_impl->m_current = p_impl->m_struct_def.top();
-  p_impl->m_struct_def.pop();
+  p_impl->m_current = p_impl->m_struct_stack.top();
+  p_impl->m_struct_stack.pop();
 }
 
 void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
@@ -133,13 +130,12 @@ void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
                                     const std::string &member_name)
 {
   std::cout << "MemberEpilog() " << anyvalue << " " << member_name << std::endl;
-  p_impl->m_current = p_impl->m_struct_def.top();
+  p_impl->m_current = p_impl->m_struct_stack.top();
 }
 
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ArrayProlog() value:" << anyvalue << std::endl;
-  std::cout << "pvxs " << p_impl->m_current << std::endl;
   p_impl->m_array_mode = true;
 }
 
@@ -158,19 +154,11 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarProlog() value:" << anyvalue << std::endl;
-  //  p_impl->m_scalar = GetPVXSValueFromScalar(*anyvalue);
 }
 
 void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarEpilog() value:" << anyvalue << std::endl;
-  //  if (!p_impl->m_parent)
-  //  {
-  //    // If no parent exists, then we are processing scalar based AnyValue.
-  //    // We asume that this should be our result.
-  //    p_impl->m_result = p_impl->m_scalar;
-  //  }
-  //  p_impl->m_current = GetPVXSValueFromScalar(*anyvalue);
 
   if (!p_impl->m_array_mode)
   {
