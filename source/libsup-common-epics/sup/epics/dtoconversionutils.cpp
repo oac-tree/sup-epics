@@ -116,7 +116,7 @@ pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
 {
   if (::sup::dto::IsArrayType(any_type))
   {
-    return GetPVXSElementTypeCode(any_type.ElementType());
+    return GetPVXSArrayTypeCode(any_type.ElementType());
   }
   return GetPVXSBaseTypeCode(any_type);
 }
@@ -126,7 +126,7 @@ pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
   return FindTypeCode(kTypeCodeMap, any_type);
 }
 
-pvxs::TypeCode GetPVXSElementTypeCode(const dto::AnyType& any_type)
+pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
   return FindTypeCode(kElementTypeCodeMap, any_type);
 }
@@ -167,6 +167,11 @@ void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs
   }
 
   it->second(any_value, pvxs_value);  // calling assign function
+}
+
+void AssignPVXSValueFromScalarArray(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
+{
+
 }
 
 pvxs::TypeDef BuildPVXSType(const dto::AnyType& any_type)

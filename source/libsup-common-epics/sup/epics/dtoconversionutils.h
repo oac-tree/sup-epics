@@ -38,12 +38,19 @@ pvxs::TypeCode GetPVXSTypeCode(const ::sup::dto::AnyType& any_type);
 pvxs::TypeCode GetPVXSBaseTypeCode(const ::sup::dto::AnyType& any_type);
 
 //! Returns PVXS TypeCode corresponding to the given AnyType (for array elements).
-pvxs::TypeCode GetPVXSElementTypeCode(const ::sup::dto::AnyType& any_type);
+pvxs::TypeCode GetPVXSArrayTypeCode(const ::sup::dto::AnyType& any_type);
 
 //! Returns PVXS value from scalar like AnyValue.
 pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 
+//! Assigns value of the given scalar-like AnyValue to PVXS value.
+//! It is expected that AnyValue type matches PVXS type.
 void AssignPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value, ::pvxs::Value& pvxs_value);
+
+//! Assigns elements of the given array-like AnyValue to PVXS value.
+//! It is expected that AnyValue type matches PVXS type.
+void AssignPVXSValueFromScalarArray(const ::sup::dto::AnyValue& any_value,
+                                    ::pvxs::Value& pvxs_value);
 
 //! Returns PVXS type from AnyType.
 ::pvxs::TypeDef BuildPVXSType(const ::sup::dto::AnyType& any_type);

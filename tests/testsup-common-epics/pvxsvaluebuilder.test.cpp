@@ -80,7 +80,7 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasics)
   EXPECT_FALSE(pvxs_int1.equalInst(pvxs_int2));
 }
 
-//! Studying how to assign to PVXS value
+//! Studying how to assign to PVXS value.
 
 TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToScalar)
 {
@@ -100,7 +100,7 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToScalar)
   EXPECT_EQ(pvxs_int1.as<int>(), 45);
 }
 
-//! Studying how to assign to PVXS value
+//! Studying how to assign to PVXS value.
 
 TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToStruct)
 {
@@ -260,4 +260,20 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
   EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
   EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), 1);
   EXPECT_EQ(pvxs_value["struct2.second"].as<int32_t>(), 2);
+}
+
+//! Build PVXS type from AnyType representing an array of integers.
+
+TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
+{
+//  const int n_elements = 2;
+//  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32);
+
+//  auto pvxs_value = GetPVXSValue(any_value);
+
+//  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
+//  auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
+//  EXPECT_EQ(data.size(), 0);
+
+//   we can't check much here, since n_elements is not a part of pvxs::TypeDef
 }

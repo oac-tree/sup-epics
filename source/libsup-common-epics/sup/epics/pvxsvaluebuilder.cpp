@@ -138,6 +138,7 @@ void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ArrayProlog() value:" << anyvalue << std::endl;
+  std::cout << "pvxs " << p_impl->m_current << std::endl;
 }
 
 void PvxsValueBuilder::ArrayElementSeparator()

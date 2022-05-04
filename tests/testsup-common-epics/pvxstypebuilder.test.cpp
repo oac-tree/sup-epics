@@ -192,7 +192,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
 //! Building array of PVXS values (exercise to understand PVXS better).
 
-TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayOfIntegers)
+TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
 {
   auto value1 = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
   EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
