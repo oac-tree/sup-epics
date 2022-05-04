@@ -63,7 +63,7 @@ const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
 };
 
 //! Correspondance of AnyValue element type code to PVXS TypeCode (arrays).
-const std::map<sup::dto::TypeCode, pvxs::TypeCode> kElementTypeCodeMap = {
+const std::map<sup::dto::TypeCode, pvxs::TypeCode> kArrayTypeCodeMap = {
     {sup::dto::TypeCode::Bool, pvxs::TypeCode::BoolA},
     {sup::dto::TypeCode::Char8, pvxs::TypeCode::UInt8A},  // is it Ok?
     {sup::dto::TypeCode::Int8, pvxs::TypeCode::Int8A},
@@ -81,7 +81,7 @@ const std::map<sup::dto::TypeCode, pvxs::TypeCode> kElementTypeCodeMap = {
 };
 
 //! Correspondance of AnyValue type code to PVXS value assign function.
-const std::map<sup::dto::TypeCode, function_t> kConversionMap = {
+const std::map<sup::dto::TypeCode, function_t> kAssignScalarMap = {
     {sup::dto::TypeCode::Bool, AssignScalar<sup::dto::boolean>},
     {sup::dto::TypeCode::Char8, AssignScalar<sup::dto::uint8>},  // is it Ok?
     {sup::dto::TypeCode::Int8, AssignScalar<sup::dto::int8>},
@@ -128,7 +128,7 @@ pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
 
 pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
-  return FindTypeCode(kElementTypeCodeMap, any_type);
+  return FindTypeCode(kArrayTypeCodeMap, any_type);
 }
 
 // FIXME method is not used, consider removal
@@ -139,8 +139,8 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
     throw std::runtime_error("Method is intended for scalar AnyValue");
   }
 
-  auto it = kConversionMap.find(any_value.GetTypeCode());
-  if (it == kConversionMap.end())
+  auto it = kAssignScalarMap.find(any_value.GetTypeCode());
+  if (it == kAssignScalarMap.end())
   {
     throw std::runtime_error("Not a known AnyValue scalar type code");
   }
@@ -157,11 +157,11 @@ void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs
 {
   if (GetPVXSBaseTypeCode(any_value.GetType()) != pvxs_value.type())
   {
-    throw std::runtime_error("Given PVXS value doesn't intended for given scalar AnyType");
+    throw std::runtime_error("Given AnyValue type doesn't match PVXS value type");
   }
 
-  auto it = kConversionMap.find(any_value.GetTypeCode());
-  if (it == kConversionMap.end())
+  auto it = kAssignScalarMap.find(any_value.GetTypeCode());
+  if (it == kAssignScalarMap.end())
   {
     throw std::runtime_error("Not a known AnyValue scalar type code");
   }
@@ -171,7 +171,19 @@ void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs
 
 void AssignPVXSValueFromScalarArray(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
+  if (!sup::dto::IsArrayValue(any_value))
+  {
+    throw std::runtime_error("Method is intended for array like AnyValues");
+  }
 
+  if (GetPVXSArrayTypeCode(any_value.GetType()) != pvxs_value.type())
+  {
+    throw std::runtime_error("Type of AnyValue array element doesn't match type of PVXS value");
+  }
+
+  for (size_t i = 0; i < any_value.NumberOfElements(); ++i)
+  {
+  }
 }
 
 pvxs::TypeDef BuildPVXSType(const dto::AnyType& any_type)

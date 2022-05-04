@@ -198,7 +198,10 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
   EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
 
   ::pvxs::shared_array<int32_t> array({42, 43});
+
+  EXPECT_EQ(array.size(), 2);
   value1 = array.freeze();
+  EXPECT_EQ(array.size(), 0); // array dissapears after the assignment
 
   EXPECT_EQ(value1.type(), pvxs::TypeCode::Int32A);
   auto data = value1.as<::pvxs::shared_array<const int32_t>>();
