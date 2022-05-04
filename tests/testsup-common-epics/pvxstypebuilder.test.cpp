@@ -202,9 +202,11 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
 
     EXPECT_EQ(array.size(), 2);
     value = array.freeze();
+
     EXPECT_EQ(array.size(), 0);  // array dissapears after the assignment
 
     EXPECT_EQ(value.type(), pvxs::TypeCode::Int32A);
+    // I don't know how to access values directly
     auto data = value.as<::pvxs::shared_array<const int32_t>>();
     EXPECT_EQ(data.size(), 2);
     EXPECT_EQ(data[0], 42);

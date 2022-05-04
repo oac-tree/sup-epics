@@ -266,14 +266,15 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
 TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 {
-//  const int n_elements = 2;
-//  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32);
+  const int n_elements = 2;
+  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32);
+  any_value[0] = 42;
 
-//  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = GetPVXSValue(any_value);
 
-//  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
-//  auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
-//  EXPECT_EQ(data.size(), 0);
-
-//   we can't check much here, since n_elements is not a part of pvxs::TypeDef
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
+  auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 42);
+  EXPECT_EQ(data[1], 0);
 }

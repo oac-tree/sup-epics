@@ -73,6 +73,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   pvxs::Value m_current;  //! current position
 
   std::stack<::pvxs::Value> m_struct_def;
+  bool m_array_mode{false};
 
   //  pvxs::Value m_scalar;            //!< last processed scalar value
   //  pvxs::Value *m_parent{nullptr};  //! current parent
@@ -139,6 +140,7 @@ void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ArrayProlog() value:" << anyvalue << std::endl;
   std::cout << "pvxs " << p_impl->m_current << std::endl;
+  p_impl->m_array_mode = true;
 }
 
 void PvxsValueBuilder::ArrayElementSeparator()
@@ -149,6 +151,8 @@ void PvxsValueBuilder::ArrayElementSeparator()
 void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
+  p_impl->m_array_mode = false;
+  AssignPVXSValueFromScalarArray(*anyvalue, p_impl->m_current);
 }
 
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
@@ -167,7 +171,11 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
   //    p_impl->m_result = p_impl->m_scalar;
   //  }
   //  p_impl->m_current = GetPVXSValueFromScalar(*anyvalue);
-  AssignPVXSValueFromScalar(*anyvalue, p_impl->m_current);
+
+  if (!p_impl->m_array_mode)
+  {
+    AssignPVXSValueFromScalar(*anyvalue, p_impl->m_current);
+  }
 }
 
 }  // namespace sup::epics
