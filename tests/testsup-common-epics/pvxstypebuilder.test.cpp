@@ -194,7 +194,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
 TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
 {
-  { // studying impliced sharing
+  {  // studying impliced sharing
     auto value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
     EXPECT_EQ(value.type(), pvxs::TypeCode::Int32A);
 
@@ -211,6 +211,11 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
     EXPECT_EQ(data.size(), 2);
     EXPECT_EQ(data[0], 42);
     EXPECT_EQ(data[1], 43);
+
+    ::pvxs::shared_array<int32_t> array2({42, 43, 45});
+    value = array2.freeze();
+    auto data2 = value.as<::pvxs::shared_array<const int32_t>>();
+    EXPECT_EQ(data2.size(), 3);
   }
 }
 
