@@ -32,7 +32,6 @@
 
 #include <map>
 #include <stdexcept>
-#include <iostream>
 
 namespace
 {
@@ -160,11 +159,9 @@ pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
 
 pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
-  std::cout << "qqq" << static_cast<int>(any_type.GetTypeCode()) << std::endl;
   return FindTypeCode(kArrayTypeCodeMap, any_type);
 }
 
-// FIXME method is not used, consider removal
 pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {
   if (!sup::dto::IsScalarValue(any_value))
