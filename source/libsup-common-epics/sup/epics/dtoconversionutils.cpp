@@ -52,7 +52,7 @@ void AssignScalarArray(const sup::dto::AnyValue& any_value, pvxs::Value& pvxs_va
   {
     result[i] = any_value[i].As<T>();
   }
-  pvxs_value = result.freeze(); // this is how ::pvxs wants arrays are assigned
+  pvxs_value = result.freeze();  // this is how ::pvxs wants arrays are assigned
 }
 
 using function_t = std::function<void(const sup::dto::AnyValue& anyvalue, pvxs::Value& pvxs_value)>;
@@ -164,22 +164,9 @@ pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 
 pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {
-  if (!sup::dto::IsScalarValue(any_value))
-  {
-    throw std::runtime_error("Method is intended for scalar AnyValue");
-  }
-
-  auto it = kAssignScalarMap.find(any_value.GetTypeCode());
-  if (it == kAssignScalarMap.end())
-  {
-    throw std::runtime_error("Not a known AnyValue scalar type code");
-  }
-
   auto pvxs_typecode = GetPVXSBaseTypeCode(any_value.GetType());
   auto result = pvxs::TypeDef(pvxs_typecode).create();
-
-  it->second(any_value, result);  // calling assign function
-
+  AssignPVXSValueFromScalar(any_value, result);
   return result;
 };
 
@@ -225,7 +212,6 @@ void AssignPVXSValueFromScalarArray(const dto::AnyValue& any_value, pvxs::Value&
   }
 
   it->second(any_value, pvxs_value);  // calling assign function
-
 }
 
 pvxs::TypeDef BuildPVXSType(const dto::AnyType& any_type)
