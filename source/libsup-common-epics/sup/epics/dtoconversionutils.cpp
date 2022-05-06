@@ -187,7 +187,7 @@ void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs
 {
   if (!sup::dto::IsScalarValue(any_value))
   {
-    throw std::runtime_error("Method is intended for array like AnyValues");
+    throw std::runtime_error("Method is intended for scalar like AnyValues");
   }
 
   if (GetPVXSBaseTypeCode(any_value.GetType()) != pvxs_value.type())
