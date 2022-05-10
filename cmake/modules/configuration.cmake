@@ -47,3 +47,7 @@ find_package(Threads)
 if (NOT SUPCOMMONEPICS_CODAC)
   find_package(COACompact REQUIRED sup-dto)
 endif()
+
+if (COVERAGE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fprofile-arcs -ftest-coverage --coverage")
+endif()

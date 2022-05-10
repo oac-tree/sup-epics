@@ -2,6 +2,8 @@ set(library_name sup-common-epics)
 
 add_library(${library_name} SHARED "")
 
+message(INFO "aaaa ${CMAKE_CXX_FLAGS}")
+
 if (SUPCOMMONEPICS_CODAC)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
   target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup $ENV{CODAC_ROOT}/epics/include)

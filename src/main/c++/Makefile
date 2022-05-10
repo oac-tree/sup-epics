@@ -19,6 +19,7 @@ endif
 all: cmake_targets
 
 cmake_targets:
+	cp -r ../../../source/libsup-common-epics/sup .
 	@mkdir -p $(BUILD_DIR)
 	cmake -B$(BUILD_DIR)  $(CMAKE_FLAGS) ../../..
 	$(MAKE) -C $(BUILD_DIR) install
