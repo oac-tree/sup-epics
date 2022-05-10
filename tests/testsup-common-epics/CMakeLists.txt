@@ -8,3 +8,5 @@ add_executable(${test} ${source_files} ${include_files})
 target_link_libraries(${test} PRIVATE PUBLIC pthread gtest gmock sup-common-epics)
 
 gtest_discover_tests(${test})
+
+install(TARGETS ${test} LIBRARY DESTINATION bin)

@@ -20,3 +20,6 @@ add_subdirectory(sup)
 # -- Installation --
 
 set_target_properties(${library_name} PROPERTIES EXPORT_NAME sup-common-epics SOVERSION ${SUPCOMMONEPICS_SOVERSION} VERSION ${SUPCOMMONEPICS_BUILDVERSION})
+install(TARGETS ${library_name} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/sup/epics/dtotypes_fwd.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics)
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/sup/epics/dtoconversionutils.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics)
