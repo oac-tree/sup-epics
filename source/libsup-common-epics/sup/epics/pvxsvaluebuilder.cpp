@@ -166,4 +166,14 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
   }
 }
 
+void PvxsValueBuilder::UnboundedArrayProlog(const dto::AnyValue *anytype)
+{
+
+}
+
+void PvxsValueBuilder::UnboundedArrayEpilog(const dto::AnyValue *anytype)
+{
+
+}
+
 }  // namespace sup::epics
