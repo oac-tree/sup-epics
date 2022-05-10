@@ -9,4 +9,4 @@ target_link_libraries(${test} PRIVATE PUBLIC pthread gtest gmock sup-common-epic
 
 gtest_discover_tests(${test})
 
-install(TARGETS ${test} LIBRARY DESTINATION bin)
+#install(TARGETS ${test} LIBRARY DESTINATION bin)
