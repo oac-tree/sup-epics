@@ -2,8 +2,8 @@
 
 TARGET=../../../target
 
-#BUILD_DIR := ./build
 BUILD_DIR := $(TARGET)/build
+BIN_DIR := $(TARGET)/bin
 
 BUILD_TYPE = RelWithDebInfo
 
@@ -16,9 +16,12 @@ else
 CMAKE_FLAGS += -DCOVERAGE=false
 endif
 
-all: cmake_targets
+all: unit-tests
 
-cmake_targets:
+unit-tests:
 	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BIN_DIR)
 	cmake -B$(BUILD_DIR)  $(CMAKE_FLAGS) ../../..
-	$(MAKE) -C $(BUILD_DIR) install
+	$(MAKE) -C $(BUILD_DIR)
+	cp $(BUILD_DIR)/bin/testsup-common-epics $(BIN_DIR)/unit-tests
+
