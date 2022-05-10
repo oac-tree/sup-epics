@@ -2,6 +2,10 @@ set(library_name sup-common-epics)
 
 add_library(${library_name} SHARED "")
 
+if (COVERAGE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fprofile-arcs -ftest-coverage --coverage")
+endif()
+
 message(INFO "aaaa ${CMAKE_CXX_FLAGS}")
 
 if (SUPCOMMONEPICS_CODAC)

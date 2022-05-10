@@ -2,7 +2,7 @@
 
 TARGET=../../../target
 
-#BUILD_DIR := ./build
+# BUILD_DIR := ./build
 BUILD_DIR := $(TARGET)/build
 
 BUILD_TYPE = RelWithDebInfo
@@ -19,7 +19,7 @@ endif
 all: cmake_targets
 
 cmake_targets:
-	cp -r ../../../source/libsup-common-epics/sup .
 	@mkdir -p $(BUILD_DIR)
+	cp -r ../../../source/libsup-common-epics/sup .
 	cmake -B$(BUILD_DIR)  $(CMAKE_FLAGS) ../../..
 	$(MAKE) -C $(BUILD_DIR) install
