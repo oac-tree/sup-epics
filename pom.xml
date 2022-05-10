@@ -52,7 +52,6 @@
             <organization>ITER Organisation</organization>
             <email>walter.vanherck@iter.org</email>
             <roles>
-                <role>unit owner</role>
                 <role>developer</role>
             </roles>
         </developer>
@@ -62,6 +61,7 @@
             <organization>ITER Organisation</organization>
             <email>gennady.pospelov@iter.org</email>
             <roles>
+                <role>unit owner</role>
                 <role>developer</role>
             </roles>
         </developer>
