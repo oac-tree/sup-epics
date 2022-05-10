@@ -32,6 +32,7 @@
 
 #include <map>
 #include <stdexcept>
+#include <functional>
 
 namespace
 {
