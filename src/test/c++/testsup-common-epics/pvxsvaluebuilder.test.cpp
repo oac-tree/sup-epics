@@ -288,3 +288,15 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayInStruct)
   EXPECT_EQ(data[0], 42);
   EXPECT_EQ(data[1], 0);
 }
+
+TEST_F(PvxsValueBuilderTest, UnbounderScalarArray)
+{
+  // Functionality is not yet implemented. Test is here to make Sonar happy.
+  ::sup::dto::AnyValue array = ::sup::dto::UnboundedArrayValue({
+    {::sup::dto::SignedInteger64, 1}, 2, 3, 4, 5
+  }, "my_array_t");
+
+  auto pvxs_value = BuildPVXSValue(array);
+  EXPECT_TRUE(pvxs_value.valid());
+}
+
