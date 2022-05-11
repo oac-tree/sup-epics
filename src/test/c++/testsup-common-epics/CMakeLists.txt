@@ -11,4 +11,10 @@ add_executable(${test} ${source_files} ${include_files})
 
 target_link_libraries(${test} PRIVATE PUBLIC pthread gtest gmock sup-common-epics)
 
+
+target_include_directories(${test}
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/../../../main/c++/libsup-common-epics
+)
+
 gtest_discover_tests(${test})

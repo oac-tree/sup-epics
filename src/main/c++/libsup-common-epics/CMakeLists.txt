@@ -4,9 +4,9 @@ add_library(${library_name} SHARED "")
 
 if (COVERAGE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fprofile-arcs -ftest-coverage --coverage")
+    message(INFO "Coverage enabled ${CMAKE_CXX_FLAGS}")
 endif()
 
-message(INFO "aaaa ${CMAKE_CXX_FLAGS}")
 
 if (SUPCOMMONEPICS_CODAC)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
