@@ -22,6 +22,7 @@
 #include "AnyTypeHelper.h"
 #include "AnyValue.h"
 #include "sup/epics/pvxstypebuilder.h"
+#include "sup/epics/dtoconversionutils.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
@@ -32,17 +33,6 @@ using namespace ::sup::epics;
 class PvxsValueBuilderTest : public ::testing::Test
 {
 public:
-  static pvxs::Value GetPVXSValue(const sup::dto::AnyValue& any_value)
-  {
-    PvxsTypeBuilder type_builder;
-    sup::dto::SerializeAnyType(any_value.GetType(), type_builder);
-    auto pvxs_type = type_builder.GetPVXSType();
-
-    PvxsValueBuilder value_builder(pvxs_type);
-    sup::dto::SerializeAnyValue(any_value, value_builder);
-    return value_builder.GetPVXSValue();
-  }
-
   //! Returns vector of field names in a given `pvxs_value`.
   //! Remove duplication with PvxsTypeBuilderTest::GetMemberNames
   static std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
@@ -126,7 +116,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
 
   // constructing from empty AnyValue
   sup::dto::AnyValue any_value;
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_FALSE(pvxs_value.valid());
   EXPECT_TRUE(pvxs_value.equalType(pvxs_default));
 }
@@ -138,7 +128,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
   any_value = 42;
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_TRUE(pvxs_value.valid());
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
@@ -152,7 +142,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
 {
   sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32, 42}}}};
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 1);
 
@@ -169,7 +159,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
   sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32, 42}},
                                   {"bool", {sup::dto::Boolean, true}}};
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 2);
@@ -191,7 +181,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromNestedStruct)
                                     {"bool", {sup::dto::Boolean, true}}};
   sup::dto::AnyValue any_value = {{"scalars", two_scalars}};
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 1);
@@ -227,7 +217,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
         {{"first", {sup::dto::SignedInteger8, 1}}, {"second", {sup::dto::SignedInteger8, 2}}}}},
       struct_name};
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 2);
@@ -270,7 +260,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
   sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32);
   any_value[0] = 42;
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
   auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
@@ -288,7 +278,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayInStruct)
   any_array[0] = 42;
   sup::dto::AnyValue any_value = {{{"array", any_array}}, "struct_name"};
 
-  auto pvxs_value = GetPVXSValue(any_value);
+  auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);

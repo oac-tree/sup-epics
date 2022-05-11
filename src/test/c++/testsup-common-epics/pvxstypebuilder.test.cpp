@@ -19,6 +19,8 @@
 
 #include "sup/epics/pvxstypebuilder.h"
 
+#include "sup/epics/dtoconversionutils.h"
+
 #include "AnyTypeHelper.h"
 #include "AnyValue.h"
 
@@ -35,14 +37,6 @@ using namespace ::sup::epics;
 class PvxsTypeBuilderTest : public ::testing::Test
 {
 public:
-  //! Creates pvxs::TypeDef from sup::dto::AnyType. Main helper method to test the builder.
-  static pvxs::TypeDef GetPVXSType(const sup::dto::AnyType& any_type)
-  {
-    PvxsTypeBuilder builder;
-    sup::dto::SerializeAnyType(any_type, builder);
-    return builder.GetPVXSType();
-  }
-
   //! Returns vector of field names in a given `pvxs_value`.
   static std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
   {
@@ -58,7 +52,7 @@ public:
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromEmptyType)
 {
   sup::dto::AnyType any_type;
-  auto pvxs_type = GetPVXSType(any_type);
+  auto pvxs_type = BuildPVXSType(any_type);
 
   // There is no good way to check if type is empty. Where are no any getters, and it is not
   // allowed to construct pvxs::Value from it.
@@ -78,7 +72,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 
   // The only way to check if pvxs::TypeDef is correctly created is to create
   // a pvxs::Value from it, and check it's type code.
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value.nmembers(), 0);
@@ -91,7 +85,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
 {
   sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32}}};
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 1);
@@ -107,7 +101,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 {
   sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32}},
                                 {"bool", {sup::dto::Boolean}}};
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 2);
@@ -127,7 +121,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
                                    {"bool", {sup::dto::Boolean}}};
   sup::dto::AnyType any_type = {{"scalars", two_scalars}};
 
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 1);
@@ -160,7 +154,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
         {{"first", {sup::dto::SignedInteger8}}, {"second", {sup::dto::SignedInteger8}}}}},
       struct_name};
 
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value.nmembers(), 2);
@@ -226,7 +220,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
   const int n_elements = 42;
   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
 
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
   auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
@@ -262,7 +256,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
   sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32);
   sup::dto::AnyType any_type = {{{"array", any_array}}, "struct_name"};
 
-  auto pvxs_value = GetPVXSType(any_type).create();
+  auto pvxs_value = BuildPVXSType(any_type).create();
   EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
