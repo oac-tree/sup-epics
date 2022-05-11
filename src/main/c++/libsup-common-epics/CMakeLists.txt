@@ -2,12 +2,6 @@ set(library_name sup-common-epics)
 
 add_library(${library_name} SHARED "")
 
-if (COVERAGE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fprofile-arcs -ftest-coverage --coverage")
-    message(INFO "Coverage enabled ${CMAKE_CXX_FLAGS}")
-endif()
-
-
 if (SUPCOMMONEPICS_CODAC)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
   target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup $ENV{CODAC_ROOT}/epics/include)
