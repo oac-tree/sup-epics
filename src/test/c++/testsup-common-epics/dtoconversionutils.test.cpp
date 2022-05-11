@@ -56,6 +56,11 @@ TEST_F(DtoConversionUtilsTest, GetPVXSBaseTypeCode)
     ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8}}};
     EXPECT_EQ(GetPVXSBaseTypeCode(any_type), ::pvxs::TypeCode::Struct);
   }
+
+  {  // attempt to get unknown type code
+    ::sup::dto::AnyType any_type = UnboundedArrayType(::sup::dto::UnsignedInteger32);
+    EXPECT_THROW(GetPVXSBaseTypeCode(any_type), std::runtime_error);
+  }
 }
 
 //! Checks GetPVXSArrayTypeCode method to construct PVXS TypeCode from AnyType (array elements).
@@ -428,4 +433,14 @@ TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalarArray)
   EXPECT_EQ(pvxs_data.size(), 2);
   EXPECT_EQ(pvxs_data[0], 42);
   EXPECT_EQ(pvxs_data[1], 0);
+
+  {  // attempt to assign to scalar
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
+    EXPECT_THROW(AssignPVXSValueFromScalarArray(any_value, pvxs_value), std::runtime_error);
+  }
+
+  {  // attempt to assign to scalar array of wrong type
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
+    EXPECT_THROW(AssignPVXSValueFromScalarArray(any_value, pvxs_value), std::runtime_error);
+  }
 }
