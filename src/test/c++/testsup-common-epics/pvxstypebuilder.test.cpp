@@ -21,8 +21,8 @@
 
 #include "sup/epics/dtoconversionutils.h"
 
-#include "AnyTypeHelper.h"
-#include "AnyValue.h"
+#include "sup/dto/AnyTypeHelper.h"
+#include "sup/dto/AnyValue.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>

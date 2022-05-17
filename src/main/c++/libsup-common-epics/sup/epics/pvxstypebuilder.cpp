@@ -19,7 +19,7 @@
 
 #include "sup/epics/pvxstypebuilder.h"
 
-#include "AnyType.h"
+#include "sup/dto/AnyType.h"
 #include "sup/epics/dtoconversionutils.h"
 
 #include <pvxs/data.h>

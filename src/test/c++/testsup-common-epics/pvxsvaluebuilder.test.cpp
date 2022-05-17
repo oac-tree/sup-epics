@@ -19,8 +19,8 @@
 
 #include "sup/epics/pvxsvaluebuilder.h"
 
-#include "AnyTypeHelper.h"
-#include "AnyValue.h"
+#include "sup/dto/AnyTypeHelper.h"
+#include "sup/dto/AnyValue.h"
 #include "sup/epics/pvxstypebuilder.h"
 #include "sup/epics/dtoconversionutils.h"
 

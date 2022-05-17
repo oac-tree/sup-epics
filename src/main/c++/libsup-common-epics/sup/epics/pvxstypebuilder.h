@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_PVXSTYPEBUILDER_H
 #define SUP_EPICS_PVXSTYPEBUILDER_H
 
-#include "IAnyVisitor.h"
+#include "sup/dto/IAnyVisitor.h"
 #include "sup/epics/dtotypes_fwd.h"
 
 #include <memory>

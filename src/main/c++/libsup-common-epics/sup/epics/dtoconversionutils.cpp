@@ -19,11 +19,11 @@
 
 #include "sup/epics/dtoconversionutils.h"
 
-#include "AnyType.h"
-#include "AnyTypeHelper.h"
-#include "AnyValue.h"
-#include "AnyValueHelper.h"
-#include "BasicScalarTypes.h"
+#include "sup/dto/AnyType.h"
+#include "sup/dto/AnyTypeHelper.h"
+#include "sup/dto/AnyValue.h"
+#include "sup/dto/AnyValueHelper.h"
+#include "sup/dto/BasicScalarTypes.h"
 #include "pvxs/data.h"
 #include "sup/epics/pvxstypebuilder.h"
 #include "sup/epics/pvxsvaluebuilder.h"
