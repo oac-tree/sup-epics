@@ -20,15 +20,24 @@
 #ifndef SUP_EPICS_CAChannelManager_H
 #define SUP_EPICS_CAChannelManager_H
 
-#include <atomic>
-#include <condition_variable>
-#include <future>
-#include <mutex>
-#include <queue>
+#include <sup/dto/AnyType.h>
+
+#include <cadef.h>
+#include <functional>
+#include <string>
 
 namespace sup::epics
 {
+struct MonitorInfo
+{
+  sup::dto::uint64 timestamp;
+  sup::dto::int16 status;
+  sup::dto::int16 severity;
+  void* ref;
+};
 
+using ConnectionCallBack = std::function<void(const std::string&,bool)>;
+using MonitorCallBack = std::function<void(const std::string&,const MonitorInfo&)>;
 /**
  * @brief CAChannelManager manages a collection of channels in an owned context.
  *
@@ -40,6 +49,9 @@ public:
   CAChannelManager();
   ~CAChannelManager();
 
+  // replace with non-epics specific parameters
+  chid AddChannel(const std::string& name, chtype type, ConnectionCallBack* conn_cb,
+                  MonitorCallBack* mon_cb);
 
 private:
 
