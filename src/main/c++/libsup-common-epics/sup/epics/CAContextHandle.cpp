@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "CAContextManager.h"
+#include "CAContextHandle.h"
 
 #include <cadef.h>
 #include <functional>
@@ -25,7 +25,7 @@
 namespace sup::epics
 {
 
-CAContextManager::CAContextManager()
+CAContextHandle::CAContextHandle()
   : tasks{}
   , task_mtx{}
   , cond{}
@@ -38,12 +38,12 @@ CAContextManager::CAContextManager()
   }
 }
 
-CAContextManager::~CAContextManager()
+CAContextHandle::~CAContextHandle()
 {
   HaltContext();
 }
 
-bool CAContextManager::HandleTask(std::packaged_task<bool()>&& task)
+bool CAContextHandle::HandleTask(std::packaged_task<bool()>&& task)
 {
   auto result = task.get_future();
   {
@@ -54,10 +54,10 @@ bool CAContextManager::HandleTask(std::packaged_task<bool()>&& task)
   return result.get();
 }
 
-bool CAContextManager::LaunchContext()
+bool CAContextHandle::LaunchContext()
 {
   std::promise<bool> context_promise;
-  context_future = std::async(std::launch::async, &CAContextManager::ContextThread, this,
+  context_future = std::async(std::launch::async, &CAContextHandle::ContextThread, this,
                               std::ref(context_promise));
   if (!context_promise.get_future().get())
   {
@@ -67,7 +67,7 @@ bool CAContextManager::LaunchContext()
   return true;
 }
 
-void CAContextManager::HaltContext()
+void CAContextHandle::HaltContext()
 {
   if (!context_future.valid())
   {
@@ -81,7 +81,7 @@ void CAContextManager::HaltContext()
   context_future.get();
 }
 
-void CAContextManager::ContextThread(std::promise<bool>& context_promise)
+void CAContextHandle::ContextThread(std::promise<bool>& context_promise)
 {
   // Create preemptive CA context
   if (ca_context_create(ca_enable_preemptive_callback) != ECA_NORMAL)

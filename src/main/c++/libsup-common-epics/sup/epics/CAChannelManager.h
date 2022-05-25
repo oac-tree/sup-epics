@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CACONTEXTMANAGER_H
-#define SUP_EPICS_CACONTEXTMANAGER_H
+#ifndef SUP_EPICS_CAChannelManager_H
+#define SUP_EPICS_CAChannelManager_H
 
 #include <atomic>
 #include <condition_variable>
@@ -30,30 +30,21 @@ namespace sup::epics
 {
 
 /**
- * @brief CAContextManager Handles a preemtive CA context in a dedicated thread.
+ * @brief CAChannelManager manages a collection of channels in an owned context.
  *
- * @note The class creates a CA context in a separate thread and forwards all channel
- * operations to that thread as generic packaged_tasks.
+ * @note
  */
-class CAContextManager
+class CAChannelManager
 {
 public:
-  CAContextManager();
-  ~CAContextManager();
+  CAChannelManager();
+  ~CAChannelManager();
 
-  bool HandleTask(std::packaged_task<bool()>&& task);
 
 private:
-  bool LaunchContext();
-  void HaltContext();
-  void ContextThread(std::promise<bool>& context_promise);
-  std::queue<std::packaged_task<bool()>> tasks;
-  std::mutex task_mtx;
-  std::condition_variable cond;
-  std::atomic_bool halt;
-  std::future<void> context_future;
+
 };
 
 }  // namespace sup::epics
 
-#endif  // SUP_EPICS_CACONTEXTMANAGER_H
+#endif  // SUP_EPICS_CAChannelManager_H
