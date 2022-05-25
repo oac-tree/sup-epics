@@ -20,19 +20,38 @@
 #ifndef SUP_EPICS_CACONTEXTMANAGER_H
 #define SUP_EPICS_CACONTEXTMANAGER_H
 
-#include <functional>
+#include <atomic>
+#include <condition_variable>
+#include <future>
+#include <mutex>
+#include <queue>
 
 namespace sup::epics
 {
 
-//! Interface of a generic client variable.
-
+/**
+ * @brief CAContextManager Handles a preemtive CA context in a dedicated thread.
+ *
+ * @note The class creates a CA context in a separate thread and forwards all channel
+ * operations to that thread as generic packaged_tasks.
+ */
 class CAContextManager
 {
 public:
   CAContextManager();
   ~CAContextManager();
 
+  bool HandleTask(std::packaged_task<bool()>&& task);
+
+private:
+  bool LaunchContext();
+  void HaltContext();
+  void ContextThread(std::promise<bool>& context_promise);
+  std::queue<std::packaged_task<bool()>> tasks;
+  std::mutex task_mtx;
+  std::condition_variable cond;
+  std::atomic_bool halt;
+  std::future<void> context_future;
 };
 
 }  // namespace sup::epics
