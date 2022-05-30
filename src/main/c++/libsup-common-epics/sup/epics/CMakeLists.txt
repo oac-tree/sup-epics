@@ -1,6 +1,8 @@
 
 target_sources(${library_name} PRIVATE
+  CAChannelManager.cpp
   CAContextHandle.cpp
+  CAHelper.cpp
   IClientVariable.cpp
   dtoconversionutils.cpp
   dtoconversionutils.h

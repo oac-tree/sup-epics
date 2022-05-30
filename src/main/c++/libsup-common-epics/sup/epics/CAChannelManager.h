@@ -21,6 +21,7 @@
 #define SUP_EPICS_CAChannelManager_H
 
 #include <sup/dto/AnyType.h>
+#include <sup/dto/AnyValue.h>
 
 #include <cadef.h>
 #include <functional>
@@ -28,12 +29,14 @@
 
 namespace sup::epics
 {
+using ChannelID = void*;
+
 struct MonitorInfo
 {
   sup::dto::uint64 timestamp;
   sup::dto::int16 status;
   sup::dto::int16 severity;
-  void* ref;
+  sup::dto::AnyValue value;
 };
 
 using ConnectionCallBack = std::function<void(const std::string&,bool)>;
@@ -49,10 +52,12 @@ public:
   CAChannelManager();
   ~CAChannelManager();
 
-  // replace with non-epics specific parameters
-  chid AddChannel(const std::string& name, chtype type, ConnectionCallBack* conn_cb,
-                  MonitorCallBack* mon_cb);
+  ChannelID AddChannel(const std::string& name, const sup::dto::AnyType& type,
+                       ConnectionCallBack conn_cb, MonitorCallBack mon_cb);
 
+  bool RemoveChannel(ChannelID id);
+
+  bool UpdateChannel(ChannelID id, const sup::dto::AnyValue& value);
 private:
 
 };
