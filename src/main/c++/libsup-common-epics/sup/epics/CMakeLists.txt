@@ -5,6 +5,7 @@ target_sources(${library_name} PRIVATE
   CAContextHandle.cpp
   CAHelper.cpp
   CAMonitorWrapper.cpp
+  ChannelAccessVariable.cpp
   IClientVariable.cpp
   dtoconversionutils.cpp
   dtoconversionutils.h

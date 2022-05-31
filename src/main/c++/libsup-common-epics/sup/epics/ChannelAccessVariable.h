@@ -22,6 +22,8 @@
 
 #include "CATypes.h"
 
+#include <mutex>
+
 namespace sup::epics
 {
 class ChannelAccessVariable
@@ -47,10 +49,11 @@ public:
 
   bool SetCallBack(std::function<void(const std::string&, const sup::dto::AnyValue&)> cb);
 private:
-  ExtendedValue cache;
-  ChannelID id;
   void OnConnectionChanged(const std::string& name, bool connected);
   void OnMonitorCalled(const std::string& name,const CAMonitorInfo& info);
+  ExtendedValue cache;
+  ChannelID id;
+  mutable std::mutex mon_mtx;
 };
 }  // namespace sup::epics
 

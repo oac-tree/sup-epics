@@ -36,6 +36,7 @@ ChannelAccessVariable::ChannelAccessVariable(
   const std::string& name, const sup::dto::AnyType& type)
   : cache{}
   , id{0}
+  , mon_mtx{}
 {
   id = SharedCAChannelManager().AddChannel(name, type,
     std::bind(&ChannelAccessVariable::OnConnectionChanged, this,
@@ -56,14 +57,57 @@ ChannelAccessVariable::~ChannelAccessVariable()
   }
 }
 
-bool ChannelAccessVariable::IsConnected() const;
-sup::dto::AnyValue ChannelAccessVariable::GetValue() const;
-ExtendedValue ChannelAccessVariable::GetExtendedValue() const;
+bool ChannelAccessVariable::IsConnected() const
+{
+  std::lock_guard<std::mutex> lk(mon_mtx);
+  return cache.connected;
+}
 
-bool ChannelAccessVariable::SetValue(const sup::dto::AnyValue& value);
+sup::dto::AnyValue ChannelAccessVariable::GetValue() const
+{
+  std::lock_guard<std::mutex> lk(mon_mtx);
+  if(!cache.connected)
+  {
+    return {};
+  }
+  return cache.value;
+}
 
-bool ChannelAccessVariable::SetCallBack(std::function<void(const std::string&, const sup::dto::AnyValue&)> cb);
+ChannelAccessVariable::ExtendedValue ChannelAccessVariable::GetExtendedValue() const
+{
+  std::lock_guard<std::mutex> lk(mon_mtx);
+  return cache;
+}
+
+bool ChannelAccessVariable::SetValue(const sup::dto::AnyValue& value)
+{
+  ChannelID local_id;
+  {
+    std::lock_guard<std::mutex> lk(mon_mtx);
+    local_id = id;
+  }
+  return SharedCAChannelManager().UpdateChannel(local_id, value);
+}
+
+bool ChannelAccessVariable::SetCallBack(
+  std::function<void(const std::string&, const sup::dto::AnyValue&)> cb)
+{
+  return true;
+}
+
+void ChannelAccessVariable::OnConnectionChanged(const std::string& name, bool connected)
+{
+  std::lock_guard<std::mutex> lk(mon_mtx);
+  cache.connected = connected;
+}
+
+void ChannelAccessVariable::OnMonitorCalled(const std::string& name,const CAMonitorInfo& info)
+{
+  std::lock_guard<std::mutex> lk(mon_mtx);
+  cache.timestamp = info.timestamp;
+  cache.status = info.status;
+  cache.severity = info.severity;
+  cache.value = info.value;
+}
 
 }  // namespace sup::epics
-
-#endif  // SUP_EPICS_ChannelAccessVariable_H
