@@ -19,11 +19,16 @@
 
 #include "CAHelper.h"
 
+#include <sup/dto/AnyType.h>
 #include <cadef.h>
+#include <map>
+
+
 
 namespace
 {
 sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 nanoseconds);
+chtype TypeCodeToChannelType(sup::dto::TypeCode typecode);
 }  // unnamed namespace
 
 namespace sup::epics::cahelper
@@ -68,6 +73,20 @@ sup::dto::uint64 GetTimestampField(event_handler_args args)
   return ToAbsoluteTime_ns(_time->secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH, _time->nsec);
 }
 
+chtype ChannelType(const sup::dto::AnyType& anytype)
+{
+  sup::dto::AnyType input_type = sup::dto::IsArrayType(anytype) ?
+                                 anytype.ElementType() :
+                                 anytype;
+  return TypeCodeToChannelType(input_type.GetTypeCode());
+}
+
+unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
+{
+  auto result = anytype.NumberOfElements();
+  return result ? result : 1u;
+}
+
 }  // namespace sup::epics::cahelper
 
 namespace
@@ -76,4 +95,31 @@ sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 na
 {
   return seconds * 1000000000ul + nanoseconds;
 }
+chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
+{
+  using namespace sup::dto;
+  static std::map<TypeCode, chtype> channel_type_map =
+    {
+      {TypeCode::Bool, DBR_CHAR},
+      {TypeCode::Char8, DBR_CHAR},
+      {TypeCode::Int8, DBR_CHAR},
+      {TypeCode::UInt8, DBR_CHAR},
+      {TypeCode::Int16, DBR_SHORT},
+      {TypeCode::UInt16, DBR_SHORT},
+      {TypeCode::Int32, DBR_LONG},
+      {TypeCode::UInt32, DBR_LONG},
+      // {TypeCode::Int64, DBR_LONG},
+      // {TypeCode::UInt64, DBR_LONG},
+      {TypeCode::Float32, DBR_FLOAT},
+      {TypeCode::Float64, DBR_DOUBLE},
+      {TypeCode::String, DBR_STRING}
+    };
+  auto it = channel_type_map.find(typecode);
+  if (it == channel_type_map.end())
+  {
+    return -1;
+  }
+  return it->second;
+}
+
 }  // unnamed namespace

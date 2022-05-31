@@ -1,6 +1,7 @@
 
 target_sources(${library_name} PRIVATE
   CAChannelManager.cpp
+  CAChannelTasks.cpp
   CAContextHandle.cpp
   CAHelper.cpp
   IClientVariable.cpp

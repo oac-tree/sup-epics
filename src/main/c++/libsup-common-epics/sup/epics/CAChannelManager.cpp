@@ -19,39 +19,104 @@
 
 #include "CAChannelManager.h"
 
-namespace
-{
-void Monitor_CB(event_handler_args args);
-void Connection_CB(connection_handler_args args);
-}  // unnamed namespace
+#include "CAChannelTasks.h"
+#include "CAContextHandle.h"
+#include "CAHelper.h"
+#include <sup/dto/AnyValueHelper.h>
+#include <cadef.h>
+#include <utility>
 
 namespace sup::epics
 {
+struct CAChannelManager::ChannelInfo
+{
+  ChannelInfo(ConnectionCallBack&& conn_cb, MonitorCallBack&& mon_cb);
+  chid channel_id;
+  ConnectionCallBack connection_cb;
+  MonitorCallBack monitor_cb;
+};
+
+CAChannelManager::CAChannelManager()
+  : last_id{0}
+  , context_handle{new CAContextHandle()}
+{}
+
+CAChannelManager::~CAChannelManager() = default;
+
+ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::AnyType& type,
+                                       ConnectionCallBack&& conn_cb, MonitorCallBack&& mon_cb)
+{
+  std::lock_guard<std::mutex> lk(mtx);
+  auto id = GenerateID();
+  auto insert_result = callback_map.emplace(std::make_pair(id, ChannelInfo(std::move(conn_cb),
+                                                                           std::move(mon_cb))));
+  chtype channel_type;
+  auto channel_info_it = &insert_result.first->second;
+  auto add_task = std::packaged_task<bool()>([&name, channel_type, channel_info_it](){
+    return channeltasks::AddChannelTask(name, channel_type, &channel_info_it->channel_id,
+                                        &channel_info_it->connection_cb,
+                                        &channel_info_it->monitor_cb);
+  });
+  if (!context_handle->HandleTask(std::move(add_task)))
+  {
+    callback_map.erase(insert_result.first);
+    return 0;
+  }
+  return id;
+}
+
+bool CAChannelManager::RemoveChannel(ChannelID id)
+{
+  std::lock_guard<std::mutex> lk(mtx);
+  auto it = callback_map.find(id);
+  if (it == callback_map.end())
+  {
+    return false;
+  }
+  chid channel_id = it->second.channel_id;
+  auto remove_task = std::packaged_task<bool()>([channel_id](){
+    return channeltasks::RemoveChannelTask(channel_id);
+  });
+  auto result = context_handle->HandleTask(std::move(remove_task));
+  callback_map.erase(it);
+  return result;
+}
+
+bool CAChannelManager::UpdateChannel(ChannelID id, const sup::dto::AnyValue& value)
+{
+  std::lock_guard<std::mutex> lk(mtx);
+  auto it = callback_map.find(id);
+  if (it == callback_map.end())
+  {
+    return false;
+  }
+  auto anytype = value.GetType();
+  auto type = cahelper::ChannelType(anytype);
+  if (type == -1)
+  {
+    return false;
+  }
+  auto count = cahelper::ChannelMultiplicity(anytype);
+  auto channel_id = it->second.channel_id;
+  auto byte_representation = sup::dto::ToBytes(value);
+  auto ref = byte_representation.data();
+  auto update_task = std::packaged_task<bool()>([type, count, channel_id, ref](){
+    return channeltasks::UpdateChannelTask(type, count, channel_id, ref);
+  });
+  return context_handle->HandleTask(std::move(update_task));
+}
+
+ChannelID CAChannelManager::GenerateID()
+{
+  // TODO: Assume one will never generate more than 1.8e19 identifiers
+  return ++last_id;
+}
+
+CAChannelManager::ChannelInfo::ChannelInfo(ConnectionCallBack&& conn_cb,
+                                           MonitorCallBack&& mon_cb)
+  : channel_id{nullptr}
+  , connection_cb{std::move(conn_cb)}
+  , monitor_cb{std::move(mon_cb)}
+{}
 
 }  // namespace sup::epics
-
-namespace
-{
-void Monitor_CB(event_handler_args args)
-{
-  // using namespace ccs::HelperTools::ChannelAccess;
-  // auto name = std::string(ca_name(args.chid));
-  // IContextManager::MonitorInfo info;
-  // info.timestamp = GetTimestampField(args);
-  // info.status = GetStatusField(args);
-  // info.severity = GetSeverityField(args);
-  // info.ref = GetValueFieldReference(args);
-  // auto func = reinterpret_cast<std::function<void(const std::string&,
-  //                                                 const IContextManager::MonitorInfo&)>*>(args.usr);
-  // return (*func)(name, info);
-}
-
-void Connection_CB(connection_handler_args args)
-{
-  auto name = std::string(ca_name(args.chid));
-  bool connected = (args.op == CA_OP_CONN_UP);
-  auto func = static_cast<std::function<void(const std::string&, bool)>*>(ca_puser(args.chid));
-  return (*func)(name, connected);
-}
-
-}  // unnamed namespace

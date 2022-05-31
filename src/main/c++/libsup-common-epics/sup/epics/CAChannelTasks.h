@@ -17,28 +17,22 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAHelper_H
-#define SUP_EPICS_CAHelper_H
+#ifndef SUP_EPICS_CAChannelTasks_H
+#define SUP_EPICS_CAChannelTasks_H
 
-#include <sup/dto/AnyType.h>
-#include <sup/dto/BasicScalarTypes.h>
+#include "CAChannelManager.h"
+
 #include <cadef.h>
 
-namespace sup::epics::cahelper
+namespace sup::epics::channeltasks
 {
+bool AddChannelTask(const std::string& name, chtype type, chid* id,
+                    ConnectionCallBack* connect_cb, MonitorCallBack* monitor_cb);
 
-void* GetValueFieldReference(event_handler_args args);
+bool RemoveChannelTask(chid id);
 
-sup::dto::int16 GetStatusField(event_handler_args args);
+bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref);
 
-sup::dto::int16 GetSeverityField(event_handler_args args);
+}  // namespace sup::epics::channeltasks
 
-sup::dto::uint64 GetTimestampField(event_handler_args args);
-
-chtype ChannelType(const sup::dto::AnyType& anytype);
-
-unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype);
-
-}  // namespace sup::epics::cahelper
-
-#endif  // SUP_EPICS_CAHelper_H
+#endif  // SUP_EPICS_CAChannelTasks_H

@@ -23,24 +23,27 @@
 #include <sup/dto/AnyType.h>
 #include <sup/dto/AnyValue.h>
 
-#include <cadef.h>
 #include <functional>
+#include <map>
+#include <mutex>
+#include <list>
 #include <string>
 
 namespace sup::epics
 {
-using ChannelID = void*;
+class CAContextHandle;
+using ChannelID = sup::dto::uint64;
 
-struct MonitorInfo
+struct CAMonitorInfo
 {
   sup::dto::uint64 timestamp;
   sup::dto::int16 status;
   sup::dto::int16 severity;
-  sup::dto::AnyValue value;
+  void* ref;
 };
 
 using ConnectionCallBack = std::function<void(const std::string&,bool)>;
-using MonitorCallBack = std::function<void(const std::string&,const MonitorInfo&)>;
+using MonitorCallBack = std::function<void(const std::string&,const CAMonitorInfo&)>;
 /**
  * @brief CAChannelManager manages a collection of channels in an owned context.
  *
@@ -53,13 +56,18 @@ public:
   ~CAChannelManager();
 
   ChannelID AddChannel(const std::string& name, const sup::dto::AnyType& type,
-                       ConnectionCallBack conn_cb, MonitorCallBack mon_cb);
+                       ConnectionCallBack&& conn_cb, MonitorCallBack&& mon_cb);
 
   bool RemoveChannel(ChannelID id);
 
   bool UpdateChannel(ChannelID id, const sup::dto::AnyValue& value);
 private:
-
+  ChannelID last_id;
+  ChannelID GenerateID();
+  struct ChannelInfo;
+  std::unique_ptr<CAContextHandle> context_handle;
+  std::map<ChannelID, ChannelInfo> callback_map;
+  std::mutex mtx;
 };
 
 }  // namespace sup::epics
