@@ -62,8 +62,10 @@ public:
 
   bool UpdateChannel(ChannelID id, const sup::dto::AnyValue& value);
 private:
-  ChannelID last_id;
   ChannelID GenerateID();
+  void EnsureContext();
+  void ClearContextIfNotNeeded();
+  ChannelID last_id;
   struct ChannelInfo;
   std::unique_ptr<CAContextHandle> context_handle;
   std::map<ChannelID, ChannelInfo> callback_map;

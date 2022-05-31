@@ -27,6 +27,11 @@
 #include <cadef.h>
 #include <utility>
 
+namespace
+{
+bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id);
+}  // unnamed namespace
+
 namespace sup::epics
 {
 struct CAChannelManager::ChannelInfo
@@ -40,7 +45,9 @@ struct CAChannelManager::ChannelInfo
 
 CAChannelManager::CAChannelManager()
   : last_id{0}
-  , context_handle{new CAContextHandle()}
+  , context_handle{}
+  , callback_map{}
+  , mtx{}
 {}
 
 CAChannelManager::~CAChannelManager() = default;
@@ -49,6 +56,7 @@ ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::
                                        ConnectionCallBack&& conn_cb, MonitorCallBack&& mon_cb)
 {
   std::lock_guard<std::mutex> lk(mtx);
+  EnsureContext();
   auto id = GenerateID();
   auto insert_result = callback_map.emplace(
     std::make_pair(id, ChannelInfo(type, std::move(conn_cb), std::move(mon_cb))));
@@ -61,9 +69,14 @@ ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::
   });
   if (!context_handle->HandleTask(std::move(add_task)))
   {
+    if (channel_info_it->channel_id != nullptr)
+    {
+      DelegateRemoveChannel(context_handle.get(), channel_info_it->channel_id);
+    }
     callback_map.erase(insert_result.first);
-    return 0;
+    id = 0;
   }
+  ClearContextIfNotNeeded();
   return id;
 }
 
@@ -76,11 +89,9 @@ bool CAChannelManager::RemoveChannel(ChannelID id)
     return false;
   }
   chid channel_id = it->second.channel_id;
-  auto remove_task = std::packaged_task<bool()>([channel_id](){
-    return channeltasks::RemoveChannelTask(channel_id);
-  });
-  auto result = context_handle->HandleTask(std::move(remove_task));
+  auto result = DelegateRemoveChannel(context_handle.get(), channel_id);
   callback_map.erase(it);
+  ClearContextIfNotNeeded();
   return result;
 }
 
@@ -114,6 +125,22 @@ ChannelID CAChannelManager::GenerateID()
   return last_id;
 }
 
+void CAChannelManager::EnsureContext()
+{
+  if (!context_handle)
+  {
+    context_handle.reset(new CAContextHandle());
+  }
+}
+
+void CAChannelManager::ClearContextIfNotNeeded()
+{
+  if (context_handle && callback_map.empty())
+  {
+    context_handle.reset();
+  }
+}
+
 CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
                                            ConnectionCallBack&& conn_cb,
                                            MonitorCallBack&& mon_cb)
@@ -123,3 +150,14 @@ CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
 {}
 
 }  // namespace sup::epics
+
+namespace
+{
+bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id)
+{
+  auto remove_task = std::packaged_task<bool()>([id](){
+    return sup::epics::channeltasks::RemoveChannelTask(id);
+  });
+  return context->HandleTask(std::move(remove_task));
+}
+}  // unnamed namespace
