@@ -22,6 +22,7 @@
 #include "CAChannelTasks.h"
 #include "CAContextHandle.h"
 #include "CAHelper.h"
+#include "CAMonitorWrapper.h"
 #include <sup/dto/AnyValueHelper.h>
 #include <cadef.h>
 #include <utility>
@@ -30,10 +31,11 @@ namespace sup::epics
 {
 struct CAChannelManager::ChannelInfo
 {
-  ChannelInfo(ConnectionCallBack&& conn_cb, MonitorCallBack&& mon_cb);
+  ChannelInfo(const sup::dto::AnyType& anytype, ConnectionCallBack&& conn_cb,
+              MonitorCallBack&& mon_cb);
   chid channel_id;
   ConnectionCallBack connection_cb;
-  MonitorCallBack monitor_cb;
+  CAMonitorWrapper monitor_cb;
 };
 
 CAChannelManager::CAChannelManager()
@@ -48,9 +50,9 @@ ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::
 {
   std::lock_guard<std::mutex> lk(mtx);
   auto id = GenerateID();
-  auto insert_result = callback_map.emplace(std::make_pair(id, ChannelInfo(std::move(conn_cb),
-                                                                           std::move(mon_cb))));
-  chtype channel_type;
+  auto insert_result = callback_map.emplace(
+    std::make_pair(id, ChannelInfo(type, std::move(conn_cb), std::move(mon_cb))));
+  auto channel_type = cahelper::ChannelType(type);
   auto channel_info_it = &insert_result.first->second;
   auto add_task = std::packaged_task<bool()>([&name, channel_type, channel_info_it](){
     return channeltasks::AddChannelTask(name, channel_type, &channel_info_it->channel_id,
@@ -108,15 +110,16 @@ bool CAChannelManager::UpdateChannel(ChannelID id, const sup::dto::AnyValue& val
 
 ChannelID CAChannelManager::GenerateID()
 {
-  // TODO: Assume one will never generate more than 1.8e19 identifiers
-  return ++last_id;
+  while (callback_map.find(++last_id) != callback_map.end()) {}
+  return last_id;
 }
 
-CAChannelManager::ChannelInfo::ChannelInfo(ConnectionCallBack&& conn_cb,
+CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
+                                           ConnectionCallBack&& conn_cb,
                                            MonitorCallBack&& mon_cb)
   : channel_id{nullptr}
   , connection_cb{std::move(conn_cb)}
-  , monitor_cb{std::move(mon_cb)}
+  , monitor_cb{anytype, std::move(mon_cb)}
 {}
 
 }  // namespace sup::epics

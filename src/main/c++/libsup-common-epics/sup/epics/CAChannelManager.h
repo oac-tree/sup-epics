@@ -39,7 +39,7 @@ struct CAMonitorInfo
   sup::dto::uint64 timestamp;
   sup::dto::int16 status;
   sup::dto::int16 severity;
-  void* ref;
+  sup::dto::AnyValue value;
 };
 
 using ConnectionCallBack = std::function<void(const std::string&,bool)>;

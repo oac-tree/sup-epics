@@ -32,7 +32,7 @@ namespace sup::epics::channeltasks
 {
 
 bool AddChannelTask(const std::string& name, chtype type, chid* id,
-                    ConnectionCallBack* connect_cb, MonitorCallBack* monitor_cb)
+                    ConnectionCallBack* connect_cb, CAMonitorWrapper* monitor_cb)
 {
   if (ca_create_channel(name.c_str(), &Connection_CB, connect_cb, 10, id) != ECA_NORMAL)
   {
@@ -79,13 +79,12 @@ void Monitor_CB(event_handler_args args)
 {
   using namespace sup::epics::cahelper;
   auto name = std::string(ca_name(args.chid));
-  sup::epics::CAMonitorInfo info;
-  info.timestamp = GetTimestampField(args);
-  info.status = GetStatusField(args);
-  info.severity = GetSeverityField(args);
-  info.ref = GetValueFieldReference(args);
-  auto func = static_cast<sup::epics::MonitorCallBack*>(args.usr);
-  return (*func)(name, info);
+  auto timestamp = GetTimestampField(args);
+  auto status = GetStatusField(args);
+  auto severity = GetSeverityField(args);
+  auto ref = GetValueFieldReference(args);
+  auto func = static_cast<sup::epics::CAMonitorWrapper*>(args.usr);
+  return (*func)(name, timestamp, status, severity, ref);
 }
 
 void Connection_CB(connection_handler_args args)
