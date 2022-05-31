@@ -145,6 +145,12 @@ void CAChannelManager::ClearContextIfNotNeeded()
   }
 }
 
+CAChannelManager& SharedCAChannelManager()
+{
+  static CAChannelManager channel_manager;
+  return channel_manager;
+}
+
 CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
                                            ConnectionCallBack&& conn_cb,
                                            MonitorCallBack&& mon_cb)

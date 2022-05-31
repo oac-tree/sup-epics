@@ -20,6 +20,8 @@
 #ifndef SUP_EPICS_CAChannelManager_H
 #define SUP_EPICS_CAChannelManager_H
 
+#include "CATypes.h"
+
 #include <sup/dto/AnyType.h>
 #include <sup/dto/AnyValue.h>
 
@@ -32,18 +34,7 @@
 namespace sup::epics
 {
 class CAContextHandle;
-using ChannelID = sup::dto::uint64;
 
-struct CAMonitorInfo
-{
-  sup::dto::uint64 timestamp;
-  sup::dto::int16 status;
-  sup::dto::int16 severity;
-  sup::dto::AnyValue value;
-};
-
-using ConnectionCallBack = std::function<void(const std::string&,bool)>;
-using MonitorCallBack = std::function<void(const std::string&,const CAMonitorInfo&)>;
 /**
  * @brief CAChannelManager manages a collection of channels in an owned context.
  *
@@ -71,6 +62,8 @@ private:
   std::map<ChannelID, ChannelInfo> callback_map;
   std::mutex mtx;
 };
+
+CAChannelManager& SharedCAChannelManager();
 
 }  // namespace sup::epics
 
