@@ -55,12 +55,16 @@ CAChannelManager::~CAChannelManager() = default;
 ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::AnyType& type,
                                        ConnectionCallBack&& conn_cb, MonitorCallBack&& mon_cb)
 {
+  auto channel_type = cahelper::ChannelType(type);
+  if (channel_type < 0)
+  {
+    return 0;
+  }
   std::lock_guard<std::mutex> lk(mtx);
   EnsureContext();
   auto id = GenerateID();
   auto insert_result = callback_map.emplace(
     std::make_pair(id, ChannelInfo(type, std::move(conn_cb), std::move(mon_cb))));
-  auto channel_type = cahelper::ChannelType(type);
   auto channel_info_it = &insert_result.first->second;
   auto add_task = std::packaged_task<bool()>([&name, channel_type, channel_info_it](){
     return channeltasks::AddChannelTask(name, channel_type, &channel_info_it->channel_id,
