@@ -46,9 +46,6 @@ public:
   //! Returns the name of the EPICS database file name
   std::string GetDataBaseFileName() const;
 
-  //! Waits for the variable to become accessable, meaning the softIoc is running
-  bool WaitForVariable(const std::string& variable_name) const;
-
 protected:
   bool m_is_active;
   std::string m_session_name;

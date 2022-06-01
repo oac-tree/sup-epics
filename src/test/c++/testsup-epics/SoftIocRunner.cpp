@@ -23,10 +23,8 @@
 
 #include "SoftIocUtils.h"
 
-#include <chrono>
 #include <fstream>
 #include <stdexcept>
-#include <thread>
 
 namespace
 {
@@ -85,23 +83,4 @@ bool SoftIocRunner::IsActive() const
 std::string SoftIocRunner::GetDataBaseFileName() const
 {
   return m_session_name + ".db";
-}
-
-bool SoftIocRunner::WaitForVariable(const std::string& variable_name) const
-{
-  std::string command("/usr/bin/caget " + variable_name + " &> /dev/null");
-  auto timeout = std::chrono::seconds(5);
-
-  auto start = std::chrono::system_clock::now();
-  bool connected = (std::system(command.c_str()) == 0);
-  while (connected == false)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    connected = (std::system(command.c_str()) == 0);
-    if (connected || std::chrono::system_clock::now() > start + timeout)
-    {
-      break;
-    }
-  }
-  return connected;
 }

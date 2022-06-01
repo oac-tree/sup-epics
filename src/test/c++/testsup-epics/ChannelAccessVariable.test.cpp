@@ -23,6 +23,7 @@
 
 #include <sup/dto/AnyType.h>
 #include <sup/dto/AnyValue.h>
+#include <cmath>
 #include <cstring>
 #include <thread>
 
@@ -30,7 +31,8 @@
 #include "SoftIocUtils.h"
 #include "sup/epics/ChannelAccessVariable.h"
 
-static const unsigned long SECOND = 1000000000ul;
+static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,
+                         const sup::dto::AnyValue& expected_value, double timeout_sec);
 
 class ChannelAccessVariableTest : public ::testing::Test
 {
@@ -55,8 +57,8 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
 {
   using namespace sup::epics;
 
-  // Wait for softIoc to be running
-  ASSERT_TRUE(m_softioc_service.WaitForVariable("CA-TESTS:FLOAT"));
+  // Assert the softIoc is active
+  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing variables
   ChannelAccessVariable ca_bool_var("CA-TESTS:BOOL", sup::dto::Boolean);
@@ -84,25 +86,16 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   std::string string_val = "some value";
   EXPECT_TRUE(ca_string_var.SetValue(string_val));
 
-  std::this_thread::sleep_for(std::chrono::nanoseconds(SECOND));
-
   // reading bool
-  sup::dto::AnyValue bool_read;
-  EXPECT_NO_THROW(bool_read = ca_bool_var.GetValue());
-  EXPECT_EQ(bool_read, bool_val);
+  EXPECT_TRUE(WaitForValue(ca_bool_var, bool_val, 5.0));
 
   // reading float
-  sup::dto::AnyValue float_read;
-  EXPECT_NO_THROW(float_read = ca_float_var.GetValue());
-  EXPECT_EQ(float_read.As<sup::dto::float32>(), float_val);
+  EXPECT_TRUE(WaitForValue(ca_float_var, float_val, 5.0));
 
   // reading string
-  sup::dto::AnyValue string_read;
-  EXPECT_NO_THROW(string_read = ca_string_var.GetValue());
-  EXPECT_EQ(string_read, string_val);
+  EXPECT_TRUE(WaitForValue(ca_string_var, string_val, 5.0));
 
-
-  // writing too long string
+  // writing long string
   sup::dto::AnyValue chararray_val(1024, sup::dto::Character8, "char8[]");
   sup::dto::char8 char_data[1024] =
         "Some very long string which is longer than the maximum length of EPICSv3 string and "
@@ -110,17 +103,10 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   sup::dto::AssignFromCType(chararray_val, char_data);
   EXPECT_TRUE(ca_chararray_var.SetValue(chararray_val));
 
-  std::this_thread::sleep_for(std::chrono::nanoseconds(SECOND));
+  // reading long string
+  EXPECT_TRUE(WaitForValue(ca_chararray_var, chararray_val, 5.0));
 
-  // Checking the value of long variable. Not clear what should be here.
-  sup::dto::AnyValue chararray_read;
-  EXPECT_NO_THROW(chararray_read = ca_chararray_var.GetValue());
-  auto chararray_bytes = sup::dto::ToBytes(chararray_read);
-
-  auto array_compare = std::memcmp(chararray_bytes.data(), char_data, 1024);
-  EXPECT_EQ(array_compare, 0);
-
-  // Retrieve timestamp
+  // retrieve timestamp
   auto now = std::chrono::system_clock::now();
   auto now_timestamp =
     std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
@@ -136,8 +122,8 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
 {
   using namespace sup::epics;
 
-  // Wait for softIoc to be running
-  ASSERT_TRUE(m_softioc_service.WaitForVariable("CA-TESTS:BOOL"));
+  // Assert the softIoc is active
+  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // create variables
   ChannelAccessVariable ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32);
@@ -151,31 +137,37 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
   sup::dto::float32 value1 = 3.5f;
   ASSERT_TRUE(ca_float_writer.SetValue(value1));
 
-  std::this_thread::sleep_for(std::chrono::nanoseconds(SECOND));
-
   // reading variable through first client
-  sup::dto::AnyValue float_read(sup::dto::Float32);
-  EXPECT_NO_THROW(float_read = ca_float_writer.GetValue());
-  EXPECT_FLOAT_EQ(float_read.As<sup::dto::float32>(), value1);
+  EXPECT_TRUE(WaitForValue(ca_float_writer, value1, 5.0));
 
   // reading variable through second client
-  float_read = 0.0f;
-  EXPECT_NO_THROW(float_read = ca_float_reader.GetValue());
-  EXPECT_FLOAT_EQ(float_read.As<sup::dto::float32>(), value1);
+  EXPECT_TRUE(WaitForValue(ca_float_reader, value1, 5.0));
 
   // set second value
   sup::dto::float32 value2 = -1.5f;
   ASSERT_TRUE(ca_float_writer.SetValue(value2));
 
-  std::this_thread::sleep_for(std::chrono::nanoseconds(SECOND));
-
   // reading variable through first client
-  float_read = 0.0f;
-  EXPECT_NO_THROW(float_read = ca_float_writer.GetValue());
-  EXPECT_FLOAT_EQ(float_read.As<sup::dto::float32>(), value2);
+  EXPECT_TRUE(WaitForValue(ca_float_writer, value2, 5.0));
 
   // reading variable through second client
-  float_read = 0.0f;
-  EXPECT_NO_THROW(float_read = ca_float_reader.GetValue());
-  EXPECT_FLOAT_EQ(float_read.As<sup::dto::float32>(), value2);
+  EXPECT_TRUE(WaitForValue(ca_float_reader, value2, 5.0));
+}
+
+static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,
+                         const sup::dto::AnyValue& expected_value, double timeout_sec)
+{
+  auto timeout = std::chrono::system_clock::now() +
+                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  sup::dto::AnyValue value_read = variable.GetValue();
+  while (value_read != expected_value)
+  {
+    if (std::chrono::system_clock::now() > timeout)
+    {
+      return false;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    value_read = variable.GetValue();
+  }
+  return true;
 }
