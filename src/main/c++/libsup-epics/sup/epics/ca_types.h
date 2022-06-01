@@ -17,23 +17,33 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAChannelTasks_H
-#define SUP_EPICS_CAChannelTasks_H
+#ifndef SUP_EPICS_CATypes_H
+#define SUP_EPICS_CATypes_H
 
-#include "CAChannelManager.h"
-#include "CAMonitorWrapper.h"
+#include <sup/dto/AnyValue.h>
+#include <functional>
+#include <string>
 
-#include <cadef.h>
-
-namespace sup::epics::channeltasks
+namespace sup
 {
-bool AddChannelTask(const std::string& name, chtype type, chid* id,
-                    ConnectionCallBack* connect_cb, CAMonitorWrapper* monitor_cb);
+namespace epics
+{
 
-bool RemoveChannelTask(chid id);
+using ChannelID = sup::dto::uint64;
 
-bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref);
+struct CAMonitorInfo
+{
+  sup::dto::uint64 timestamp;
+  sup::dto::int16 status;
+  sup::dto::int16 severity;
+  sup::dto::AnyValue value;
+};
 
-}  // namespace sup::epics::channeltasks
+using ConnectionCallBack = std::function<void(const std::string&,bool)>;
+using MonitorCallBack = std::function<void(const std::string&,const CAMonitorInfo&)>;
 
-#endif  // SUP_EPICS_CAChannelTasks_H
+}  // namespace epics
+
+}  // namespace sup
+
+#endif  // SUP_EPICS_CATypes_H

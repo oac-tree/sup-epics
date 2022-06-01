@@ -17,12 +17,13 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "CAChannelManager.h"
+#include "sup/epics/ca_channel_manager.h"
 
-#include "CAChannelTasks.h"
-#include "CAContextHandle.h"
-#include "CAHelper.h"
-#include "CAMonitorWrapper.h"
+#include "sup/epics/ca_channel_tasks.h"
+#include "sup/epics/ca_context_handle.h"
+#include "sup/epics/ca_helper.h"
+#include "sup/epics/ca_monitor_wrapper.h"
+
 #include <sup/dto/AnyValueHelper.h>
 #include <cadef.h>
 #include <utility>
@@ -32,7 +33,9 @@ namespace
 bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id);
 }  // unnamed namespace
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 struct CAChannelManager::ChannelInfo
 {
@@ -159,7 +162,9 @@ CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
   , monitor_cb{anytype, std::move(mon_cb)}
 {}
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 namespace
 {

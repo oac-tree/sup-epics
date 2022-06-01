@@ -29,7 +29,7 @@
 
 #include "SoftIocRunner.h"
 #include "SoftIocUtils.h"
-#include "sup/epics/ChannelAccessVariable.h"
+#include "sup/epics/channel_access_variable.h"
 
 static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec);
@@ -79,7 +79,7 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   EXPECT_TRUE(ca_bool_var.SetValue(bool_val));
 
   // set float
-  sup::dto::float32 float_val = 0.25f;
+  sup::dto::float32 float_val = 0.25F;
   EXPECT_TRUE(ca_float_var.SetValue(float_val));
 
   // set string
@@ -134,7 +134,7 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
   EXPECT_TRUE(ca_float_reader.WaitForConnected(5.0));
 
   // set first value
-  sup::dto::float32 value1 = 3.5f;
+  sup::dto::float32 value1 = 3.5F;
   ASSERT_TRUE(ca_float_writer.SetValue(value1));
 
   // reading variable through first client
@@ -144,7 +144,7 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
   EXPECT_TRUE(WaitForValue(ca_float_reader, value1, 5.0));
 
   // set second value
-  sup::dto::float32 value2 = -1.5f;
+  sup::dto::float32 value2 = -1.5F;
   ASSERT_TRUE(ca_float_writer.SetValue(value2));
 
   // reading variable through first client

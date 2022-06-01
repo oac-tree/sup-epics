@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_CAChannelManager_H
 #define SUP_EPICS_CAChannelManager_H
 
-#include "CATypes.h"
+#include "sup/epics/ca_types.h"
 
 #include <sup/dto/AnyType.h>
 #include <sup/dto/AnyValue.h>
@@ -31,7 +31,9 @@
 #include <list>
 #include <string>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 class CAContextHandle;
 
@@ -65,6 +67,8 @@ private:
 
 CAChannelManager& SharedCAChannelManager();
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_CAChannelManager_H

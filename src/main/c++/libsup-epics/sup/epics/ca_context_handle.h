@@ -26,7 +26,9 @@
 #include <mutex>
 #include <queue>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 /**
@@ -54,6 +56,8 @@ private:
   std::future<void> context_future;
 };
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_CAContextHandle_H

@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "CAChannelTasks.h"
+#include "sup/epics/ca_channel_tasks.h"
 
-#include "CAChannelManager.h"
-#include "CAHelper.h"
+#include "sup/epics/ca_channel_manager.h"
+#include "sup/epics/ca_helper.h"
 
 namespace
 {
@@ -28,7 +28,11 @@ void Monitor_CB(event_handler_args args);
 void Connection_CB(connection_handler_args args);
 }  // unnamed namespace
 
-namespace sup::epics::channeltasks
+namespace sup
+{
+namespace epics
+{
+namespace channeltasks
 {
 
 bool AddChannelTask(const std::string& name, chtype type, chid* id,
@@ -71,7 +75,11 @@ bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref)
   return true;
 }
 
-}  // namespace sup::epics::channeltasks
+}  // namespace channeltasks
+
+}  // namespace epics
+
+}  // namespace sup
 
 namespace
 {

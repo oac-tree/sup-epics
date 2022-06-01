@@ -1,11 +1,11 @@
 
 target_sources(${library_name} PRIVATE
-  CAChannelManager.cpp
-  CAChannelTasks.cpp
-  CAContextHandle.cpp
-  CAHelper.cpp
-  CAMonitorWrapper.cpp
-  ChannelAccessVariable.cpp
+  ca_channel_manager.cpp
+  ca_channel_tasks.cpp
+  ca_context_handle.cpp
+  ca_helper.cpp
+  ca_monitor_wrapper.cpp
+  channel_access_variable.cpp
   dtoconversionutils.cpp
   dtoconversionutils.h
   dtotypes_fwd.h

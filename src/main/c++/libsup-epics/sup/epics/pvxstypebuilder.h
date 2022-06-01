@@ -25,7 +25,9 @@
 
 #include <memory>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 //! Visitor to construct pvxs::TypeDef from sup::dto::AnyType.
@@ -63,6 +65,8 @@ private:
   std::unique_ptr<PvxsTypeBuilderImpl> p_impl;
 };
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_PVXSTYPEBUILDER_H

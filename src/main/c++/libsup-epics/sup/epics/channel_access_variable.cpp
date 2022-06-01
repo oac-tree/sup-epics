@@ -17,14 +17,16 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "ChannelAccessVariable.h"
+#include "sup/epics/channel_access_variable.h"
 
-#include "CAChannelManager.h"
+#include "sup/epics/ca_channel_manager.h"
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 ChannelAccessVariable::ExtendedValue::ExtendedValue()
   : connected{false}
@@ -143,4 +145,6 @@ void ChannelAccessVariable::OnMonitorCalled(const std::string& name,const CAMoni
   }
 }
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup

@@ -141,7 +141,9 @@ pvxs::TypeCode FindTypeCode(const T& container, const sup::dto::AnyType& any_typ
 
 }  // namespace
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
@@ -229,4 +231,6 @@ pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
   return builder.GetPVXSValue();
 }
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup

@@ -24,7 +24,11 @@
 #include <sup/dto/BasicScalarTypes.h>
 #include <cadef.h>
 
-namespace sup::epics::cahelper
+namespace sup
+{
+namespace epics
+{
+namespace cahelper
 {
 
 void* GetValueFieldReference(event_handler_args args);
@@ -39,6 +43,10 @@ chtype ChannelType(const sup::dto::AnyType& anytype);
 
 unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype);
 
-}  // namespace sup::epics::cahelper
+}  // namespace cahelper
+
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_CAHelper_H

@@ -23,11 +23,14 @@
 //! @file dtotypes_fwd.h
 //! Forward declaration of some external types related to the data transfer.
 
-namespace sup::dto
+namespace sup
+{
+namespace dto
 {
 class AnyValue;
 class AnyType;
-}  // namespace sup::dto
+}  // namespace dto
+}  // namespace sup
 
 namespace pvxs
 {

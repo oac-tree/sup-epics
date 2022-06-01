@@ -25,7 +25,9 @@
 
 #include <memory>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 //! Visitor to construct pvxs::Value from sup::dto::AnyValue.
@@ -64,6 +66,8 @@ private:
   std::unique_ptr<PvxsValueBuilderImpl> p_impl;
 };
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_PVXSVALUEBUILDER_H

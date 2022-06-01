@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "CAMonitorWrapper.h"
+#include "sup/epics/ca_monitor_wrapper.h"
 
 #include <sup/dto/AnyValueHelper.h>
 #include <string.h>
@@ -28,7 +28,9 @@ sup::dto::AnyValue AnyValueFromMonitorRef(const sup::dto::AnyType& anytype, void
                                           std::size_t size);
 }  // unnamed namespace
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype_, MonitorCallBack&& mon_cb_)
   : anytype{std::move(anytype_)}
@@ -51,7 +53,9 @@ void CAMonitorWrapper::operator()(const std::string& name, sup::dto::uint64 time
   return mon_cb(name, info);
 }
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 namespace
 {
@@ -61,9 +65,10 @@ sup::dto::AnyValue AnyValueFromMonitorRef(const sup::dto::AnyType& anytype, void
   sup::dto::AnyValue result(anytype);
   if (anytype.GetTypeCode() == sup::dto::TypeCode::String)
   {
-    char buffer[41];
-    buffer[40] = 0;
-    strncpy(buffer, (const char*)ref, 40);
+    const std::size_t kEpicsStringLength{40};
+    char buffer[kEpicsStringLength+1];
+    buffer[kEpicsStringLength] = 0;
+    strncpy(buffer, (const char*)ref, kEpicsStringLength);
     result = std::string(buffer);
   }
   else

@@ -17,13 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "CAHelper.h"
+#include "sup/epics/ca_helper.h"
 
 #include <sup/dto/AnyType.h>
 #include <cadef.h>
 #include <map>
-
-
 
 namespace
 {
@@ -31,8 +29,13 @@ sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 na
 chtype TypeCodeToChannelType(sup::dto::TypeCode typecode);
 }  // unnamed namespace
 
-namespace sup::epics::cahelper
+namespace sup
 {
+namespace epics
+{
+namespace cahelper
+{
+
 void* GetValueFieldReference(event_handler_args args)
 {
   if (args.status != ECA_NORMAL)
@@ -87,7 +90,11 @@ unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
   return result ? result : 1u;
 }
 
-}  // namespace sup::epics::cahelper
+}  // namespace cahelper
+
+}  // namespace epics
+
+}  // namespace sup
 
 namespace
 {

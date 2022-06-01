@@ -64,7 +64,9 @@ pvxs::Value CreateValueFromType(const ::pvxs::TypeDef &type_def)
 
 }  // namespace
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 struct PvxsValueBuilder::PvxsValueBuilderImpl
@@ -176,4 +178,6 @@ void PvxsValueBuilder::UnboundedArrayEpilog(const dto::AnyValue *anytype)
 
 }
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup

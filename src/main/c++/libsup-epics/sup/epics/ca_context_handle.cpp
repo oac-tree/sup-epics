@@ -17,12 +17,14 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "CAContextHandle.h"
+#include "sup/epics/ca_context_handle.h"
 
 #include <cadef.h>
 #include <functional>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 CAContextHandle::CAContextHandle()
@@ -108,4 +110,6 @@ void CAContextHandle::ContextThread(std::promise<bool>& context_promise)
   ca_context_destroy();
 }
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup

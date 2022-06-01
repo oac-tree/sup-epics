@@ -28,7 +28,9 @@
 #include <stack>
 #include <stdexcept>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 struct PvxsTypeBuilder::PvxsTypeBuilderImpl
@@ -125,4 +127,6 @@ void PvxsTypeBuilder::UnboundedArrayEpilog(const dto::AnyType *anytype)
 
 }
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup

@@ -27,7 +27,9 @@
 
 #include <string>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 
 //! Returns PVXS TypeCode corresponding to the given AnyType.
@@ -58,6 +60,8 @@ void AssignPVXSValueFromScalarArray(const ::sup::dto::AnyValue& any_value,
 //! Returns PVXS value from AnyValue.
 ::pvxs::Value BuildPVXSValue(const ::sup::dto::AnyValue& any_value);
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_DTOCONVERSIONUTILS_H

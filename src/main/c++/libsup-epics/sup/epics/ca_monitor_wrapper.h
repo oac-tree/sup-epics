@@ -20,11 +20,13 @@
 #ifndef SUP_EPICS_CAMonitorWrapper_H
 #define SUP_EPICS_CAMonitorWrapper_H
 
-#include "CAChannelManager.h"
+#include "sup/epics/ca_channel_manager.h"
 #include <sup/dto/AnyType.h>
 #include <string>
 
-namespace sup::epics
+namespace sup
+{
+namespace epics
 {
 class CAMonitorWrapper
 {
@@ -38,6 +40,8 @@ private:
   MonitorCallBack mon_cb;
 };
 
-}  // namespace sup::epics
+}  // namespace epics
+
+}  // namespace sup
 
 #endif  // SUP_EPICS_CAMonitorWrapper_H
