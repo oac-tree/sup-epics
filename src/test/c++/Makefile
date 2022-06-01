@@ -23,5 +23,5 @@ unit-tests:
 	@mkdir -p $(BIN_DIR)
 	cmake -B$(BUILD_DIR)  $(CMAKE_FLAGS) $(TARGET)
 	$(MAKE) -C $(BUILD_DIR)
-	cp $(BUILD_DIR)/bin/testsup-common-epics $(BIN_DIR)/.
+	cp $(BUILD_DIR)/bin/testsup-epics $(BIN_DIR)/.
 

@@ -4,4 +4,4 @@ find_package(GTest REQUIRED)
 find_package(Threads)
 include(GoogleTest)
 
-add_subdirectory(testsup-common-epics)
+add_subdirectory(testsup-epics)

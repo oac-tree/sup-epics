@@ -1,1 +1,1 @@
-add_subdirectory(libsup-common-epics)
+add_subdirectory(libsup-epics)

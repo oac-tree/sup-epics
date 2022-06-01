@@ -1,6 +1,6 @@
 # Supervision and automation system EPICS interface
 
-Library of common components to send/receive SUP data-transfer-objects via EPICS Channel Access and PV access network protocols.
+Library of components to send/receive SUP data-transfer-objects via EPICS Channel Access and PV access network protocols.
 This is bare CMake project intended for the development and prototyping on Linux of the user's choice.
 CODAC packaging will follow at a later stage.
 
@@ -15,7 +15,7 @@ git clone https://git.iter.org/scm/coa/sup-dto.git
 mvn clean install
 
 # install this packages
-git clone https://git.iter.org/scm/coa/sup-common-epics.git
+git clone https://git.iter.org/scm/coa/sup-epics.git
 mkdir <build>; cd <build>
 cmake <source> && make -j4 && ctest
 ```
@@ -38,7 +38,7 @@ make -C <epics-base>
 git clone --recursive https://github.com/mdavidsaver/pvxs.git
 
 # create file <pvxs>/configure/RELEASE.local with the content (use real path)
-EPICS_BASE=<epics-base> 
+EPICS_BASE=<epics-base>
 
 make -C <pvxs>
 
@@ -58,13 +58,13 @@ mkdir <build>; cd <build>
 cmake <source> && make -j4 && ctest
 ```
 
-Please note, that thanks to CMake magic (the magic is located in $HOME/.cmake directory), installation is optional. 
+Please note, that thanks to CMake magic (the magic is located in $HOME/.cmake directory), installation is optional.
 Without installation, libraries will be discoverable right from the build directory.
 
-### Finally, install `cpp-common-epics`
+### Finally, install `cpp-epics`
 
 ```
-git clone https://git.iter.org/scm/coa/sup-common-epics.git
+git clone https://git.iter.org/scm/coa/sup-epics.git
 mkdir <build>; cd <build>
 cmake <source> && make -j4 && ctest
 ```

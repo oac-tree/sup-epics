@@ -29,7 +29,7 @@ retcode=${no_error}
 
 echo "***** Starting unit tests *****"
 
-../../../target/bin/testsup-common-epics || retcode=$?
+../../../target/bin/testsup-epics || retcode=$?
 
 echo "***** End of unit tests *****"
 
