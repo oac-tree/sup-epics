@@ -20,6 +20,8 @@
 #include "ChannelAccessVariable.h"
 
 #include "CAChannelManager.h"
+#include <chrono>
+#include <cmath>
 #include <stdexcept>
 
 namespace sup::epics
@@ -33,10 +35,12 @@ ChannelAccessVariable::ExtendedValue::ExtendedValue()
 {}
 
 ChannelAccessVariable::ChannelAccessVariable(
-  const std::string& name, const sup::dto::AnyType& type)
+  const std::string& name, const sup::dto::AnyType& type, VariableChangedCallback cb)
   : cache{}
   , id{0}
   , mon_mtx{}
+  , connected_cv{}
+  , var_changed_cb{std::move(cb)}
 {
   id = SharedCAChannelManager().AddChannel(name, type,
     std::bind(&ChannelAccessVariable::OnConnectionChanged, this,
@@ -89,25 +93,54 @@ bool ChannelAccessVariable::SetValue(const sup::dto::AnyValue& value)
   return SharedCAChannelManager().UpdateChannel(local_id, value);
 }
 
-bool ChannelAccessVariable::SetCallBack(
-  std::function<void(const std::string&, const sup::dto::AnyValue&)> cb)
+bool ChannelAccessVariable::WaitForConnected(double timeout_sec) const
 {
-  return true;
+  auto timeout = std::chrono::system_clock::now() +
+                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  std::unique_lock<std::mutex> lk(mon_mtx);
+  bool connected = cache.connected;
+  while (!connected)
+  {
+    auto wait_result = connected_cv.wait_until(lk, timeout);
+    if (wait_result == std::cv_status::timeout)
+    {
+      return false;
+    }
+    connected = cache.connected;
+  }
+  return connected;
 }
 
 void ChannelAccessVariable::OnConnectionChanged(const std::string& name, bool connected)
 {
-  std::lock_guard<std::mutex> lk(mon_mtx);
-  cache.connected = connected;
+  ExtendedValue result;
+  {
+    std::lock_guard<std::mutex> lk(mon_mtx);
+    cache.connected = connected;
+    result = cache;
+  }
+  connected_cv.notify_one();
+  if (var_changed_cb)
+  {
+    var_changed_cb(name, result);
+  }
 }
 
 void ChannelAccessVariable::OnMonitorCalled(const std::string& name,const CAMonitorInfo& info)
 {
-  std::lock_guard<std::mutex> lk(mon_mtx);
-  cache.timestamp = info.timestamp;
-  cache.status = info.status;
-  cache.severity = info.severity;
-  cache.value = info.value;
+  ExtendedValue result;
+  {
+    std::lock_guard<std::mutex> lk(mon_mtx);
+    cache.timestamp = info.timestamp;
+    cache.status = info.status;
+    cache.severity = info.severity;
+    cache.value = info.value;
+    result = cache;
+  }
+  if (var_changed_cb)
+  {
+    var_changed_cb(name, result);
+  }
 }
 
 }  // namespace sup::epics
