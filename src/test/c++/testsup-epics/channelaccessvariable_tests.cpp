@@ -27,8 +27,8 @@
 #include <cstring>
 #include <thread>
 
-#include "SoftIocRunner.h"
-#include "SoftIocUtils.h"
+#include "softioc_runner.h"
+#include "softioc_utils.h"
 #include "sup/epics/channel_access_variable.h"
 
 static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,

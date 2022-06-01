@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "SoftIocUtils.h"
+#include "softioc_utils.h"
 
 namespace
 {

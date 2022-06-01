@@ -19,9 +19,9 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "SoftIocRunner.h"
+#include "softioc_runner.h"
 
-#include "SoftIocUtils.h"
+#include "softioc_utils.h"
 
 #include <fstream>
 #include <stdexcept>
