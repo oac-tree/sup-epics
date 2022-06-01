@@ -6,7 +6,6 @@ target_sources(${library_name} PRIVATE
   CAHelper.cpp
   CAMonitorWrapper.cpp
   ChannelAccessVariable.cpp
-  IClientVariable.cpp
   dtoconversionutils.cpp
   dtoconversionutils.h
   dtotypes_fwd.h
