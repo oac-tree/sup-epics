@@ -35,6 +35,14 @@ void GenerateEpicDatabaseFile(const std::string& name, const std::string& db_fil
   result << db_file_content;
   result.close();
 }
+
+// Retrieve path for EPICS binaries
+std::string GetEPICSBinaryPath()
+{
+  return std::string(std::getenv("EPICS_BASE")) + "/bin/"
+         + std::string(std::getenv("EPICS_HOST_ARCH")) + "/";
+}
+
 }  // unnamed namespace
 
 SoftIocRunner::SoftIocRunner(const std::string& session_name) : m_is_active(false)
@@ -57,8 +65,9 @@ void SoftIocRunner::Start(const std::string& db_file_content)
 
   GenerateEpicDatabaseFile(GetDataBaseFileName(), db_file_content);
 
-  const std::string command{"/usr/bin/screen -d -m -S " + m_session_name + " /usr/bin/softIoc -d "
-                            + GetDataBaseFileName() + " &> /dev/null"};
+  const std::string command{"/usr/bin/screen -d -m -S " + m_session_name + " "
+                            + GetEPICSBinaryPath() + "softIoc -d " + GetDataBaseFileName()
+                            + " &> /dev/null"};
   std::system(command.c_str());
   m_is_active = true;
 }
