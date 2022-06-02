@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CATypes_H
-#define SUP_EPICS_CATypes_H
+#ifndef SUP_EPICS_CA_TYPES_H_
+#define SUP_EPICS_CA_TYPES_H_
 
-#include <sup/dto/AnyValue.h>
+#include <sup/dto/anyvalue.h>
 #include <functional>
 #include <string>
 
@@ -46,4 +46,4 @@ using MonitorCallBack = std::function<void(const std::string&,const CAMonitorInf
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CATypes_H
+#endif  // SUP_EPICS_CA_TYPES_H_

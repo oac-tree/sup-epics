@@ -17,9 +17,9 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxsvaluebuilder.h"
+#include <sup/epics/pvxsvaluebuilder.h>
 
-#include "sup/epics/dtoconversionutils.h"
+#include <sup/epics/dtoconversionutils.h>
 
 #include <pvxs/data.h>
 

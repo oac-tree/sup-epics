@@ -17,11 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAChannelTasks_H
-#define SUP_EPICS_CAChannelTasks_H
+#ifndef SUP_EPICS_CA_CHANNEL_TASKS_H_
+#define SUP_EPICS_CA_CHANNEL_TASKS_H_
 
-#include "sup/epics/ca_channel_manager.h"
-#include "sup/epics/ca_monitor_wrapper.h"
+#include <sup/epics/ca_channel_manager.h>
+#include <sup/epics/ca_monitor_wrapper.h>
 
 #include <cadef.h>
 
@@ -45,4 +45,4 @@ bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref);
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CAChannelTasks_H
+#endif  // SUP_EPICS_CA_CHANNEL_TASKS_H_

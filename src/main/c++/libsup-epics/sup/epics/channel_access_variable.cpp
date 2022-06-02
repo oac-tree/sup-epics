@@ -17,9 +17,9 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/channel_access_variable.h"
+#include <sup/epics/channel_access_variable.h>
 
-#include "sup/epics/ca_channel_manager.h"
+#include <sup/epics/ca_channel_manager.h>
 #include <chrono>
 #include <cmath>
 #include <stdexcept>

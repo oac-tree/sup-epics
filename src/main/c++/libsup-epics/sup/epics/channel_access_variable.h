@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_ChannelAccessVariable_H
-#define SUP_EPICS_ChannelAccessVariable_H
+#ifndef SUP_EPICS_CHANNEL_ACCESS_VARIABLE_H_
+#define SUP_EPICS_CHANNEL_ACCESS_VARIABLE_H_
 
-#include "sup/epics/ca_types.h"
+#include <sup/epics/ca_types.h>
 
 #include <condition_variable>
 #include <mutex>
@@ -113,4 +113,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_ChannelAccessVariable_H
+#endif  // SUP_EPICS_CHANNEL_ACCESS_VARIABLE_H_

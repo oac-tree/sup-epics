@@ -17,11 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAMonitorWrapper_H
-#define SUP_EPICS_CAMonitorWrapper_H
+#ifndef SUP_EPICS_CA_MONITOR_WRAPPER_H_
+#define SUP_EPICS_CA_MONITOR_WRAPPER_H_
 
-#include "sup/epics/ca_channel_manager.h"
-#include <sup/dto/AnyType.h>
+#include <sup/epics/ca_channel_manager.h>
+#include <sup/dto/anytype.h>
 #include <string>
 
 namespace sup
@@ -44,4 +44,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CAMonitorWrapper_H
+#endif  // SUP_EPICS_CA_MONITOR_WRAPPER_H_

@@ -17,9 +17,9 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/ca_monitor_wrapper.h"
+#include <sup/epics/ca_monitor_wrapper.h>
 
-#include <sup/dto/AnyValueHelper.h>
+#include <sup/dto/anyvalue_helper.h>
 #include <string.h>
 
 namespace

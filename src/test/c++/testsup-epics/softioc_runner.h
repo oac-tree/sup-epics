@@ -19,8 +19,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_SoftIocRunner_H
-#define SUP_EPICS_SoftIocRunner_H
+#ifndef SUP_EPICS_SOFTIOCRUNNER_H_
+#define SUP_EPICS_SOFTIOCRUNNER_H_
 
 #include <string>
 
@@ -51,4 +51,4 @@ protected:
   std::string m_session_name;
 };
 
-#endif  // SUP_EPICS_SoftIocRunner_H
+#endif  // SUP_EPICS_SOFTIOCRUNNER_H_

@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAContextHandle_H
-#define SUP_EPICS_CAContextHandle_H
+#ifndef SUP_EPICS_CA_CONTEXT_HANDLE_H_
+#define SUP_EPICS_CA_CONTEXT_HANDLE_H_
 
 #include <atomic>
 #include <condition_variable>
@@ -60,4 +60,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CAContextHandle_H
+#endif  // SUP_EPICS_CA_CONTEXT_HANDLE_H_

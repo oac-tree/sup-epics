@@ -19,8 +19,8 @@
 
 #include "sup/epics/pvxsvaluebuilder.h"
 
-#include "sup/dto/AnyTypeHelper.h"
-#include "sup/dto/AnyValue.h"
+#include "sup/dto/anytype_helper.h"
+#include "sup/dto/anyvalue.h"
 #include "sup/epics/pvxstypebuilder.h"
 #include "sup/epics/dtoconversionutils.h"
 
@@ -125,7 +125,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
 
 TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
 {
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32};
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
   any_value = 42;
 
   auto pvxs_value = BuildPVXSValue(any_value);
@@ -140,7 +140,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
 
 TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
 {
-  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32, 42}}}};
+  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32Type, 42}}}};
 
   auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
@@ -156,8 +156,8 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
 
 TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 {
-  sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32, 42}},
-                                  {"bool", {sup::dto::Boolean, true}}};
+  sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                  {"bool", {sup::dto::BooleanType, true}}};
 
   auto pvxs_value = BuildPVXSValue(any_value);
 
@@ -177,8 +177,8 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 
 TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromNestedStruct)
 {
-  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32, 42}},
-                                    {"bool", {sup::dto::Boolean, true}}};
+  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                    {"bool", {sup::dto::BooleanType, true}}};
   sup::dto::AnyValue any_value = {{"scalars", two_scalars}};
 
   auto pvxs_value = BuildPVXSValue(any_value);
@@ -208,13 +208,13 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromNestedStruct)
 TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
-  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32, 42}},
-                                    {"bool", {sup::dto::Boolean, true}}};
+  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                    {"bool", {sup::dto::BooleanType, true}}};
 
   sup::dto::AnyValue any_value{
       {{"struct1", two_scalars},
        {"struct2",
-        {{"first", {sup::dto::SignedInteger8, 1}}, {"second", {sup::dto::SignedInteger8, 2}}}}},
+        {{"first", {sup::dto::SignedInteger8Type, 1}}, {"second", {sup::dto::SignedInteger8Type, 2}}}}},
       struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
@@ -257,7 +257,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 {
   const int n_elements = 2;
-  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32);
+  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
   any_value[0] = 42;
 
   auto pvxs_value = BuildPVXSValue(any_value);
@@ -274,7 +274,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayInStruct)
 {
   const int n_elements = 2;
-  sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32);
+  sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
   any_array[0] = 42;
   sup::dto::AnyValue any_value = {{{"array", any_array}}, "struct_name"};
 
@@ -293,7 +293,7 @@ TEST_F(PvxsValueBuilderTest, UnbounderScalarArray)
 {
   // Functionality is not yet implemented. Test is here to make Sonar happy.
   ::sup::dto::AnyValue array = ::sup::dto::UnboundedArrayValue({
-    {::sup::dto::SignedInteger64, 1}, 2, 3, 4, 5
+    {::sup::dto::SignedInteger64Type, 1}, 2, 3, 4, 5
   }, "my_array_t");
 
   auto pvxs_value = BuildPVXSValue(array);

@@ -17,11 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAHelper_H
-#define SUP_EPICS_CAHelper_H
+#ifndef SUP_EPICS_CA_HELPER_H_
+#define SUP_EPICS_CA_HELPER_H_
 
-#include <sup/dto/AnyType.h>
-#include <sup/dto/BasicScalarTypes.h>
+#include <sup/dto/anytype.h>
+#include <sup/dto/basic_scalar_types.h>
 #include <cadef.h>
 
 namespace sup
@@ -49,4 +49,4 @@ unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype);
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CAHelper_H
+#endif  // SUP_EPICS_CA_HELPER_H_

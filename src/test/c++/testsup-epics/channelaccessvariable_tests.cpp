@@ -21,15 +21,15 @@
 
 #include <gtest/gtest.h>
 
-#include <sup/dto/AnyType.h>
-#include <sup/dto/AnyValue.h>
+#include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue.h>
 #include <cmath>
 #include <cstring>
 #include <thread>
 
 #include "softioc_runner.h"
 #include "softioc_utils.h"
-#include "sup/epics/channel_access_variable.h"
+#include <sup/epics/channel_access_variable.h>
 
 static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec);
@@ -61,11 +61,11 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing variables
-  ChannelAccessVariable ca_bool_var("CA-TESTS:BOOL", sup::dto::Boolean);
-  ChannelAccessVariable ca_float_var("CA-TESTS:FLOAT", sup::dto::Float32);
-  ChannelAccessVariable ca_string_var("CA-TESTS:STRING", sup::dto::String);
+  ChannelAccessVariable ca_bool_var("CA-TESTS:BOOL", sup::dto::BooleanType);
+  ChannelAccessVariable ca_float_var("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  ChannelAccessVariable ca_string_var("CA-TESTS:STRING", sup::dto::StringType);
 
-  sup::dto::AnyType char_array_t(1024, sup::dto::Character8, "char8[]");
+  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
   ChannelAccessVariable ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
 
   // waiting for variables to connect
@@ -96,7 +96,7 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   EXPECT_TRUE(WaitForValue(ca_string_var, string_val, 5.0));
 
   // writing long string
-  sup::dto::AnyValue chararray_val(1024, sup::dto::Character8, "char8[]");
+  sup::dto::AnyValue chararray_val(1024, sup::dto::Character8Type, "char8[]");
   sup::dto::char8 char_data[1024] =
         "Some very long string which is longer than the maximum length of EPICSv3 string and "
         "should be serialised on a waveform record";
@@ -126,8 +126,8 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
   ASSERT_TRUE(m_softioc_service.IsActive());
 
   // create variables
-  ChannelAccessVariable ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32);
-  ChannelAccessVariable ca_float_reader("CA-TESTS:FLOAT", sup::dto::Float32);
+  ChannelAccessVariable ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  ChannelAccessVariable ca_float_reader("CA-TESTS:FLOAT", sup::dto::Float32Type);
 
   // waiting for connected clients
   EXPECT_TRUE(ca_float_writer.WaitForConnected(5.0));

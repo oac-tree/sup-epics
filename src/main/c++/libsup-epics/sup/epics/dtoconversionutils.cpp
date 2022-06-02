@@ -17,16 +17,16 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/dtoconversionutils.h"
+#include <sup/epics/dtoconversionutils.h>
 
-#include "sup/dto/AnyType.h"
-#include "sup/dto/AnyTypeHelper.h"
-#include "sup/dto/AnyValue.h"
-#include "sup/dto/AnyValueHelper.h"
-#include "sup/dto/BasicScalarTypes.h"
+#include <sup/dto/anytype.h>
+#include <sup/dto/anytype_helper.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/dto/anyvalue_helper.h>
+#include <sup/dto/basic_scalar_types.h>
 #include "pvxs/data.h"
-#include "sup/epics/pvxstypebuilder.h"
-#include "sup/epics/pvxsvaluebuilder.h"
+#include <sup/epics/pvxstypebuilder.h>
+#include <sup/epics/pvxsvaluebuilder.h>
 
 #include <pvxs/nt.h>
 

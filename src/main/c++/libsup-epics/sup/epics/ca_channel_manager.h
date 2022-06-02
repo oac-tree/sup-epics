@@ -17,13 +17,13 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CAChannelManager_H
-#define SUP_EPICS_CAChannelManager_H
+#ifndef SUP_EPICS_CA_CHANNEL_MANAGER_H_
+#define SUP_EPICS_CA_CHANNEL_MANAGER_H_
 
-#include "sup/epics/ca_types.h"
+#include <sup/epics/ca_types.h>
 
-#include <sup/dto/AnyType.h>
-#include <sup/dto/AnyValue.h>
+#include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue.h>
 
 #include <functional>
 #include <map>
@@ -71,4 +71,4 @@ CAChannelManager& SharedCAChannelManager();
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CAChannelManager_H
+#endif  // SUP_EPICS_CA_CHANNEL_MANAGER_H_

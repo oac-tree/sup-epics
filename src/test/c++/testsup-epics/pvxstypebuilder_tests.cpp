@@ -17,12 +17,12 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxstypebuilder.h"
+#include <sup/epics/pvxstypebuilder.h>
 
-#include "sup/epics/dtoconversionutils.h"
+#include <sup/epics/dtoconversionutils.h>
 
-#include "sup/dto/AnyTypeHelper.h"
-#include "sup/dto/AnyValue.h"
+#include <sup/dto/anytype_helper.h>
+#include <sup/dto/anyvalue.h>
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
@@ -68,7 +68,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromEmptyType)
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 {
-  sup::dto::AnyType any_type(sup::dto::SignedInteger32);
+  sup::dto::AnyType any_type(sup::dto::SignedInteger32Type);
 
   // The only way to check if pvxs::TypeDef is correctly created is to create
   // a pvxs::Value from it, and check it's type code.
@@ -84,7 +84,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
 {
-  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32}}};
+  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
   auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
@@ -99,8 +99,8 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 {
-  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32}},
-                                {"bool", {sup::dto::Boolean}}};
+  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}},
+                                {"bool", {sup::dto::BooleanType}}};
   auto pvxs_value = BuildPVXSType(any_type).create();
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
@@ -117,8 +117,8 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
 {
-  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32}},
-                                   {"bool", {sup::dto::Boolean}}};
+  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}};
   sup::dto::AnyType any_type = {{"scalars", two_scalars}};
 
   auto pvxs_value = BuildPVXSType(any_type).create();
@@ -145,13 +145,13 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
-  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32}},
-                                   {"bool", {sup::dto::Boolean}}};
+  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}};
 
   sup::dto::AnyType any_type{
       {{"struct1", two_scalars},
        {"struct2",
-        {{"first", {sup::dto::SignedInteger8}}, {"second", {sup::dto::SignedInteger8}}}}},
+        {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::SignedInteger8Type}}}}},
       struct_name};
 
   auto pvxs_value = BuildPVXSType(any_type).create();
@@ -218,7 +218,7 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 {
   const int n_elements = 42;
-  sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32);
+  sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32Type);
 
   auto pvxs_value = BuildPVXSType(any_type).create();
 
@@ -253,7 +253,7 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
 TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
 {
   const int n_elements = 42;
-  sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32);
+  sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32Type);
   sup::dto::AnyType any_type = {{{"array", any_array}}, "struct_name"};
 
   auto pvxs_value = BuildPVXSType(any_type).create();
@@ -268,7 +268,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
 TEST_F(PvxsTypeBuilderTest, UnbounderScalarArray)
 {
   // Functionality is not yet implemented. Test is here to make Sonar happy.
-  sup::dto::AnyType scalar_array = UnboundedArrayType(sup::dto::UnsignedInteger32);
+  sup::dto::AnyType scalar_array = UnboundedArrayType(sup::dto::UnsignedInteger32Type);
   auto pvxs_value = BuildPVXSType(scalar_array).create();
   EXPECT_TRUE(pvxs_value.valid());
 }

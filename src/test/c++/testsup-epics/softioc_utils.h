@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_SoftIocUtils_H
-#define SUP_EPICS_SoftIocUtils_H
+#ifndef SUP_EPICS_SOFTIOCUTILS_H_
+#define SUP_EPICS_SOFTIOCUTILS_H_
 
 #include <string>
 
@@ -28,4 +28,4 @@ std::string GetEpicsDBContentString();
 //! Removes file with given name from disk.
 void RemoveFile(const std::string& file_name);
 
-#endif  // SUP_EPICS_SoftIocUtils_H
+#endif  // SUP_EPICS_SOFTIOCUTILS_H_
