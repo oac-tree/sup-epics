@@ -29,7 +29,7 @@ namespace sup
 {
 namespace epics
 {
-class ChannelAccessVariable
+class ChannelAccessPV
 {
 public:
   struct ExtendedValue
@@ -54,13 +54,13 @@ public:
    * @throws std::runtime_error when the EPICS context or channel could not be created (not
    * related to the fact that the specific PV might not be connected).
    */
-  ChannelAccessVariable(const std::string& name, const sup::dto::AnyType& type,
+  ChannelAccessPV(const std::string& name, const sup::dto::AnyType& type,
                         VariableChangedCallback cb = {});
 
     /**
    * @brief Destructor.
    */
-  ~ChannelAccessVariable();
+  ~ChannelAccessPV();
 
     /**
    * @brief Check if variable is connected.

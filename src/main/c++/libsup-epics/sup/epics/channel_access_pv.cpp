@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/channel_access_variable.h>
+#include <sup/epics/channel_access_pv.h>
 
 #include <sup/epics/ca_channel_manager.h>
 #include <chrono>
@@ -28,7 +28,7 @@ namespace sup
 {
 namespace epics
 {
-ChannelAccessVariable::ExtendedValue::ExtendedValue()
+ChannelAccessPV::ExtendedValue::ExtendedValue()
   : connected{false}
   , timestamp{0}
   , status{0}
@@ -36,7 +36,7 @@ ChannelAccessVariable::ExtendedValue::ExtendedValue()
   , value{}
 {}
 
-ChannelAccessVariable::ChannelAccessVariable(
+ChannelAccessPV::ChannelAccessPV(
   const std::string& name, const sup::dto::AnyType& type, VariableChangedCallback cb)
   : cache{}
   , id{0}
@@ -45,17 +45,17 @@ ChannelAccessVariable::ChannelAccessVariable(
   , var_changed_cb{std::move(cb)}
 {
   id = SharedCAChannelManager().AddChannel(name, type,
-    std::bind(&ChannelAccessVariable::OnConnectionChanged, this,
+    std::bind(&ChannelAccessPV::OnConnectionChanged, this,
     std::placeholders::_1, std::placeholders::_2),
-    std::bind(&ChannelAccessVariable::OnMonitorCalled, this,
+    std::bind(&ChannelAccessPV::OnMonitorCalled, this,
     std::placeholders::_1, std::placeholders::_2));
   if (id == 0)
   {
-    throw std::runtime_error("Could not construct ChannelAccessVariable");
+    throw std::runtime_error("Could not construct ChannelAccessPV");
   }
 }
 
-ChannelAccessVariable::~ChannelAccessVariable()
+ChannelAccessPV::~ChannelAccessPV()
 {
   if (id > 0)
   {
@@ -63,13 +63,13 @@ ChannelAccessVariable::~ChannelAccessVariable()
   }
 }
 
-bool ChannelAccessVariable::IsConnected() const
+bool ChannelAccessPV::IsConnected() const
 {
   std::lock_guard<std::mutex> lk(mon_mtx);
   return cache.connected;
 }
 
-sup::dto::AnyValue ChannelAccessVariable::GetValue() const
+sup::dto::AnyValue ChannelAccessPV::GetValue() const
 {
   std::lock_guard<std::mutex> lk(mon_mtx);
   if(!cache.connected)
@@ -79,13 +79,13 @@ sup::dto::AnyValue ChannelAccessVariable::GetValue() const
   return cache.value;
 }
 
-ChannelAccessVariable::ExtendedValue ChannelAccessVariable::GetExtendedValue() const
+ChannelAccessPV::ExtendedValue ChannelAccessPV::GetExtendedValue() const
 {
   std::lock_guard<std::mutex> lk(mon_mtx);
   return cache;
 }
 
-bool ChannelAccessVariable::SetValue(const sup::dto::AnyValue& value)
+bool ChannelAccessPV::SetValue(const sup::dto::AnyValue& value)
 {
   ChannelID local_id;
   {
@@ -95,7 +95,7 @@ bool ChannelAccessVariable::SetValue(const sup::dto::AnyValue& value)
   return SharedCAChannelManager().UpdateChannel(local_id, value);
 }
 
-bool ChannelAccessVariable::WaitForConnected(double timeout_sec) const
+bool ChannelAccessPV::WaitForConnected(double timeout_sec) const
 {
   auto timeout = std::chrono::system_clock::now() +
                  std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
@@ -113,7 +113,7 @@ bool ChannelAccessVariable::WaitForConnected(double timeout_sec) const
   return connected;
 }
 
-void ChannelAccessVariable::OnConnectionChanged(const std::string& name, bool connected)
+void ChannelAccessPV::OnConnectionChanged(const std::string& name, bool connected)
 {
   ExtendedValue result;
   {
@@ -128,7 +128,7 @@ void ChannelAccessVariable::OnConnectionChanged(const std::string& name, bool co
   }
 }
 
-void ChannelAccessVariable::OnMonitorCalled(const std::string& name,const CAMonitorInfo& info)
+void ChannelAccessPV::OnMonitorCalled(const std::string& name,const CAMonitorInfo& info)
 {
   ExtendedValue result;
   {

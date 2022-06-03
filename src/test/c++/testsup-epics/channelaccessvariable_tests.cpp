@@ -29,9 +29,9 @@
 
 #include "softioc_runner.h"
 #include "softioc_utils.h"
-#include <sup/epics/channel_access_variable.h>
+#include <sup/epics/channel_access_pv.h>
 
-static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,
+static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec);
 
 class ChannelAccessVariableTest : public ::testing::Test
@@ -61,12 +61,12 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing variables
-  ChannelAccessVariable ca_bool_var("CA-TESTS:BOOL", sup::dto::BooleanType);
-  ChannelAccessVariable ca_float_var("CA-TESTS:FLOAT", sup::dto::Float32Type);
-  ChannelAccessVariable ca_string_var("CA-TESTS:STRING", sup::dto::StringType);
+  ChannelAccessPV ca_bool_var("CA-TESTS:BOOL", sup::dto::BooleanType);
+  ChannelAccessPV ca_float_var("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  ChannelAccessPV ca_string_var("CA-TESTS:STRING", sup::dto::StringType);
 
   sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
-  ChannelAccessVariable ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
+  ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
 
   // waiting for variables to connect
   EXPECT_TRUE(ca_bool_var.WaitForConnected(5.0));
@@ -110,7 +110,7 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   auto now = std::chrono::system_clock::now();
   auto now_timestamp =
     std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
-  ChannelAccessVariable::ExtendedValue ext_boolean;
+  ChannelAccessPV::ExtendedValue ext_boolean;
   EXPECT_NO_THROW(ext_boolean = ca_bool_var.GetExtendedValue());
 
   auto timestamp = ext_boolean.timestamp;
@@ -126,8 +126,8 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
   ASSERT_TRUE(m_softioc_service.IsActive());
 
   // create variables
-  ChannelAccessVariable ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32Type);
-  ChannelAccessVariable ca_float_reader("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  ChannelAccessPV ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  ChannelAccessPV ca_float_reader("CA-TESTS:FLOAT", sup::dto::Float32Type);
 
   // waiting for connected clients
   EXPECT_TRUE(ca_float_writer.WaitForConnected(5.0));
@@ -154,7 +154,7 @@ TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
   EXPECT_TRUE(WaitForValue(ca_float_reader, value2, 5.0));
 }
 
-static bool WaitForValue(const sup::epics::ChannelAccessVariable& variable,
+static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec)
 {
   auto timeout = std::chrono::system_clock::now() +
