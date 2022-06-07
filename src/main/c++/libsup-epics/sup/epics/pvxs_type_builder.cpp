@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/pvxstypebuilder.h>
+#include <sup/epics/pvxs_type_builder.h>
 
 #include <sup/dto/anytype.h>
-#include <sup/epics/dtoconversionutils.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 #include <pvxs/data.h>
 

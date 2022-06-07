@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/dtoconversionutils.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 #include <sup/dto/anytype.h>
 #include <sup/dto/anytype_helper.h>
@@ -25,8 +25,8 @@
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/basic_scalar_types.h>
 #include "pvxs/data.h"
-#include <sup/epics/pvxstypebuilder.h>
-#include <sup/epics/pvxsvaluebuilder.h>
+#include <sup/epics/pvxs_type_builder.h>
+#include <sup/epics/pvxs_value_builder.h>
 
 #include <pvxs/nt.h>
 
