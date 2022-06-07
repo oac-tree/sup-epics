@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_DTOTYPES_FWD_H_
 #define SUP_EPICS_DTOTYPES_FWD_H_
 
-//! @file dtotypes_fwd.h
+//! @file dto_types_fwd.h
 //! Forward declaration of some external types related to the data transfer.
 
 namespace sup
