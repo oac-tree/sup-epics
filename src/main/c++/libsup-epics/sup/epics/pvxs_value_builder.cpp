@@ -17,11 +17,9 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/pvxs_value_builder.h>
-
-#include <sup/epics/anyvalue_scalar_conversion_utils.h>
-
 #include <pvxs/data.h>
+#include <sup/epics/dto_scalar_conversion_utils.h>
+#include <sup/epics/pvxs_value_builder.h>
 
 #include <iostream>
 #include <stack>
@@ -168,15 +166,9 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
   }
 }
 
-void PvxsValueBuilder::UnboundedArrayProlog(const dto::AnyValue *anytype)
-{
+void PvxsValueBuilder::UnboundedArrayProlog(const dto::AnyValue *anytype) {}
 
-}
-
-void PvxsValueBuilder::UnboundedArrayEpilog(const dto::AnyValue *anytype)
-{
-
-}
+void PvxsValueBuilder::UnboundedArrayEpilog(const dto::AnyValue *anytype) {}
 
 }  // namespace epics
 

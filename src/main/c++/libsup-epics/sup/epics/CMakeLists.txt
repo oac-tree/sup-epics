@@ -1,7 +1,7 @@
 
 target_sources(${library_name} PRIVATE
-  anyvalue_scalar_conversion_utils.cpp
-  anyvalue_scalar_conversion_utils.h
+  dto_scalar_conversion_utils.cpp
+  dto_scalar_conversion_utils.h
   ca_channel_manager.cpp
   ca_channel_tasks.cpp
   ca_context_handle.cpp
@@ -13,8 +13,6 @@ target_sources(${library_name} PRIVATE
   dto_types_fwd.h
   dto_typecode_conversion_utils.cpp
   dto_typecode_conversion_utils.h
-  pvxs_scalar_conversion_utils.cpp
-  pvxs_scalar_conversion_utils.h
   pvxs_type_builder.cpp
   pvxs_type_builder.h
   pvxs_value_builder.cpp

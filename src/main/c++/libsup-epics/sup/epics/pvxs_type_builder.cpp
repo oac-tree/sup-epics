@@ -21,7 +21,7 @@
 
 #include <pvxs/data.h>
 #include <sup/dto/anytype.h>
-#include <sup/epics/anyvalue_scalar_conversion_utils.h>
+#include <sup/epics/dto_scalar_conversion_utils.h>
 #include <sup/epics/dto_typecode_conversion_utils.h>
 
 #include <iostream>
