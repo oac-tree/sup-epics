@@ -29,13 +29,13 @@
 
 using namespace ::sup::epics;
 
-class DtoConversionUtilsTest : public ::testing::Test
+class DtoConversionUtilsTests : public ::testing::Test
 {
 };
 
 //! Checks GetPVXSBaseTypeCode method to construct PVXS TypeCode from AnyType (base types).
 
-TEST_F(DtoConversionUtilsTest, GetPVXSBaseTypeCode)
+TEST_F(DtoConversionUtilsTests, GetPVXSBaseTypeCode)
 {
   EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::EmptyType), ::pvxs::TypeCode::Null);
   EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::BooleanType), ::pvxs::TypeCode::Bool);
@@ -65,7 +65,7 @@ TEST_F(DtoConversionUtilsTest, GetPVXSBaseTypeCode)
 
 //! Checks GetPVXSArrayTypeCode method to construct PVXS TypeCode from AnyType (array elements).
 
-TEST_F(DtoConversionUtilsTest, GetPVXSArrayTypeCode)
+TEST_F(DtoConversionUtilsTests, GetPVXSArrayTypeCode)
 {
   EXPECT_EQ(GetPVXSArrayTypeCode(sup::dto::BooleanType), ::pvxs::TypeCode::BoolA);
   EXPECT_EQ(GetPVXSArrayTypeCode(sup::dto::Character8Type), ::pvxs::TypeCode::UInt8A);
@@ -90,7 +90,7 @@ TEST_F(DtoConversionUtilsTest, GetPVXSArrayTypeCode)
 //! Checks GetPVXSTypeCode method to construct PVXS TypeCode from AnyType.
 //! Checks scalars and array of scalars.
 
-TEST_F(DtoConversionUtilsTest, GetPVXSTypeCode)
+TEST_F(DtoConversionUtilsTests, GetPVXSTypeCode)
 {
   const int n_elements{42};
   using ::sup::dto::AnyType;
@@ -150,7 +150,7 @@ TEST_F(DtoConversionUtilsTest, GetPVXSTypeCode)
 
 //! Checks GetPVXSValueFromScalar helper method to construct PVXS value from scalar based AnyValue.
 
-TEST_F(DtoConversionUtilsTest, GetPVXSValueFromScalar)
+TEST_F(DtoConversionUtilsTests, GetPVXSValueFromScalar)
 {
   {  // from Bool
     sup::dto::AnyValue any_value{sup::dto::BooleanType};
@@ -287,7 +287,7 @@ TEST_F(DtoConversionUtilsTest, GetPVXSValueFromScalar)
 
 //! Checks GetPVXSValueFromScalar helper method to assign scalar-like AnyValue to PVXS
 //! value (pre-created with correct type).
-TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalar)
+TEST_F(DtoConversionUtilsTests, AssignPVXSValueFromScalar)
 {
   {  // from Bool
     sup::dto::AnyValue any_value{sup::dto::BooleanType};
@@ -420,7 +420,7 @@ TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalar)
 //! Checks AssignPVXSValueFromScalarArray helper method to assign PVXS arrays from array-like
 //! AnyValues. FIXME add tests for all types.
 
-TEST_F(DtoConversionUtilsTest, AssignPVXSValueFromScalarArray)
+TEST_F(DtoConversionUtilsTests, AssignPVXSValueFromScalarArray)
 {
   const int n_elements = 2;
   sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);

@@ -34,7 +34,7 @@ using namespace ::sup::epics;
 
 //! Testing PvxsTypeBuilder class to build pvxs::TypeDef from AnyType's.
 
-class PvxsTypeBuilderTest : public ::testing::Test
+class DtoConversionUtilsTests : public ::testing::Test
 {
 public:
   //! Returns vector of field names in a given `pvxs_value`.
@@ -49,7 +49,7 @@ public:
   }
 };
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromEmptyType)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromEmptyType)
 {
   sup::dto::AnyType any_type;
   auto pvxs_type = BuildPVXSType(any_type);
@@ -66,7 +66,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromEmptyType)
 
 //! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like types.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromScalarType)
 {
   sup::dto::AnyType any_type(sup::dto::SignedInteger32Type);
 
@@ -82,7 +82,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromScalarType)
 
 //! Build PVXS type from AnyType representing a struct with single field.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromStructWithSingleField)
 {
   sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
   auto pvxs_value = BuildPVXSType(any_type).create();
@@ -97,7 +97,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithSingleField)
 
 //! Build PVXS value from AnyValue representing a struct with two fields.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromStructWithTwoFields)
 {
   sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}},
                                 {"bool", {sup::dto::BooleanType}}};
@@ -115,7 +115,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 
 //! Build PVXS type from AnyType representing a struct with two fields nested in parent struct.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromNestedStruct)
 {
   sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
                                    {"bool", {sup::dto::BooleanType}}};
@@ -142,7 +142,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromNestedStruct)
 
 //! Build PVXS type from AnyType representing a struct with two nested structs.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromTwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
   sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
@@ -186,7 +186,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
 //! Building array of PVXS values (exercise to understand PVXS better).
 
-TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
+TEST_F(DtoConversionUtilsTests, PVXSTypeBasicsArrayOfIntegers)
 {
   {  // studying impliced sharing
     auto value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
@@ -215,7 +215,7 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeBasicsArrayOfIntegers)
 
 //! Build PVXS type from AnyType representing an array of integers.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromArrayOfIntegers)
 {
   const int n_elements = 42;
   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32Type);
@@ -231,7 +231,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 
 //! Building array of PVXS values  (exercise to understand PVXS better).
 
-TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
+TEST_F(DtoConversionUtilsTests, PVXSTypeArrayInStruct)
 {
   pvxs::TypeDef type_def(pvxs::TypeCode::Struct, "simple_t",
                          {pvxs::Member(pvxs::TypeCode::Int32A, "field")});
@@ -250,7 +250,7 @@ TEST_F(PvxsTypeBuilderTest, PVXSTypeArrayInStruct)
 
 //! Build PVXS type from AnyType representing an array of integers inside the struct.
 
-TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
+TEST_F(DtoConversionUtilsTests, BuildPVXSTypeFromArrayInStruct)
 {
   const int n_elements = 42;
   sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32Type);
@@ -265,7 +265,7 @@ TEST_F(PvxsTypeBuilderTest, BuildPVXSTypeFromArrayInStruct)
   EXPECT_EQ(data.size(), 0);
 }
 
-TEST_F(PvxsTypeBuilderTest, UnbounderScalarArray)
+TEST_F(DtoConversionUtilsTests, UnbounderScalarArray)
 {
   // Functionality is not yet implemented. Test is here to make Sonar happy.
   sup::dto::AnyType scalar_array = UnboundedArrayType(sup::dto::UnsignedInteger32Type);

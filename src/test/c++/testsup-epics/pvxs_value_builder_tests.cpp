@@ -30,7 +30,7 @@
 
 using namespace ::sup::epics;
 
-class PvxsValueBuilderTest : public ::testing::Test
+class PvxsValueBuilderTests : public ::testing::Test
 {
 public:
   //! Returns vector of field names in a given `pvxs_value`.
@@ -48,7 +48,7 @@ public:
 
 //! Investigating PVXS value itself.
 
-TEST_F(PvxsValueBuilderTest, PVXSValueBasics)
+TEST_F(PvxsValueBuilderTests, PVXSValueBasics)
 {
   // default constructed
   pvxs::Value pvxs_default1;
@@ -72,7 +72,7 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasics)
 
 //! Studying how to assign to PVXS value.
 
-TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToScalar)
+TEST_F(PvxsValueBuilderTests, PVXSValueBasicsAssignToScalar)
 {
   pvxs::Value pvxs_int1 = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
   pvxs_int1 = 42;
@@ -92,7 +92,7 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToScalar)
 
 //! Studying how to assign to PVXS value.
 
-TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToStruct)
+TEST_F(PvxsValueBuilderTests, PVXSValueBasicsAssignToStruct)
 {
   pvxs::TypeDef type_def(pvxs::TypeCode::Struct, "simple_t",
                          {pvxs::Member(pvxs::TypeCode::Int32, "field")});
@@ -109,7 +109,7 @@ TEST_F(PvxsValueBuilderTest, PVXSValueBasicsAssignToStruct)
 
 //! Build PVXS value from empty AnyValue.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromEmpty)
 {
   // investigating default constructed PVXS
   pvxs::Value pvxs_default;
@@ -123,7 +123,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromEmpty)
 
 //! Build PVXS value from scalar like AnyValue.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromSignedInteger32)
 {
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
   any_value = 42;
@@ -138,7 +138,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromSignedInteger32)
 
 //! Build PVXS value from AnyValue representing a struct with single field.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromStructWithSingleField)
 {
   sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32Type, 42}}}};
 
@@ -154,7 +154,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSValueFromStructWithSingleField)
 
 //! Build PVXS value from AnyValue representing a struct with two fields.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
+TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromStructWithTwoFields)
 {
   sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                   {"bool", {sup::dto::BooleanType, true}}};
@@ -175,7 +175,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromStructWithTwoFields)
 
 //! Build PVXS value from AnyValue representing a struct with two fields nested in parent struct.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromNestedStruct)
+TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromNestedStruct)
 {
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                     {"bool", {sup::dto::BooleanType, true}}};
@@ -205,7 +205,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromNestedStruct)
 
 //! Build PVXS value from AnyValue representing a struct with two nested structs.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
+TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromTwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
@@ -254,7 +254,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromTwoNestedStruct)
 
 //! Build PVXS value from AnyValue representing an array of integers.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
+TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromArrayOfIntegers)
 {
   const int n_elements = 2;
   sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
@@ -271,7 +271,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayOfIntegers)
 
 //! Build PVXS value from AnyValue representing an array of integers inside the struct.
 
-TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayInStruct)
+TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromArrayInStruct)
 {
   const int n_elements = 2;
   sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
@@ -289,7 +289,7 @@ TEST_F(PvxsValueBuilderTest, BuildPVXSTypeFromArrayInStruct)
   EXPECT_EQ(data[1], 0);
 }
 
-TEST_F(PvxsValueBuilderTest, UnbounderScalarArray)
+TEST_F(PvxsValueBuilderTests, UnbounderScalarArray)
 {
   // Functionality is not yet implemented. Test is here to make Sonar happy.
   ::sup::dto::AnyValue array = ::sup::dto::UnboundedArrayValue({
