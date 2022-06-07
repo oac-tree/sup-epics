@@ -6,6 +6,8 @@ target_sources(${library_name} PRIVATE
   ca_helper.cpp
   ca_monitor_wrapper.cpp
   channel_access_pv.cpp
+  anyvalue_scalar_conversion_utils.cpp
+  anyvalue_scalar_conversion_utils.h
   dto_conversion_utils.cpp
   dto_conversion_utils.h
   dto_types_fwd.h

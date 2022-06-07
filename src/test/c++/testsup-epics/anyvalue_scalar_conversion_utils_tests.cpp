@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/anyvalue_scalar_conversion_utils.h>
 
 #include <sup/dto/anyvalue.h>
 
@@ -29,13 +29,13 @@
 
 using namespace ::sup::epics;
 
-class DtoConversionUtilsTests : public ::testing::Test
+class AnyValueScalarConversionUtilsTests : public ::testing::Test
 {
 };
 
 //! Checks GetPVXSBaseTypeCode method to construct PVXS TypeCode from AnyType (base types).
 
-TEST_F(DtoConversionUtilsTests, GetPVXSBaseTypeCode)
+TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSBaseTypeCode)
 {
   EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::EmptyType), ::pvxs::TypeCode::Null);
   EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::BooleanType), ::pvxs::TypeCode::Bool);
@@ -65,7 +65,7 @@ TEST_F(DtoConversionUtilsTests, GetPVXSBaseTypeCode)
 
 //! Checks GetPVXSArrayTypeCode method to construct PVXS TypeCode from AnyType (array elements).
 
-TEST_F(DtoConversionUtilsTests, GetPVXSArrayTypeCode)
+TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSArrayTypeCode)
 {
   EXPECT_EQ(GetPVXSArrayTypeCode(sup::dto::BooleanType), ::pvxs::TypeCode::BoolA);
   EXPECT_EQ(GetPVXSArrayTypeCode(sup::dto::Character8Type), ::pvxs::TypeCode::UInt8A);
@@ -90,7 +90,7 @@ TEST_F(DtoConversionUtilsTests, GetPVXSArrayTypeCode)
 //! Checks GetPVXSTypeCode method to construct PVXS TypeCode from AnyType.
 //! Checks scalars and array of scalars.
 
-TEST_F(DtoConversionUtilsTests, GetPVXSTypeCode)
+TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSTypeCode)
 {
   const int n_elements{42};
   using ::sup::dto::AnyType;
@@ -150,7 +150,7 @@ TEST_F(DtoConversionUtilsTests, GetPVXSTypeCode)
 
 //! Checks GetPVXSValueFromScalar helper method to construct PVXS value from scalar based AnyValue.
 
-TEST_F(DtoConversionUtilsTests, GetPVXSValueFromScalar)
+TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 {
   {  // from Bool
     sup::dto::AnyValue any_value{sup::dto::BooleanType};
@@ -287,7 +287,7 @@ TEST_F(DtoConversionUtilsTests, GetPVXSValueFromScalar)
 
 //! Checks GetPVXSValueFromScalar helper method to assign scalar-like AnyValue to PVXS
 //! value (pre-created with correct type).
-TEST_F(DtoConversionUtilsTests, AssignPVXSValueFromScalar)
+TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueFromScalar)
 {
   {  // from Bool
     sup::dto::AnyValue any_value{sup::dto::BooleanType};
@@ -420,7 +420,7 @@ TEST_F(DtoConversionUtilsTests, AssignPVXSValueFromScalar)
 //! Checks AssignPVXSValueFromScalarArray helper method to assign PVXS arrays from array-like
 //! AnyValues. FIXME add tests for all types.
 
-TEST_F(DtoConversionUtilsTests, AssignPVXSValueFromScalarArray)
+TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueFromScalarArray)
 {
   const int n_elements = 2;
   sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);

@@ -19,7 +19,7 @@
 
 #include <sup/epics/pvxs_value_builder.h>
 
-#include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/anyvalue_scalar_conversion_utils.h>
 
 #include <pvxs/data.h>
 

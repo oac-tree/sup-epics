@@ -17,12 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/pvxs_type_builder.h>
-
-#include <sup/dto/anytype.h>
-#include <sup/epics/dto_conversion_utils.h>
+#include "pvxs_type_builder.h"
 
 #include <pvxs/data.h>
+#include <sup/dto/anytype.h>
+#include <sup/epics/anyvalue_scalar_conversion_utils.h>
 
 #include <iostream>
 #include <stack>
@@ -61,7 +60,8 @@ void PvxsTypeBuilder::EmptyEpilog(const sup::dto::AnyType* anytype)
 void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
   std::cout << "StructProlog() value:" << anytype << std::endl;
-  p_impl->m_struct_stack.push(::pvxs::TypeDef(GetPVXSTypeCode(*anytype), anytype->GetTypeName(), {}));
+  p_impl->m_struct_stack.push(
+      ::pvxs::TypeDef(GetPVXSTypeCode(*anytype), anytype->GetTypeName(), {}));
 }
 
 void PvxsTypeBuilder::StructMemberSeparator()
@@ -117,15 +117,9 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
   p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
 }
 
-void PvxsTypeBuilder::UnboundedArrayProlog(const dto::AnyType *anytype)
-{
+void PvxsTypeBuilder::UnboundedArrayProlog(const dto::AnyType* anytype) {}
 
-}
-
-void PvxsTypeBuilder::UnboundedArrayEpilog(const dto::AnyType *anytype)
-{
-
-}
+void PvxsTypeBuilder::UnboundedArrayEpilog(const dto::AnyType* anytype) {}
 
 }  // namespace epics
 
