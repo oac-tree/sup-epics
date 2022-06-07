@@ -32,16 +32,6 @@ namespace sup
 namespace epics
 {
 
-//! Returns PVXS TypeCode corresponding to the given AnyType.
-//! Distinguishes base types and array elements.
-pvxs::TypeCode GetPVXSTypeCode(const ::sup::dto::AnyType& any_type);
-
-//! Returns PVXS TypeCode corresponding to the given AnyType (for base types).
-pvxs::TypeCode GetPVXSBaseTypeCode(const ::sup::dto::AnyType& any_type);
-
-//! Returns PVXS TypeCode corresponding to the given AnyType (for array elements).
-pvxs::TypeCode GetPVXSArrayTypeCode(const ::sup::dto::AnyType& any_type);
-
 //! Returns PVXS value from scalar like AnyValue.
 pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 
@@ -53,9 +43,6 @@ void AssignPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value, ::pvxs::Va
 //! It is expected that AnyValue type matches PVXS type.
 void AssignPVXSValueFromScalarArray(const ::sup::dto::AnyValue& any_value,
                                     ::pvxs::Value& pvxs_value);
-
-//! Returns AnyType corresponding to the given PVXS's TypeCode.
-::sup::dto::TypeCode GetAnyTypeCode(const ::pvxs::TypeCode& pvxs_type);
 
 //! Assigns value of the given scalar-like PVXS value to AnyValue.
 //! It is expected that AnyValue type matches PVXS type.

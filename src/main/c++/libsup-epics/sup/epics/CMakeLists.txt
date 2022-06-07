@@ -11,6 +11,8 @@ target_sources(${library_name} PRIVATE
   dto_conversion_utils.cpp
   dto_conversion_utils.h
   dto_types_fwd.h
+  dto_typecode_conversion_utils.cpp
+  dto_typecode_conversion_utils.h
   pvxs_scalar_conversion_utils.cpp
   pvxs_scalar_conversion_utils.h
   pvxs_type_builder.cpp
