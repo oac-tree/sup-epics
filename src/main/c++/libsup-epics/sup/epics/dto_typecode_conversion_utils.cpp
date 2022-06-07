@@ -41,7 +41,6 @@ namespace
 const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
     {sup::dto::TypeCode::Empty, pvxs::TypeCode::Null},
     {sup::dto::TypeCode::Bool, pvxs::TypeCode::Bool},
-    {sup::dto::TypeCode::Char8, pvxs::TypeCode::UInt8},  // is it Ok?
     {sup::dto::TypeCode::Int8, pvxs::TypeCode::Int8},
     {sup::dto::TypeCode::UInt8, pvxs::TypeCode::UInt8},
     {sup::dto::TypeCode::Int16, pvxs::TypeCode::Int16},
@@ -59,7 +58,6 @@ const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
 //! Correspondance of AnyValue element type code to PVXS TypeCode (arrays).
 const std::map<sup::dto::TypeCode, pvxs::TypeCode> kArrayTypeCodeMap = {
     {sup::dto::TypeCode::Bool, pvxs::TypeCode::BoolA},
-    {sup::dto::TypeCode::Char8, pvxs::TypeCode::UInt8A},  // is it Ok?
     {sup::dto::TypeCode::Int8, pvxs::TypeCode::Int8A},
     {sup::dto::TypeCode::UInt8, pvxs::TypeCode::UInt8A},
     {sup::dto::TypeCode::Int16, pvxs::TypeCode::Int16A},
@@ -118,12 +116,14 @@ pvxs::TypeCode GetPVXSTypeCode(const dto::AnyType& any_type)
 
 pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
 {
-  return FindTypeCode(kTypeCodeMap, any_type);
+  return any_type.GetTypeCode() == sup::dto::TypeCode::Char8 ? pvxs::TypeCode::UInt8
+                                                             : FindTypeCode(kTypeCodeMap, any_type);
 }
 
 pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
-  return FindTypeCode(kArrayTypeCodeMap, any_type);
+  return any_type.GetTypeCode() == sup::dto::TypeCode::Char8 ? pvxs::TypeCode::UInt8A
+                                                             : FindTypeCode(kArrayTypeCodeMap, any_type);
 }
 
 dto::TypeCode GetAnyTypeCode(const pvxs::TypeCode& pvxs_type)

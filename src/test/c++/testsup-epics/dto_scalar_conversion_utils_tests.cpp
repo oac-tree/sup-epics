@@ -341,14 +341,6 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
     EXPECT_EQ(any_value.As<sup::dto::boolean>(), true);
   }
 
-  //  {  // from Char
-  //    sup::dto::AnyValue any_value{sup::dto::Character8Type};
-  //    any_value = 'w';
-  //    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
-  //    AssignPVXSValueFromScalar(any_value, pvxs_value);
-  //    EXPECT_EQ(pvxs_value.as<char>(), 'w');
-  //  }
-
   {  // from Int8
     sup::dto::AnyValue any_value{sup::dto::SignedInteger8Type};
     any_value = 0;
@@ -358,14 +350,14 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
     EXPECT_EQ(any_value.As<sup::dto::int8>(), 42);
   }
 
-  //  {  // from UInt8
-  //    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8Type};
-  //    any_value = 0;
-  //    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
-  //    pvxs_value = 42;
-  //    AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
-  //    EXPECT_EQ(any_value.As<sup::dto::uint8>(), 42);
-  //  }
+  {  // from UInt8
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8Type};
+    any_value = 0;
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
+    pvxs_value = 42;
+    AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
+    EXPECT_EQ(any_value.As<sup::dto::uint8>(), 42);
+  }
 
   {  // from Int16
     sup::dto::AnyValue any_value{sup::dto::SignedInteger16Type};

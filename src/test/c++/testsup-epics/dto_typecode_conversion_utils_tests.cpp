@@ -155,9 +155,8 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetBaseAnyType)
 {
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Null), ::sup::dto::TypeCode::Empty);
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Bool), ::sup::dto::TypeCode::Bool);
-  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt8), ::sup::dto::TypeCode::Char8);
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int8), ::sup::dto::TypeCode::Int8);
-  //  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt8), ::sup::dto::TypeCode::UInt8);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt8), ::sup::dto::TypeCode::UInt8);
 
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int16), ::sup::dto::TypeCode::Int16);
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt16), ::sup::dto::TypeCode::UInt16);
