@@ -30,6 +30,7 @@
 #include <sup/epics/pvxs_value_builder.h>
 
 #include <functional>
+#include <iostream>
 #include <map>
 #include <stdexcept>
 
@@ -138,6 +139,20 @@ pvxs::TypeCode FindTypeCode(const T& container, const sup::dto::AnyType& any_typ
   return it->second;
 }
 
+//! Finds pvxs::TypeCode corresponding to the given AnyType. Use provided container.
+template <typename T>
+sup::dto::TypeCode FindAnyTypeCode(const T& container, const pvxs::TypeCode& type_code)
+{
+  auto on_element = [type_code](const typename T::value_type& pair)
+  { return pair.second == type_code; };
+  auto it = std::find_if(container.begin(), container.end(), on_element);
+  if (it == container.end())
+  {
+    throw std::runtime_error("Unknown TypeCode");
+  }
+  return it->first;
+}
+
 }  // namespace
 
 namespace sup
@@ -214,6 +229,11 @@ void AssignPVXSValueFromScalarArray(const dto::AnyValue& any_value, pvxs::Value&
   }
 
   it->second(any_value, pvxs_value);  // calling assign function
+}
+
+dto::TypeCode GetAnyTypeCode(const pvxs::TypeCode& pvxs_type)
+{
+  return FindAnyTypeCode(kTypeCodeMap, pvxs_type);
 }
 
 }  // namespace epics

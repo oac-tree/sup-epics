@@ -29,6 +29,7 @@ namespace dto
 {
 class AnyValue;
 class AnyType;
+enum class TypeCode;
 }  // namespace dto
 }  // namespace sup
 

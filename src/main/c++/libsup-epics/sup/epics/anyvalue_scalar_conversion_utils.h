@@ -54,6 +54,9 @@ void AssignPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value, ::pvxs::Va
 void AssignPVXSValueFromScalarArray(const ::sup::dto::AnyValue& any_value,
                                     ::pvxs::Value& pvxs_value);
 
+//! Returns AnyType corresponding to the given PVXS's TypeCode.
+::sup::dto::TypeCode GetAnyTypeCode(const ::pvxs::TypeCode& pvxs_type);
+
 }  // namespace epics
 
 }  // namespace sup

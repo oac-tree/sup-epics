@@ -17,13 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/anyvalue_scalar_conversion_utils.h>
-
-#include <sup/dto/anyvalue.h>
-
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/anyvalue_scalar_conversion_utils.h>
 
 #include <iostream>
 
@@ -100,7 +98,8 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSTypeCode)
   EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::BooleanType)), ::pvxs::TypeCode::BoolA);
 
   EXPECT_EQ(GetPVXSTypeCode(AnyType(TypeCode::UInt8)), ::pvxs::TypeCode::UInt8);
-  EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::Character8Type)), ::pvxs::TypeCode::UInt8A);
+  EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::Character8Type)),
+            ::pvxs::TypeCode::UInt8A);
 
   EXPECT_EQ(GetPVXSTypeCode(AnyType(TypeCode::Int8)), ::pvxs::TypeCode::Int8);
   EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::SignedInteger8Type)),
@@ -135,10 +134,12 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSTypeCode)
             ::pvxs::TypeCode::UInt64A);
 
   EXPECT_EQ(GetPVXSTypeCode(AnyType(TypeCode::Float32)), ::pvxs::TypeCode::Float32);
-  EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::Float32Type)), ::pvxs::TypeCode::Float32A);
+  EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::Float32Type)),
+            ::pvxs::TypeCode::Float32A);
 
   EXPECT_EQ(GetPVXSTypeCode(AnyType(TypeCode::Float64)), ::pvxs::TypeCode::Float64);
-  EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::Float64Type)), ::pvxs::TypeCode::Float64A);
+  EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::Float64Type)),
+            ::pvxs::TypeCode::Float64A);
 
   EXPECT_EQ(GetPVXSTypeCode(AnyType(TypeCode::String)), ::pvxs::TypeCode::String);
   EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::StringType)), ::pvxs::TypeCode::StringA);
@@ -443,4 +444,31 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueFromScalarArray)
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
     EXPECT_THROW(AssignPVXSValueFromScalarArray(any_value, pvxs_value), std::runtime_error);
   }
+}
+
+//! Checks GetPVXSBaseTypeCode method to construct PVXS TypeCode from AnyType (base types).
+
+TEST_F(AnyValueScalarConversionUtilsTests, GetBaseAnyType)
+{
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Null), ::sup::dto::TypeCode::Empty);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Bool), ::sup::dto::TypeCode::Bool);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt8), ::sup::dto::TypeCode::Char8);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int8), ::sup::dto::TypeCode::Int8);
+  //  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt8), ::sup::dto::TypeCode::UInt8);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int16), ::sup::dto::TypeCode::Int16);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt16), ::sup::dto::TypeCode::UInt16);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int32), ::sup::dto::TypeCode::Int32);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt32), ::sup::dto::TypeCode::UInt32);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int64), ::sup::dto::TypeCode::Int64);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt64), ::sup::dto::TypeCode::UInt64);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Float32), ::sup::dto::TypeCode::Float32);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Float64), ::sup::dto::TypeCode::Float64);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::String), ::sup::dto::TypeCode::String);
+
+  EXPECT_THROW(GetAnyTypeCode(::pvxs::TypeCode::StringA), std::runtime_error);
 }
