@@ -37,12 +37,13 @@ pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 
 //! Assigns value of the given scalar-like AnyValue to PVXS value.
 //! It is expected that AnyValue type matches PVXS type.
-void AssignPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value, ::pvxs::Value& pvxs_value);
+void AssignAnyValueToPVXSValueScalar(const ::sup::dto::AnyValue& any_value,
+                                     ::pvxs::Value& pvxs_value);
 
 //! Assigns elements of the given array-like AnyValue to PVXS value.
 //! It is expected that AnyValue type matches PVXS type.
-void AssignPVXSValueFromScalarArray(const ::sup::dto::AnyValue& any_value,
-                                    ::pvxs::Value& pvxs_value);
+void AssignAnyValueToPVXSValueScalarArray(const ::sup::dto::AnyValue& any_value,
+                                          ::pvxs::Value& pvxs_value);
 
 //! Assigns value of the given scalar-like PVXS value to AnyValue.
 //! It is expected that AnyValue type matches PVXS type.

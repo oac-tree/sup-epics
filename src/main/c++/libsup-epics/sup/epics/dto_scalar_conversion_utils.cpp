@@ -17,8 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "pvxs/data.h"
-
+#include <pvxs/data.h>
 #include <pvxs/nt.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anytype_helper.h>
@@ -66,8 +65,6 @@ void AssignToPVXSScalarArray(const sup::dto::AnyValue& any_value, pvxs::Value& p
 
 using pvxs_function_t =
     std::function<void(const sup::dto::AnyValue& anyvalue, pvxs::Value& pvxs_value)>;
-using anyvalue_function_t =
-    std::function<void(const pvxs::Value& pvxs_value, sup::dto::AnyValue& anyvalue)>;
 
 //! Correspondance of AnyValue type code to PVXS value function to assign scalars.
 const std::map<sup::dto::TypeCode, pvxs_function_t> kAssignToPVXSScalarMap = {
@@ -85,22 +82,6 @@ const std::map<sup::dto::TypeCode, pvxs_function_t> kAssignToPVXSScalarMap = {
     {sup::dto::TypeCode::Float64, AssignToPVXSScalar<sup::dto::float64>},
     {sup::dto::TypeCode::String, AssignToPVXSScalar<std::string>}};
 
-//! Correspondance of AnyValue type code to PVXS value function to assign scalars.
-const std::map<sup::dto::TypeCode, anyvalue_function_t> kAssignToAnyValueScalarMap = {
-    {sup::dto::TypeCode::Bool, AssignToAnyValueScalar<sup::dto::boolean>},
-    {sup::dto::TypeCode::Char8, AssignToAnyValueScalar<sup::dto::uint8>},  // is it Ok?
-    {sup::dto::TypeCode::Int8, AssignToAnyValueScalar<sup::dto::int8>},
-    {sup::dto::TypeCode::UInt8, AssignToAnyValueScalar<sup::dto::uint8>},
-    {sup::dto::TypeCode::Int16, AssignToAnyValueScalar<sup::dto::int16>},
-    {sup::dto::TypeCode::UInt16, AssignToAnyValueScalar<sup::dto::uint16>},
-    {sup::dto::TypeCode::Int32, AssignToAnyValueScalar<sup::dto::int32>},
-    {sup::dto::TypeCode::UInt32, AssignToAnyValueScalar<sup::dto::uint32>},
-    {sup::dto::TypeCode::Int64, AssignToAnyValueScalar<sup::dto::int64>},
-    {sup::dto::TypeCode::UInt64, AssignToAnyValueScalar<sup::dto::uint64>},
-    {sup::dto::TypeCode::Float32, AssignToAnyValueScalar<sup::dto::float32>},
-    {sup::dto::TypeCode::Float64, AssignToAnyValueScalar<sup::dto::float64>},
-    {sup::dto::TypeCode::String, AssignToAnyValueScalar<std::string>}};
-
 //! Correspondance of AnyValue type code to PVXS value function to assign scalar arrays.
 const std::map<sup::dto::TypeCode, pvxs_function_t> kAssignToPVXSScalarArrayMap = {
     {sup::dto::TypeCode::Bool, AssignToPVXSScalarArray<sup::dto::boolean>},
@@ -116,6 +97,25 @@ const std::map<sup::dto::TypeCode, pvxs_function_t> kAssignToPVXSScalarArrayMap 
     {sup::dto::TypeCode::Float32, AssignToPVXSScalarArray<sup::dto::float32>},
     {sup::dto::TypeCode::Float64, AssignToPVXSScalarArray<sup::dto::float64>},
     {sup::dto::TypeCode::String, AssignToPVXSScalarArray<std::string>}};
+
+using anyvalue_function_t =
+    std::function<void(const pvxs::Value& pvxs_value, sup::dto::AnyValue& anyvalue)>;
+
+//! Correspondance of AnyValue type code to PVXS value function to assign scalars.
+const std::map<sup::dto::TypeCode, anyvalue_function_t> kAssignToAnyValueScalarMap = {
+    {sup::dto::TypeCode::Bool, AssignToAnyValueScalar<sup::dto::boolean>},
+    {sup::dto::TypeCode::Char8, AssignToAnyValueScalar<sup::dto::uint8>},  // is it Ok?
+    {sup::dto::TypeCode::Int8, AssignToAnyValueScalar<sup::dto::int8>},
+    {sup::dto::TypeCode::UInt8, AssignToAnyValueScalar<sup::dto::uint8>},
+    {sup::dto::TypeCode::Int16, AssignToAnyValueScalar<sup::dto::int16>},
+    {sup::dto::TypeCode::UInt16, AssignToAnyValueScalar<sup::dto::uint16>},
+    {sup::dto::TypeCode::Int32, AssignToAnyValueScalar<sup::dto::int32>},
+    {sup::dto::TypeCode::UInt32, AssignToAnyValueScalar<sup::dto::uint32>},
+    {sup::dto::TypeCode::Int64, AssignToAnyValueScalar<sup::dto::int64>},
+    {sup::dto::TypeCode::UInt64, AssignToAnyValueScalar<sup::dto::uint64>},
+    {sup::dto::TypeCode::Float32, AssignToAnyValueScalar<sup::dto::float32>},
+    {sup::dto::TypeCode::Float64, AssignToAnyValueScalar<sup::dto::float64>},
+    {sup::dto::TypeCode::String, AssignToAnyValueScalar<std::string>}};
 
 //! Finds pvxs::TypeCode corresponding to the given AnyType. Use provided container.
 template <typename T>
@@ -154,11 +154,11 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
 {
   auto pvxs_typecode = GetPVXSBaseTypeCode(any_value.GetType());
   auto result = pvxs::TypeDef(pvxs_typecode).create();
-  AssignPVXSValueFromScalar(any_value, result);
+  AssignAnyValueToPVXSValueScalar(any_value, result);
   return result;
 };
 
-void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
+void AssignAnyValueToPVXSValueScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
   if (!sup::dto::IsScalarValue(any_value))
   {
@@ -179,7 +179,7 @@ void AssignPVXSValueFromScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs
   it->second(any_value, pvxs_value);  // calling assign function
 }
 
-void AssignPVXSValueFromScalarArray(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
+void AssignAnyValueToPVXSValueScalarArray(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
   if (!sup::dto::IsArrayValue(any_value))
   {

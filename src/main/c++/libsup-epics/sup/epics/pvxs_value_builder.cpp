@@ -148,7 +148,7 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
   p_impl->m_array_mode = false;
-  AssignPVXSValueFromScalarArray(*anyvalue, p_impl->m_current);
+  AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_current);
 }
 
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
@@ -162,7 +162,7 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
 
   if (!p_impl->m_array_mode)
   {
-    AssignPVXSValueFromScalar(*anyvalue, p_impl->m_current);
+    AssignAnyValueToPVXSValueScalar(*anyvalue, p_impl->m_current);
   }
 }
 
