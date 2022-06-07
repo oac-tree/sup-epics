@@ -57,6 +57,11 @@ void AssignPVXSValueFromScalarArray(const ::sup::dto::AnyValue& any_value,
 //! Returns AnyType corresponding to the given PVXS's TypeCode.
 ::sup::dto::TypeCode GetAnyTypeCode(const ::pvxs::TypeCode& pvxs_type);
 
+//! Assigns value of the given scalar-like PVXS value to AnyValue.
+//! It is expected that AnyValue type matches PVXS type.
+void AssignPVXSValueToAnyValueScalar(const ::pvxs::Value& pvxs_value,
+                                     ::sup::dto::AnyValue& any_value);
+
 }  // namespace epics
 
 }  // namespace sup
