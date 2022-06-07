@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_DTOTYPES_FWD_H_
-#define SUP_EPICS_DTOTYPES_FWD_H_
+#ifndef SUP_EPICS_DTO_TYPES_FWD_H_
+#define SUP_EPICS_DTO_TYPES_FWD_H_
 
 //! @file dto_types_fwd.h
 //! Forward declaration of some external types related to the data transfer.
@@ -39,4 +39,4 @@ class TypeDef;
 struct TypeCode;
 }  // namespace pvxs
 
-#endif  // SUP_EPICS_DTOTYPES_FWD_H_
+#endif  // SUP_EPICS_DTO_TYPES_FWD_H_
