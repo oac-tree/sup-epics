@@ -20,10 +20,11 @@
 #ifndef SUP_EPICS_ANYVALUE_BUILD_ADAPTER_H_
 #define SUP_EPICS_ANYVALUE_BUILD_ADAPTER_H_
 
-#include <sup/epics/dto_types_fwd.h>
 #include <sup/dto/basic_scalar_types.h>
+#include <sup/epics/dto_types_fwd.h>
 
 #include <memory>
+#include <string>
 
 namespace sup
 {
@@ -43,7 +44,7 @@ public:
   void Bool(const std::string& name, ::sup::dto::boolean value);
   void Int32(const std::string& name, ::sup::dto::int32 value);
 
-  void StartStruct();
+  void StartStruct(const std::string& name = {}, const std::string& struct_name = {});
 
   void EndStruct();
 

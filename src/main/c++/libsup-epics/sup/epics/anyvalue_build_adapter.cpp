@@ -78,9 +78,9 @@ void AnyValueBuildAdapter::Int32(const std::string& name, dto::int32 value)
   p_impl->AddMember(name, ::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapter::StartStruct()
+void AnyValueBuildAdapter::StartStruct(const std::string& name, const std::string& struct_name)
 {
-  BuildNode node{std::string(), ::sup::dto::AnyValue({})};
+  BuildNode node{name, ::sup::dto::EmptyStruct(struct_name)};
   p_impl->m_struct_stack.emplace(node);
 }
 
