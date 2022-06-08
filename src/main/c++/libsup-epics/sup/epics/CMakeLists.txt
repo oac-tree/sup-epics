@@ -2,6 +2,8 @@
 target_sources(${library_name} PRIVATE
   anytype_builder.cpp
   anytype_builder.h
+  anyvalue_build_adapter.cpp
+  anyvalue_build_adapter.h
   dto_scalar_conversion_utils.cpp
   dto_scalar_conversion_utils.h
   ca_channel_manager.cpp

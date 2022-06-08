@@ -17,39 +17,27 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/dto_conversion_utils.h>
-
+#include <gtest/gtest.h>
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
-
-#include <gtest/gtest.h>
-#include <pvxs/data.h>
-#include <pvxs/nt.h>
-
-#include <iostream>
+#include <sup/epics/anyvalue_build_adapter.h>
 
 using namespace ::sup::epics;
 
-//! Testing AnyTypeBuilder class to build AnyType from PVXS's TypeDef.
-//! Testing is done via convenience function BuildAnyType.
-
-class AnyTypeBuilderTests : public ::testing::Test
+class AnyValueBuildAdapterTests : public ::testing::Test
 {
 };
 
-TEST_F(AnyTypeBuilderTests, ScalarTypes)
+TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
 {
-  pvxs::TypeDef type_def(::pvxs::TypeCode::Int32);
+  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
 
-  auto anytype = BuildAnyType(type_def);
-  EXPECT_EQ(anytype.GetTypeCode(), ::sup::dto::TypeCode::Int32);
-  EXPECT_EQ(anytype, ::sup::dto::SignedInteger32Type);
-}
+  AnyValueBuildAdapter builder;
 
+  builder.StartStruct();
+  builder.Int32(42, "signed");
+  builder.EndStruct();
 
-TEST_F(AnyTypeBuilderTests, FromStructWithSingleField)
-{
-  ::pvxs::TypeDef type_def(::pvxs::TypeCode::Struct, "top_t", {::pvxs::members::UInt32("A")});
-
-//  auto anytype = BuildAnyType(type_def);
+  auto value = builder.MoveAnyValue();
+  EXPECT_EQ(value.GetType(), any_type);
 }
