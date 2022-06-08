@@ -26,6 +26,7 @@
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/epics/pvxs_type_builder.h>
 #include <sup/epics/pvxs_value_builder.h>
+#include <sup/epics/anytype_builder.h>
 
 namespace sup
 {
@@ -44,6 +45,12 @@ pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
   PvxsValueBuilder builder(BuildPVXSType(any_value.GetType()));
   sup::dto::SerializeAnyValue(any_value, builder);
   return builder.GetPVXSValue();
+}
+
+dto::AnyType BuildAnyType(const pvxs::TypeDef &pvxs_type)
+{
+  AnyTypeBuilder builder(pvxs_type);
+  return builder.MoveAnyType();
 }
 
 }  // namespace epics

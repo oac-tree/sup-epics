@@ -17,32 +17,36 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_DTO_CONVERSION_UTILS_H_
-#define SUP_EPICS_DTO_CONVERSION_UTILS_H_
-
-//! @file dto_conversion_utils.h
-//! Collection of utility functions to convert sup-dto's AnyValue to PVXS values and back.
+#ifndef SUP_EPICS_ANYTYPE_BUILDER_H_
+#define SUP_EPICS_ANYTYPE_BUILDER_H_
 
 #include <sup/epics/dto_types_fwd.h>
 
-#include <string>
+#include <memory>
 
 namespace sup
 {
 namespace epics
 {
 
-//! Returns PVXS type from AnyType.
-::pvxs::TypeDef BuildPVXSType(const ::sup::dto::AnyType& any_type);
+//! Builds AnyType from PVXS's TypeDef.
+//! Internally relies on syp::dto::AnyTypeBuilder
 
-//! Returns PVXS value from AnyValue.
-::pvxs::Value BuildPVXSValue(const ::sup::dto::AnyValue& any_value);
+class AnyTypeBuilder
+{
+public:
+  explicit AnyTypeBuilder(const pvxs::TypeDef& pvxs_type);
+  ~AnyTypeBuilder();
 
-//! Returns AnyType from PVXS's TypeDev.
-::sup::dto::AnyType BuildAnyType(const ::pvxs::TypeDef& pvxs_type);
+  dto::AnyType MoveAnyType() const;
+
+private:
+  struct AnyTypeBuilderImpl;
+  std::unique_ptr<AnyTypeBuilderImpl> p_impl;
+};
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_DTO_CONVERSION_UTILS_H_
+#endif  // SUP_EPICS_ANYTYPE_BUILDER_H_

@@ -17,32 +17,32 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_DTO_CONVERSION_UTILS_H_
-#define SUP_EPICS_DTO_CONVERSION_UTILS_H_
+#include <sup/epics/dto_conversion_utils.h>
 
-//! @file dto_conversion_utils.h
-//! Collection of utility functions to convert sup-dto's AnyValue to PVXS values and back.
+#include <sup/dto/anytype_helper.h>
+#include <sup/dto/anyvalue.h>
 
-#include <sup/epics/dto_types_fwd.h>
+#include <gtest/gtest.h>
+#include <pvxs/data.h>
+#include <pvxs/nt.h>
 
-#include <string>
+#include <iostream>
 
-namespace sup
+using namespace ::sup::epics;
+
+//! Testing AnyTypeBuilder class to build AnyType from PVXS's TypeDef.
+//! Testing is done via convenience function BuildAnyType.
+
+class AnyTypeBuilderTests : public ::testing::Test
 {
-namespace epics
+};
+
+TEST_F(AnyTypeBuilderTests, ScalarTypes)
 {
+  pvxs::TypeDef type_def(::pvxs::TypeCode::Int32);
 
-//! Returns PVXS type from AnyType.
-::pvxs::TypeDef BuildPVXSType(const ::sup::dto::AnyType& any_type);
+  auto anytype = BuildAnyType(type_def);
+  EXPECT_EQ(anytype.GetTypeCode(), ::sup::dto::TypeCode::Int32);
+  EXPECT_EQ(anytype, ::sup::dto::SignedInteger32Type);
+}
 
-//! Returns PVXS value from AnyValue.
-::pvxs::Value BuildPVXSValue(const ::sup::dto::AnyValue& any_value);
-
-//! Returns AnyType from PVXS's TypeDev.
-::sup::dto::AnyType BuildAnyType(const ::pvxs::TypeDef& pvxs_type);
-
-}  // namespace epics
-
-}  // namespace sup
-
-#endif  // SUP_EPICS_DTO_CONVERSION_UTILS_H_
