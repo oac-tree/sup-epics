@@ -36,7 +36,6 @@ struct BuildNode
   ::sup::dto::AnyValue value;
 };
 
-
 struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 {
   ::sup::dto::AnyValue m_result;
@@ -54,6 +53,12 @@ struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
       throw std::runtime_error("Stack is empty");
     }
   }
+
+  void AddMember(const std::string& name, const ::sup::dto::AnyValue& anyvalue)
+  {
+    ValidateTop();
+    GetTopStruct()->AddMember(name, anyvalue);
+  }
 };
 
 AnyValueBuildAdapter::AnyValueBuildAdapter() : p_impl(new AnyValueBuildAdapterImpl) {}
@@ -63,12 +68,15 @@ dto::AnyValue AnyValueBuildAdapter::MoveAnyValue() const
   return std::move(p_impl->m_result);
 }
 
-void AnyValueBuildAdapter::Int32(const std::string &name, dto::int32 value)
+void AnyValueBuildAdapter::Bool(const std::string& name, dto::boolean value)
 {
-  p_impl->ValidateTop();
-  p_impl->GetTopStruct()->AddMember(name, ::sup::dto::AnyValue(value));
+  p_impl->AddMember(name, ::sup::dto::AnyValue(value));
 }
 
+void AnyValueBuildAdapter::Int32(const std::string& name, dto::int32 value)
+{
+  p_impl->AddMember(name, ::sup::dto::AnyValue(value));
+}
 
 void AnyValueBuildAdapter::StartStruct()
 {

@@ -42,4 +42,24 @@ TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
   auto value = builder.MoveAnyValue();
   EXPECT_EQ(value.GetType(), any_type);
   EXPECT_TRUE(::sup::dto::IsStructValue(value));
+  EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
+}
+
+TEST_F(AnyValueBuildAdapterTests, StructWithTwoFields)
+{
+  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}},
+                                {"bool", {sup::dto::BooleanType}}};
+
+  AnyValueBuildAdapter builder;
+
+  builder.StartStruct();
+  builder.Int32("signed", 42);
+  builder.Bool("bool", true);
+  builder.EndStruct();
+
+  auto value = builder.MoveAnyValue();
+  EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_TRUE(::sup::dto::IsStructValue(value));
+  EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
+  EXPECT_EQ(value["bool"].As<sup::dto::boolean>(), true);
 }
