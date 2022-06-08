@@ -20,88 +20,66 @@
 #include "anyvalue_build_adapter.h"
 
 #include <sup/dto/anytype.h>
-#include <sup/dto/anytype_registry.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/dto/parse/anyvalue_builder.h>
+
+#include <stack>
+#include <stdexcept>
 
 namespace sup
 {
 namespace epics
 {
 
+struct BuildNode
+{
+  std::string name;
+  ::sup::dto::AnyValue value;
+};
+
+
 struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 {
-  ::sup::dto::AnyTypeRegistry m_registry;
-  ::sup::dto::AnyValueBuilder m_builder;
+  ::sup::dto::AnyValue m_result;
+  std::stack<BuildNode> m_struct_stack;
 
-  void WriteEncoding()
+  ::sup::dto::AnyValue* GetTopStruct()
   {
-    const std::string key("encoding");
-    const std::string value("sup-dto/v1.0/JSON");
-    m_builder.StartObject();
-    m_builder.Key(key.c_str(), key.size(), true);
-    m_builder.String(value.c_str(), value.size(), true);
-    m_builder.EndObject(1);
+    return m_struct_stack.empty() ? nullptr : &m_struct_stack.top().value;
   }
 
-  AnyValueBuildAdapterImpl() : m_builder(&m_registry) {}
+  void ValidateTop()
+  {
+    if (!GetTopStruct())
+    {
+      throw std::runtime_error("Stack is empty");
+    }
+  }
 };
 
 AnyValueBuildAdapter::AnyValueBuildAdapter() : p_impl(new AnyValueBuildAdapterImpl) {}
 
 dto::AnyValue AnyValueBuildAdapter::MoveAnyValue() const
 {
-  return p_impl->m_builder.MoveAnyValue();
+  return std::move(p_impl->m_result);
 }
 
-bool AnyValueBuildAdapter::Bool(dto::boolean b, const std::string &name)
+void AnyValueBuildAdapter::Int32(const std::string &name, dto::int32 value)
 {
-  return false;
+  p_impl->ValidateTop();
+  p_impl->GetTopStruct()->AddMember(name, ::sup::dto::AnyValue(value));
 }
 
-bool AnyValueBuildAdapter::Int32(dto::int32 i, const std::string &name)
-{
-  p_impl->m_builder.Key(name.c_str(), name.size(), true);
-  p_impl->m_builder.Int(i);
-  return true;
-}
-
-bool AnyValueBuildAdapter::Uint32(dto::uint32 u, const std::string &name)
-{
-  return false;
-}
-
-bool AnyValueBuildAdapter::Int64(dto::int64 i, const std::string &name)
-{
-  return false;
-}
-
-bool AnyValueBuildAdapter::Uint64(dto::uint64 u, const std::string &name)
-{
-  return false;
-}
-
-bool AnyValueBuildAdapter::Double(dto::float64 d, const std::string &name)
-{
-  return false;
-}
-
-bool AnyValueBuildAdapter::String(const std::string &str, const std::string &name)
-{
-  return false;
-}
 
 void AnyValueBuildAdapter::StartStruct()
 {
-  p_impl->m_builder.StartArray();
-  p_impl->WriteEncoding();
-  p_impl->m_builder.StartObject();
+  BuildNode node{std::string(), ::sup::dto::AnyValue({})};
+  p_impl->m_struct_stack.emplace(node);
 }
 
 void AnyValueBuildAdapter::EndStruct()
 {
-  p_impl->m_builder.EndObject(1);
-  p_impl->m_builder.EndArray(1);
+  p_impl->m_result = p_impl->m_struct_stack.top().value;
+  p_impl->m_struct_stack.pop();
 }
 
 AnyValueBuildAdapter::~AnyValueBuildAdapter() = default;

@@ -31,7 +31,6 @@ namespace epics
 {
 
 //! Builds AnyValue in step-wise manner by calling methods to add fields and structs.
-//! Internally relies on ::sup::dto::AnyValueBuilder.
 
 class AnyValueBuildAdapter
 {
@@ -41,13 +40,7 @@ public:
 
   dto::AnyValue MoveAnyValue() const;
 
-  bool Bool(::sup::dto::boolean b, const std::string& name);
-  bool Int32(::sup::dto::int32 i, const std::string& name);
-  bool Uint32(::sup::dto::uint32 u, const std::string& name);
-  bool Int64(::sup::dto::int64 i, const std::string& name);
-  bool Uint64(::sup::dto::uint64 u, const std::string& name);
-  bool Double(::sup::dto::float64 d, const std::string& name);
-  bool String(const std::string& str, const std::string& name);
+  void Int32(const std::string& name, ::sup::dto::int32 value);
 
   void StartStruct();
 

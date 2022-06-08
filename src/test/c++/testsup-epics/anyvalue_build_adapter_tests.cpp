@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
+#include <sup/dto/anyvalue_helper.h>
 #include <sup/epics/anyvalue_build_adapter.h>
 
 using namespace ::sup::epics;
@@ -35,9 +36,10 @@ TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
   AnyValueBuildAdapter builder;
 
   builder.StartStruct();
-  builder.Int32(42, "signed");
+  builder.Int32("signed", 42);
   builder.EndStruct();
 
   auto value = builder.MoveAnyValue();
   EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_TRUE(::sup::dto::IsStructValue(value));
 }
