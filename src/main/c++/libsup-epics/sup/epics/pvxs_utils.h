@@ -25,6 +25,8 @@
 
 #include <sup/epics/dto_types_fwd.h>
 
+#include <vector>
+
 namespace sup
 {
 namespace epics
@@ -35,6 +37,9 @@ bool IsScalar(const ::pvxs::Value& value);
 
 //! Returns true if given value is a struct.
 bool IsStruct(const ::pvxs::Value& value);
+
+//! Returns vector of children.
+std::vector<::pvxs::Value> GetChildren(const pvxs::Value& pvxs_value);
 
 }  // namespace epics
 }  // namespace sup

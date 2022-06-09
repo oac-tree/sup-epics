@@ -23,6 +23,8 @@
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 
+#include <iostream>
+
 using namespace ::sup::epics;
 
 class PvxsUtilsTests : public ::testing::Test
@@ -99,4 +101,47 @@ TEST_F(PvxsUtilsTests, IsStruct)
   EXPECT_TRUE(IsStruct(TypeDef(TypeCode::Struct).create()));
   EXPECT_FALSE(IsStruct(TypeDef(TypeCode::Union).create()));
   EXPECT_FALSE(IsStruct(TypeDef(TypeCode::UnionA).create()));
+}
+
+TEST_F(PvxsUtilsTests, GetChildrenForScalar)
+{
+  auto value = ::pvxs::TypeDef(::pvxs::TypeCode::Int16).create();
+  EXPECT_TRUE(GetChildren(value).empty());
+}
+
+TEST_F(PvxsUtilsTests, GetChildrenForSimpleStruct)
+{
+  auto value = pvxs::TypeDef(pvxs::TypeCode::Struct, "simple_t",
+                             {pvxs::Member(pvxs::TypeCode::Int32, "field")})
+                   .create();
+
+  // setting through the parent
+  value["field"] = 42;
+  EXPECT_EQ(value["field"].as<int32_t>(), 42);
+
+  // accessing child
+  auto child = value["field"];
+  EXPECT_EQ(child.as<int32_t>(), 42);
+
+  // changing through the child
+  child = 43;
+  EXPECT_EQ(child.as<int32_t>(), 43);
+
+  // through parent we see child has changed
+  EXPECT_EQ(value["field"].as<int32_t>(), 43);
+
+  // conclusion: PVXS has implicit sharing, all objects act like pointers
+
+  // finally checking our convenience function to access children
+  auto children = GetChildren(value);
+  ASSERT_EQ(children.size(), 1);
+  EXPECT_EQ(children[0].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(children[0].as<int32_t>(), 43);
+
+  // changing the value
+  children[0] = 44;
+
+  // check that old objects have been updated
+  EXPECT_EQ(value["field"].as<int32_t>(), 44);
+  EXPECT_EQ(child.as<int32_t>(), 44);
 }

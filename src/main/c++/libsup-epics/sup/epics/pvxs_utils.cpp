@@ -51,6 +51,16 @@ bool IsStruct(const pvxs::Value &value)
   return value.type() == pvxs::TypeCode::Struct;
 }
 
+std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
+{
+  std::vector<pvxs::Value> result;
+  for (auto fld : pvxs_value.ichildren())
+  {
+    result.push_back(fld);
+  }
+  return result;
+}
+
 }  // namespace epics
 
 }  // namespace sup
