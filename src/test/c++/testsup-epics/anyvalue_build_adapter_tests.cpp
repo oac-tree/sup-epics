@@ -93,3 +93,44 @@ TEST_F(AnyValueBuildAdapterTests, StructWithNestedStructWithField)
   EXPECT_EQ(value["scalars.signed"].As<sup::dto::int32>(), 42);
   EXPECT_EQ(value["scalars.bool"].As<sup::dto::boolean>(), true);
 }
+
+//! Creation of AnyValue containing two structures.
+
+TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructs)
+{
+  const std::string struct_name = "struct_name";
+  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}};
+
+  sup::dto::AnyType any_type{
+      {{"struct1", two_scalars},
+       {"struct2",
+        {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
+      struct_name};
+
+  AnyValueBuildAdapter builder;
+
+  builder.StartStruct(struct_name);
+
+  builder.StartStruct();
+  builder.Int32("signed", 42);
+  builder.Bool("bool", true);
+  builder.EndStruct("struct1");
+
+  builder.StartStruct();
+  builder.Int8("first", -43);
+  builder.UInt8("second", 44);
+  builder.EndStruct("struct2");
+
+  builder.EndStruct();
+
+  auto value = builder.MoveAnyValue();
+  EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_TRUE(::sup::dto::IsStructValue(value));
+  EXPECT_TRUE(::sup::dto::IsStructValue(value["struct1"]));
+  EXPECT_TRUE(::sup::dto::IsStructValue(value["struct2"]));
+  EXPECT_EQ(value["struct1.signed"].As<sup::dto::int32>(), 42);
+  EXPECT_EQ(value["struct1.bool"].As<sup::dto::boolean>(), true);
+  EXPECT_EQ(value["struct2.first"].As<sup::dto::int8>(), -43);
+  EXPECT_EQ(value["struct2.second"].As<sup::dto::uint8>(), 44);
+}

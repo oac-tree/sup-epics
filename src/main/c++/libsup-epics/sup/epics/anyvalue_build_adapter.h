@@ -42,11 +42,21 @@ public:
   dto::AnyValue MoveAnyValue() const;
 
   void Bool(const std::string& member_name, ::sup::dto::boolean value);
+  void Int8(const std::string& member_name, ::sup::dto::int8 value);
+  void UInt8(const std::string& member_name, ::sup::dto::uint8 value);
+  void Int16(const std::string& member_name, ::sup::dto::int16 value);
+  void UInt16(const std::string& member_name, ::sup::dto::uint16 value);
   void Int32(const std::string& member_name, ::sup::dto::int32 value);
+  void UInt32(const std::string& member_name, ::sup::dto::uint32 value);
+  void Int64(const std::string& member_name, ::sup::dto::int64 value);
+  void UInt64(const std::string& member_name, ::sup::dto::uint64 value);
+  void Float32(const std::string& member_name, ::sup::dto::float32 value);
+  void Float64(const std::string& member_name, ::sup::dto::float64 value);
+  void String(const std::string& member_name, const std::string& value);
 
   void StartStruct(const std::string& struct_name = {});
 
-  void EndStruct(const std::string& member_name= {} );
+  void EndStruct(const std::string& member_name = {});
 
 private:
   struct AnyValueBuildAdapterImpl;
