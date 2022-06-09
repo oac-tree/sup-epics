@@ -39,7 +39,7 @@ namespace epics
 ::pvxs::Value BuildPVXSValue(const ::sup::dto::AnyValue& any_value);
 
 //! Returns AnyType from PVXS's TypeDev.
-::sup::dto::AnyType BuildAnyValue(const ::pvxs::Value& pvxs_value);
+::sup::dto::AnyValue BuildAnyValue(const ::pvxs::Value& pvxs_value);
 
 }  // namespace epics
 

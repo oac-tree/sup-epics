@@ -21,6 +21,9 @@
 
 #include <pvxs/data.h>
 #include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/anyvalue_build_adapter.h>
+#include <sup/epics/dto_scalar_conversion_utils.h>
 #include <sup/epics/dto_typecode_conversion_utils.h>
 
 #include <iostream>
@@ -34,6 +37,21 @@ namespace epics
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
   ::pvxs::Value m_pvxs_value;
+  AnyValueBuildAdapter m_builder;
+  ::sup::dto::AnyValue m_result;
+
+  void ProcessPvxsValue(const pvxs::Value& pvxs_value)
+  {
+    m_pvxs_value = pvxs_value;
+
+    auto code = GetAnyTypeCode(m_pvxs_value.type());
+
+    if (::sup::dto::IsScalarTypeCode(code))
+    {
+      m_result = ::sup::dto::AnyValue(::sup::dto::AnyType(code));
+      AssignPVXSValueToAnyValueScalar(m_pvxs_value, m_result);
+    }
+  }
 
   AnyValueFromPVXSBuilderImpl() = default;
 };
@@ -41,11 +59,12 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value)
     : p_impl(new AnyValueFromPVXSBuilderImpl)
 {
+  p_impl->ProcessPvxsValue(pvxs_value);
 }
 
-dto::AnyType AnyValueFromPVXSBuilder::MoveAnyType() const
+dto::AnyValue AnyValueFromPVXSBuilder::MoveAnyType() const
 {
-  return {};
+  return std::move(p_impl->m_result);
 }
 
 AnyValueFromPVXSBuilder::~AnyValueFromPVXSBuilder() = default;

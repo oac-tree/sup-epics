@@ -17,37 +17,27 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/dto_conversion_utils.h>
-
-#include <sup/dto/anytype_helper.h>
-#include <sup/dto/anyvalue.h>
-
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+#include <sup/dto/anytype_helper.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 #include <iostream>
 
 using namespace ::sup::epics;
 
-
 class AnyValueFromPVXSBuilderTests : public ::testing::Test
 {
 };
 
-//TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
-//{
-//  pvxs::TypeDef type_def(::pvxs::TypeCode::Int32);
+TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
+{
+  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::Int32).create();
+  pvxs_value = 42;
 
-//  auto anytype = BuildAnyType(type_def);
-//  EXPECT_EQ(anytype.GetTypeCode(), ::sup::dto::TypeCode::Int32);
-//  EXPECT_EQ(anytype, ::sup::dto::SignedInteger32Type);
-//}
-
-
-//TEST_F(AnyValueFromPVXSBuilderTests, FromStructWithSingleField)
-//{
-//  ::pvxs::TypeDef type_def(::pvxs::TypeCode::Struct, "top_t", {::pvxs::members::UInt32("A")});
-
-////  auto anytype = BuildAnyType(type_def);
-//}
+  auto anyvalue = BuildAnyValue(pvxs_value);
+  EXPECT_EQ(anyvalue.GetType(), ::sup::dto::SignedInteger32Type);
+  EXPECT_EQ(anyvalue.As<::sup::dto::int32>(), 42);
+}

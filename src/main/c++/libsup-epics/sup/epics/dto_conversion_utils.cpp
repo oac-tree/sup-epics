@@ -47,7 +47,7 @@ pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
   return builder.GetPVXSValue();
 }
 
-dto::AnyType BuildAnyValue(const pvxs::Value& pvxs_value)
+dto::AnyValue BuildAnyValue(const pvxs::Value& pvxs_value)
 {
   AnyValueFromPVXSBuilder builder(pvxs_value);
   return builder.MoveAnyType();
