@@ -72,6 +72,8 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       }
       ProcessStack();
       m_builder.EndStruct();
+
+      m_result = m_builder.MoveAnyValue();
     }
   }
 

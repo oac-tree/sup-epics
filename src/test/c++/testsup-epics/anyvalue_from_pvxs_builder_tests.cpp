@@ -32,6 +32,8 @@ class AnyValueFromPVXSBuilderTests : public ::testing::Test
 {
 };
 
+//! Construct AnyValue from scalar-like PVXS value
+
 TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
 {
   auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::Int32).create();
@@ -42,15 +44,37 @@ TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
   EXPECT_EQ(anyvalue.As<::sup::dto::int32>(), 42);
 }
 
+//! Construct AnyValue from PVXS containing a struct with single fields.
+
 TEST_F(AnyValueFromPVXSBuilderTests, StructWithSingleField)
 {
-  sup::dto::AnyType expected_any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
 
   auto pvxs_value =
       ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("signed")}).create();
   pvxs_value["signed"] = 42;
 
-//  auto anyvalue = BuildAnyValue(pvxs_value);
-//  EXPECT_EQ(anyvalue.GetType(), ::sup::dto::SignedInteger32Type);
-//  EXPECT_EQ(anyvalue.As<::sup::dto::int32>(), 42);
+  auto anyvalue = BuildAnyValue(pvxs_value);
+  EXPECT_EQ(anyvalue.GetType(), expected_anytype);
+  EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
+  EXPECT_EQ(anyvalue["signed"].As<sup::dto::int32>(), 42);
+}
+
+TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoFields)
+{
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
+                                        {"bool", {sup::dto::BooleanType}}};
+
+  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
+                                    {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")})
+                        .create();
+  pvxs_value["signed"] = 42;
+  pvxs_value["bool"] = true;
+
+  auto anyvalue = BuildAnyValue(pvxs_value);
+
+  EXPECT_EQ(anyvalue.GetType(), expected_anytype);
+  EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
+  EXPECT_EQ(anyvalue["signed"].As<sup::dto::int32>(), 42);
+  EXPECT_EQ(anyvalue["bool"].As<sup::dto::boolean>(), true);
 }
