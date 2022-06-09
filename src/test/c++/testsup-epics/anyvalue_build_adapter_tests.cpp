@@ -34,7 +34,7 @@ class AnyValueBuildAdapterTests : public ::testing::Test
 
 TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
 {
-  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
 
   AnyValueBuildAdapter builder;
 
@@ -43,7 +43,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
   builder.EndStruct();
 
   auto value = builder.MoveAnyValue();
-  EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_EQ(value.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(value));
   EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
 }
@@ -52,8 +52,8 @@ TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
 
 TEST_F(AnyValueBuildAdapterTests, StructWithTwoFields)
 {
-  sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}},
-                                {"bool", {sup::dto::BooleanType}}};
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
+                                        {"bool", {sup::dto::BooleanType}}};
 
   AnyValueBuildAdapter builder;
 
@@ -63,7 +63,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoFields)
   builder.EndStruct();
 
   auto value = builder.MoveAnyValue();
-  EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_EQ(value.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(value));
   EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
   EXPECT_EQ(value["bool"].As<sup::dto::boolean>(), true);
@@ -75,7 +75,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithNestedStructWithField)
 {
   sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
                                    {"bool", {sup::dto::BooleanType}}};
-  sup::dto::AnyType any_type = {{"scalars", two_scalars}};
+  sup::dto::AnyType expected_anytype = {{"scalars", two_scalars}};
 
   AnyValueBuildAdapter builder;
 
@@ -87,7 +87,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithNestedStructWithField)
   builder.EndStruct();
 
   auto value = builder.MoveAnyValue();
-  EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_EQ(value.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(value));
   EXPECT_TRUE(::sup::dto::IsStructValue(value["scalars"]));
   EXPECT_EQ(value["scalars.signed"].As<sup::dto::int32>(), 42);
@@ -102,7 +102,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructs)
   sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
                                    {"bool", {sup::dto::BooleanType}}};
 
-  sup::dto::AnyType any_type{
+  sup::dto::AnyType expected_anytype{
       {{"struct1", two_scalars},
        {"struct2",
         {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
@@ -125,7 +125,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructs)
   builder.EndStruct();
 
   auto value = builder.MoveAnyValue();
-  EXPECT_EQ(value.GetType(), any_type);
+  EXPECT_EQ(value.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(value));
   EXPECT_TRUE(::sup::dto::IsStructValue(value["struct1"]));
   EXPECT_TRUE(::sup::dto::IsStructValue(value["struct2"]));

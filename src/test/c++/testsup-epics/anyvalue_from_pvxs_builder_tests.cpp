@@ -41,3 +41,16 @@ TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
   EXPECT_EQ(anyvalue.GetType(), ::sup::dto::SignedInteger32Type);
   EXPECT_EQ(anyvalue.As<::sup::dto::int32>(), 42);
 }
+
+TEST_F(AnyValueFromPVXSBuilderTests, StructWithSingleField)
+{
+  sup::dto::AnyType expected_any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
+
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("signed")}).create();
+  pvxs_value["signed"] = 42;
+
+//  auto anyvalue = BuildAnyValue(pvxs_value);
+//  EXPECT_EQ(anyvalue.GetType(), ::sup::dto::SignedInteger32Type);
+//  EXPECT_EQ(anyvalue.As<::sup::dto::int32>(), 42);
+}

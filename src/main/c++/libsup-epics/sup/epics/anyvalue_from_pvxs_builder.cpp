@@ -28,17 +28,36 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <stack>
+#include <list>
 
 namespace sup
 {
 namespace epics
 {
 
+struct Node
+{
+  ::pvxs::Value* parent;
+  ::pvxs::Value* child;
+};
+
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
   ::pvxs::Value m_pvxs_value;
   AnyValueBuildAdapter m_builder;
   ::sup::dto::AnyValue m_result;
+  std::stack<Node> m_pvxs_stack;
+
+  std::list<::pvxs::Value*> GetChildrenReverse(const pvxs::Value& pvxs_value)
+  {
+    std::list<::pvxs::Value*> result;
+    for(auto fld : pvxs_value.ichildren())
+    {
+      result.push_front(&fld);
+    }
+    return result;
+  }
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
   {
@@ -51,6 +70,31 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       m_result = ::sup::dto::AnyValue(::sup::dto::AnyType(code));
       AssignPVXSValueToAnyValueScalar(m_pvxs_value, m_result);
     }
+    else if(::sup::dto::IsStructTypeCode(code))
+    {
+      m_builder.StartStruct();
+      for(auto child : GetChildrenReverse(m_pvxs_value))
+      {
+        m_pvxs_stack.push({&m_pvxs_value, child});
+      }
+      ProcessStack();
+      m_builder.EndStruct();
+    }
+
+  }
+
+  void ProcessStack()
+  {
+    ::pvxs::Value* current_parent(&m_pvxs_value);
+    while(!m_pvxs_stack.empty())
+    {
+      auto node = m_pvxs_stack.top();
+      m_pvxs_stack.pop();
+
+
+
+    }
+
   }
 
   AnyValueFromPVXSBuilderImpl() = default;
