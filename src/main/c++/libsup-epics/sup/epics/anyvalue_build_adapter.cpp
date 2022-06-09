@@ -22,6 +22,7 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 
+#include <iostream>
 #include <stack>
 #include <stdexcept>
 
@@ -56,6 +57,7 @@ struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 
   void AddMember(const std::string& name, const ::sup::dto::AnyValue& anyvalue)
   {
+    std::cout << "AddMember " << name << " top:" << GetTopStruct() << std::endl;
     ValidateTop();
     GetTopStruct()->AddMember(name, anyvalue);
   }
@@ -68,26 +70,35 @@ dto::AnyValue AnyValueBuildAdapter::MoveAnyValue() const
   return std::move(p_impl->m_result);
 }
 
-void AnyValueBuildAdapter::Bool(const std::string& name, dto::boolean value)
+void AnyValueBuildAdapter::Bool(const std::string& member_name, dto::boolean value)
 {
-  p_impl->AddMember(name, ::sup::dto::AnyValue(value));
+  p_impl->AddMember(member_name, ::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapter::Int32(const std::string& name, dto::int32 value)
+void AnyValueBuildAdapter::Int32(const std::string& member_name, dto::int32 value)
 {
-  p_impl->AddMember(name, ::sup::dto::AnyValue(value));
+  p_impl->AddMember(member_name, ::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapter::StartStruct(const std::string& name, const std::string& struct_name)
+void AnyValueBuildAdapter::StartStruct(const std::string& struct_name)
 {
-  BuildNode node{name, ::sup::dto::EmptyStruct(struct_name)};
+  BuildNode node{{}, ::sup::dto::EmptyStruct(struct_name)};
   p_impl->m_struct_stack.emplace(node);
 }
 
-void AnyValueBuildAdapter::EndStruct()
+void AnyValueBuildAdapter::EndStruct(const std::string& member_name)
 {
-  p_impl->m_result = p_impl->m_struct_stack.top().value;
+  ::sup::dto::AnyValue top_struct = p_impl->m_struct_stack.top().value;
   p_impl->m_struct_stack.pop();
+
+  if (member_name.empty())
+  {
+    p_impl->m_result = top_struct;
+  }
+  else
+  {
+    p_impl->AddMember(member_name, top_struct);
+  }
 }
 
 AnyValueBuildAdapter::~AnyValueBuildAdapter() = default;

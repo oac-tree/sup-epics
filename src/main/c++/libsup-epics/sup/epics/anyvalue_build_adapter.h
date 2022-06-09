@@ -41,12 +41,12 @@ public:
 
   dto::AnyValue MoveAnyValue() const;
 
-  void Bool(const std::string& name, ::sup::dto::boolean value);
-  void Int32(const std::string& name, ::sup::dto::int32 value);
+  void Bool(const std::string& member_name, ::sup::dto::boolean value);
+  void Int32(const std::string& member_name, ::sup::dto::int32 value);
 
-  void StartStruct(const std::string& name = {}, const std::string& struct_name = {});
+  void StartStruct(const std::string& struct_name = {});
 
-  void EndStruct();
+  void EndStruct(const std::string& member_name= {} );
 
 private:
   struct AnyValueBuildAdapterImpl;
