@@ -24,9 +24,9 @@
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/anyvalue_helper.h>
+#include <sup/epics/anyvalue_from_pvxs_builder.h>
 #include <sup/epics/pvxs_type_builder.h>
 #include <sup/epics/pvxs_value_builder.h>
-#include <sup/epics/anytype_builder.h>
 
 namespace sup
 {
@@ -47,9 +47,9 @@ pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
   return builder.GetPVXSValue();
 }
 
-dto::AnyType BuildAnyType(const pvxs::TypeDef &pvxs_type)
+dto::AnyType BuildAnyValue(const pvxs::Value& pvxs_value)
 {
-  AnyTypeBuilder builder(pvxs_type);
+  AnyValueFromPVXSBuilder builder(pvxs_value);
   return builder.MoveAnyType();
 }
 

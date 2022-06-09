@@ -30,26 +30,24 @@
 
 using namespace ::sup::epics;
 
-//! Testing AnyTypeBuilder class to build AnyType from PVXS's TypeDef.
-//! Testing is done via convenience function BuildAnyType.
 
-class AnyTypeBuilderTests : public ::testing::Test
+class AnyValueFromPVXSBuilderTests : public ::testing::Test
 {
 };
 
-TEST_F(AnyTypeBuilderTests, ScalarTypes)
-{
-  pvxs::TypeDef type_def(::pvxs::TypeCode::Int32);
-
-  auto anytype = BuildAnyType(type_def);
-  EXPECT_EQ(anytype.GetTypeCode(), ::sup::dto::TypeCode::Int32);
-  EXPECT_EQ(anytype, ::sup::dto::SignedInteger32Type);
-}
-
-
-TEST_F(AnyTypeBuilderTests, FromStructWithSingleField)
-{
-  ::pvxs::TypeDef type_def(::pvxs::TypeCode::Struct, "top_t", {::pvxs::members::UInt32("A")});
+//TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
+//{
+//  pvxs::TypeDef type_def(::pvxs::TypeCode::Int32);
 
 //  auto anytype = BuildAnyType(type_def);
-}
+//  EXPECT_EQ(anytype.GetTypeCode(), ::sup::dto::TypeCode::Int32);
+//  EXPECT_EQ(anytype, ::sup::dto::SignedInteger32Type);
+//}
+
+
+//TEST_F(AnyValueFromPVXSBuilderTests, FromStructWithSingleField)
+//{
+//  ::pvxs::TypeDef type_def(::pvxs::TypeCode::Struct, "top_t", {::pvxs::members::UInt32("A")});
+
+////  auto anytype = BuildAnyType(type_def);
+//}

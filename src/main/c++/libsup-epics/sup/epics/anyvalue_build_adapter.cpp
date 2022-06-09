@@ -136,7 +136,8 @@ void AnyValueBuildAdapter::StartStruct(const std::string &struct_name)
   p_impl->m_struct_stack.emplace(node);
 }
 
-//! Finalise current struct and add it as a member to the previous struct.
+//! Finalise current struct. If `member_name` is not empty it is assumed that the struct should
+//! be added to the previos struct as a field.
 void AnyValueBuildAdapter::EndStruct(const std::string &member_name)
 {
   ::sup::dto::AnyValue top_struct = p_impl->m_struct_stack.top().value;

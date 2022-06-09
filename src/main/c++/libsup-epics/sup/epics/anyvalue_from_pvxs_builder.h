@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_ANYTYPE_BUILDER_H_
-#define SUP_EPICS_ANYTYPE_BUILDER_H_
+#ifndef SUP_EPICS_ANYVALUE_FROM_PVXS_BUILDER_H_
+#define SUP_EPICS_ANYVALUE_FROM_PVXS_BUILDER_H_
 
 #include <sup/epics/dto_types_fwd.h>
 
@@ -29,24 +29,23 @@ namespace sup
 namespace epics
 {
 
-//! Builds AnyType from PVXS's TypeDef.
-//! Internally relies on syp::dto::AnyTypeBuilder
+//! Builds AnyValue from PVXS's value.
 
-class AnyTypeBuilder
+class AnyValueFromPVXSBuilder
 {
 public:
-  explicit AnyTypeBuilder(const pvxs::TypeDef& pvxs_type);
-  ~AnyTypeBuilder();
+  explicit AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value);
+  ~AnyValueFromPVXSBuilder();
 
   dto::AnyType MoveAnyType() const;
 
 private:
-  struct AnyTypeBuilderImpl;
-  std::unique_ptr<AnyTypeBuilderImpl> p_impl;
+  struct AnyValueFromPVXSBuilderImpl;
+  std::unique_ptr<AnyValueFromPVXSBuilderImpl> p_impl;
 };
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_ANYTYPE_BUILDER_H_
+#endif  // SUP_EPICS_ANYVALUE_FROM_PVXS_BUILDER_H_
