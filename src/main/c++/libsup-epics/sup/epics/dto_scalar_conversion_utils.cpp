@@ -27,6 +27,7 @@
 #include <sup/epics/dto_scalar_conversion_utils.h>
 #include <sup/epics/dto_typecode_conversion_utils.h>
 #include <sup/epics/pvxs_type_builder.h>
+#include <sup/epics/pvxs_utils.h>
 #include <sup/epics/pvxs_value_builder.h>
 
 #include <functional>
@@ -205,6 +206,19 @@ void AssignPVXSValueToAnyValueScalar(const ::pvxs::Value& pvxs_value,
   }
 
   it->second(pvxs_value, any_value);  // calling assign function
+}
+
+dto::AnyValue GetAnyValueFromScalar(const pvxs::Value& pvxs_value)
+{
+  if (!IsScalar(pvxs_value))
+  {
+    throw std::runtime_error("Given PVXS Value is not a scalar");
+  }
+
+  ::sup::dto::AnyValue result(::sup::dto::AnyType(GetAnyTypeCode(pvxs_value.type())));
+  AssignPVXSValueToAnyValueScalar(pvxs_value, result);
+
+  return result;
 }
 
 }  // namespace epics

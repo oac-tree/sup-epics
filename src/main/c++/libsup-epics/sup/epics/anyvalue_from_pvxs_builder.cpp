@@ -25,11 +25,12 @@
 #include <sup/epics/anyvalue_build_adapter.h>
 #include <sup/epics/dto_scalar_conversion_utils.h>
 #include <sup/epics/dto_typecode_conversion_utils.h>
+#include <sup/epics/pvxs_utils.h>
 
 #include <iostream>
-#include <stdexcept>
-#include <stack>
 #include <list>
+#include <stack>
+#include <stdexcept>
 
 namespace sup
 {
@@ -38,8 +39,8 @@ namespace epics
 
 struct Node
 {
-  ::pvxs::Value* parent;
-  ::pvxs::Value* child;
+  ::pvxs::Value parent;
+  ::pvxs::Value child;
 };
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
@@ -48,16 +49,6 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   AnyValueBuildAdapter m_builder;
   ::sup::dto::AnyValue m_result;
   std::stack<Node> m_pvxs_stack;
-
-  std::list<::pvxs::Value*> GetChildrenReverse(const pvxs::Value& pvxs_value)
-  {
-    std::list<::pvxs::Value*> result;
-    for(auto fld : pvxs_value.ichildren())
-    {
-      result.push_front(&fld);
-    }
-    return result;
-  }
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
   {
@@ -70,31 +61,39 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       m_result = ::sup::dto::AnyValue(::sup::dto::AnyType(code));
       AssignPVXSValueToAnyValueScalar(m_pvxs_value, m_result);
     }
-    else if(::sup::dto::IsStructTypeCode(code))
+    else if (::sup::dto::IsStructTypeCode(code))
     {
       m_builder.StartStruct();
-      for(auto child : GetChildrenReverse(m_pvxs_value))
+      auto children = GetChildren(m_pvxs_value);
+      // reverse iteration
+      for (auto it = children.rbegin(); it != children.rend(); ++it)
       {
-        m_pvxs_stack.push({&m_pvxs_value, child});
+        m_pvxs_stack.push({m_pvxs_value, *it});
       }
       ProcessStack();
       m_builder.EndStruct();
     }
-
   }
 
   void ProcessStack()
   {
-    ::pvxs::Value* current_parent(&m_pvxs_value);
-    while(!m_pvxs_stack.empty())
+    ::pvxs::Value current_parent(m_pvxs_value);
+    while (!m_pvxs_stack.empty())
     {
       auto node = m_pvxs_stack.top();
       m_pvxs_stack.pop();
 
-
+      if (IsStruct(node.child))
+      {
+        m_builder.StartStruct();
+      }
+      else
+      {
+        auto member_name = current_parent.nameOf(node.child);
+        m_builder.AddScalar(member_name, GetAnyValueFromScalar(node.child));
+      }
 
     }
-
   }
 
   AnyValueFromPVXSBuilderImpl() = default;

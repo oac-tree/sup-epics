@@ -33,7 +33,7 @@ namespace epics
 {
 
 //! Returns PVXS value from scalar like AnyValue.
-pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
+::pvxs::Value GetPVXSValueFromScalar(const ::sup::dto::AnyValue& any_value);
 
 //! Assigns value of the given scalar-like AnyValue to PVXS value.
 //! It is expected that AnyValue type matches PVXS type.
@@ -49,6 +49,9 @@ void AssignAnyValueToPVXSValueScalarArray(const ::sup::dto::AnyValue& any_value,
 //! It is expected that AnyValue type matches PVXS type.
 void AssignPVXSValueToAnyValueScalar(const ::pvxs::Value& pvxs_value,
                                      ::sup::dto::AnyValue& any_value);
+
+//! Returns AnyValue constructed and initialised from scalar-like PVXS Value.
+::sup::dto::AnyValue GetAnyValueFromScalar(const ::pvxs::Value& pvxs_value);
 
 }  // namespace epics
 
