@@ -1,11 +1,9 @@
 
 target_sources(${library_name} PRIVATE
-  anyvalue_from_pvxs_builder.cpp
-  anyvalue_from_pvxs_builder.h
   anyvalue_build_adapter.cpp
   anyvalue_build_adapter.h
-  dto_scalar_conversion_utils.cpp
-  dto_scalar_conversion_utils.h
+  anyvalue_from_pvxs_builder.cpp
+  anyvalue_from_pvxs_builder.h
   ca_channel_manager.cpp
   ca_channel_tasks.cpp
   ca_context_handle.cpp
@@ -14,11 +12,15 @@ target_sources(${library_name} PRIVATE
   channel_access_pv.cpp
   dto_conversion_utils.cpp
   dto_conversion_utils.h
-  dto_types_fwd.h
+  dto_scalar_conversion_utils.cpp
+  dto_scalar_conversion_utils.h
   dto_typecode_conversion_utils.cpp
   dto_typecode_conversion_utils.h
+  dto_types_fwd.h
   pvxs_type_builder.cpp
   pvxs_type_builder.h
+  pvxs_utils.cpp
+  pvxs_utils.h
   pvxs_value_builder.cpp
   pvxs_value_builder.h
 )
