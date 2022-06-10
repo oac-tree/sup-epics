@@ -22,7 +22,6 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 
-#include <iostream>
 #include <stack>
 #include <stdexcept>
 
@@ -31,20 +30,14 @@ namespace sup
 namespace epics
 {
 
-struct BuildNode
-{
-  std::string name;
-  ::sup::dto::AnyValue value;
-};
-
 struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 {
   ::sup::dto::AnyValue m_result;
-  std::stack<BuildNode> m_struct_stack;
+  std::stack<::sup::dto::AnyValue> m_struct_stack;
 
   ::sup::dto::AnyValue *GetTopStruct()
   {
-    return m_struct_stack.empty() ? nullptr : &m_struct_stack.top().value;
+    return m_struct_stack.empty() ? nullptr : &m_struct_stack.top();
   }
 
   void ValidateTop()
@@ -57,7 +50,6 @@ struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 
   void AddMember(const std::string &name, const ::sup::dto::AnyValue &anyvalue)
   {
-    std::cout << "AddMember " << name << " top:" << GetTopStruct() << std::endl;
     ValidateTop();
     GetTopStruct()->AddMember(name, anyvalue);
   }
@@ -141,15 +133,14 @@ void AnyValueBuildAdapter::AddScalar(const std::string &member_name, const dto::
 
 void AnyValueBuildAdapter::StartStruct(const std::string &struct_name)
 {
-  BuildNode node{{}, ::sup::dto::EmptyStruct(struct_name)};
-  p_impl->m_struct_stack.emplace(node);
+  p_impl->m_struct_stack.emplace(::sup::dto::EmptyStruct(struct_name));
 }
 
 //! Finalise current struct. If `member_name` is not empty it is assumed that the struct should
 //! be added to the previos struct as a field.
 void AnyValueBuildAdapter::EndStruct(const std::string &member_name)
 {
-  ::sup::dto::AnyValue top_struct = p_impl->m_struct_stack.top().value;
+  auto top_struct = p_impl->m_struct_stack.top();
   p_impl->m_struct_stack.pop();
 
   if (member_name.empty())
