@@ -32,7 +32,7 @@ class AnyValueFromPVXSBuilderTests : public ::testing::Test
 {
 };
 
-//! Construct AnyValue from scalar-like PVXS value
+//! Construct AnyValue from scalar-like PVXS value.
 
 TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
 {
@@ -44,27 +44,27 @@ TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)
   EXPECT_EQ(anyvalue.As<::sup::dto::int32>(), 42);
 }
 
-//! Construct AnyValue from PVXS containing a struct with single fields.
+//! Construct AnyValue from PVXS containing a struct with single fieldd.
 
 TEST_F(AnyValueFromPVXSBuilderTests, StructWithSingleField)
 {
-  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
-
   auto pvxs_value =
       ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("signed")}).create();
   pvxs_value["signed"] = 42;
 
   auto anyvalue = BuildAnyValue(pvxs_value);
+
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
+
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
   EXPECT_EQ(anyvalue["signed"].As<sup::dto::int32>(), 42);
 }
 
+//! Construct AnyValue from PVXS containing a struct with two fields.
+
 TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoFields)
 {
-  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
-                                        {"bool", {sup::dto::BooleanType}}};
-
   auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
                                     {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")})
                         .create();
@@ -73,18 +73,20 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoFields)
 
   auto anyvalue = BuildAnyValue(pvxs_value);
 
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
+                                        {"bool", {sup::dto::BooleanType}}};
+
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
   EXPECT_EQ(anyvalue["signed"].As<sup::dto::int32>(), 42);
   EXPECT_EQ(anyvalue["bool"].As<sup::dto::boolean>(), true);
 }
 
+//! Construct AnyValue from PVXS containing a struct with a struct. Internal struct
+//! contains two fields.
+
 TEST_F(AnyValueFromPVXSBuilderTests, StructWithNestedStructWithField)
 {
-  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
-                                   {"bool", {sup::dto::BooleanType}}};
-  sup::dto::AnyType expected_anytype = {{"scalars", two_scalars}};
-
   auto pvxs_value =
       ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
                       {pvxs::members::Struct("scalars", {pvxs::members::Int32("signed"),
@@ -95,6 +97,11 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithNestedStructWithField)
   pvxs_value["scalars.bool"] = true;
 
   auto anyvalue = BuildAnyValue(pvxs_value);
+
+  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}};
+  sup::dto::AnyType expected_anytype = {{"scalars", two_scalars}};
+
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue["scalars"]));
@@ -105,14 +112,6 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithNestedStructWithField)
 TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
 {
   const std::string struct_name = "struct_name";
-  sup::dto::AnyType two_scalars = {{{"signed", {sup::dto::SignedInteger32Type}},
-                                   {"bool", {sup::dto::BooleanType}}}, "struct1_name"};
-
-  sup::dto::AnyType expected_anytype{
-      {{"struct1", two_scalars},
-       {"struct2",
-        {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
-      struct_name};
 
   auto member1 = pvxs::members::Struct(
       "struct1", "struct1_name", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
@@ -127,6 +126,17 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
   pvxs_value["struct2.second"] = 44;
 
   auto anyvalue = BuildAnyValue(pvxs_value);
+
+  sup::dto::AnyType two_scalars = {
+      {{"signed", {sup::dto::SignedInteger32Type}}, {"bool", {sup::dto::BooleanType}}},
+      "struct1_name"};
+
+  sup::dto::AnyType expected_anytype{
+      {{"struct1", two_scalars},
+       {"struct2",
+        {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
+      struct_name};
+
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
 
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));

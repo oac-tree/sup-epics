@@ -27,7 +27,6 @@
 #include <sup/epics/dto_typecode_conversion_utils.h>
 #include <sup/epics/pvxs_utils.h>
 
-#include <iostream>
 #include <list>
 #include <stack>
 #include <stdexcept>
@@ -40,35 +39,29 @@ namespace epics
 struct Node
 {
   ::pvxs::Value m_value;
-  std::string m_name;  //! name under which the value is known to its parent
-  bool m_is_visited{false};
-  Node(::pvxs::Value value, const std::string& name, bool is_visited)
-      :  m_value(value), m_name(name), m_is_visited(is_visited)
-  {
-  }
+  std::string m_name;        //! name under which the value is known to its parent
+  bool m_is_visited{false};  //! will be true if `value` is a struct and all children are processed
+  Node(::pvxs::Value value, const std::string& name) : m_value(value), m_name(name) {}
 };
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
-  ::pvxs::Value m_pvxs_value;
   AnyValueBuildAdapter m_builder;
   ::sup::dto::AnyValue m_result;
   std::stack<Node> m_pvxs_stack;
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
   {
-    m_pvxs_value = pvxs_value;
-
-    auto code = GetAnyTypeCode(m_pvxs_value.type());
+    auto code = GetAnyTypeCode(pvxs_value.type());
 
     if (::sup::dto::IsScalarTypeCode(code))
     {
       m_result = ::sup::dto::AnyValue(::sup::dto::AnyType(code));
-      AssignPVXSValueToAnyValueScalar(m_pvxs_value, m_result);
+      AssignPVXSValueToAnyValueScalar(pvxs_value, m_result);
     }
     else if (::sup::dto::IsStructTypeCode(code))
     {
-      m_pvxs_stack.push({m_pvxs_value, std::string(), false});
+      m_pvxs_stack.push({pvxs_value, std::string()});
       ProcessStack();
       m_result = m_builder.MoveAnyValue();
     }
@@ -82,33 +75,49 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 
       if (IsStruct(node.m_value))
       {
-        if (node.m_is_visited)
-        {
-          std::cout << "aaa 1.2 EndStruct" << std::endl;
-          m_builder.EndStruct(node.m_name);
-          m_pvxs_stack.pop();
-        }
-        else
-        {
-          std::cout << "aaa 1.2 StartStruct " << node.m_value.id() << std::endl;
-          m_builder.StartStruct(node.m_value.id());
-          node.m_is_visited = true;
-          auto children = GetChildren(node.m_value);
-          for (auto it = children.rbegin(); it != children.rend(); ++it)
-          {
-            m_pvxs_stack.push({*it, node.m_value.nameOf(*it), false});
-          }
-        }
+        ProcessStructNode(node);
       }
-
-      if (IsScalar(node.m_value))
+      else if (IsScalar(node.m_value))
       {
-        std::cout << "aaa 1.3 Iscalar" << m_pvxs_stack.size() << std::endl;
-        m_builder.AddScalar(node.m_name, GetAnyValueFromScalar(node.m_value));
-        m_pvxs_stack.pop();
+        ProcessScalarNode(node);
       }
-
     }
+  }
+
+  //! Process PVXS value representing a struct.
+  void ProcessStructNode(Node& node)
+  {
+    if (node.m_is_visited)
+    {
+      // All children have been already added to the struct. It's time to tell the builder
+      // that the struct has to be added to its own parent.
+      m_builder.EndStruct(node.m_name);
+      m_pvxs_stack.pop();  // we don't need the node anymore
+    }
+    else
+    {
+      // We found a struct which we haven't seen before. Let's tell the builder to create
+      // underlying AnyValue, and let's add children to the stack.
+      // We are not poping struct node, we will get back to it later.
+      m_builder.StartStruct(node.m_value.id());
+      node.m_is_visited = true;
+
+      auto children = GetChildren(node.m_value);
+      // iteration in reverse order
+      for (auto it = children.rbegin(); it != children.rend(); ++it)
+      {
+        m_pvxs_stack.push({*it, node.m_value.nameOf(*it)});
+      }
+    }
+  }
+
+  //! Process PVXS value representing a scalar.
+  void ProcessScalarNode(Node& node)
+  {
+    // It's a scalar field. Let's add corresponding field to the AnyValue and remove node from
+    // stack. We don't need it anymore.
+    m_builder.AddScalar(node.m_name, GetAnyValueFromScalar(node.m_value));
+    m_pvxs_stack.pop();
   }
 
   AnyValueFromPVXSBuilderImpl() = default;
