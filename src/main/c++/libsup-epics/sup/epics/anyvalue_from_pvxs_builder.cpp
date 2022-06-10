@@ -69,7 +69,8 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     }
     else if (::sup::dto::IsStructTypeCode(code))
     {
-      m_builder.StartStruct();
+      std::cout << "aaaa " << m_pvxs_value << " " << m_pvxs_value.id();
+      m_builder.StartStruct(m_pvxs_value.id());
       auto children = GetChildren(m_pvxs_value);
       // reverse iteration
       for (auto it = children.rbegin(); it != children.rend(); ++it)
@@ -102,8 +103,8 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
         }
         else
         {
-          std::cout << "aaa 1.2 StartStruct" << std::endl;
-          m_builder.StartStruct();
+          std::cout << "aaa 1.2 StartStruct " << node.m_child.id() << std::endl;
+          m_builder.StartStruct(node.m_child.id());
           node.m_is_visited = true;
           auto children = GetChildren(node.m_child);
           for (auto it = children.rbegin(); it != children.rend(); ++it)

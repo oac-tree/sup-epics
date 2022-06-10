@@ -158,8 +158,8 @@ TEST_F(AnyValueBuildAdapterTests, StructWithNestedStructWithField)
 TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructs)
 {
   const std::string struct_name = "struct_name";
-  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
-                                   {"bool", {sup::dto::BooleanType}}};
+  sup::dto::AnyType two_scalars = {{ {"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}}, "internal_struct"};
 
   sup::dto::AnyType expected_anytype{
       {{"struct1", two_scalars},
@@ -171,7 +171,7 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructs)
 
   builder.StartStruct(struct_name);
 
-  builder.StartStruct();
+  builder.StartStruct("internal_struct");
   builder.Int32("signed", 42);
   builder.Bool("bool", true);
   builder.EndStruct("struct1");

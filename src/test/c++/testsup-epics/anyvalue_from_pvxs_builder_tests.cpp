@@ -104,21 +104,23 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithNestedStructWithField)
 
 TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
 {
-  //  const std::string struct_name = "struct_name";
-  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
-                                   {"bool", {sup::dto::BooleanType}}};
+  const std::string struct_name = "struct_name";
+  sup::dto::AnyType two_scalars = {{{"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}}, "struct1_name"};
 
-  sup::dto::AnyType expected_anytype{{{"struct1", two_scalars},
-                                      {"struct2",
-                                       {{"first", {sup::dto::SignedInteger8Type}},
-                                        {"second", {sup::dto::UnsignedInteger8Type}}}}}};
+  sup::dto::AnyType expected_anytype{
+      {{"struct1", two_scalars},
+       {"struct2",
+        {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
+      struct_name};
 
   auto member1 = pvxs::members::Struct(
-      "struct1", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
+      "struct1", "struct1_name", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
   auto member2 = pvxs::members::Struct(
       "struct2", {pvxs::members::Int8("first"), pvxs::members::UInt8("second")});
 
-  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {member1, member2}).create();
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, struct_name, {member1, member2}).create();
   pvxs_value["struct1.signed"] = 42;
   pvxs_value["struct1.bool"] = true;
   pvxs_value["struct2.first"] = -43;
