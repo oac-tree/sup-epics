@@ -37,9 +37,16 @@ namespace epics
 
 struct Node
 {
+  //! Current PVXS value in the hierarchy. Please not that PVXS has implicit sharing so the
+  //! object basically behaves as a pointer.
   ::pvxs::Value m_value;
-  std::string m_name;        //! name under which the value is known to its parent
-  bool m_is_visited{false};  //! will be true if `value` is a struct and all children are processed
+
+  //!< The name under which the value is known to its parent.
+  std::string m_name;
+
+  //! Will be true if `value` is a struct and all children are processed.
+  bool m_is_visited{false};
+
   Node(::pvxs::Value value, const std::string& name) : m_value(value), m_name(name) {}
 };
 
