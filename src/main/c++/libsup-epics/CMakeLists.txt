@@ -19,7 +19,16 @@ add_subdirectory(sup)
 
 # -- Installation --
 
-set_target_properties(${library_name} PROPERTIES EXPORT_NAME sup-epics SOVERSION ${SUPEPICS_SOVERSION} VERSION ${SUPEPICS_BUILDVERSION})
-install(TARGETS ${library_name} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/sup/epics/dtotypes_fwd.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics)
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/sup/epics/dtoconversionutils.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics)
+set_target_properties(${library_name} PROPERTIES
+    EXPORT_NAME sup-epics
+    SOVERSION ${SUPEPICS_SOVERSION}
+    VERSION ${SUPEPICS_BUILDVERSION}
+)
+
+install(FILES
+        sup/epics/ca_types.h
+        sup/epics/channel_access_pv.h
+        sup/epics/dto_types_fwd.h
+        sup/epics/dto_conversion_utils.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
+)

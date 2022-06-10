@@ -5,9 +5,6 @@ TARGET=../../../target
 # BUILD_DIR := ./build
 BUILD_DIR := $(TARGET)/build
 
-BUILD_TYPE = RelWithDebInfo
-
-CMAKE_FLAGS := -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
 CMAKE_FLAGS += -DCMAKE_INSTALL_PREFIX=$(TARGET)
 
 ifeq ($(COVERAGE),true)
@@ -21,5 +18,5 @@ all: cmake_targets
 cmake_targets:
 	cp $(TARGET)/../src/CMakeLists.txt $(TARGET)/.
 	@mkdir -p $(BUILD_DIR)
-	cmake -B$(BUILD_DIR)  $(CMAKE_FLAGS) $(TARGET)
+	cmake -B$(BUILD_DIR) $(CMAKE_FLAGS) $(TARGET)
 	$(MAKE) -C $(BUILD_DIR) install
