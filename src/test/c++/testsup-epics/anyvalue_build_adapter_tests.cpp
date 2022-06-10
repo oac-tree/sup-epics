@@ -64,6 +64,18 @@ TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
   EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
 }
 
+//! Attempt to create a struct using empty string as a name.
+
+TEST_F(AnyValueBuildAdapterTests, StructWithMissedFieldName)
+{
+  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
+
+  AnyValueBuildAdapter builder;
+
+  builder.StartStruct();
+  EXPECT_THROW(builder.Int32("", 42), std::runtime_error);
+}
+
 //! Creation of AnyValue containing a struct with two fields.
 
 TEST_F(AnyValueBuildAdapterTests, StructWithTwoFields)

@@ -40,23 +40,26 @@ struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
     return m_struct_stack.empty() ? nullptr : &m_struct_stack.top();
   }
 
-  void ValidateTop()
-  {
-    if (!GetTopStruct())
-    {
-      throw std::runtime_error("Stack is empty");
-    }
-  }
-
   void AddMember(const std::string &name, const ::sup::dto::AnyValue &anyvalue)
   {
+    auto top = GetTopStruct();
+
+    if (top && name.empty())
+    {
+      throw std::runtime_error("Attempt to add empty field name into existing struct");
+    }
+
+    if (!top && !name.empty())
+    {
+      throw std::runtime_error("Attempt to add field in non-existing struct");
+    }
+
     if (name.empty())
     {
       m_result = anyvalue;
     }
     else
     {
-      ValidateTop();
       GetTopStruct()->AddMember(name, anyvalue);
     }
   }
