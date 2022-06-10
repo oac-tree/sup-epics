@@ -86,10 +86,11 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   void ProcessStack()
   {
     ::pvxs::Value current_parent(m_pvxs_value);
+    int nloop{0};
     while (!m_pvxs_stack.empty())
     {
-      auto node = m_pvxs_stack.top();
-      std::cout << "aaa 1.1 " << m_pvxs_stack.size() << std::endl;
+      auto& node = m_pvxs_stack.top();
+      std::cout << "aaa 1.1 " << m_pvxs_stack.size() << " visited " << node.m_is_visited << std::endl;
 
       if (IsStruct(node.m_child))
       {
@@ -114,6 +115,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 
       if (IsScalar(node.m_child))
       {
+        std::cout << "aaa 1.3 Iscalar" << m_pvxs_stack.size() << std::endl;
         m_builder.AddScalar(node.m_name, GetAnyValueFromScalar(node.m_child));
         m_pvxs_stack.pop();
       }
@@ -143,6 +145,10 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 //      {
 //        m_pvxs_stack.push({current_parent, *it, child.nameOf(*it), false});
 //      }
+
+      nloop++;
+      if(nloop>10)
+        throw 1;
     }
   }
 

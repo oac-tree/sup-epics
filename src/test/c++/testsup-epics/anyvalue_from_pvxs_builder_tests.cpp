@@ -78,3 +78,26 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoFields)
   EXPECT_EQ(anyvalue["signed"].As<sup::dto::int32>(), 42);
   EXPECT_EQ(anyvalue["bool"].As<sup::dto::boolean>(), true);
 }
+
+TEST_F(AnyValueFromPVXSBuilderTests, StructWithNestedStructWithField)
+{
+  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}};
+  sup::dto::AnyType expected_anytype = {{"scalars", two_scalars}};
+
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
+                      {pvxs::members::Struct(
+                          "scalars", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")})})
+          .create();
+
+  pvxs_value["scalars.signed"] = 42;
+  pvxs_value["scalars.bool"] = true;
+
+  auto anyvalue = BuildAnyValue(pvxs_value);
+  EXPECT_EQ(anyvalue.GetType(), expected_anytype);
+  EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
+  EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue["scalars"]));
+  EXPECT_EQ(anyvalue["scalars.signed"].As<sup::dto::int32>(), 42);
+  EXPECT_EQ(anyvalue["scalars.bool"].As<sup::dto::boolean>(), true);
+}
