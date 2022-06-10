@@ -50,8 +50,15 @@ struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 
   void AddMember(const std::string &name, const ::sup::dto::AnyValue &anyvalue)
   {
-    ValidateTop();
-    GetTopStruct()->AddMember(name, anyvalue);
+    if (name.empty())
+    {
+      m_result = anyvalue;
+    }
+    else
+    {
+      ValidateTop();
+      GetTopStruct()->AddMember(name, anyvalue);
+    }
   }
 };
 
@@ -142,15 +149,7 @@ void AnyValueBuildAdapter::EndStruct(const std::string &member_name)
 {
   auto top_struct = p_impl->m_struct_stack.top();
   p_impl->m_struct_stack.pop();
-
-  if (member_name.empty())
-  {
-    p_impl->m_result = top_struct;
-  }
-  else
-  {
-    p_impl->AddMember(member_name, top_struct);
-  }
+  p_impl->AddMember(member_name, top_struct);
 }
 
 AnyValueBuildAdapter::~AnyValueBuildAdapter() = default;

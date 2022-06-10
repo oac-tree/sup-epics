@@ -30,6 +30,22 @@ class AnyValueBuildAdapterTests : public ::testing::Test
 {
 };
 
+//! Creation of AnyValue scalar.
+
+TEST_F(AnyValueBuildAdapterTests, Scalar)
+{
+  AnyValueBuildAdapter builder;
+
+  // By passing an empty member name we tell the builder that this will be the scalar.
+  builder.Int32("", 42);
+
+  auto value = builder.MoveAnyValue();
+  EXPECT_EQ(value.GetType(), sup::dto::SignedInteger32Type);
+  EXPECT_TRUE(::sup::dto::IsScalarValue(value));
+  EXPECT_EQ(value.As<sup::dto::int32>(), 42);
+}
+
+
 //! Creation of AnyValue containing a struct with single field.
 
 TEST_F(AnyValueBuildAdapterTests, StructWithSingleField)
