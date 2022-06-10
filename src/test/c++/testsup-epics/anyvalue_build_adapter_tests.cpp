@@ -115,7 +115,7 @@ TEST_F(AnyValueBuildAdapterTests, AttemptToAddNonScalar)
   builder.AddScalar("signed", value1);
   auto value2 = ::sup::dto::AnyValue(struct_anytype);
 
-  // it is not possible to add non-scalar via AddScala API
+  // it is not possible to add non-scalar via AddScalar API
   EXPECT_THROW(builder.AddScalar("bool", value2), std::runtime_error);
   builder.EndStruct();
 

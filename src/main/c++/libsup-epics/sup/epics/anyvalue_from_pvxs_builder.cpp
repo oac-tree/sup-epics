@@ -39,8 +39,14 @@ namespace epics
 
 struct Node
 {
-  ::pvxs::Value parent;
-  ::pvxs::Value child;
+  ::pvxs::Value m_parent;
+  ::pvxs::Value m_child;
+  std::string m_name;  //! name under which the child is known to its parent
+  bool m_is_visited{false};
+  Node(::pvxs::Value parent, ::pvxs::Value child, const std::string& name, bool is_visited)
+      : m_parent(parent), m_child(child), m_name(name), m_is_visited(is_visited)
+  {
+  }
 };
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
@@ -68,7 +74,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       // reverse iteration
       for (auto it = children.rbegin(); it != children.rend(); ++it)
       {
-        m_pvxs_stack.push({m_pvxs_value, *it});
+        m_pvxs_stack.push({m_pvxs_value, *it, m_pvxs_value.nameOf(*it), false});
       }
       ProcessStack();
       m_builder.EndStruct();
@@ -83,18 +89,60 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     while (!m_pvxs_stack.empty())
     {
       auto node = m_pvxs_stack.top();
-      m_pvxs_stack.pop();
+      std::cout << "aaa 1.1 " << m_pvxs_stack.size() << std::endl;
 
-      if (IsStruct(node.child))
+      if (IsStruct(node.m_child))
       {
-        m_builder.StartStruct();
-      }
-      else
-      {
-        auto member_name = current_parent.nameOf(node.child);
-        m_builder.AddScalar(member_name, GetAnyValueFromScalar(node.child));
+        if (node.m_is_visited)
+        {
+          std::cout << "aaa 1.2 EndStruct" << std::endl;
+          m_builder.EndStruct(node.m_name);
+          m_pvxs_stack.pop();
+        }
+        else
+        {
+          std::cout << "aaa 1.2 StartStruct" << std::endl;
+          m_builder.StartStruct();
+          node.m_is_visited = true;
+          auto children = GetChildren(node.m_child);
+          for (auto it = children.rbegin(); it != children.rend(); ++it)
+          {
+            m_pvxs_stack.push({current_parent, *it, node.m_child.nameOf(*it), false});
+          }
+        }
       }
 
+      if (IsScalar(node.m_child))
+      {
+        m_builder.AddScalar(node.m_name, GetAnyValueFromScalar(node.m_child));
+        m_pvxs_stack.pop();
+      }
+
+
+
+//      auto child = node.m_child;
+//      auto member_name = current_parent.nameOf(child);
+
+//      if (IsStruct(child))
+//      {
+//        m_builder.StartStruct();
+//        current_parent = child;
+//      }
+//      else if (IsScalar(child))
+//      {
+//        m_builder.AddScalar(member_name, GetAnyValueFromScalar(child));
+//      }
+//      else
+//      {
+//        throw std::runtime_error("Unexpected PVXS type");
+//      }
+
+//      auto children = GetChildren(child);
+//      // reverse iteration
+//      for (auto it = children.rbegin(); it != children.rend(); ++it)
+//      {
+//        m_pvxs_stack.push({current_parent, *it, child.nameOf(*it), false});
+//      }
     }
   }
 
