@@ -60,7 +60,7 @@ struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
     }
     else
     {
-      GetTopStruct()->AddMember(name, anyvalue);
+      top->AddMember(name, anyvalue);
     }
   }
 };
