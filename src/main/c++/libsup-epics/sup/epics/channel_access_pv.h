@@ -63,6 +63,14 @@ public:
   ~ChannelAccessPV();
 
     /**
+   * @brief Deleted copy/move constructor/assigment.
+   */
+  ChannelAccessPV(const ChannelAccessPV& other) = delete;
+  ChannelAccessPV(ChannelAccessPV&& other) = delete;
+  ChannelAccessPV& operator=(const ChannelAccessPV& other) = delete;
+  ChannelAccessPV& operator=(ChannelAccessPV&& other) = delete;
+
+    /**
    * @brief Check if variable is connected.
    *
    * @return True if variable is connected, false otherwise.
