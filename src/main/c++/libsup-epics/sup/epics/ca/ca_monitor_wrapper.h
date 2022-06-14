@@ -32,7 +32,7 @@ class CAMonitorWrapper
 {
 public:
   CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& mon_cb);
-  void operator()(const std::string& name, sup::dto::uint64 timestamp, sup::dto::int16 status,
+  void operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
                   sup::dto::int16 severity, void* ref);
 private:
   sup::dto::AnyType anytype;

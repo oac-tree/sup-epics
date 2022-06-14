@@ -39,8 +39,8 @@ struct CAMonitorInfo
   sup::dto::AnyValue value;
 };
 
-using ConnectionCallBack = std::function<void(const std::string&,bool)>;
-using MonitorCallBack = std::function<void(const std::string&,const CAMonitorInfo&)>;
+using ConnectionCallBack = std::function<void(bool)>;
+using MonitorCallBack = std::function<void(const CAMonitorInfo&)>;
 
 }  // namespace epics
 

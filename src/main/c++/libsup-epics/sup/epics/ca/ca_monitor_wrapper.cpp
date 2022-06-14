@@ -42,15 +42,15 @@ CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype_, MonitorCallBack&&
   size = bytes.size();
 }
 
-void CAMonitorWrapper::operator()(const std::string& name, sup::dto::uint64 timestamp,
-                                  sup::dto::int16 status, sup::dto::int16 severity, void* ref)
+void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
+                                  sup::dto::int16 severity, void* ref)
 {
   CAMonitorInfo info;
   info.timestamp = timestamp;
   info.status = status;
   info.severity = severity;
   info.value = AnyValueFromMonitorRef(anytype, ref, size);
-  return mon_cb(name, info);
+  return mon_cb(info);
 }
 
 }  // namespace epics

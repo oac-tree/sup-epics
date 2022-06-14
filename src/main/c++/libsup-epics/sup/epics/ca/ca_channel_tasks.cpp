@@ -86,21 +86,19 @@ namespace
 void Monitor_CB(event_handler_args args)
 {
   using namespace sup::epics::cahelper;
-  auto name = std::string(ca_name(args.chid));
   auto timestamp = GetTimestampField(args);
   auto status = GetStatusField(args);
   auto severity = GetSeverityField(args);
   auto ref = GetValueFieldReference(args);
   auto func = static_cast<sup::epics::CAMonitorWrapper*>(args.usr);
-  return (*func)(name, timestamp, status, severity, ref);
+  return (*func)(timestamp, status, severity, ref);
 }
 
 void Connection_CB(connection_handler_args args)
 {
-  auto name = std::string(ca_name(args.chid));
   bool connected = (args.op == CA_OP_CONN_UP);
   auto func = static_cast<sup::epics::ConnectionCallBack*>(ca_puser(args.chid));
-  return (*func)(name, connected);
+  return (*func)(connected);
 }
 
 }  // unnamed namespace

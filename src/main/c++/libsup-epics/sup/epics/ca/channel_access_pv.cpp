@@ -38,17 +38,16 @@ ChannelAccessPV::ExtendedValue::ExtendedValue()
 
 ChannelAccessPV::ChannelAccessPV(
   const std::string& name, const sup::dto::AnyType& type, VariableChangedCallback cb)
-  : cache{}
+  : channel_name{name}
+  , cache{}
   , id{0}
   , mon_mtx{}
   , connected_cv{}
   , var_changed_cb{std::move(cb)}
 {
   id = SharedCAChannelManager().AddChannel(name, type,
-    std::bind(&ChannelAccessPV::OnConnectionChanged, this,
-    std::placeholders::_1, std::placeholders::_2),
-    std::bind(&ChannelAccessPV::OnMonitorCalled, this,
-    std::placeholders::_1, std::placeholders::_2));
+    std::bind(&ChannelAccessPV::OnConnectionChanged, this, std::placeholders::_1),
+    std::bind(&ChannelAccessPV::OnMonitorCalled, this, std::placeholders::_1));
   if (id == 0)
   {
     throw std::runtime_error("Could not construct ChannelAccessPV");
@@ -67,6 +66,11 @@ bool ChannelAccessPV::IsConnected() const
 {
   std::lock_guard<std::mutex> lk(mon_mtx);
   return cache.connected;
+}
+
+std::string ChannelAccessPV::GetChannelName() const
+{
+  return channel_name;
 }
 
 sup::dto::AnyValue ChannelAccessPV::GetValue() const
@@ -113,7 +117,7 @@ bool ChannelAccessPV::WaitForConnected(double timeout_sec) const
   return connected;
 }
 
-void ChannelAccessPV::OnConnectionChanged(const std::string& name, bool connected)
+void ChannelAccessPV::OnConnectionChanged(bool connected)
 {
   ExtendedValue result;
   {
@@ -124,11 +128,11 @@ void ChannelAccessPV::OnConnectionChanged(const std::string& name, bool connecte
   connected_cv.notify_one();
   if (var_changed_cb)
   {
-    var_changed_cb(name, result);
+    var_changed_cb(result);
   }
 }
 
-void ChannelAccessPV::OnMonitorCalled(const std::string& name,const CAMonitorInfo& info)
+void ChannelAccessPV::OnMonitorCalled(const CAMonitorInfo& info)
 {
   ExtendedValue result;
   {
@@ -141,7 +145,7 @@ void ChannelAccessPV::OnMonitorCalled(const std::string& name,const CAMonitorInf
   }
   if (var_changed_cb)
   {
-    var_changed_cb(name, result);
+    var_changed_cb(result);
   }
 }
 

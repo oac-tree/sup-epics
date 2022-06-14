@@ -41,7 +41,7 @@ public:
     sup::dto::int16 severity;
     sup::dto::AnyValue value;
   };
-  using VariableChangedCallback = std::function<void(const std::string&, const ExtendedValue&)>;
+  using VariableChangedCallback = std::function<void(const ExtendedValue&)>;
   /**
    * @brief Constructor.
    *
@@ -55,7 +55,7 @@ public:
    * related to the fact that the specific PV might not be connected).
    */
   ChannelAccessPV(const std::string& name, const sup::dto::AnyType& type,
-                        VariableChangedCallback cb = {});
+                  VariableChangedCallback cb = {});
 
     /**
    * @brief Destructor.
@@ -76,6 +76,13 @@ public:
    * @return True if variable is connected, false otherwise.
    */
   bool IsConnected() const;
+
+    /**
+   * @brief Retrieve the variable's channel name.
+   *
+   * @return The variable's channel name.
+   */
+  std::string GetChannelName() const;
 
     /**
    * @brief Retrieve the variable's value.
@@ -109,8 +116,9 @@ public:
   bool WaitForConnected(double timeout_sec) const;
 
 private:
-  void OnConnectionChanged(const std::string& name, bool connected);
-  void OnMonitorCalled(const std::string& name, const CAMonitorInfo& info);
+  void OnConnectionChanged(bool connected);
+  void OnMonitorCalled(const CAMonitorInfo& info);
+  const std::string channel_name;
   ExtendedValue cache;
   ChannelID id;
   mutable std::mutex mon_mtx;
