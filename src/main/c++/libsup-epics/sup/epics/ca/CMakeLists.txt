@@ -5,5 +5,6 @@ target_sources(${library_name} PRIVATE
     ca_context_handle.cpp
     ca_helper.cpp
     ca_monitor_wrapper.cpp
+    channel_access_client.cpp
     channel_access_pv.cpp
 )

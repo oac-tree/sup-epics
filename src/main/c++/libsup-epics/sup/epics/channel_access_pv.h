@@ -110,7 +110,7 @@ public:
 
 private:
   void OnConnectionChanged(const std::string& name, bool connected);
-  void OnMonitorCalled(const std::string& name,const CAMonitorInfo& info);
+  void OnMonitorCalled(const std::string& name, const CAMonitorInfo& info);
   ExtendedValue cache;
   ChannelID id;
   mutable std::mutex mon_mtx;
