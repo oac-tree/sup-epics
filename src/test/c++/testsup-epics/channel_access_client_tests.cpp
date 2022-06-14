@@ -36,6 +36,7 @@ static const std::string BOOL_CHANNEL = "CA-TESTS:BOOL";
 static const std::string FLOAT_CHANNEL = "CA-TESTS:FLOAT";
 static const std::string STRING_CHANNEL = "CA-TESTS:STRING";
 static const std::string CHARRAY_CHANNEL = "CA-TESTS:CHARRAY";
+static const std::string UNKNOWN_CHANNEL = "CA-TESTS:UNKNOWN";
 
 static bool WaitForValue(const sup::epics::ChannelAccessClient& client, const std::string& name,
                          const sup::dto::AnyValue& expected_value, double timeout_sec);
@@ -75,11 +76,28 @@ TEST_F(ChannelAccessClientTest, SingleClient)
   sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
   EXPECT_TRUE(client.AddVariable(CHARRAY_CHANNEL, char_array_t));
 
+  // test variable names
+  auto var_names = client.GetVariableNames();
+  EXPECT_EQ(var_names.size(), 4);
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), BOOL_CHANNEL) == var_names.end());
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), FLOAT_CHANNEL) == var_names.end());
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), STRING_CHANNEL) == var_names.end());
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), CHARRAY_CHANNEL) == var_names.end());
+  EXPECT_TRUE(std::find(var_names.begin(), var_names.end(), UNKNOWN_CHANNEL) == var_names.end());
+
   // waiting for variables to connect
   EXPECT_TRUE(client.WaitForConnected(BOOL_CHANNEL, 5.0));
   EXPECT_TRUE(client.WaitForConnected(FLOAT_CHANNEL, 1.0));
   EXPECT_TRUE(client.WaitForConnected(STRING_CHANNEL, 1.0));
   EXPECT_TRUE(client.WaitForConnected(CHARRAY_CHANNEL, 1.0));
+  EXPECT_FALSE(client.WaitForConnected(UNKNOWN_CHANNEL, 1.0));
+
+  // checking connected
+  EXPECT_TRUE(client.IsConnected(BOOL_CHANNEL));
+  EXPECT_TRUE(client.IsConnected(FLOAT_CHANNEL));
+  EXPECT_TRUE(client.IsConnected(STRING_CHANNEL));
+  EXPECT_TRUE(client.IsConnected(CHARRAY_CHANNEL));
+  EXPECT_FALSE(client.IsConnected(UNKNOWN_CHANNEL));
 
   // set bool
   sup::dto::boolean bool_val = true;
@@ -92,6 +110,10 @@ TEST_F(ChannelAccessClientTest, SingleClient)
   // set string
   std::string string_val = "some value";
   EXPECT_TRUE(client.SetValue(STRING_CHANNEL, string_val));
+
+  // set unknown channel
+  sup::dto::AnyValue unknown_val = 77;
+  EXPECT_FALSE(client.SetValue(UNKNOWN_CHANNEL, unknown_val));
 
   // reading bool
   EXPECT_TRUE(WaitForValue(client, BOOL_CHANNEL, bool_val, 5.0));
@@ -123,6 +145,19 @@ TEST_F(ChannelAccessClientTest, SingleClient)
   auto timestamp = ext_boolean.timestamp;
   EXPECT_TRUE(now_timestamp > timestamp);
   EXPECT_NE(timestamp, 0);
+
+  // remove variable
+  EXPECT_TRUE(client.RemoveVariable(CHARRAY_CHANNEL));
+  EXPECT_FALSE(client.RemoveVariable(UNKNOWN_CHANNEL));
+
+    // retest variable names
+  var_names = client.GetVariableNames();
+  EXPECT_EQ(var_names.size(), 3);
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), BOOL_CHANNEL) == var_names.end());
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), FLOAT_CHANNEL) == var_names.end());
+  EXPECT_FALSE(std::find(var_names.begin(), var_names.end(), STRING_CHANNEL) == var_names.end());
+  EXPECT_TRUE(std::find(var_names.begin(), var_names.end(), CHARRAY_CHANNEL) == var_names.end());
+  EXPECT_TRUE(std::find(var_names.begin(), var_names.end(), UNKNOWN_CHANNEL) == var_names.end());
 }
 
 TEST_F(ChannelAccessClientTest, MultipleClients)
