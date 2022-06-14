@@ -24,29 +24,113 @@ namespace sup
 namespace epics
 {
 
-ChannelAccessClient::ChannelAccessClient() = default;
+ChannelAccessClient::ChannelAccessClient(VariableUpdatedCallback cb)
+  : pv_map{}
+  , var_updated_cb{std::move(cb)}
+{}
+
 ChannelAccessClient::~ChannelAccessClient() = default;
 
 bool ChannelAccessClient::AddVariable(const std::string& name, const sup::dto::AnyType& type)
-{}
+{
+  if (pv_map.find(name) != pv_map.end())
+  {
+    return false;
+  }
+  std::unique_ptr<ChannelAccessPV> pv;
+  try
+  {
+    pv.reset(
+      new ChannelAccessPV(name, type,
+        std::bind(&ChannelAccessClient::OnVariableUpdated, this, name, std::placeholders::_1)));
+  }
+  catch(const std::runtime_error&)
+  {
+    return false;
+  }
+  pv_map.emplace(name, std::move(pv));
+  return true;
+}
+
+std::vector<std::string> ChannelAccessClient::GetVariableNames() const
+{
+  std::vector<std::string> result;
+  for (auto& pv_entry : pv_map)
+  {
+    result.push_back(pv_entry.first);
+  }
+  return result;
+}
 
 bool ChannelAccessClient::IsConnected(const std::string& name) const
-{}
+{
+  auto it = pv_map.find(name);
+  if (it == pv_map.end())
+  {
+    return false;
+  }
+  return it->second->IsConnected();
+}
 
 sup::dto::AnyValue ChannelAccessClient::GetValue(const std::string& name) const
-{}
+{
+  auto it = pv_map.find(name);
+  if (it == pv_map.end())
+  {
+    return {};
+  }
+  return it->second->GetValue();
+}
 
 ChannelAccessPV::ExtendedValue ChannelAccessClient::GetExtendedValue(const std::string& name) const
-{}
+{
+  auto it = pv_map.find(name);
+  if (it == pv_map.end())
+  {
+    return {};
+  }
+  return it->second->GetExtendedValue();
+}
 
 bool ChannelAccessClient::SetValue(const std::string& name, const sup::dto::AnyValue& value)
-{}
+{
+  auto it = pv_map.find(name);
+  if (it == pv_map.end())
+  {
+    return false;
+  }
+  return it->second->SetValue(value);
+}
 
 bool ChannelAccessClient::WaitForConnected(const std::string& name, double timeout_sec) const
-{}
+{
+  auto it = pv_map.find(name);
+  if (it == pv_map.end())
+  {
+    return false;
+  }
+  return it->second->WaitForConnected(timeout_sec);
+}
 
 bool ChannelAccessClient::RemoveVariable(const std::string& name)
-{}
+{
+  auto it = pv_map.find(name);
+  if (it == pv_map.end())
+  {
+    return false;
+  }
+  pv_map.erase(it);
+  return true;
+}
+
+void ChannelAccessClient::OnVariableUpdated(
+  const std::string& name, const ChannelAccessPV::ExtendedValue& value)
+{
+  if (var_updated_cb)
+  {
+    var_updated_cb(name, value);
+  }
+}
 
 }  // namespace epics
 

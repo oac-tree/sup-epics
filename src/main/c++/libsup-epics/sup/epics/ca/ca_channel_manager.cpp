@@ -128,7 +128,8 @@ bool CAChannelManager::UpdateChannel(ChannelID id, const sup::dto::AnyValue& val
 
 ChannelID CAChannelManager::GenerateID()
 {
-  while (callback_map.find(++last_id) != callback_map.end()) {}
+  while (callback_map.find(++last_id) != callback_map.end())
+  {}
   return last_id;
 }
 

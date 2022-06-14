@@ -22,8 +22,9 @@
 
 #include <sup/epics/channel_access_pv.h>
 
-#include <condition_variable>
-#include <mutex>
+#include <map>
+#include <memory>
+#include <vector>
 
 namespace sup
 {
@@ -35,10 +36,12 @@ namespace epics
 class ChannelAccessClient
 {
 public:
+  using VariableUpdatedCallback =
+    std::function<void(const std::string&,const ChannelAccessPV::ExtendedValue&)>;
   /**
    * @brief Constructor.
    */
-  ChannelAccessClient();
+  ChannelAccessClient(VariableUpdatedCallback cb = {});
 
     /**
    * @brief Destructor.
@@ -64,6 +67,13 @@ public:
    * @return True if variable was successfully constructed, false otherwise.
    */
   bool AddVariable(const std::string& name, const sup::dto::AnyType& type);
+
+    /**
+   * @brief Retrieve the names of all managed channels.
+   *
+   * @return List of all channel names.
+   */
+  std::vector<std::string> GetVariableNames() const;
 
     /**
    * @brief Check if specific channel is connected.
@@ -121,6 +131,9 @@ public:
   bool RemoveVariable(const std::string& name);
 
 private:
+  void OnVariableUpdated(const std::string& name, const ChannelAccessPV::ExtendedValue& value);
+  std::map<std::string, std::unique_ptr<ChannelAccessPV>> pv_map;
+  VariableUpdatedCallback var_updated_cb;
 };
 }  // namespace epics
 
