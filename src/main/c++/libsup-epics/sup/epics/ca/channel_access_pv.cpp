@@ -19,7 +19,7 @@
 
 #include <sup/epics/channel_access_pv.h>
 
-#include <sup/epics/ca_channel_manager.h>
+#include <sup/epics/ca/ca_channel_manager.h>
 #include <chrono>
 #include <cmath>
 #include <stdexcept>

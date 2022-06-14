@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/ca_helper.h>
+#include <sup/epics/ca/ca_helper.h>
 
 #include <sup/dto/anytype.h>
 #include <cadef.h>

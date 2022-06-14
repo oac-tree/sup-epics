@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/ca_channel_tasks.h>
+#include <sup/epics/ca/ca_channel_tasks.h>
 
-#include <sup/epics/ca_channel_manager.h>
-#include <sup/epics/ca_helper.h>
+#include <sup/epics/ca/ca_channel_manager.h>
+#include <sup/epics/ca/ca_helper.h>
 
 namespace
 {

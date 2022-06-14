@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/ca_context_handle.h>
+#include <sup/epics/ca/ca_context_handle.h>
 
 #include <cadef.h>
 #include <functional>

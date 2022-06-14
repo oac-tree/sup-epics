@@ -17,31 +17,32 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CA_MONITOR_WRAPPER_H_
-#define SUP_EPICS_CA_MONITOR_WRAPPER_H_
+#ifndef SUP_EPICS_CA_CHANNEL_TASKS_H_
+#define SUP_EPICS_CA_CHANNEL_TASKS_H_
 
-#include <sup/epics/ca_channel_manager.h>
-#include <sup/dto/anytype.h>
-#include <string>
+#include <sup/epics/ca/ca_channel_manager.h>
+#include <sup/epics/ca/ca_monitor_wrapper.h>
+
+#include <cadef.h>
 
 namespace sup
 {
 namespace epics
 {
-class CAMonitorWrapper
+namespace channeltasks
 {
-public:
-  CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& mon_cb);
-  void operator()(const std::string& name, sup::dto::uint64 timestamp, sup::dto::int16 status,
-                  sup::dto::int16 severity, void* ref);
-private:
-  sup::dto::AnyType anytype;
-  std::size_t size;
-  MonitorCallBack mon_cb;
-};
+
+bool AddChannelTask(const std::string& name, chtype type, chid* id,
+                    ConnectionCallBack* connect_cb, CAMonitorWrapper* monitor_cb);
+
+bool RemoveChannelTask(chid id);
+
+bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref);
+
+}  // namespace channeltasks
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CA_MONITOR_WRAPPER_H_
+#endif  // SUP_EPICS_CA_CHANNEL_TASKS_H_
