@@ -55,7 +55,7 @@ bool ChannelAccessClient::AddVariable(const std::string& name, const sup::dto::A
 std::vector<std::string> ChannelAccessClient::GetVariableNames() const
 {
   std::vector<std::string> result;
-  for (auto& pv_entry : pv_map)
+  for (const auto& pv_entry : pv_map)
   {
     result.push_back(pv_entry.first);
   }

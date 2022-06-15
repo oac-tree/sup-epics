@@ -23,9 +23,9 @@
 
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
+#include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstring>
 #include <thread>
 
 #include "softioc_runner.h"

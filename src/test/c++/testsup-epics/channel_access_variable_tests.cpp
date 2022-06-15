@@ -24,7 +24,6 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 #include <cmath>
-#include <cstring>
 #include <thread>
 
 #include "softioc_runner.h"
