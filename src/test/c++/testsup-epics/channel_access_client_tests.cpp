@@ -143,7 +143,7 @@ TEST_F(ChannelAccessClientTest, SingleClient)
   EXPECT_NO_THROW(ext_boolean = client.GetExtendedValue(BOOL_CHANNEL));
 
   auto timestamp = ext_boolean.timestamp;
-  EXPECT_TRUE(now_timestamp > timestamp);
+  EXPECT_TRUE(now_timestamp > static_cast<long>(timestamp));
   EXPECT_NE(timestamp, 0);
 
   // remove variable

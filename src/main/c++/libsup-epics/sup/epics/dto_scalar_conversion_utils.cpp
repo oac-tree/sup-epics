@@ -143,7 +143,7 @@ pvxs::Value GetPVXSValueFromScalar(const dto::AnyValue& any_value)
   auto result = pvxs::TypeDef(pvxs_typecode).create();
   AssignAnyValueToPVXSValueScalar(any_value, result);
   return result;
-};
+}
 
 void AssignAnyValueToPVXSValueScalar(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {

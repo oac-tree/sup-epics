@@ -113,7 +113,7 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   EXPECT_NO_THROW(ext_boolean = ca_bool_var.GetExtendedValue());
 
   auto timestamp = ext_boolean.timestamp;
-  EXPECT_TRUE(now_timestamp > timestamp);
+  EXPECT_TRUE(now_timestamp > static_cast<long>(timestamp));
   EXPECT_NE(timestamp, 0);
 }
 
