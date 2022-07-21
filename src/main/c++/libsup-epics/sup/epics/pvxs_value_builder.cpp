@@ -166,16 +166,6 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
   }
 }
 
-void PvxsValueBuilder::UnboundedArrayProlog(const dto::AnyValue *anyvalue)
-{
-  (void)anyvalue;
-}
-
-void PvxsValueBuilder::UnboundedArrayEpilog(const dto::AnyValue *anyvalue)
-{
-  (void)anyvalue;
-}
-
 }  // namespace epics
 
 }  // namespace sup

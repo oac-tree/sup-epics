@@ -57,9 +57,6 @@ public:
   void ScalarProlog(const sup::dto::AnyType* anytype) override;
   void ScalarEpilog(const sup::dto::AnyType* anytype) override;
 
-  void UnboundedArrayProlog(const sup::dto::AnyType* anytype) override;
-  void UnboundedArrayEpilog(const sup::dto::AnyType* anytype) override;
-
 private:
   struct PvxsTypeBuilderImpl;
   std::unique_ptr<PvxsTypeBuilderImpl> p_impl;

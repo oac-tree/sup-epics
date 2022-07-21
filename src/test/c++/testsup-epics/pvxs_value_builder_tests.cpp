@@ -17,12 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxs_value_builder.h"
-
 #include "sup/dto/anytype_helper.h"
 #include "sup/dto/anyvalue.h"
-#include "sup/epics/pvxs_type_builder.h"
 #include "sup/epics/dto_conversion_utils.h"
+#include "sup/epics/pvxs_type_builder.h"
+#include "sup/epics/pvxs_value_builder.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
@@ -211,11 +210,11 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromTwoNestedStruct)
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                     {"bool", {sup::dto::BooleanType, true}}};
 
-  sup::dto::AnyValue any_value{
-      {{"struct1", two_scalars},
-       {"struct2",
-        {{"first", {sup::dto::SignedInteger8Type, 1}}, {"second", {sup::dto::SignedInteger8Type, 2}}}}},
-      struct_name};
+  sup::dto::AnyValue any_value{{{"struct1", two_scalars},
+                                {"struct2",
+                                 {{"first", {sup::dto::SignedInteger8Type, 1}},
+                                  {"second", {sup::dto::SignedInteger8Type, 2}}}}},
+                               struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
 
@@ -292,11 +291,9 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromArrayInStruct)
 TEST_F(PvxsValueBuilderTests, UnbounderScalarArray)
 {
   // Functionality is not yet implemented. Test is here to make Sonar happy.
-  ::sup::dto::AnyValue array = ::sup::dto::UnboundedArrayValue({
-    {::sup::dto::SignedInteger64Type, 1}, 2, 3, 4, 5
-  }, "my_array_t");
+  ::sup::dto::AnyValue array =
+      ::sup::dto::ArrayValue({{::sup::dto::SignedInteger64Type, 1}, 2, 3, 4, 5}, "my_array_t");
 
   auto pvxs_value = BuildPVXSValue(array);
   EXPECT_TRUE(pvxs_value.valid());
 }
-

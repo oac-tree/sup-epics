@@ -56,7 +56,7 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetPVXSBaseTypeCode)
   }
 
   {  // attempt to get unknown type code
-    ::sup::dto::AnyType any_type = UnboundedArrayType(::sup::dto::UnsignedInteger32Type);
+    sup::dto::AnyType any_type(64, sup::dto::UnsignedInteger32Type);
     EXPECT_THROW(GetPVXSBaseTypeCode(any_type), std::runtime_error);
   }
 }

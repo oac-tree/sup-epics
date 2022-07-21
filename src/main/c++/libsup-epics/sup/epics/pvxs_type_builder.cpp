@@ -118,16 +118,6 @@ void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
   p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
 }
 
-void PvxsTypeBuilder::UnboundedArrayProlog(const dto::AnyType* anytype)
-{
-  (void)anytype;
-}
-
-void PvxsTypeBuilder::UnboundedArrayEpilog(const dto::AnyType* anytype)
-{
-  (void)anytype;
-}
-
 }  // namespace epics
 
 }  // namespace sup

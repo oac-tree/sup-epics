@@ -58,9 +58,6 @@ public:
   void ScalarProlog(const sup::dto::AnyValue* anyvalue) override;
   void ScalarEpilog(const sup::dto::AnyValue* anyvalue) override;
 
-  void UnboundedArrayProlog(const sup::dto::AnyValue* anytype) override;
-  void UnboundedArrayEpilog(const sup::dto::AnyValue* anytype) override;
-
 private:
   struct PvxsValueBuilderImpl;
   std::unique_ptr<PvxsValueBuilderImpl> p_impl;
