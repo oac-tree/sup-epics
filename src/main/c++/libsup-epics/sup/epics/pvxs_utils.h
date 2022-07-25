@@ -35,6 +35,9 @@ namespace epics
 //! Returns true if given value contains a scalar.
 bool IsScalar(const ::pvxs::Value& value);
 
+//! Returns true if given value contains a scalar array.
+bool IsScalarArray(const ::pvxs::Value& value);
+
 //! Returns true if given value is a struct.
 bool IsStruct(const ::pvxs::Value& value);
 

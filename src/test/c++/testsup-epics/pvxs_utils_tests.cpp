@@ -67,6 +67,42 @@ TEST_F(PvxsUtilsTests, IsScalar)
   EXPECT_FALSE(IsScalar(TypeDef(TypeCode::UnionA).create()));
 }
 
+TEST_F(PvxsUtilsTests, IsScalarArray)
+{
+  using pvxs::TypeCode;
+  using pvxs::TypeDef;
+
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Bool).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Int8).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::UInt8).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Int16).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::UInt16).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Int32).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::UInt32).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Int64).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::UInt64).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Float32).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Float64).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::String).create()));
+
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::BoolA).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::Int8A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::UInt8A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::Int16A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::UInt16A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::Int32A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::UInt32A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::Int64A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::UInt64A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::Float32A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::Float64A).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::StringA).create()));
+
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Struct).create()));
+  EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Union).create()));
+  EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::UnionA).create()));
+}
+
 TEST_F(PvxsUtilsTests, IsStruct)
 {
   using pvxs::TypeCode;
@@ -102,6 +138,8 @@ TEST_F(PvxsUtilsTests, IsStruct)
   EXPECT_FALSE(IsStruct(TypeDef(TypeCode::Union).create()));
   EXPECT_FALSE(IsStruct(TypeDef(TypeCode::UnionA).create()));
 }
+
+//! Testing GetChildren() utility function. It is used for testing in other places.
 
 TEST_F(PvxsUtilsTests, GetChildrenForScalar)
 {

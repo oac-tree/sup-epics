@@ -61,6 +61,11 @@ std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
   return result;
 }
 
+bool IsScalarArray(const pvxs::Value &value)
+{
+  return value.type().isarray();
+}
+
 }  // namespace epics
 
 }  // namespace sup
