@@ -264,11 +264,3 @@ TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromArrayInStruct)
   auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
   EXPECT_EQ(data.size(), 0);
 }
-
-TEST_F(PvxsTypeBuilderTests, UnbounderScalarArray)
-{
-  // Functionality is not yet implemented. Test is here to make Sonar happy.
-  sup::dto::AnyType scalar_array(64, sup::dto::UnsignedInteger32Type);
-  auto pvxs_value = BuildPVXSType(scalar_array).create();
-  EXPECT_TRUE(pvxs_value.valid());
-}
