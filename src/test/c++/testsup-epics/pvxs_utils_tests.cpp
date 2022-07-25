@@ -101,6 +101,9 @@ TEST_F(PvxsUtilsTests, IsScalarArray)
   EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Struct).create()));
   EXPECT_FALSE(IsScalarArray(TypeDef(TypeCode::Union).create()));
   EXPECT_TRUE(IsScalarArray(TypeDef(TypeCode::UnionA).create()));
+
+  // checking Null type separately, since it is not possible to create value from it
+  EXPECT_FALSE(IsScalarArray(TypeCode::Null));
 }
 
 TEST_F(PvxsUtilsTests, IsStruct)

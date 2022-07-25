@@ -32,8 +32,14 @@ namespace sup
 namespace epics
 {
 
+//! Returns true if given type_code is referring to a scalar.
+bool IsScalar(const ::pvxs::TypeCode& type_code);
+
 //! Returns true if given value contains a scalar.
 bool IsScalar(const ::pvxs::Value& value);
+
+//! Returns true if given type_code is referring to a scalar array..
+bool IsScalarArray(const ::pvxs::TypeCode& type_code);
 
 //! Returns true if given value contains a scalar array.
 bool IsScalarArray(const ::pvxs::Value& value);

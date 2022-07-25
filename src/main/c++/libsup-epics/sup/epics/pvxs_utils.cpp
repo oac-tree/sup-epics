@@ -39,11 +39,16 @@ namespace sup
 namespace epics
 {
 
-bool IsScalar(const pvxs::Value &value)
+bool IsScalar(const pvxs::TypeCode &type_code)
 {
-  auto on_element = [&value](const ::pvxs::TypeCode &element) { return value.type() == element; };
+  auto on_element = [&type_code](const ::pvxs::TypeCode &element) { return type_code == element; };
   auto it = std::find_if(kPvxsScalarCodes.begin(), kPvxsScalarCodes.end(), on_element);
   return it != kPvxsScalarCodes.end();
+}
+
+bool IsScalar(const pvxs::Value &value)
+{
+  return IsScalar(value.type());
 }
 
 bool IsStruct(const pvxs::Value &value)
@@ -61,9 +66,15 @@ std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
   return result;
 }
 
+bool IsScalarArray(const pvxs::TypeCode &type_code)
+{
+  // for some reason type_code.isarray() is true for Null types too
+  return type_code != pvxs::TypeCode::Null && type_code.isarray();
+}
+
 bool IsScalarArray(const pvxs::Value &value)
 {
-  return value.type().isarray();
+  return IsScalarArray(value.type());
 }
 
 }  // namespace epics
