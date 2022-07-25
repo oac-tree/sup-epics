@@ -607,3 +607,28 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalar)
     EXPECT_THROW(GetAnyValueFromScalar(pvxs_value), std::runtime_error);
   }
 }
+
+//! Checks GetAnyValueFromScalarArray helper method to assign PVXS arrays  to AnyValue.
+
+TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalarArray)
+{
+  auto value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+  ::pvxs::shared_array<int32_t> array({42, 43});
+  value = array.freeze();
+
+  auto any_value = GetAnyValueFromScalarArray(value);
+  EXPECT_TRUE(sup::dto::IsArrayValue(any_value));
+  EXPECT_EQ(any_value.GetTypeCode(), sup::dto::TypeCode::Array);
+  EXPECT_EQ(any_value.NumberOfElements(), 2);
+  EXPECT_EQ(any_value[0], 42);
+  EXPECT_EQ(any_value[0].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value[1], 43);
+  EXPECT_EQ(any_value[1].GetTypeCode(), sup::dto::TypeCode::Int32);
+
+  // attempt to create array from scalar
+  {  // from long string
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
+    pvxs_value = std::string(1025, 'a');
+    EXPECT_THROW(GetAnyValueFromScalarArray(pvxs_value), std::runtime_error);
+  }
+}
