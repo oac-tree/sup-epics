@@ -27,6 +27,7 @@
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/basic_scalar_types.h>
 #include <sup/epics/pvxs_type_builder.h>
+#include <sup/epics/pvxs_utils.h>
 #include <sup/epics/pvxs_value_builder.h>
 
 #include <functional>
@@ -122,12 +123,18 @@ pvxs::TypeCode GetPVXSBaseTypeCode(const dto::AnyType& any_type)
 
 pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
-  return any_type.GetTypeCode() == sup::dto::TypeCode::Char8 ? pvxs::TypeCode::UInt8A
-                                                             : FindTypeCode(kArrayTypeCodeMap, any_type);
+  return any_type.GetTypeCode() == sup::dto::TypeCode::Char8
+             ? pvxs::TypeCode::UInt8A
+             : FindTypeCode(kArrayTypeCodeMap, any_type);
 }
 
 dto::TypeCode GetAnyTypeCode(const pvxs::TypeCode& pvxs_type)
 {
+  if (IsScalarArray(pvxs_type))
+  {
+    return FindAnyTypeCode(kArrayTypeCodeMap, pvxs_type);
+  }
+
   return FindAnyTypeCode(kTypeCodeMap, pvxs_type);
 }
 

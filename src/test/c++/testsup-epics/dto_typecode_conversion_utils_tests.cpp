@@ -153,6 +153,7 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetPVXSTypeCode)
 
 TEST_F(DtoTypeCodeConversionUtilsTests, GetBaseAnyType)
 {
+  // scalar case
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Null), ::sup::dto::TypeCode::Empty);
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Bool), ::sup::dto::TypeCode::Bool);
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int8), ::sup::dto::TypeCode::Int8);
@@ -172,5 +173,22 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetBaseAnyType)
 
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::String), ::sup::dto::TypeCode::String);
 
-  EXPECT_THROW(GetAnyTypeCode(::pvxs::TypeCode::StringA), std::runtime_error);
+  // array case
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::BoolA), ::sup::dto::TypeCode::Bool);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int8A), ::sup::dto::TypeCode::Int8);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt8A), ::sup::dto::TypeCode::UInt8);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int16A), ::sup::dto::TypeCode::Int16);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt16A), ::sup::dto::TypeCode::UInt16);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int32A), ::sup::dto::TypeCode::Int32);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt32A), ::sup::dto::TypeCode::UInt32);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Int64A), ::sup::dto::TypeCode::Int64);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::UInt64A), ::sup::dto::TypeCode::UInt64);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Float32A), ::sup::dto::TypeCode::Float32);
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Float64A), ::sup::dto::TypeCode::Float64);
+
+  EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::StringA), ::sup::dto::TypeCode::String);
 }
