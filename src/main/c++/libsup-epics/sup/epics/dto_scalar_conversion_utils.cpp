@@ -120,9 +120,9 @@ const std::map<sup::dto::TypeCode, anyvalue_function_t> kAssignToAnyValueScalarM
 
 //! Finds pvxs::TypeCode corresponding to the given AnyType. Use provided container.
 template <typename T>
-pvxs::TypeCode FindTypeCode(const T& container, const sup::dto::AnyType& any_type)
+typename T::mapped_type FindContentForType(const T& container, sup::dto::TypeCode type_code)
 {
-  auto it = container.find(any_type.GetTypeCode());
+  auto it = container.find(type_code);
   if (it == container.end())
   {
     throw std::runtime_error("Unknown AnyType code");
@@ -157,13 +157,8 @@ void AssignAnyValueToPVXSValueScalar(const dto::AnyValue& any_value, pvxs::Value
     throw std::runtime_error("Given AnyValue type doesn't match PVXS value type");
   }
 
-  auto it = kAssignToPVXSScalarMap.find(any_value.GetTypeCode());
-  if (it == kAssignToPVXSScalarMap.end())
-  {
-    throw std::runtime_error("Not a known AnyValue scalar type code");
-  }
-
-  it->second(any_value, pvxs_value);  // calling assign function
+  auto assign_func = FindContentForType(kAssignToPVXSScalarMap, any_value.GetTypeCode());
+  assign_func(any_value, pvxs_value);
 }
 
 void AssignAnyValueToPVXSValueScalarArray(const dto::AnyValue& any_value, pvxs::Value& pvxs_value)
@@ -180,13 +175,8 @@ void AssignAnyValueToPVXSValueScalarArray(const dto::AnyValue& any_value, pvxs::
     throw std::runtime_error("Type of AnyValue array element doesn't match type of PVXS value");
   }
 
-  auto it = kAssignToPVXSScalarArrayMap.find(element_type.GetTypeCode());
-  if (it == kAssignToPVXSScalarArrayMap.end())
-  {
-    throw std::runtime_error("Not a known AnyValue scalar type code");
-  }
-
-  it->second(any_value, pvxs_value);  // calling assign function
+  auto assign_func = FindContentForType(kAssignToPVXSScalarArrayMap, element_type.GetTypeCode());
+  assign_func(any_value, pvxs_value);
 }
 
 void AssignPVXSValueToAnyValueScalar(const ::pvxs::Value& pvxs_value,
@@ -199,13 +189,8 @@ void AssignPVXSValueToAnyValueScalar(const ::pvxs::Value& pvxs_value,
     throw std::runtime_error("Given PVXS value type doesn't match AnyValue type");
   }
 
-  auto it = kAssignToAnyValueScalarMap.find(type_code);
-  if (it == kAssignToAnyValueScalarMap.end())
-  {
-    throw std::runtime_error("Not a known AnyValue scalar type code");
-  }
-
-  it->second(pvxs_value, any_value);  // calling assign function
+  auto assign_func = FindContentForType(kAssignToAnyValueScalarMap, type_code);
+  assign_func(pvxs_value, any_value);
 }
 
 dto::AnyValue GetAnyValueFromScalar(const pvxs::Value& pvxs_value)
@@ -219,6 +204,19 @@ dto::AnyValue GetAnyValueFromScalar(const pvxs::Value& pvxs_value)
   AssignPVXSValueToAnyValueScalar(pvxs_value, result);
 
   return result;
+}
+
+dto::AnyValue GetAnyValueFromScalarArray(const pvxs::Value& pvxs_value)
+{
+  if (!IsScalarArray(pvxs_value))
+  {
+    throw std::runtime_error("Given PVXS Value is not a scalar array");
+  }
+
+  //  auto type_code = GetAnyTypeCode(pvxs_value.type());
+  //  ::sup::dto::AnyValue result(::sup::dto::AnyType(GetAnyTypeCode(pvxs_value.type())));
+
+  return {};
 }
 
 }  // namespace epics

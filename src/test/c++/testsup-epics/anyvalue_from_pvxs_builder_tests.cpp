@@ -147,3 +147,9 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
   EXPECT_EQ(anyvalue["struct2.first"].As<sup::dto::int8>(), -43);
   EXPECT_EQ(anyvalue["struct2.second"].As<sup::dto::uint8>(), 44);
 }
+
+TEST_F(AnyValueFromPVXSBuilderTests, ScalarArray)
+{
+
+}
+

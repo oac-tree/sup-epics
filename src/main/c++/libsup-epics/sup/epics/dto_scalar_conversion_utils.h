@@ -53,6 +53,9 @@ void AssignPVXSValueToAnyValueScalar(const ::pvxs::Value& pvxs_value,
 //! Returns AnyValue constructed and initialised from scalar-like PVXS Value.
 ::sup::dto::AnyValue GetAnyValueFromScalar(const ::pvxs::Value& pvxs_value);
 
+//! Returns AnyValue constructed and initialised from PVXS Value containing scalar array.
+::sup::dto::AnyValue GetAnyValueFromScalarArray(const ::pvxs::Value& pvxs_value);
+
 }  // namespace epics
 
 }  // namespace sup
