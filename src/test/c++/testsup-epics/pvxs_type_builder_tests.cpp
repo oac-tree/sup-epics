@@ -49,7 +49,7 @@ public:
   }
 };
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromEmptyType)
+TEST_F(PvxsTypeBuilderTests, EmptyType)
 {
   sup::dto::AnyType any_type;
   auto pvxs_type = BuildPVXSType(any_type);
@@ -66,7 +66,7 @@ TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromEmptyType)
 
 //! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like types.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromScalarType)
+TEST_F(PvxsTypeBuilderTests, ScalarType)
 {
   sup::dto::AnyType any_type(sup::dto::SignedInteger32Type);
 
@@ -82,7 +82,7 @@ TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromScalarType)
 
 //! Build PVXS type from AnyType representing a struct with single field.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromStructWithSingleField)
+TEST_F(PvxsTypeBuilderTests, StructWithSingleField)
 {
   sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}}};
   auto pvxs_value = BuildPVXSType(any_type).create();
@@ -97,7 +97,7 @@ TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromStructWithSingleField)
 
 //! Build PVXS value from AnyValue representing a struct with two fields.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromStructWithTwoFields)
+TEST_F(PvxsTypeBuilderTests, StructWithTwoFields)
 {
   sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}},
                                 {"bool", {sup::dto::BooleanType}}};
@@ -115,7 +115,7 @@ TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromStructWithTwoFields)
 
 //! Build PVXS type from AnyType representing a struct with two fields nested in parent struct.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromNestedStruct)
+TEST_F(PvxsTypeBuilderTests, NestedStruct)
 {
   sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
                                    {"bool", {sup::dto::BooleanType}}};
@@ -142,7 +142,7 @@ TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromNestedStruct)
 
 //! Build PVXS type from AnyType representing a struct with two nested structs.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromTwoNestedStruct)
+TEST_F(PvxsTypeBuilderTests, TwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
   sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
@@ -215,7 +215,7 @@ TEST_F(PvxsTypeBuilderTests, PVXSTypeBasicsArrayOfIntegers)
 
 //! Build PVXS type from AnyType representing an array of integers.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromArrayOfIntegers)
+TEST_F(PvxsTypeBuilderTests, ArrayOfIntegers)
 {
   const int n_elements = 42;
   sup::dto::AnyType any_type(n_elements, sup::dto::SignedInteger32Type);
@@ -250,7 +250,7 @@ TEST_F(PvxsTypeBuilderTests, PVXSTypeArrayInStruct)
 
 //! Build PVXS type from AnyType representing an array of integers inside the struct.
 
-TEST_F(PvxsTypeBuilderTests, BuildPVXSTypeFromArrayInStruct)
+TEST_F(PvxsTypeBuilderTests,ArrayInStruct)
 {
   const int n_elements = 42;
   sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32Type);
