@@ -153,7 +153,7 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromStructWithSingleField)
 
 //! Build PVXS value from AnyValue representing a struct with two fields.
 
-TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromStructWithTwoFields)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromStructWithTwoFields)
 {
   sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                   {"bool", {sup::dto::BooleanType, true}}};
@@ -174,7 +174,7 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromStructWithTwoFields)
 
 //! Build PVXS value from AnyValue representing a struct with two fields nested in parent struct.
 
-TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromNestedStruct)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromNestedStruct)
 {
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                     {"bool", {sup::dto::BooleanType, true}}};
@@ -204,7 +204,7 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromNestedStruct)
 
 //! Build PVXS value from AnyValue representing a struct with two nested structs.
 
-TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromTwoNestedStruct)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromTwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
@@ -253,7 +253,7 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromTwoNestedStruct)
 
 //! Build PVXS value from AnyValue representing an array of integers.
 
-TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromArrayOfIntegers)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromArrayOfIntegers)
 {
   const int n_elements = 2;
   sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
@@ -270,7 +270,7 @@ TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromArrayOfIntegers)
 
 //! Build PVXS value from AnyValue representing an array of integers inside the struct.
 
-TEST_F(PvxsValueBuilderTests, BuildPVXSTypeFromArrayInStruct)
+TEST_F(PvxsValueBuilderTests, BuildPVXSValueFromArrayInStruct)
 {
   const int n_elements = 2;
   sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
