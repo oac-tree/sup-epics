@@ -26,6 +26,7 @@
 #include <sup/epics/dto_scalar_conversion_utils.h>
 #include <sup/epics/pvxs_utils.h>
 
+#include <sstream>
 #include <list>
 #include <stack>
 #include <stdexcept>
@@ -75,6 +76,13 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       {
         ProcessScalarNode(node);
       }
+      else
+      {
+        std::ostringstream ostr;
+        ostr << "AnyValueFromPVXSBuilder: unsupported PVXS value \n" << node.m_value;
+        throw std::runtime_error(ostr.str());
+      }
+
     }
   }
 

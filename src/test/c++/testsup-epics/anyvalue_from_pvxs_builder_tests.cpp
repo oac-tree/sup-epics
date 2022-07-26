@@ -150,6 +150,11 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
 
 TEST_F(AnyValueFromPVXSBuilderTests, ScalarArray)
 {
+  auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+  ::pvxs::shared_array<int32_t> array({42, 43});
+  pvxs_value = array.freeze();
+
+//  auto anyvalue = BuildAnyValue(pvxs_value);
 
 }
 

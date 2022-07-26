@@ -612,11 +612,11 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalar)
 
 TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalarArray)
 {
-  auto value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+  auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
   ::pvxs::shared_array<int32_t> array({42, 43});
-  value = array.freeze();
+  pvxs_value = array.freeze();
 
-  auto any_value = GetAnyValueFromScalarArray(value);
+  auto any_value = GetAnyValueFromScalarArray(pvxs_value);
   EXPECT_TRUE(sup::dto::IsArrayValue(any_value));
   EXPECT_EQ(any_value.GetTypeCode(), sup::dto::TypeCode::Array);
   EXPECT_EQ(any_value.NumberOfElements(), 2);
