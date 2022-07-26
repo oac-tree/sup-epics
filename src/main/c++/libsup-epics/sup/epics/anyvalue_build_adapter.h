@@ -54,10 +54,6 @@ public:
   void Float64(const std::string& member_name, ::sup::dto::float64 value);
   void String(const std::string& member_name, const std::string& value);
 
-  // TODO merge AddScalar and AddMember methods
-
-  void AddScalar(const std::string& member_name, const ::sup::dto::AnyValue& value);
-
   void AddMember(const std::string& member_name, const ::sup::dto::AnyValue& value);
 
   void StartStruct(const std::string& struct_name = {});

@@ -111,10 +111,10 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoFieldsViaAddScalar)
 
   auto value1 = ::sup::dto::AnyValue(::sup::dto::SignedInteger32Type);
   value1 = 42;
-  builder.AddScalar("signed", value1);
+  builder.AddMember("signed", value1);
   auto value2 = ::sup::dto::AnyValue(::sup::dto::BooleanType);
   value2 = true;
-  builder.AddScalar("bool", value2);
+  builder.AddMember("bool", value2);
   builder.EndStruct();
 
   auto value = builder.MoveAnyValue();
@@ -123,37 +123,6 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoFieldsViaAddScalar)
   EXPECT_TRUE(::sup::dto::IsStructValue(value));
   EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
   EXPECT_EQ(value["bool"].As<sup::dto::boolean>(), true);
-}
-
-//! Attempt to add non-scalar via scalar API.
-
-TEST_F(AnyValueBuildAdapterTests, AttemptToAddNonScalar)
-{
-  sup::dto::AnyType struct_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
-                                      {"bool", {sup::dto::BooleanType}}};
-
-  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
-
-  AnyValueBuildAdapter builder;
-
-  builder.StartStruct();
-
-  auto value1 = ::sup::dto::AnyValue(::sup::dto::SignedInteger32Type);
-  value1 = 42;
-  builder.AddScalar("signed", value1);
-  auto value2 = ::sup::dto::AnyValue(struct_anytype);
-
-  // it is not possible to add non-scalar via AddScalar API
-  EXPECT_THROW(builder.AddScalar("bool", value2), std::runtime_error);
-  builder.EndStruct();
-
-  auto value = builder.MoveAnyValue();
-
-  //  at the end we have a structure with single field
-  EXPECT_EQ(value.GetType(), expected_anytype);
-  EXPECT_EQ(value.NumberOfMembers(), 1);
-  EXPECT_TRUE(::sup::dto::IsStructValue(value));
-  EXPECT_EQ(value["signed"].As<sup::dto::int32>(), 42);
 }
 
 //! Creation of AnyValue containing a struct with another struct in it.

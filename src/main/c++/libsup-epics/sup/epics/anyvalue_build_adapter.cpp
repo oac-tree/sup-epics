@@ -132,15 +132,6 @@ void AnyValueBuildAdapter::String(const std::string &member_name, const std::str
   p_impl->AddMember(member_name, ::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapter::AddScalar(const std::string &member_name, const dto::AnyValue &value)
-{
-  if (!::sup::dto::IsScalarValue(value))
-  {
-    throw std::runtime_error("Given AnyValue is not a scalar");
-  }
-  p_impl->AddMember(member_name, value);
-}
-
 void AnyValueBuildAdapter::AddMember(const std::string &member_name, const dto::AnyValue &value)
 {
   p_impl->AddMember(member_name, value);
