@@ -129,9 +129,9 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   //! Process PVXS value representing a scalar array.
   void ProcessScalarArrayNode(Node& node)
   {
-    // It's a scalar field. Let's add corresponding field to the AnyValue and remove node from
+    // It's a scalar array field. Let's add corresponding field to the AnyValue and remove node from
     // stack. We don't need it anymore.
-    m_builder.AddScalar(node.m_name, GetAnyValueFromScalarArray(node.m_value));
+    m_builder.AddMember(node.m_name, GetAnyValueFromScalarArray(node.m_value));
     m_pvxs_stack.pop();
   }
 

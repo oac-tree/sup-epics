@@ -148,13 +148,59 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
   EXPECT_EQ(anyvalue["struct2.second"].As<sup::dto::uint8>(), 44);
 }
 
-TEST_F(AnyValueFromPVXSBuilderTests, ScalarArray)
+//! Building AnyValue from PVXS value a scalar array.
+
+TEST_F(AnyValueFromPVXSBuilderTests, ArrayOfIntegers)
 {
   auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
   ::pvxs::shared_array<int32_t> array({42, 43});
   pvxs_value = array.freeze();
 
-//  auto anyvalue = BuildAnyValue(pvxs_value);
+  auto any_value = BuildAnyValue(pvxs_value);
 
+  EXPECT_TRUE(sup::dto::IsArrayValue(any_value));
+  EXPECT_EQ(any_value.GetTypeCode(), sup::dto::TypeCode::Array);
+  EXPECT_EQ(any_value.NumberOfElements(), 2);
+  EXPECT_EQ(any_value[0], 42);
+  EXPECT_EQ(any_value[0].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value[1], 43);
+  EXPECT_EQ(any_value[1].GetTypeCode(), sup::dto::TypeCode::Int32);
 }
 
+//! Building AnyValue from PVXS value containing a struct with single field containing a scalar
+//! array.
+
+TEST_F(AnyValueFromPVXSBuilderTests, ArrayInStruct)
+{
+  // long way to create a PVXS struct containing an array
+  const std::string struct_name = "struct_name";
+
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, struct_name, {pvxs::members::Int32A("array")})
+          .create();
+
+  ::pvxs::shared_array<int32_t> array({42, 43});
+  pvxs_value["array"] = array.freeze();
+  EXPECT_EQ(array.size(), 0);  // array dissapears after the assignment
+
+  // validating struct we've got
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
+  auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 42);
+  EXPECT_EQ(data[1], 43);
+
+  // building AnyValue from it
+  auto any_value = BuildAnyValue(pvxs_value);
+
+  // validating result
+  EXPECT_EQ(any_value.GetTypeName(), struct_name);
+
+  sup::dto::AnyType expected_anytype{
+      {{"array", ::sup::dto::AnyType(2, ::sup::dto::SignedInteger32Type)}}, struct_name};
+
+  EXPECT_EQ(any_value.GetType(), expected_anytype);
+  EXPECT_EQ(any_value["array"][0], 42);
+  EXPECT_EQ(any_value["array"][1], 43);
+}
