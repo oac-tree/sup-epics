@@ -76,6 +76,10 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       {
         ProcessScalarNode(node);
       }
+      else if (IsScalarArray(node.m_value))
+      {
+        ProcessScalarArrayNode(node);
+      }
       else
       {
         std::ostringstream ostr;
@@ -119,6 +123,15 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     // It's a scalar field. Let's add corresponding field to the AnyValue and remove node from
     // stack. We don't need it anymore.
     m_builder.AddScalar(node.m_name, GetAnyValueFromScalar(node.m_value));
+    m_pvxs_stack.pop();
+  }
+
+  //! Process PVXS value representing a scalar array.
+  void ProcessScalarArrayNode(Node& node)
+  {
+    // It's a scalar field. Let's add corresponding field to the AnyValue and remove node from
+    // stack. We don't need it anymore.
+    m_builder.AddScalar(node.m_name, GetAnyValueFromScalarArray(node.m_value));
     m_pvxs_stack.pop();
   }
 

@@ -221,3 +221,45 @@ TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructs)
   EXPECT_EQ(value["struct2.first"].As<sup::dto::int8>(), -43);
   EXPECT_EQ(value["struct2.second"].As<sup::dto::uint8>(), 44);
 }
+
+//! Same test as before when internal structs are added via AddMember method
+
+TEST_F(AnyValueBuildAdapterTests, StructWithTwoNestedStructsViaAddMembers)
+{
+  const std::string struct_name = "struct_name";
+  sup::dto::AnyType two_scalars = {{ {"signed", {sup::dto::SignedInteger32Type}},
+                                   {"bool", {sup::dto::BooleanType}}}, "internal_struct"};
+
+  sup::dto::AnyType expected_anytype{
+      {{"struct1", two_scalars},
+       {"struct2",
+        {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
+      struct_name};
+
+  sup::dto::AnyValue struct1= {{{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                    {"bool", {sup::dto::BooleanType, true}}}, "internal_struct"};
+
+  sup::dto::AnyValue struct2= {{"first", {sup::dto::SignedInteger8Type, -43}},
+                                    {"second", {sup::dto::UnsignedInteger8Type, 44}}};
+
+
+
+  AnyValueBuildAdapter builder;
+
+  builder.StartStruct(struct_name);
+
+  builder.AddMember("struct1", struct1);
+  builder.AddMember("struct2", struct2);
+
+  builder.EndStruct();
+
+  auto value = builder.MoveAnyValue();
+  EXPECT_EQ(value.GetType(), expected_anytype);
+  EXPECT_TRUE(::sup::dto::IsStructValue(value));
+  EXPECT_TRUE(::sup::dto::IsStructValue(value["struct1"]));
+  EXPECT_TRUE(::sup::dto::IsStructValue(value["struct2"]));
+  EXPECT_EQ(value["struct1.signed"].As<sup::dto::int32>(), 42);
+  EXPECT_EQ(value["struct1.bool"].As<sup::dto::boolean>(), true);
+  EXPECT_EQ(value["struct2.first"].As<sup::dto::int8>(), -43);
+  EXPECT_EQ(value["struct2.second"].As<sup::dto::uint8>(), 44);
+}

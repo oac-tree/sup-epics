@@ -141,6 +141,11 @@ void AnyValueBuildAdapter::AddScalar(const std::string &member_name, const dto::
   p_impl->AddMember(member_name, value);
 }
 
+void AnyValueBuildAdapter::AddMember(const std::string &member_name, const dto::AnyValue &value)
+{
+  p_impl->AddMember(member_name, value);
+}
+
 void AnyValueBuildAdapter::StartStruct(const std::string &struct_name)
 {
   p_impl->m_struct_stack.emplace(::sup::dto::EmptyStruct(struct_name));
