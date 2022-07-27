@@ -278,8 +278,70 @@ TEST_F(AnyValueFromPVXSBuilderTests, PlainDefaultConstructedNTScalar)
   EXPECT_EQ(any_value["alarm.message"].GetTypeCode(), sup::dto::TypeCode::String);
   EXPECT_EQ(any_value["alarm.message"], std::string());
   EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"].GetTypeCode(), sup::dto::TypeCode::Int64);
-  EXPECT_EQ(any_value["timeStamp.nanoseconds"], 0);
+  EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"], 0);
   EXPECT_EQ(any_value["timeStamp.nanoseconds"].GetTypeCode(), sup::dto::TypeCode::Int32);
-  EXPECT_EQ(any_value["timeStamp.userTag"], 0);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"], 0);
   EXPECT_EQ(any_value["timeStamp.userTag"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["timeStamp.userTag"], 0);
+}
+
+//! Building AnyValue from plain NTScalar.
+//! Same as test above, only some values are assigned.
+
+TEST_F(AnyValueFromPVXSBuilderTests, PlainNTScalar)
+{
+  // plain NTSCalar without display meta
+  auto pvxs_value = pvxs::nt::NTScalar{pvxs::TypeCode::Int32}.create();
+
+  // assigning values
+  pvxs_value["value"] = 42;
+  pvxs_value["alarm.severity"] = 1;
+  pvxs_value["alarm.status"] = 2;
+  pvxs_value["alarm.message"] = std::string("abc");
+  pvxs_value["timeStamp.secondsPastEpoch"] = -1;
+  pvxs_value["timeStamp.nanoseconds"] = -2;
+  pvxs_value["timeStamp.userTag"] = -3;
+
+  // checking pvxs_value itself
+  EXPECT_EQ(pvxs_value["value"].as<int32_t>(), 42);
+  EXPECT_EQ(pvxs_value["alarm.severity"].as<int32_t>(), 1);
+  EXPECT_EQ(pvxs_value["alarm.status"].as<int32_t>(), 2);
+  EXPECT_EQ(pvxs_value["alarm.message"].as<std::string>(), std::string("abc"));
+
+  EXPECT_EQ(pvxs_value["timeStamp.secondsPastEpoch"].as<int64_t>(), -1);
+  EXPECT_EQ(pvxs_value["timeStamp.nanoseconds"].as<int32_t>(), -2);
+  EXPECT_EQ(pvxs_value["timeStamp.userTag"].as<int32_t>(), -3);
+
+  // building any_value
+  auto any_value = BuildAnyValue(pvxs_value);
+
+  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
+                                     {"status", {sup::dto::SignedInteger32Type}},
+                                     {"message", {sup::dto::StringType}}},
+                                    "alarm_t"};
+
+  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
+                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
+                                         {"userTag", {sup::dto::SignedInteger32Type}}},
+                                        "time_t"};
+
+  sup::dto::AnyType expected_anytype{{{"value", {sup::dto::SignedInteger32Type}},
+                                      {"alarm", alarm_struct},
+                                      {"timeStamp", timestamp_struct}},
+                                     "epics:nt/NTScalar:1.0"};
+
+  EXPECT_EQ(any_value.GetType(), expected_anytype);
+  EXPECT_EQ(any_value["value"], 42);
+  EXPECT_EQ(any_value["alarm.severity"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["alarm.severity"], 1);
+  EXPECT_EQ(any_value["alarm.status"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["alarm.status"], 2);
+  EXPECT_EQ(any_value["alarm.message"].GetTypeCode(), sup::dto::TypeCode::String);
+  EXPECT_EQ(any_value["alarm.message"], std::string("abc"));
+  EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"].GetTypeCode(), sup::dto::TypeCode::Int64);
+  EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"], -1);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"], -2);
+  EXPECT_EQ(any_value["timeStamp.userTag"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["timeStamp.userTag"], -3);
 }
