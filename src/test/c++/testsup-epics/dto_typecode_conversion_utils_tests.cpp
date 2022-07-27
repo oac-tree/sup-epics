@@ -21,7 +21,7 @@
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/dto_typecode_conversion_utils.h>
+#include <sup/epics/utils/dto_typecode_conversion_utils.h>
 
 #include <iostream>
 

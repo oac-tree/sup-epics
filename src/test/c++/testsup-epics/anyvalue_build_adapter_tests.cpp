@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/anyvalue_build_adapter.h"
+#include "sup/epics/utils/anyvalue_build_adapter.h"
 
 #include <gtest/gtest.h>
 #include <sup/dto/anytype_helper.h>

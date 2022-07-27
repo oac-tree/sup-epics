@@ -17,11 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/dto/anytype_helper.h"
-#include "sup/dto/anyvalue.h"
-#include "sup/epics/dto_conversion_utils.h"
-#include "sup/epics/pvxs_type_builder.h"
-#include "sup/epics/pvxs_value_builder.h"
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>

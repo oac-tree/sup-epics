@@ -24,11 +24,11 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/basic_scalar_types.h>
-#include <sup/epics/dto_scalar_conversion_utils.h>
-#include <sup/epics/dto_typecode_conversion_utils.h>
-#include <sup/epics/pvxs_type_builder.h>
-#include <sup/epics/pvxs_utils.h>
-#include <sup/epics/pvxs_value_builder.h>
+#include <sup/epics/utils/dto_scalar_conversion_utils.h>
+#include <sup/epics/utils/dto_typecode_conversion_utils.h>
+#include <sup/epics/utils/pvxs_type_builder.h>
+#include <sup/epics/utils/pvxs_utils.h>
+#include <sup/epics/utils/pvxs_value_builder.h>
 
 #include <functional>
 #include <iostream>

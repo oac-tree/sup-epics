@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/pvxs_type_builder.h>
+#include <sup/epics/utils/pvxs_type_builder.h>
 
 #include <sup/epics/dto_conversion_utils.h>
 

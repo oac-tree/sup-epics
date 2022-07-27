@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_ANYVALUE_FROM_PVXS_BUILDER_H_
-#define SUP_EPICS_ANYVALUE_FROM_PVXS_BUILDER_H_
+#ifndef SUP_EPICS_UTILS_ANYVALUE_FROM_PVXS_BUILDER_H_
+#define SUP_EPICS_UTILS_ANYVALUE_FROM_PVXS_BUILDER_H_
 
 #include <sup/epics/dto_types_fwd.h>
 
@@ -48,4 +48,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_ANYVALUE_FROM_PVXS_BUILDER_H_
+#endif  // SUP_EPICS_UTILS_ANYVALUE_FROM_PVXS_BUILDER_H_

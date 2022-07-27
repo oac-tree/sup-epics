@@ -18,8 +18,8 @@
  *****************************************************************************/
 
 #include <pvxs/data.h>
-#include <sup/epics/dto_scalar_conversion_utils.h>
-#include <sup/epics/pvxs_value_builder.h>
+#include <sup/epics/utils/dto_scalar_conversion_utils.h>
+#include <sup/epics/utils/pvxs_value_builder.h>
 
 #include <iostream>
 #include <stack>

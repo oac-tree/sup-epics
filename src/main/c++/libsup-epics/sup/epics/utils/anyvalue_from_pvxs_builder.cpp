@@ -22,9 +22,9 @@
 #include <pvxs/data.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/anyvalue_build_adapter.h>
-#include <sup/epics/dto_scalar_conversion_utils.h>
-#include <sup/epics/pvxs_utils.h>
+#include <sup/epics/utils/anyvalue_build_adapter.h>
+#include <sup/epics/utils/dto_scalar_conversion_utils.h>
+#include <sup/epics/utils/pvxs_utils.h>
 
 #include <sstream>
 #include <list>

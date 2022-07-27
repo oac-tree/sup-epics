@@ -26,9 +26,9 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/basic_scalar_types.h>
-#include <sup/epics/pvxs_type_builder.h>
-#include <sup/epics/pvxs_utils.h>
-#include <sup/epics/pvxs_value_builder.h>
+#include <sup/epics/utils/pvxs_type_builder.h>
+#include <sup/epics/utils/pvxs_utils.h>
+#include <sup/epics/utils/pvxs_value_builder.h>
 
 #include <functional>
 #include <iostream>

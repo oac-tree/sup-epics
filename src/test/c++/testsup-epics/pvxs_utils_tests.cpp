@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxs_utils.h"
+#include "sup/epics/utils/pvxs_utils.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/data.h>

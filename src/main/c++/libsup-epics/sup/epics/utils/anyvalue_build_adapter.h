@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_ANYVALUE_BUILD_ADAPTER_H_
-#define SUP_EPICS_ANYVALUE_BUILD_ADAPTER_H_
+#ifndef SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_H_
+#define SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_H_
 
 #include <sup/dto/basic_scalar_types.h>
 #include <sup/epics/dto_types_fwd.h>
@@ -69,4 +69,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_ANYVALUE_BUILD_ADAPTER_H_
+#endif  // SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_H_

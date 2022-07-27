@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_DTO_TYPECODE_CONVERSION_UTILS_H_
-#define SUP_EPICS_DTO_TYPECODE_CONVERSION_UTILS_H_
+#ifndef SUP_EPICS_UTILS_DTO_TYPECODE_CONVERSION_UTILS_H_
+#define SUP_EPICS_UTILS_DTO_TYPECODE_CONVERSION_UTILS_H_
 
 //! @file dto_typecode_conversion_utils.h
 //! Collection of utility functions to convert TypeCode of AnyValue to the TypeCode of PVXS value.
@@ -49,4 +49,4 @@ pvxs::TypeCode GetPVXSArrayTypeCode(const ::sup::dto::AnyType& any_type);
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_DTO_TYPECODE_CONVERSION_UTILS_H_
+#endif  // SUP_EPICS_UTILS_DTO_TYPECODE_CONVERSION_UTILS_H_

@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PVXS_UTILS_H_
-#define SUP_EPICS_PVXS_UTILS_H_
+#ifndef SUP_EPICS_UTILS_PVXS_UTILS_H_
+#define SUP_EPICS_UTILS_PVXS_UTILS_H_
 
 //! @file pvxs_utils.h
 //! Collection of utils for PVXS's types and values.
@@ -53,4 +53,4 @@ std::vector<::pvxs::Value> GetChildren(const pvxs::Value& pvxs_value);
 }  // namespace epics
 }  // namespace sup
 
-#endif  // SUP_EPICS_PVXS_UTILS_H_
+#endif  // SUP_EPICS_UTILS_PVXS_UTILS_H_
