@@ -17,12 +17,11 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/dto/anyvalue.h>
-#include <sup/epics/dto_conversion_utils.h>
-
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 using namespace ::sup::epics;
 
@@ -285,4 +284,59 @@ TEST_F(PvxsValueBuilderTests, ArrayInStruct)
   EXPECT_EQ(data.size(), 2);
   EXPECT_EQ(data[0], 42);
   EXPECT_EQ(data[1], 0);
+}
+
+//! Building PVXS value from AnyValue mimicking NTEnum.
+
+TEST_F(PvxsValueBuilderTests, NTEnum)
+{
+  // preparing AnyValue with all fields as in NTEnum
+  sup::dto::AnyValue choices =
+      sup::dto::ArrayValue({{sup::dto::StringType, std::string("abc")}, std::string("qwerty")});
+
+  sup::dto::AnyValue enum_value = {
+      {{"index", {sup::dto::SignedInteger32Type, 42}}, {"choices", choices}}, "enum_t"};
+
+  sup::dto::AnyValue alarm_value = {{{"severity", {sup::dto::SignedInteger32Type, 1}},
+                                     {"status", {sup::dto::SignedInteger32Type, 2}},
+                                     {"message", {sup::dto::StringType, std::string("abc")}}},
+                                    "alarm_t"};
+
+  sup::dto::AnyValue timestamp_value = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type, -1}},
+                                         {"nanoseconds", {sup::dto::SignedInteger32Type, -2}},
+                                         {"userTag", {sup::dto::SignedInteger32Type, -3}}},
+                                        "time_t"};
+
+  sup::dto::AnyValue any_value{
+      {{"value", enum_value}, {"alarm", alarm_value}, {"timeStamp", timestamp_value}},
+      "epics:nt/NTEnum:1.0"};
+
+  auto pvxs_value = BuildPVXSValue(any_value);
+
+  EXPECT_EQ(pvxs_value.id(), std::string("epics:nt/NTEnum:1.0"));
+  EXPECT_EQ(pvxs_value["value"].type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["value"].id(), std::string("enum_t"));
+  EXPECT_EQ(pvxs_value["value.index"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["value.index"].as<int32_t>(), 42);
+  EXPECT_EQ(pvxs_value["value.choices"].type(), pvxs::TypeCode::StringA);
+  auto enum_choices = pvxs_value["value.choices"].as<::pvxs::shared_array<const std::string>>();
+  EXPECT_EQ(enum_choices.size(), 2);
+  EXPECT_EQ(enum_choices[0], std::string("abc"));
+  EXPECT_EQ(enum_choices[1], std::string("qwerty"));
+
+  EXPECT_EQ(pvxs_value["alarm"].type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["alarm.severity"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["alarm.severity"].as<int32_t>(), 1);
+  EXPECT_EQ(pvxs_value["alarm.status"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["alarm.status"].as<int32_t>(), 2);
+  EXPECT_EQ(pvxs_value["alarm.message"].type(), pvxs::TypeCode::String);
+  EXPECT_EQ(pvxs_value["alarm.message"].as<std::string>(), std::string("abc"));
+
+  EXPECT_EQ(pvxs_value["timeStamp"].type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["timeStamp.secondsPastEpoch"].type(), pvxs::TypeCode::Int64);
+  EXPECT_EQ(pvxs_value["timeStamp.secondsPastEpoch"].as<int64_t>(), -1);
+  EXPECT_EQ(pvxs_value["timeStamp.nanoseconds"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["timeStamp.nanoseconds"].as<int32_t>(), -2);
+  EXPECT_EQ(pvxs_value["timeStamp.userTag"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["timeStamp.userTag"].as<int32_t>(), -3);
 }

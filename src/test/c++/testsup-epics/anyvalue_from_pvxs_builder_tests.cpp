@@ -442,7 +442,8 @@ TEST_F(AnyValueFromPVXSBuilderTests, EmptyNTEnum)
   EXPECT_EQ(any_value["timeStamp.userTag"], 0);
 }
 
-//! Build AnyValue from NTEnum with data
+//! Build AnyValue from NTEnum with data.
+//! Same test as above, only enum is initialised with data.
 
 TEST_F(AnyValueFromPVXSBuilderTests, InitialisedNTEnum)
 {
