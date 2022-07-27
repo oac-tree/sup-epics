@@ -305,24 +305,45 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
 TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalarArray)
 {
-  const int n_elements = 2;
-  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
-  any_value[0] = 42;
+  {  // Array of Int32
+    const int n_elements = 2;
+    sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
+    any_value[0] = 42;
 
-  pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
-  AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value);
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+    AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value);
 
-  auto pvxs_data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
-  EXPECT_EQ(pvxs_data.size(), 2);
-  EXPECT_EQ(pvxs_data[0], 42);
-  EXPECT_EQ(pvxs_data[1], 0);
+    auto pvxs_data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
+    EXPECT_EQ(pvxs_data.size(), 2);
+    EXPECT_EQ(pvxs_data[0], 42);
+    EXPECT_EQ(pvxs_data[1], 0);
+  }
+
+  {  // Array of Strings
+    const int n_elements = 2;
+    sup::dto::AnyValue any_value(n_elements, sup::dto::StringType);
+    any_value[0] = "abc";
+    any_value[1] = "qwerty";
+
+    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::StringA).create();
+    AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value);
+
+    auto pvxs_data = pvxs_value.as<::pvxs::shared_array<const std::string>>();
+    EXPECT_EQ(pvxs_data.size(), 2);
+    EXPECT_EQ(pvxs_data[0], std::string("abc"));
+    EXPECT_EQ(pvxs_data[1], std::string("qwerty"));
+  }
 
   {  // attempt to assign to scalar
+    const int n_elements = 2;
+    sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
     EXPECT_THROW(AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value), std::runtime_error);
   }
 
   {  // attempt to assign to scalar array of wrong type
+    const int n_elements = 2;
+    sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
     EXPECT_THROW(AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value), std::runtime_error);
   }
@@ -612,18 +633,35 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalar)
 
 TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalarArray)
 {
-  auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
-  ::pvxs::shared_array<int32_t> array({42, 43});
-  pvxs_value = array.freeze();
+  {  // from Int32A
+    auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+    ::pvxs::shared_array<int32_t> array({42, 43});
+    pvxs_value = array.freeze();
 
-  auto any_value = GetAnyValueFromScalarArray(pvxs_value);
-  EXPECT_TRUE(sup::dto::IsArrayValue(any_value));
-  EXPECT_EQ(any_value.GetTypeCode(), sup::dto::TypeCode::Array);
-  EXPECT_EQ(any_value.NumberOfElements(), 2);
-  EXPECT_EQ(any_value[0], 42);
-  EXPECT_EQ(any_value[0].GetTypeCode(), sup::dto::TypeCode::Int32);
-  EXPECT_EQ(any_value[1], 43);
-  EXPECT_EQ(any_value[1].GetTypeCode(), sup::dto::TypeCode::Int32);
+    auto any_value = GetAnyValueFromScalarArray(pvxs_value);
+    EXPECT_TRUE(sup::dto::IsArrayValue(any_value));
+    EXPECT_EQ(any_value.GetTypeCode(), sup::dto::TypeCode::Array);
+    EXPECT_EQ(any_value.NumberOfElements(), 2);
+    EXPECT_EQ(any_value[0], 42);
+    EXPECT_EQ(any_value[0].GetTypeCode(), sup::dto::TypeCode::Int32);
+    EXPECT_EQ(any_value[1], 43);
+    EXPECT_EQ(any_value[1].GetTypeCode(), sup::dto::TypeCode::Int32);
+  }
+
+  {  // from StringA
+    auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::StringA).create();
+    ::pvxs::shared_array<std::string> array({"abc", "qwerty"});
+    pvxs_value = array.freeze();
+
+    auto any_value = GetAnyValueFromScalarArray(pvxs_value);
+    EXPECT_TRUE(sup::dto::IsArrayValue(any_value));
+    EXPECT_EQ(any_value.GetTypeCode(), sup::dto::TypeCode::Array);
+    EXPECT_EQ(any_value.NumberOfElements(), 2);
+    EXPECT_EQ(any_value[0], std::string("abc"));
+    EXPECT_EQ(any_value[0].GetTypeCode(), sup::dto::TypeCode::String);
+    EXPECT_EQ(any_value[1], std::string("qwerty"));
+    EXPECT_EQ(any_value[1].GetTypeCode(), sup::dto::TypeCode::String);
+  }
 
   // attempt to create array from scalar
   {  // from long string
