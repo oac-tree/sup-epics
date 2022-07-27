@@ -441,3 +441,61 @@ TEST_F(AnyValueFromPVXSBuilderTests, EmptyNTEnum)
   EXPECT_EQ(any_value["timeStamp.userTag"].GetTypeCode(), sup::dto::TypeCode::Int32);
   EXPECT_EQ(any_value["timeStamp.userTag"], 0);
 }
+
+//! Build AnyValue from NTEnum with data
+
+TEST_F(AnyValueFromPVXSBuilderTests, InitialisedNTEnum)
+{
+  auto pvxs_value = pvxs::nt::NTEnum{}.create();
+
+  // assigning values
+  pvxs_value["value.index"] = 42;
+  ::pvxs::shared_array<std::string> array({"abc", "qwerty"});
+  pvxs_value["value.choices"] = array.freeze();
+  pvxs_value["alarm.severity"] = 1;
+  pvxs_value["alarm.status"] = 2;
+  pvxs_value["alarm.message"] = std::string("abc");
+  pvxs_value["timeStamp.secondsPastEpoch"] = -1;
+  pvxs_value["timeStamp.nanoseconds"] = -2;
+  pvxs_value["timeStamp.userTag"] = -3;
+
+  // building any_value
+  auto any_value = BuildAnyValue(pvxs_value);
+
+  // constructing expected AnyType
+  sup::dto::AnyType enum_struct = {{{"index", {sup::dto::SignedInteger32Type}},
+                                    {"choices", {sup::dto::AnyType(2, sup::dto::StringType)}}},
+                                   "enum_t"};
+
+  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
+                                     {"status", {sup::dto::SignedInteger32Type}},
+                                     {"message", {sup::dto::StringType}}},
+                                    "alarm_t"};
+
+  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
+                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
+                                         {"userTag", {sup::dto::SignedInteger32Type}}},
+                                        "time_t"};
+
+  sup::dto::AnyType expected_anytype{
+      {{"value", enum_struct}, {"alarm", alarm_struct}, {"timeStamp", timestamp_struct}},
+      "epics:nt/NTEnum:1.0"};
+
+  // validating AnyValue
+  EXPECT_EQ(any_value.GetType(), expected_anytype);
+  EXPECT_EQ(any_value["value.index"], 42);
+  EXPECT_EQ(any_value["value.choices"][0], std::string("abc"));
+  EXPECT_EQ(any_value["value.choices"][1], std::string("qwerty"));
+  EXPECT_EQ(any_value["alarm.severity"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["alarm.severity"], 1);
+  EXPECT_EQ(any_value["alarm.status"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["alarm.status"], 2);
+  EXPECT_EQ(any_value["alarm.message"].GetTypeCode(), sup::dto::TypeCode::String);
+  EXPECT_EQ(any_value["alarm.message"], std::string("abc"));
+  EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"].GetTypeCode(), sup::dto::TypeCode::Int64);
+  EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"], -1);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"], -2);
+  EXPECT_EQ(any_value["timeStamp.userTag"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["timeStamp.userTag"], -3);
+}
