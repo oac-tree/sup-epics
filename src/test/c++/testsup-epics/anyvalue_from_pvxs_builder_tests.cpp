@@ -204,3 +204,82 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayInStruct)
   EXPECT_EQ(any_value["array"][0], 42);
   EXPECT_EQ(any_value["array"][1], 43);
 }
+
+//! Building AnyValue from plain default-constructed NTScalar.
+//! Plan scalar means that it doesn't contain display, control and alarm meta-data.
+//!
+//! struct "epics:nt/NTScalar:1.0" {
+//!   int32_t value = 0
+//!   struct "alarm_t" {
+//!     int32_t severity = 0
+//!     int32_t status = 0
+//!     string message = ""
+//!   } alarm
+//!   struct "time_t" {
+//!     int64_t secondsPastEpoch = 0
+//!     int32_t nanoseconds = 0
+//!     int32_t userTag = 0
+//!   } timeStamp
+//! }
+
+TEST_F(AnyValueFromPVXSBuilderTests, PlainDefaultConstructedNTScalar)
+{
+  // plain NTSCalar without display meta
+  auto pvxs_value = pvxs::nt::NTScalar{pvxs::TypeCode::Int32}.create();
+
+  // checking pvxs_value itself
+  EXPECT_EQ(pvxs_value.id(), std::string("epics:nt/NTScalar:1.0"));
+  EXPECT_EQ(pvxs_value["value"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["value"].as<int32_t>(), 0);
+  EXPECT_EQ(pvxs_value["display.limitLow"].type(), pvxs::TypeCode::Null);
+  EXPECT_EQ(pvxs_value["display.description"].type(), pvxs::TypeCode::Null);
+  EXPECT_EQ(pvxs_value["control.limitLow"].type(), pvxs::TypeCode::Null);
+
+  EXPECT_EQ(pvxs_value["alarm"].type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["alarm.severity"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["alarm.severity"].as<int32_t>(), 0);
+  EXPECT_EQ(pvxs_value["alarm.status"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["alarm.status"].as<int32_t>(), 0);
+  EXPECT_EQ(pvxs_value["alarm.message"].type(), pvxs::TypeCode::String);
+  EXPECT_EQ(pvxs_value["alarm.message"].as<std::string>(), std::string());
+
+  EXPECT_EQ(pvxs_value["timeStamp"].type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["timeStamp.secondsPastEpoch"].type(), pvxs::TypeCode::Int64);
+  EXPECT_EQ(pvxs_value["timeStamp.secondsPastEpoch"].as<int64_t>(), 0);
+  EXPECT_EQ(pvxs_value["timeStamp.nanoseconds"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["timeStamp.nanoseconds"].as<int32_t>(), 0);
+  EXPECT_EQ(pvxs_value["timeStamp.userTag"].type(), pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["timeStamp.userTag"].as<int32_t>(), 0);
+
+  // building any_value
+  auto any_value = BuildAnyValue(pvxs_value);
+
+  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
+                                     {"status", {sup::dto::SignedInteger32Type}},
+                                     {"message", {sup::dto::StringType}}},
+                                    "alarm_t"};
+
+  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
+                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
+                                         {"userTag", {sup::dto::SignedInteger32Type}}},
+                                        "time_t"};
+
+  sup::dto::AnyType expected_anytype{{{"value", {sup::dto::SignedInteger32Type}},
+                                      {"alarm", alarm_struct},
+                                      {"timeStamp", timestamp_struct}},
+                                     "epics:nt/NTScalar:1.0"};
+
+  EXPECT_EQ(any_value.GetType(), expected_anytype);
+  EXPECT_EQ(any_value["value"], 0);
+  EXPECT_EQ(any_value["alarm.severity"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["alarm.severity"], 0);
+  EXPECT_EQ(any_value["alarm.status"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["alarm.status"], 0);
+  EXPECT_EQ(any_value["alarm.message"].GetTypeCode(), sup::dto::TypeCode::String);
+  EXPECT_EQ(any_value["alarm.message"], std::string());
+  EXPECT_EQ(any_value["timeStamp.secondsPastEpoch"].GetTypeCode(), sup::dto::TypeCode::Int64);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"], 0);
+  EXPECT_EQ(any_value["timeStamp.nanoseconds"].GetTypeCode(), sup::dto::TypeCode::Int32);
+  EXPECT_EQ(any_value["timeStamp.userTag"], 0);
+  EXPECT_EQ(any_value["timeStamp.userTag"].GetTypeCode(), sup::dto::TypeCode::Int32);
+}

@@ -269,13 +269,15 @@ TEST_F(PvxsValueBuilderTests, ArrayOfIntegers)
 
 TEST_F(PvxsValueBuilderTests, ArrayInStruct)
 {
+  const std::string struct_name{"struct_name"};
+
   const int n_elements = 2;
   sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
   any_array[0] = 42;
-  sup::dto::AnyValue any_value = {{{"array", any_array}}, "struct_name"};
+  sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
-  EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
+  EXPECT_EQ(pvxs_value.id(), struct_name);
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
