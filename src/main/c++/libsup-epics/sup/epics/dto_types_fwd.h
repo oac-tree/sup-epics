@@ -38,6 +38,10 @@ namespace pvxs
 class Value;
 class TypeDef;
 struct TypeCode;
+namespace client
+{
+class Context;
+}
 }  // namespace pvxs
 
 #endif  // SUP_EPICS_DTO_TYPES_FWD_H_
