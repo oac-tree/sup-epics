@@ -134,7 +134,7 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
 }
 
 //! Server with variable and initial value created before the client.
-//! Client gets the value from server, modifies one field and set the value back.
+//! Client gets the structure from the server, modifies one field and set the value back.
 //! Test check that server value has changed.
 
 TEST_F(PVAccessClientVariableTest, SetFromClient)
@@ -160,4 +160,47 @@ TEST_F(PVAccessClientVariableTest, SetFromClient)
 
   auto shared_value = m_shared_pv.fetch();
   EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 1);
+}
+
+//! Server with variable and initial value created before the client.
+//! Client gets the structure from the server, and sets the value of one field three times in a row.
+//! Checking the last value on server side.
+//!
+//! This test often hangs
+
+TEST_F(PVAccessClientVariableTest, DISABLE_MultipleSetFromClient)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable.IsConnected());
+
+  // retrieving value
+  sup::dto::AnyValue any_value;
+  EXPECT_TRUE(variable.GetValue(any_value));
+  EXPECT_EQ(any_value["value"], kInitialValue);
+
+//  std::cerr.setstate(std::ios_base::failbit);
+
+  // modifying the field in retrieved value
+  for (int i = 1; i <= 3; ++i)
+  {
+    any_value["value"] = kInitialValue + i;
+    EXPECT_TRUE(variable.SetValue(any_value));
+  }
+//  shared_context->hurryUp();
+//  std::cerr.clear();
+  std::this_thread::sleep_for(msec(20));
+
+  // It will generate a log message on the screen
+  // "ERR pvxs.client.io Server 127.0.0.1:5075 uses non-existent IOID 268443649.  Ignoring..."
+  // This is because the client destroys pvxs::client::Operation with a new SetValue request and the
+  // server is not able to finalize the taking of the previous value.
+
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 3);
 }
