@@ -184,7 +184,7 @@ TEST_F(PVAccessClientVariableTest, DISABLE_MultipleSetFromClient)
   EXPECT_TRUE(variable.GetValue(any_value));
   EXPECT_EQ(any_value["value"], kInitialValue);
 
-//  std::cerr.setstate(std::ios_base::failbit);
+  //  std::cerr.setstate(std::ios_base::failbit);
 
   // modifying the field in retrieved value
   for (int i = 1; i <= 3; ++i)
@@ -192,8 +192,8 @@ TEST_F(PVAccessClientVariableTest, DISABLE_MultipleSetFromClient)
     any_value["value"] = kInitialValue + i;
     EXPECT_TRUE(variable.SetValue(any_value));
   }
-//  shared_context->hurryUp();
-//  std::cerr.clear();
+  //  shared_context->hurryUp();
+  //  std::cerr.clear();
   std::this_thread::sleep_for(msec(20));
 
   // It will generate a log message on the screen
@@ -203,4 +203,47 @@ TEST_F(PVAccessClientVariableTest, DISABLE_MultipleSetFromClient)
 
   auto shared_value = m_shared_pv.fetch();
   EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 3);
+}
+
+//! Server with variable and initial value created before two clients.
+//! One client set the value, second checks updated value.
+
+TEST_F(PVAccessClientVariableTest, TwoClients)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable1(kChannelName, shared_context);
+  sup::epics::PVAccessClientVariable variable2(kChannelName, shared_context);
+
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable1.IsConnected());
+  EXPECT_TRUE(variable2.IsConnected());
+
+  // retrieving value through first variable
+  sup::dto::AnyValue any_value1;
+  EXPECT_TRUE(variable1.GetValue(any_value1));
+  EXPECT_EQ(any_value1["value"], kInitialValue);
+
+  // retrieving value through the second variable
+  sup::dto::AnyValue any_value2;
+  EXPECT_TRUE(variable2.GetValue(any_value2));
+  EXPECT_EQ(any_value2["value"], kInitialValue);
+
+  // setting the value through the first variable
+  any_value1["value"] = 45;
+  EXPECT_TRUE(variable1.SetValue(any_value1));
+
+  std::this_thread::sleep_for(msec(20));
+
+  // checking the value through the second variable
+  sup::dto::AnyValue any_value3;
+  EXPECT_TRUE(variable2.GetValue(any_value3));
+  EXPECT_EQ(any_value3["value"], 45);
+
+  // checking the value on server side
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
