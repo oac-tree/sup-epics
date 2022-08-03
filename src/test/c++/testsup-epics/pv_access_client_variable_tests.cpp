@@ -35,6 +35,7 @@ using msec = std::chrono::milliseconds;
 namespace
 {
 const int kInitialValue = 42;
+const int kInitialStatus = 1;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
 }  // namespace
 
@@ -49,6 +50,7 @@ public:
       , m_server(pvxs::server::Config::isolated().build().addPV(kChannelName, m_shared_pv))
   {
     m_pvxs_value["value"] = kInitialValue;
+    m_pvxs_value["alarm.status"] = kInitialStatus;
   }
 
   //! Create PVXS context intended for sharing among multiple PVAccessClientVariable variables.
@@ -75,7 +77,7 @@ TEST_F(PVAccessClientVariableTest, InitialStateWhenNoServer)
   EXPECT_FALSE(variable.IsConnected());
 }
 
-//! Sets the value through unconnected client. The value of the cache should be changed.
+//! Sets the value through the unconnected client. The value of the cache should be changed.
 
 TEST_F(PVAccessClientVariableTest, SetValueWhenUnconnected)
 {
@@ -115,7 +117,7 @@ TEST_F(PVAccessClientVariableTest, DisconnectionOnServerStop)
 }
 
 //! A server with a single variable is created before the client.
-//! Check client's initial value of the variable after the connection.
+//! Check the client's initial value of the variable after the connection.
 
 TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
 {
@@ -134,8 +136,8 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
 }
 
 //! Server with variable and initial value created before the client.
-//! Client gets the structure from the server, modifies one field and set the value back.
-//! Test check that server value has changed.
+//! The client gets the structure from the server, modifies one field, and sets the value back.
+//! Test check that the server value has changed.
 
 TEST_F(PVAccessClientVariableTest, SetFromClient)
 {
@@ -163,10 +165,11 @@ TEST_F(PVAccessClientVariableTest, SetFromClient)
 }
 
 //! Server with variable and initial value created before the client.
-//! Client gets the structure from the server, and sets the value of one field three times in a row.
-//! Checking the last value on server side.
+//! The client gets the structure from the server and sets the value of one field three times in a
+//! row without any extra delays. This led to the situation, where every next operation, destroys
+//! the one being executed. The test checks the last value on the server side.
 //!
-//! This test often hangs
+//! This test often hangs and it is disabled for the moment. FIXME.
 
 TEST_F(PVAccessClientVariableTest, DISABLE_MultipleSetFromClient)
 {
@@ -246,4 +249,35 @@ TEST_F(PVAccessClientVariableTest, TwoClients)
   // checking the value on server side
   auto shared_value = m_shared_pv.fetch();
   EXPECT_EQ(shared_value["value"].as<int>(), 45);
+}
+
+//! Server with variable and initial value created before the client.
+//! The client sets the value on the server using a custom structure, with value filed.
+//! The test proves, that `pvxs::server::Server` allows updating server variable with pvxs::Value
+//! that doesn't much the remote one. It will use only matching fields.
+
+TEST_F(PVAccessClientVariableTest, SetFromSimilarStructure)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable.IsConnected());
+
+  // constructing a structure that doesn't coincide with variable on server side
+  // however it has `value` field
+  sup::dto::AnyValue any_value = {{{"value", {sup::dto::SignedInteger32Type, 22}}}};
+
+  // setting custom AnyValue via client
+  EXPECT_TRUE(variable.SetValue(any_value));
+  std::this_thread::sleep_for(msec(20));
+
+  // We see that the `value` field has bin updated on server side.
+  // The field `alarm.status` on server side remained untouched.
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), 22);
+  EXPECT_EQ(shared_value["alarm.status"].as<int>(), kInitialStatus);
 }
