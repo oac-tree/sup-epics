@@ -85,7 +85,7 @@ TEST_F(PvxsValueBuilderTests, PVXSValueBasicsAssignToScalar)
   EXPECT_EQ(pvxs_int1.as<int>(), 45);
 }
 
-//! Studying how to assign to PVXS value (exercise to understand PVXS better).
+//! Studying how to assign to PVXS struct (exercise to understand PVXS better).
 
 TEST_F(PvxsValueBuilderTests, PVXSValueBasicsAssignToStruct)
 {
@@ -100,6 +100,25 @@ TEST_F(PvxsValueBuilderTests, PVXSValueBasicsAssignToStruct)
   auto field_value = value["field"];  // copy
   field_value = 43;
   EXPECT_EQ(value["field"].as<int32_t>(), 43);  // seems there is an implicit sharing inside
+}
+
+//! Studying what happen if we assign scalar to struct (exercise to understand PVXS better).
+
+TEST_F(PvxsValueBuilderTests, PVXSValueBasicsAttemptToAssign)
+{
+  auto struct_value = pvxs::TypeDef(pvxs::TypeCode::Struct, "simple_t",
+                         {pvxs::Member(pvxs::TypeCode::Int32, "field")}).create();
+
+  struct_value["field"] = 42;
+
+  auto scalar_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
+  scalar_value = 43;
+
+  struct_value = scalar_value;
+
+  // so, assignment simply changes the type
+  EXPECT_EQ(struct_value.type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(struct_value.as<int>(), 43);
 }
 
 //! Build PVXS value from empty AnyValue.
