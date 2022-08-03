@@ -23,23 +23,40 @@
 #include <pvxs/nt.h>
 #include <pvxs/server.h>
 #include <pvxs/sharedpv.h>
-#include <sup/epics/channel_access_pv.h>
+#include <sup/epics/pvxs/pv_access_client_variable.h>
+
+#include <memory>
 
 namespace
 {
 const int kInitialValue = 42;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
-}
+}  // namespace
 
 class PVAccessClientVariableTest : public ::testing::Test
 {
 public:
+  using shared_context_t = std::shared_ptr<pvxs::client::Context>;
+
   PVAccessClientVariableTest()
       : m_pvxs_value(pvxs::nt::NTScalar{pvxs::TypeCode::Int32}.create())
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
       , m_server(pvxs::server::Config::isolated().build().addPV(kChannelName, m_shared_pv))
   {
     m_pvxs_value["value"] = kInitialValue;
+  }
+
+  //! Create PVXS context intended for sharing among multiple PVAccessClientVariable variables.
+  shared_context_t CreateSharedContext()
+  {
+    return std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
+  }
+
+  sup::epics::PVAccessClientVariable::Context CreateContext(shared_context_t shared_context)
+  {
+    sup::epics::PVAccessClientVariable::Context result;
+    result.pvxs_context = shared_context; // weak_ptr
+    return result;
   }
 
   pvxs::Value m_pvxs_value;
@@ -49,9 +66,13 @@ public:
 
 TEST_F(PVAccessClientVariableTest, InitialState)
 {
-  m_server.start();
-  m_shared_pv.open(m_pvxs_value);
-  EXPECT_EQ(1, 1);
+  auto shared_context = CreateSharedContext();
+
+  const std::string expected_name("NON_EXISTING:INT");
+  sup::epics::PVAccessClientVariable variable(expected_name, CreateContext(shared_context));
+
+  EXPECT_EQ(variable.GetVariableName(), expected_name);
+  EXPECT_FALSE(variable.IsConnected());
 }
 
 TEST_F(PVAccessClientVariableTest, InitialStateV2)
