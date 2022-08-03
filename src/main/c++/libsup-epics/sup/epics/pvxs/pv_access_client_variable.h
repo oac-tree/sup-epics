@@ -39,12 +39,9 @@ namespace epics
 class PVAccessClientVariable
 {
 public:
-  struct Context
-  {
-    std::weak_ptr<pvxs::client::Context> pvxs_context;
-  };
+  using context_t = std::weak_ptr<pvxs::client::Context>;
 
-  explicit PVAccessClientVariable(const std::string& variable_name, const Context& context);
+  explicit PVAccessClientVariable(const std::string& variable_name, context_t context);
   ~PVAccessClientVariable();
 
   PVAccessClientVariable(const PVAccessClientVariable&) = delete;

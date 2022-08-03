@@ -52,13 +52,6 @@ public:
     return std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
   }
 
-  sup::epics::PVAccessClientVariable::Context CreateContext(shared_context_t shared_context)
-  {
-    sup::epics::PVAccessClientVariable::Context result;
-    result.pvxs_context = shared_context; // weak_ptr
-    return result;
-  }
-
   pvxs::Value m_pvxs_value;
   pvxs::server::SharedPV m_shared_pv;
   pvxs::server::Server m_server;
@@ -69,7 +62,7 @@ TEST_F(PVAccessClientVariableTest, InitialState)
   auto shared_context = CreateSharedContext();
 
   const std::string expected_name("NON_EXISTING:INT");
-  sup::epics::PVAccessClientVariable variable(expected_name, CreateContext(shared_context));
+  sup::epics::PVAccessClientVariable variable(expected_name, shared_context);
 
   EXPECT_EQ(variable.GetVariableName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());

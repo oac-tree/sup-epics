@@ -34,13 +34,13 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   using subscription_t = pvxs::client::Subscription;
   std::string m_variable_name;
   pvxs::Value m_pvxs_value;
-  Context m_context;
+  context_t m_context;
   bool m_is_connected{false};
   std::shared_ptr<subscription_t> m_subscription;
   std::shared_ptr<pvxs::client::Operation> m_operation;
   std::mutex m_mutex;
 
-  PVAccessClientVariableImpl(const std::string& variable_name, const Context& context)
+  PVAccessClientVariableImpl(const std::string& variable_name, context_t context)
       : m_variable_name(variable_name), m_context(context)
   {
   }
@@ -48,7 +48,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   //! Inits subscription to monitor the variable.
   void InitSubscription()
   {
-    if (auto sp = m_context.pvxs_context.lock())
+    if (auto sp = m_context.lock())
     {
       m_subscription = sp->monitor(m_variable_name.c_str())
                            .maskConnected(false)
@@ -105,7 +105,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
 
     m_pvxs_value = new_pvxs_value;
     // copying the value inside lambda
-    if (auto sp = m_context.pvxs_context.lock())
+    if (auto sp = m_context.lock())
     {
       m_operation = sp->put(m_variable_name.c_str())
                         .build([new_pvxs_value](pvxs::Value&& /*proto*/) { return new_pvxs_value; })
@@ -120,7 +120,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
 };
 
 PVAccessClientVariable::PVAccessClientVariable(const std::string& variable_name,
-                                               const Context& context)
+                                               context_t context)
     : p_impl(new PVAccessClientVariableImpl(variable_name, context))
 {
   p_impl->InitSubscription();
