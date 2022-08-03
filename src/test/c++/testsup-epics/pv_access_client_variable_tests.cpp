@@ -23,9 +23,14 @@
 #include <pvxs/nt.h>
 #include <pvxs/server.h>
 #include <pvxs/sharedpv.h>
+#include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_client_variable.h>
 
 #include <memory>
+#include <thread>
+
+using msec = std::chrono::milliseconds;
 
 namespace
 {
@@ -57,7 +62,9 @@ public:
   pvxs::server::Server m_server;
 };
 
-TEST_F(PVAccessClientVariableTest, InitialState)
+//! Initial state of PVAccessClientVariable when no server exists.
+
+TEST_F(PVAccessClientVariableTest, InitialStateWhenNoServer)
 {
   auto shared_context = CreateSharedContext();
 
@@ -68,9 +75,40 @@ TEST_F(PVAccessClientVariableTest, InitialState)
   EXPECT_FALSE(variable.IsConnected());
 }
 
-TEST_F(PVAccessClientVariableTest, InitialStateV2)
+//! Sets the value through unconnected client. The value of the cache should be changed.
+
+TEST_F(PVAccessClientVariableTest, SetValueWhenUnconnected)
+{
+  auto shared_context = CreateSharedContext();
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
+  any_value = 42;
+
+  EXPECT_TRUE(variable.SetValue(any_value));
+
+  sup::dto::AnyValue result;
+  EXPECT_TRUE(variable.GetValue(result));
+  EXPECT_EQ(any_value, result);
+}
+
+//! A server with a single variable is created before the client.
+//! Checks client connected/disconnected status.
+
+TEST_F(PVAccessClientVariableTest, DisconnectionOnServerStop)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
-  EXPECT_EQ(1, 1);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable.IsConnected());
+
+  // stopping server
+  m_server.stop();
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_FALSE(variable.IsConnected());
 }
