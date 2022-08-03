@@ -82,11 +82,12 @@ TEST_F(PVAccessClientVariableTest, SetValueWhenUnconnected)
   auto shared_context = CreateSharedContext();
   sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
 
+  // seting the value
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
   any_value = 42;
-
   EXPECT_TRUE(variable.SetValue(any_value));
 
+  // expecting to get same value
   sup::dto::AnyValue result;
   EXPECT_TRUE(variable.GetValue(result));
   EXPECT_EQ(any_value, result);
@@ -111,4 +112,52 @@ TEST_F(PVAccessClientVariableTest, DisconnectionOnServerStop)
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_FALSE(variable.IsConnected());
+}
+
+//! A server with a single variable is created before the client.
+//! Check client's initial value of the variable after the connection.
+
+TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable.IsConnected());
+
+  sup::dto::AnyValue result;
+  EXPECT_TRUE(variable.GetValue(result));
+  EXPECT_EQ(result["value"], kInitialValue);
+}
+
+//! Server with variable and initial value created before the client.
+//! Client gets the value from server, modifies one field and set the value back.
+//! Test check that server value has changed.
+
+TEST_F(PVAccessClientVariableTest, SetFromClient)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable.IsConnected());
+
+  // retrieving value
+  sup::dto::AnyValue any_value;
+  EXPECT_TRUE(variable.GetValue(any_value));
+  EXPECT_EQ(any_value["value"], kInitialValue);
+
+  // modifying the field in retrieved value
+  any_value["value"] = kInitialValue + 1;
+  EXPECT_TRUE(variable.SetValue(any_value));
+  std::this_thread::sleep_for(msec(20));
+
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 1);
 }
