@@ -20,6 +20,7 @@
 #include "sup/epics/pv_access_client.h"
 
 #include <pvxs/client.h>
+#include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_client_variable.h>
 
 #include <map>
@@ -95,6 +96,26 @@ bool PVAccessClient::IsConnected(const std::string& name) const
 {
   auto iter = p_impl->m_variables.find(name);
   return iter == p_impl->m_variables.end() ? false : iter->second->IsConnected();
+}
+
+dto::AnyValue PVAccessClient::GetValue(const std::string& name) const
+{
+  auto iter = p_impl->m_variables.find(name);
+  if (iter == p_impl->m_variables.end())
+  {
+    throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
+  }
+  return iter->second->GetValue();
+}
+
+bool PVAccessClient::SetValue(const std::string& name, const dto::AnyValue& value)
+{
+  auto iter = p_impl->m_variables.find(name);
+  if (iter == p_impl->m_variables.end())
+  {
+    throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
+  }
+  return iter->second->SetValue(value);
 }
 
 PVAccessClient::~PVAccessClient()

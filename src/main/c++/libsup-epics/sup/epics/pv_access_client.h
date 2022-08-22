@@ -64,6 +64,17 @@ public:
   //! @return True if channel is connected, false otherwise.
   bool IsConnected(const std::string& name) const;
 
+  //! Get the value from a specific channel. Will throw if channel was not added yet.
+  //! @param name EPICS channel name.
+  //! @return Channel's value.
+  sup::dto::AnyValue GetValue(const std::string& name) const;
+
+  //! Propagate the value to a specific channel. Will throw if channel was not added yet.
+  //! @param name EPICS channel name.
+  //! @param value Value to be written to the channel.
+  //! @return True if successful, false otherwise.
+  bool SetValue(const std::string& name, const sup::dto::AnyValue& value);
+
 private:
   struct PVAccessClientImpl;
   PVAccessClientImpl* p_impl{nullptr};

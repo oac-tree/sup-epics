@@ -30,6 +30,7 @@
 #include <sup/epics/pv_access_client.h>
 
 #include <memory>
+#include <stdexcept>
 #include <thread>
 
 using msec = std::chrono::milliseconds;
@@ -90,4 +91,8 @@ TEST_F(PVAccessClientTest, InitialState)
 
   EXPECT_TRUE(client.GetVariableNames().empty());
   EXPECT_FALSE(client.IsConnected("non-existing-channel"));
+  EXPECT_THROW(client.GetValue("non-existing-channel"), std::runtime_error);
+
+  sup::dto::AnyValue any_value;
+  EXPECT_THROW(client.SetValue("non-existing-channel", any_value), std::runtime_error);
 }
