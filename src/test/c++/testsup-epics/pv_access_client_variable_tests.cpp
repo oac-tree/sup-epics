@@ -75,6 +75,9 @@ TEST_F(PVAccessClientVariableTest, InitialStateWhenNoServer)
 
   EXPECT_EQ(variable.GetVariableName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());
+
+  auto any_value = variable.GetValue();
+  EXPECT_TRUE(::sup::dto::IsEmptyValue(any_value));
 }
 
 //! Sets the value through the unconnected client. The value of the cache should be changed.

@@ -58,6 +58,11 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
   {
+    if (IsEmptyValue(pvxs_value))
+    {
+        return; // by default AnyValueBuildAdapter will generate empty AnyValue
+    }
+
     m_pvxs_stack.push({pvxs_value, std::string()});
     ProcessStack();
   }

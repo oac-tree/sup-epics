@@ -39,6 +39,11 @@ namespace sup
 namespace epics
 {
 
+bool IsEmptyValue(const pvxs::Value &value)
+{
+  return value.type() == pvxs::TypeCode::Null;
+}
+
 bool IsScalar(const pvxs::TypeCode &type_code)
 {
   auto on_element = [&type_code](const ::pvxs::TypeCode &element) { return type_code == element; };

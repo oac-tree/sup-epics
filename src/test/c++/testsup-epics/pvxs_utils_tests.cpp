@@ -31,6 +31,15 @@ class PvxsUtilsTests : public ::testing::Test
 {
 };
 
+TEST_F(PvxsUtilsTests, IsEmptyValue)
+{
+  pvxs::Value value;
+  EXPECT_TRUE(IsEmptyValue(value));
+
+  auto scalar_value = ::pvxs::TypeDef(::pvxs::TypeCode::Int16).create();
+  EXPECT_FALSE(IsEmptyValue(scalar_value));
+}
+
 TEST_F(PvxsUtilsTests, IsScalar)
 {
   using pvxs::TypeCode;

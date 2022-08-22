@@ -32,6 +32,9 @@ namespace sup
 namespace epics
 {
 
+//! Returns true if given value is empty value (i.e. default-constructed).
+bool IsEmptyValue(const ::pvxs::Value& value);
+
 //! Returns true if given type_code is referring to a scalar.
 bool IsScalar(const ::pvxs::TypeCode& type_code);
 

@@ -32,6 +32,16 @@ class AnyValueFromPVXSBuilderTests : public ::testing::Test
 {
 };
 
+//! Construct AnyValue default-constructed PVXS value.
+
+TEST_F(AnyValueFromPVXSBuilderTests, EmptyValue)
+{
+  pvxs::Value pvxs_value;
+
+  auto anyvalue = BuildAnyValue(pvxs_value);
+  EXPECT_TRUE(sup::dto::IsEmptyValue(anyvalue));
+}
+
 //! Construct AnyValue from scalar-like PVXS value.
 
 TEST_F(AnyValueFromPVXSBuilderTests, ScalarTypes)

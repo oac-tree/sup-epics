@@ -30,6 +30,17 @@ class AnyValueBuildAdapterTests : public ::testing::Test
 {
 };
 
+
+//! Checking that the builder returns an empty value.
+
+TEST_F(AnyValueBuildAdapterTests, InitialState)
+{
+  AnyValueBuildAdapter builder;
+  auto value = builder.MoveAnyValue();
+
+  EXPECT_TRUE(::sup::dto::IsEmptyValue(value));
+}
+
 //! Creation of AnyValue scalar.
 
 TEST_F(AnyValueBuildAdapterTests, Scalar)
@@ -44,7 +55,6 @@ TEST_F(AnyValueBuildAdapterTests, Scalar)
   EXPECT_TRUE(::sup::dto::IsScalarValue(value));
   EXPECT_EQ(value.As<sup::dto::int32>(), 42);
 }
-
 
 //! Creation of AnyValue containing a struct with single field.
 
