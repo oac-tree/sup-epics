@@ -26,8 +26,8 @@
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/pvxs/pv_access_client_variable.h>
 #include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/pvxs/pv_access_client_variable.h>
 
 #include <memory>
 #include <thread>
@@ -131,6 +131,25 @@ TEST_F(PVAccessClientVariableTest, DisconnectionOnServerStop)
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_FALSE(variable.IsConnected());
+}
+
+//! A server with a single variable is created before the client, but started after the client was
+//! created. Checking that the client gets connected after the server start.
+
+TEST_F(PVAccessClientVariableTest, ConnectionOnServerStart)
+{
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  EXPECT_FALSE(variable.IsConnected());
+
+  // starting the server
+  m_server.start();
+  std::this_thread::sleep_for(msec(20));
+
+  // checking that the variable is connected
+  EXPECT_TRUE(variable.IsConnected());
 }
 
 //! A server with a single variable is created and started before the client.
@@ -288,7 +307,6 @@ TEST_F(PVAccessClientVariableTest, TwoClients)
   EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
 
-
 //! Server with variable and initial value created before two clients.
 //! One client set the value, second checks updated value.
 //! Both clients are initialised via callbacks.
@@ -306,8 +324,10 @@ TEST_F(PVAccessClientVariableTest, TwoClientsCallbacks)
   EXPECT_CALL(listener1, OnValueChanged(_)).Times(1);
   EXPECT_CALL(listener2, OnValueChanged(_)).Times(1);
 
-  sup::epics::PVAccessClientVariable variable1(kChannelName, shared_context, listener1.GetCallBack());
-  sup::epics::PVAccessClientVariable variable2(kChannelName, shared_context, listener2.GetCallBack());
+  sup::epics::PVAccessClientVariable variable1(kChannelName, shared_context,
+                                               listener1.GetCallBack());
+  sup::epics::PVAccessClientVariable variable2(kChannelName, shared_context,
+                                               listener2.GetCallBack());
 
   std::this_thread::sleep_for(msec(20));
 
@@ -344,7 +364,6 @@ TEST_F(PVAccessClientVariableTest, TwoClientsCallbacks)
   auto shared_value = m_shared_pv.fetch();
   EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
-
 
 //! Server with variable and initial value created before the client.
 //! The client sets the value on the server using a custom structure, with value filed.

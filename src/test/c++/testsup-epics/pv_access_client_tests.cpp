@@ -81,7 +81,7 @@ public:
   pvxs::server::Server m_server;
 };
 
-//! Initial state of PVAccess.
+//! Initial state of PVAccessClient when no server is running, and no variables have been added.
 
 TEST_F(PVAccessClientTest, InitialState)
 {
@@ -95,4 +95,9 @@ TEST_F(PVAccessClientTest, InitialState)
 
   sup::dto::AnyValue any_value;
   EXPECT_THROW(client.SetValue("non-existing-channel", any_value), std::runtime_error);
+}
+
+TEST_F(PVAccessClientTest, InitialStateWhenNoServer)
+{
+
 }
