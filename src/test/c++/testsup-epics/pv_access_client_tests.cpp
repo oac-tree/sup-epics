@@ -89,4 +89,5 @@ TEST_F(PVAccessClientTest, InitialState)
   sup::epics::PVAccessClient client(context);
 
   EXPECT_TRUE(client.GetVariableNames().empty());
+  EXPECT_FALSE(client.IsConnected("non-existing-channel"));
 }

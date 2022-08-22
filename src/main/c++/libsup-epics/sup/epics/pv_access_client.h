@@ -52,12 +52,17 @@ public:
   PVAccessClient& operator=(PVAccessClient&&) = delete;
 
   //! Add variable with the given channel. Will throw if such channel already exists.
-  //! @name EPICS channel name.
+  //! @param name EPICS channel name.
   void AddVariable(const std::string& name);
 
-  //! @brief Returns the names of all managed channels.
+  //! Returns the names of all managed channels.
   //! @return List of all channel names.
   std::vector<std::string> GetVariableNames() const;
+
+  //! Check if specific channel is connected.
+  //! @param name EPICS channel name.
+  //! @return True if channel is connected, false otherwise.
+  bool IsConnected(const std::string& name) const;
 
 private:
   struct PVAccessClientImpl;

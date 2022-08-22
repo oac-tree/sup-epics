@@ -61,18 +61,6 @@ struct PVAccessClient::PVAccessClientImpl
     m_variables.emplace(name, std::move(variable));
   }
 
-  //! Returns the names of all managed channels.
-  std::vector<std::string> GetVariableNames()
-  {
-    std::vector<std::string> result;
-    for (const auto& entry : m_variables)
-    {
-      result.push_back(entry.first);
-    }
-
-    return result;
-  }
-
   void OnVariableChanged(const std::string& name, const sup::dto::AnyValue& any_value)
   {
     if (m_callback)
@@ -94,7 +82,19 @@ void PVAccessClient::AddVariable(const std::string& name)
 
 std::vector<std::string> PVAccessClient::GetVariableNames() const
 {
-  return p_impl->GetVariableNames();
+  std::vector<std::string> result;
+  for (const auto& entry : p_impl->m_variables)
+  {
+    result.push_back(entry.first);
+  }
+
+  return result;
+}
+
+bool PVAccessClient::IsConnected(const std::string& name) const
+{
+  auto iter = p_impl->m_variables.find(name);
+  return iter == p_impl->m_variables.end() ? false : iter->second->IsConnected();
 }
 
 PVAccessClient::~PVAccessClient()
