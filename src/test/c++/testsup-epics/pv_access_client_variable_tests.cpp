@@ -17,6 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
 #include <pvxs/data.h>
@@ -26,11 +27,13 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_client_variable.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 #include <memory>
 #include <thread>
 
 using msec = std::chrono::milliseconds;
+using ::testing::_;
 
 namespace
 {
@@ -38,6 +41,18 @@ const int kInitialValue = 42;
 const int kInitialStatus = 1;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
 }  // namespace
+
+//! Mock class to listen for callbacks.
+class MockClientListener
+{
+public:
+  sup::epics::PVAccessClientVariable::callback_t GetCallBack()
+  {
+    return [this](const sup::dto::AnyValue& value) { OnValueChanged(value); };
+  }
+
+  MOCK_METHOD1(OnValueChanged, void(const sup::dto::AnyValue& value));
+};
 
 class PVAccessClientVariableTest : public ::testing::Test
 {
@@ -142,30 +157,24 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
 
 TEST_F(PVAccessClientVariableTest, CallbackAfterConnection)
 {
+  MockClientListener listener;
+
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  ::sup::dto::AnyValue value_from_callback;
-  int callback_call_count{0};
-  auto on_value_changed =
-      [&value_from_callback, &callback_call_count](const sup::dto::AnyValue& any_value)
-  {
-    value_from_callback = any_value;
-    callback_call_count++;
-  };
+  // setting up callback expectations
+  const auto expected_any_value = sup::epics::BuildAnyValue(m_pvxs_value);
+  EXPECT_CALL(listener, OnValueChanged(expected_any_value)).Times(1);
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context, on_value_changed);
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context, listener.GetCallBack());
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
 
   auto result = variable.GetValue();
   EXPECT_EQ(result["value"], kInitialValue);
-
-  // checking the value as reported by callback
-  EXPECT_EQ(callback_call_count, 1);
-  EXPECT_EQ(result["value"], kInitialValue);
+  EXPECT_EQ(result, expected_any_value);
 }
 
 //! Server with variable and initial value created before the client.
