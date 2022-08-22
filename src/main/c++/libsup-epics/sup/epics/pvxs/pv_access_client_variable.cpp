@@ -141,10 +141,9 @@ bool PVAccessClientVariable::IsConnected() const
   return p_impl->m_is_connected;
 }
 
-bool PVAccessClientVariable::GetValue(sup::dto::AnyValue& value) const
+sup::dto::AnyValue PVAccessClientVariable::GetValue() const
 {
-  value = sup::epics::BuildAnyValue(p_impl->m_pvxs_value);
-  return true;
+  return sup::epics::BuildAnyValue(p_impl->m_pvxs_value);
 }
 
 bool PVAccessClientVariable::SetValue(const sup::dto::AnyValue& value)

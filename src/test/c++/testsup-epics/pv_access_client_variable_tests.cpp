@@ -90,8 +90,7 @@ TEST_F(PVAccessClientVariableTest, SetValueWhenUnconnected)
   EXPECT_TRUE(variable.SetValue(any_value));
 
   // expecting to get same value
-  sup::dto::AnyValue result;
-  EXPECT_TRUE(variable.GetValue(result));
+  auto result = variable.GetValue();
   EXPECT_EQ(any_value, result);
 }
 
@@ -130,8 +129,7 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
 
   EXPECT_TRUE(variable.IsConnected());
 
-  sup::dto::AnyValue result;
-  EXPECT_TRUE(variable.GetValue(result));
+  auto result = variable.GetValue();
   EXPECT_EQ(result["value"], kInitialValue);
 }
 
@@ -151,8 +149,7 @@ TEST_F(PVAccessClientVariableTest, SetFromClient)
   EXPECT_TRUE(variable.IsConnected());
 
   // retrieving value
-  sup::dto::AnyValue any_value;
-  EXPECT_TRUE(variable.GetValue(any_value));
+  auto any_value = variable.GetValue();
   EXPECT_EQ(any_value["value"], kInitialValue);
 
   // modifying the field in retrieved value
@@ -183,8 +180,7 @@ TEST_F(PVAccessClientVariableTest, DISABLE_MultipleSetFromClient)
   EXPECT_TRUE(variable.IsConnected());
 
   // retrieving value
-  sup::dto::AnyValue any_value;
-  EXPECT_TRUE(variable.GetValue(any_value));
+  auto any_value = variable.GetValue();
   EXPECT_EQ(any_value["value"], kInitialValue);
 
   //  std::cerr.setstate(std::ios_base::failbit);
@@ -226,13 +222,11 @@ TEST_F(PVAccessClientVariableTest, TwoClients)
   EXPECT_TRUE(variable2.IsConnected());
 
   // retrieving value through first variable
-  sup::dto::AnyValue any_value1;
-  EXPECT_TRUE(variable1.GetValue(any_value1));
+  auto any_value1 = variable1.GetValue();
   EXPECT_EQ(any_value1["value"], kInitialValue);
 
   // retrieving value through the second variable
-  sup::dto::AnyValue any_value2;
-  EXPECT_TRUE(variable2.GetValue(any_value2));
+  auto any_value2 = variable2.GetValue();
   EXPECT_EQ(any_value2["value"], kInitialValue);
 
   // setting the value through the first variable
@@ -242,8 +236,7 @@ TEST_F(PVAccessClientVariableTest, TwoClients)
   std::this_thread::sleep_for(msec(20));
 
   // checking the value through the second variable
-  sup::dto::AnyValue any_value3;
-  EXPECT_TRUE(variable2.GetValue(any_value3));
+  auto any_value3 = variable2.GetValue();
   EXPECT_EQ(any_value3["value"], 45);
 
   // checking the value on server side

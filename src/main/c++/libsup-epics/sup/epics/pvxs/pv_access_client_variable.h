@@ -51,9 +51,9 @@ public:
 
   bool IsConnected() const;
 
-  //! Assigns the value of underlying cache variable to <value>.
-  //! The <value> should be default constructed, or match the type of PVXS variable.
-  bool GetValue(sup::dto::AnyValue& value) const;
+  //! Returns the variable's value.
+  //! @return The value of underlying cache variable if connected, empty value otherwise.
+  sup::dto::AnyValue GetValue() const;
 
   //! The PVXS variable held in the cache is assigned with the <value> parameter and marked for
   //! asynchronous update. Will throw if assignment was not possible.
