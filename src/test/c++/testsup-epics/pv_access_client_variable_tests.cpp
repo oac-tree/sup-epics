@@ -288,6 +288,64 @@ TEST_F(PVAccessClientVariableTest, TwoClients)
   EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
 
+
+//! Server with variable and initial value created before two clients.
+//! One client set the value, second checks updated value.
+//! Both clients are initialised via callbacks.
+
+TEST_F(PVAccessClientVariableTest, TwoClientsCallbacks)
+{
+  MockClientListener listener1;
+  MockClientListener listener2;
+
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  // callback expectation on variable connection
+  EXPECT_CALL(listener1, OnValueChanged(_)).Times(1);
+  EXPECT_CALL(listener2, OnValueChanged(_)).Times(1);
+
+  sup::epics::PVAccessClientVariable variable1(kChannelName, shared_context, listener1.GetCallBack());
+  sup::epics::PVAccessClientVariable variable2(kChannelName, shared_context, listener2.GetCallBack());
+
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable1.IsConnected());
+  EXPECT_TRUE(variable2.IsConnected());
+
+  testing::Mock::VerifyAndClearExpectations(&listener1);
+  testing::Mock::VerifyAndClearExpectations(&listener2);
+
+  // retrieving value through first variable
+  auto any_value1 = variable1.GetValue();
+  EXPECT_EQ(any_value1["value"], kInitialValue);
+
+  // retrieving value through the second variable
+  auto any_value2 = variable2.GetValue();
+  EXPECT_EQ(any_value2["value"], kInitialValue);
+
+  // setting the value through the first variable
+  any_value1["value"] = 45;
+
+  // callback expectation on setting the value through one of the client
+  EXPECT_CALL(listener1, OnValueChanged(any_value1)).Times(1);
+  EXPECT_CALL(listener2, OnValueChanged(any_value1)).Times(1);
+
+  EXPECT_TRUE(variable1.SetValue(any_value1));
+
+  std::this_thread::sleep_for(msec(20));
+
+  // checking the value through the second variable
+  auto any_value3 = variable2.GetValue();
+  EXPECT_EQ(any_value3["value"], 45);
+
+  // checking the value on server side
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), 45);
+}
+
+
 //! Server with variable and initial value created before the client.
 //! The client sets the value on the server using a custom structure, with value filed.
 //! The test proves, that `pvxs::server::Server` allows updating server variable with pvxs::Value

@@ -43,12 +43,12 @@ public:
   using context_t = std::weak_ptr<pvxs::client::Context>;
   using callback_t = std::function<void(const sup::dto::AnyValue&)>;
 
-  //! Constructor
+  //! Constructor.
   //! @param variable_name EPICS channel name.
   //! @param context A weak pointer to shared PVXS client's context.
   //! @param callback A callback to report changed variable.
   explicit PVAccessClientVariable(const std::string& variable_name, context_t context,
-                                  callback_t callbacpk = {});
+                                  callback_t callback = {});
   ~PVAccessClientVariable();
 
   PVAccessClientVariable(const PVAccessClientVariable&) = delete;
