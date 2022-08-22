@@ -20,22 +20,39 @@
 #ifndef SPU_EPICS_PVXS_PV_ACCESS_CLIENT_H_
 #define SPU_EPICS_PVXS_PV_ACCESS_CLIENT_H_
 
+#include <sup/epics/dto_types_fwd.h>
+
+#include <functional>
+#include <memory>
+#include <string>
+
 namespace sup
 {
 namespace epics
 {
+
 //! Represents a client to access/update multiple pvAccess variables.
 
 class PVAccessClient
 {
 public:
-  explicit PVAccessClient();
+  using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
+  using context_t = std::shared_ptr<pvxs::client::Context>;
+
+  //! Constructor.
+  //! @param context Shared context for PVXS client.
+  //! @param callback A callback to report changed variable.
+  explicit PVAccessClient(context_t context, callback_t callback);
   ~PVAccessClient();
 
   PVAccessClient(const PVAccessClient&) = delete;
   PVAccessClient& operator=(const PVAccessClient&) = delete;
   PVAccessClient(PVAccessClient&&) = delete;
   PVAccessClient& operator=(PVAccessClient&&) = delete;
+
+  //! Add variable with the given channel. Will throw if such channel already exists.
+  //! @name EPICS channel name.
+  void AddVariable(const std::string& name);
 
 private:
   struct PVAccessClientImpl;

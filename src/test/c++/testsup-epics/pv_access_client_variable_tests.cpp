@@ -133,7 +133,7 @@ TEST_F(PVAccessClientVariableTest, DisconnectionOnServerStop)
   EXPECT_FALSE(variable.IsConnected());
 }
 
-//! A server with a single variable is created before the client.
+//! A server with a single variable is created and started before the client.
 //! Check the client's initial value of the variable after the connection.
 
 TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
