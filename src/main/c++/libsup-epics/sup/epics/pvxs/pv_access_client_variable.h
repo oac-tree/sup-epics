@@ -53,6 +53,8 @@ public:
 
   PVAccessClientVariable(const PVAccessClientVariable&) = delete;
   PVAccessClientVariable& operator=(const PVAccessClientVariable&) = delete;
+  PVAccessClientVariable(PVAccessClientVariable&&) = delete;
+  PVAccessClientVariable& operator=(PVAccessClientVariable&&) = delete;
 
   std::string GetVariableName() const;
 
