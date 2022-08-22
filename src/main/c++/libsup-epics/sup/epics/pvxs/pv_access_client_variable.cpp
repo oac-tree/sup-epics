@@ -24,6 +24,7 @@
 #include <sup/epics/dto_conversion_utils.h>
 
 #include <mutex>
+#include <thread>
 
 namespace sup
 {
@@ -155,6 +156,23 @@ sup::dto::AnyValue PVAccessClientVariable::GetValue() const
 bool PVAccessClientVariable::SetValue(const sup::dto::AnyValue& value)
 {
   return p_impl->SetCache(value);
+}
+
+bool PVAccessClientVariable::WaitForConnected(double timeout_sec) const
+{
+  const size_t msec_in_sec = 1000;
+  const std::chrono::milliseconds timeout_precision_msec(10);
+  auto timeout = std::chrono::system_clock::now()
+                 + std::chrono::milliseconds(static_cast<long>(timeout_sec * msec_in_sec));
+  while (std::chrono::system_clock::now() < timeout)
+  {
+    if (IsConnected())
+    {
+      return true;
+    }
+    std::this_thread::sleep_for(timeout_precision_msec);
+  }
+  return false;
 }
 
 }  // namespace epics

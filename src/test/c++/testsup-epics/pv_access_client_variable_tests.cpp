@@ -112,6 +112,21 @@ TEST_F(PVAccessClientVariableTest, SetValueWhenUnconnected)
   EXPECT_EQ(any_value, result);
 }
 
+//! Checking the method WaitForConnected.
+
+TEST_F(PVAccessClientVariableTest, WaitForConnected)
+{
+  auto shared_context = CreateSharedContext();
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+
+  // Server is not started, waiting will fail.
+  EXPECT_FALSE(variable.WaitForConnected(0.01));
+
+  // Server started, waiting will succeed.
+  m_server.start();
+  EXPECT_TRUE(variable.WaitForConnected(0.1));
+}
+
 //! A server with a single variable is created before the client.
 //! Checks client connected/disconnected status.
 

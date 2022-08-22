@@ -68,6 +68,11 @@ public:
   //! asynchronous update. Will throw if assignment was not possible.
   bool SetValue(const sup::dto::AnyValue& value);
 
+  //! This method waits for the variable to be connected with a timeout.
+  //! @param timeout_sec Timeout in seconds to wait for the variable to be connected.
+  //! @return True if the variable was connected within the timeout period.
+  bool WaitForConnected(double timeout_sec) const;
+
 private:
   struct PVAccessClientVariableImpl;
   PVAccessClientVariableImpl* p_impl{nullptr};
