@@ -25,6 +25,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace sup
 {
@@ -42,7 +43,7 @@ public:
   //! Constructor.
   //! @param context Shared context for PVXS client.
   //! @param callback A callback to report changed variable.
-  explicit PVAccessClient(context_t context, callback_t callback);
+  explicit PVAccessClient(context_t context, callback_t callback = {});
   ~PVAccessClient();
 
   PVAccessClient(const PVAccessClient&) = delete;
@@ -53,6 +54,10 @@ public:
   //! Add variable with the given channel. Will throw if such channel already exists.
   //! @name EPICS channel name.
   void AddVariable(const std::string& name);
+
+  //! @brief Returns the names of all managed channels.
+  //! @return List of all channel names.
+  std::vector<std::string> GetVariableNames() const;
 
 private:
   struct PVAccessClientImpl;

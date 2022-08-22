@@ -43,8 +43,8 @@ struct PVAccessClient::PVAccessClientImpl
   //! Adds channel with given name to the map of channels.
   void AddVariable(const std::string& name)
   {
-    auto it = m_variables.find(name);
-    if (it != m_variables.end())
+    auto iter = m_variables.find(name);
+    if (iter != m_variables.end())
     {
       throw std::runtime_error("Error in PVAccessClient: existing variable name '" + name + "'.");
     }
@@ -59,6 +59,18 @@ struct PVAccessClient::PVAccessClientImpl
     std::unique_ptr<PVAccessClientVariable> variable(
         new PVAccessClientVariable(name, m_context, variable_callback));
     m_variables.emplace(name, std::move(variable));
+  }
+
+  //! Returns the names of all managed channels.
+  std::vector<std::string> GetVariableNames()
+  {
+    std::vector<std::string> result;
+    for (const auto& entry : m_variables)
+    {
+      result.push_back(entry.first);
+    }
+
+    return result;
   }
 
   void OnVariableChanged(const std::string& name, const sup::dto::AnyValue& any_value)
@@ -78,6 +90,11 @@ PVAccessClient::PVAccessClient(context_t context, callback_t callback)
 void PVAccessClient::AddVariable(const std::string& name)
 {
   p_impl->AddVariable(name);
+}
+
+std::vector<std::string> PVAccessClient::GetVariableNames() const
+{
+  return p_impl->GetVariableNames();
 }
 
 PVAccessClient::~PVAccessClient()
