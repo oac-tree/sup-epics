@@ -22,6 +22,7 @@
 
 #include <sup/epics/dto_types_fwd.h>
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -40,8 +41,14 @@ class PVAccessClientVariable
 {
 public:
   using context_t = std::weak_ptr<pvxs::client::Context>;
+  using callback_t = std::function<void(const sup::dto::AnyValue&)>;
 
-  explicit PVAccessClientVariable(const std::string& variable_name, context_t context);
+  //! Constructor
+  //! @param variable_name EPICS channel name.
+  //! @param context A weak pointer to shared PVXS client's context.
+  //! @param callback A callback to report changed variable.
+  explicit PVAccessClientVariable(const std::string& variable_name, context_t context,
+                                  callback_t callbacpk = {});
   ~PVAccessClientVariable();
 
   PVAccessClientVariable(const PVAccessClientVariable&) = delete;
@@ -57,7 +64,7 @@ public:
 
   //! The PVXS variable held in the cache is assigned with the <value> parameter and marked for
   //! asynchronous update. Will throw if assignment was not possible.
-  bool SetValue(const sup::dto::AnyValue &value);
+  bool SetValue(const sup::dto::AnyValue& value);
 
 private:
   struct PVAccessClientVariableImpl;

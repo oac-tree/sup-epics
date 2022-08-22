@@ -136,6 +136,38 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
   EXPECT_EQ(result["value"], kInitialValue);
 }
 
+//! A server with a single variable is created before the client.
+//! The client is constructed with callback provided.
+//! Check the callback value of the variable after the connection.
+
+TEST_F(PVAccessClientVariableTest, CallbackAfterConnection)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
+
+  ::sup::dto::AnyValue value_from_callback;
+  int callback_call_count{0};
+  auto on_value_changed =
+      [&value_from_callback, &callback_call_count](const sup::dto::AnyValue& any_value)
+  {
+    value_from_callback = any_value;
+    callback_call_count++;
+  };
+
+  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context, on_value_changed);
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable.IsConnected());
+
+  auto result = variable.GetValue();
+  EXPECT_EQ(result["value"], kInitialValue);
+
+  // checking the value as reported by callback
+  EXPECT_EQ(callback_call_count, 1);
+  EXPECT_EQ(result["value"], kInitialValue);
+}
+
 //! Server with variable and initial value created before the client.
 //! The client gets the structure from the server, modifies one field, and sets the value back.
 //! Test check that the server value has changed.

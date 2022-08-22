@@ -35,13 +35,15 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   std::string m_variable_name;
   pvxs::Value m_pvxs_value;
   context_t m_context;
+  callback_t m_callback;
   bool m_is_connected{false};
   std::shared_ptr<subscription_t> m_subscription;
   std::shared_ptr<pvxs::client::Operation> m_operation;
   std::mutex m_mutex;
 
-  PVAccessClientVariableImpl(const std::string& variable_name, context_t context)
-      : m_variable_name(variable_name), m_context(context)
+  PVAccessClientVariableImpl(const std::string& variable_name, context_t context,
+                             callback_t callback)
+      : m_variable_name(variable_name), m_context(context), m_callback(callback)
   {
   }
 
@@ -76,6 +78,10 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
         if (update)
         {
           m_pvxs_value = update;
+          if (m_callback)
+          {
+            m_callback(sup::epics::BuildAnyValue(m_pvxs_value));
+          }
         }
         else
         {
@@ -119,9 +125,9 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   }
 };
 
-PVAccessClientVariable::PVAccessClientVariable(const std::string& variable_name,
-                                               context_t context)
-    : p_impl(new PVAccessClientVariableImpl(variable_name, context))
+PVAccessClientVariable::PVAccessClientVariable(const std::string& variable_name, context_t context,
+                                               callback_t callback)
+    : p_impl(new PVAccessClientVariableImpl(variable_name, context, callback))
 {
   p_impl->InitSubscription();
 }
