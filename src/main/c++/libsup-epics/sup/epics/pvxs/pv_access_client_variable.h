@@ -70,7 +70,7 @@ public:
 
 private:
   struct PVAccessClientVariableImpl;
-  PVAccessClientVariableImpl* p_impl;
+  PVAccessClientVariableImpl* p_impl{nullptr};
 };
 
 }  // namespace epics

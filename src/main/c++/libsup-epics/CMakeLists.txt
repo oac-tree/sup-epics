@@ -30,5 +30,6 @@ install(FILES
         sup/epics/channel_access_pv.h
         sup/epics/dto_types_fwd.h
         sup/epics/dto_conversion_utils.h
+        sup/epics/pv_access_client.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
 )
