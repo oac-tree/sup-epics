@@ -21,6 +21,7 @@
 
 #include <pvxs/data.h>
 #include <sup/dto/anyvalue.h>
+#include <sup/epics/dto_conversion_utils.h>
 
 #include <mutex>
 #include <stdexcept>
@@ -33,38 +34,51 @@ namespace epics
 struct PVAccessServerVariable::PVAccessServerVariableImpl
 {
   const std::string m_variable_name;
+  const sup::dto::AnyType m_original_type;  //!< Type used during the construction.
   callback_t m_callback;
-  sup::dto::AnyType m_original_type; //!< Type used during the construction.
   pvxs::Value m_pvxs_value;  //!< value cache
   std::mutex m_mutex;
 
   explicit PVAccessServerVariableImpl(const std::string& variable_name,
                                       const sup::dto::AnyValue& any_value, callback_t callback)
-      : m_variable_name(variable_name), m_callback(std::move(callback))
+      : m_variable_name(variable_name)
+      , m_original_type(any_value.GetType())
+      , m_callback(std::move(callback))
   {
-    m_original_type = any_value.GetType();
   }
 
-  pvxs::Value GetPVXSValue(const sup::dto::AnyValue& any_value)
+  //! Converts AnyValue to PVXS value. If AnyValue is scalar, turn it into the structure.
+  static pvxs::Value GetPVXSValue(const sup::dto::AnyValue& any_value)
   {
-//    if (sup::dto::IsScalarValue(any_value))
-//    {
-
-//    }
+    auto struct_any_value =
+        sup::dto::IsScalarValue(any_value) ? ConvertScalarToStruct(any_value) : any_value;
+    return BuildPVXSValue(struct_any_value);
   }
 
+  //! Converts PVXS value to AnyValue. If original type was a scalar, turn PVXS struct to a scalar.
+  sup::dto::AnyValue GetAnyValue(const pvxs::Value& pvxs_value)
+  {
+    auto result = BuildAnyValue(pvxs_value);
+    return sup::dto::IsScalarType(m_original_type) ? ConvertStructToScalar(result) : result;
+  }
 
   //! Sets the cache variable and schedules update of the shared variable.
   bool SetCache(const sup::dto::AnyValue& any_value)
   {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     if (any_value.GetType() != m_original_type)
     {
       throw std::runtime_error(
           "Error in  PVAccessServerVariable::SetValue(): attempt to change type");
     }
 
-  }
+    m_pvxs_value = GetPVXSValue(any_value);
 
+    // FIXME implement shared_pv update
+
+    return true;
+  }
 };
 
 PVAccessServerVariable::PVAccessServerVariable(const std::string& variable_name,
@@ -81,12 +95,12 @@ std::string PVAccessServerVariable::GetVariableName() const
 
 dto::AnyValue PVAccessServerVariable::GetValue() const
 {
-  return {};
+  return sup::epics::BuildAnyValue(p_impl->m_pvxs_value);
 }
 
 bool PVAccessServerVariable::SetValue(const dto::AnyValue& value)
 {
-  return false;
+  return p_impl->SetCache(value);
 }
 
 PVAccessServerVariable::~PVAccessServerVariable()
