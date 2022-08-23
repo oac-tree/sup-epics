@@ -185,7 +185,7 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
   EXPECT_EQ(result["value"], kInitialValue);
 }
 
-//! A server with a single variable is created before the client.
+//! A server with a single variable is created and started before the client.
 //! The client is constructed with callback provided.
 //! Check the callback value of the variable after the connection.
 
