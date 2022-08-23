@@ -22,23 +22,39 @@
 
 #include <sup/epics/dto_types_fwd.h>
 
+#include <functional>
+#include <string>
+
 namespace sup
 {
 namespace epics
 {
 
-//! Represents a server to run multiple pvAccess variables.
+//! Represents a single variable on board of PVAccessServer.
 
 class PVAccessServerVariable
 {
 public:
-  explicit PVAccessServerVariable();
+  using callback_t = std::function<void(const sup::dto::AnyValue&)>;
+
+  PVAccessServerVariable(const std::string& variable_name, const sup::dto::AnyValue& any_value,
+                         callback_t callback);
   ~PVAccessServerVariable();
 
   PVAccessServerVariable(const PVAccessServerVariable&) = delete;
   PVAccessServerVariable& operator=(const PVAccessServerVariable&) = delete;
   PVAccessServerVariable(PVAccessServerVariable&&) = delete;
   PVAccessServerVariable& operator=(PVAccessServerVariable&&) = delete;
+
+  std::string GetVariableName() const;
+
+  //! Returns the variable's value.
+  //! @return The value of underlying cache variable if connected, empty value otherwise.
+  sup::dto::AnyValue GetValue() const;
+
+  //! The PVXS variable held in the cache is assigned with the <value> parameter and marked for
+  //! asynchronous update. Will throw if assignment was not possible.
+  bool SetValue(const sup::dto::AnyValue& value);
 
 private:
   struct PVAccessServerVariableImpl;
