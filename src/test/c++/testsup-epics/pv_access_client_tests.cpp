@@ -176,4 +176,75 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   EXPECT_EQ(any_value0["value"], kInitialIntChannelValue);
   auto any_value1 = client.GetValue(kStringChannelName);
   EXPECT_EQ(any_value1["value"], kInitialStringChannelValue);
+
+  // setting values
+  any_value0["value"] = kInitialIntChannelValue + 1;
+  EXPECT_TRUE(client.SetValue(kIntChannelName, any_value0));
+  any_value1["value"] = std::string("abc2");
+  EXPECT_TRUE(client.SetValue(kStringChannelName, any_value1));
+
+  std::this_thread::sleep_for(msec(20));
+
+  // checking values on server side
+  auto shared_int_value = m_shared_ntscalar_pv.fetch();
+  EXPECT_EQ(shared_int_value["value"].as<int>(), kInitialIntChannelValue + 1);
+
+  auto shared_string_value = m_shared_string_pv.fetch();
+  EXPECT_EQ(shared_string_value["value"].as<std::string>(), std::string("abc2"));
+}
+
+//! Standard scenario. Server with two different variables was created and started before
+//! clients. Two clients with single variable each are started after. One client sets the value,
+//! checking updated value from second client. Both clients have callbacks.
+
+TEST_F(PVAccessClientTest, TwoClients)
+{
+  MockClientListener listener1;
+  MockClientListener listener2;
+
+  // starting a server with two variables
+  m_server.start();
+  m_shared_ntscalar_pv.open(m_pvxs_ntscalar_value);
+  m_shared_string_pv.open(m_pvxs_string_value);
+
+  // creating two client loooking at the same channel
+  auto context = CreateSharedContext();
+
+  // callback expectation on variable connection
+  EXPECT_CALL(listener1, OnValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener2, OnValueChanged(kIntChannelName, _)).Times(1);
+
+  sup::epics::PVAccessClient client0(context, listener1.GetCallBack());
+  client0.AddVariable(kIntChannelName);
+
+  sup::epics::PVAccessClient client1(context, listener2.GetCallBack());
+  client1.AddVariable(kIntChannelName);
+
+  // checking connection status
+  std::this_thread::sleep_for(msec(20));
+  EXPECT_TRUE(client0.IsConnected(kIntChannelName));
+  EXPECT_TRUE(client1.IsConnected(kIntChannelName));
+
+  // validating callbacks and clearing listeners
+  testing::Mock::VerifyAndClearExpectations(&listener1);
+  testing::Mock::VerifyAndClearExpectations(&listener2);
+
+  // retrieving value through first client
+  auto any_value = client0.GetValue(kIntChannelName);
+  EXPECT_EQ(any_value["value"], kInitialIntChannelValue);
+
+  // setting the value through the first client
+  any_value["value"] = 45;
+
+  // callback expectation on setting the value through one of the client
+  EXPECT_CALL(listener1, OnValueChanged(kIntChannelName, any_value)).Times(1);
+  EXPECT_CALL(listener2, OnValueChanged(kIntChannelName, any_value)).Times(1);
+
+  EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
+
+  std::this_thread::sleep_for(msec(20));
+
+  // checking the value through the second variable
+  auto any_value_from_client1 = client1.GetValue(kIntChannelName);
+  EXPECT_EQ(any_value_from_client1["value"], 45);
 }
