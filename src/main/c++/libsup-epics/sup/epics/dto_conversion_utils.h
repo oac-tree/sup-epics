@@ -41,6 +41,14 @@ namespace epics
 //! Returns AnyValue from PVXS's value.
 ::sup::dto::AnyValue BuildAnyValue(const ::pvxs::Value& pvxs_value);
 
+//! Convert scalar AnyValue to struct AnyValue with `value` field.
+//! Used to publish scalars via PVXS server.
+::sup::dto::AnyValue ConvertScalarToStruct(const ::sup::dto::AnyValue& any_value);
+
+//! Convert struct AnyValue to scalar AnyValue. Struct must contain a single field named `value`.
+//! Used to publish scalars via PVXS server.
+::sup::dto::AnyValue ConvertStructToScalar(const ::sup::dto::AnyValue& any_value);
+
 }  // namespace epics
 
 }  // namespace sup
