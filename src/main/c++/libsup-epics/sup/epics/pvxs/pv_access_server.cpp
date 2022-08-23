@@ -19,6 +19,8 @@
 
 #include "sup/epics/pv_access_server.h"
 
+#include <pvxs/server.h>
+
 namespace sup
 {
 namespace epics
@@ -26,9 +28,18 @@ namespace epics
 
 struct PVAccessServer::PVAccessServerImpl
 {
+  context_t m_context;
+  callback_t m_callback;
+  PVAccessServerImpl(context_t context, callback_t callback)
+      : m_context(std::move(context)), m_callback(std::move(callback))
+  {
+  }
 };
 
-PVAccessServer::PVAccessServer() : p_impl(new PVAccessServerImpl()) {}
+PVAccessServer::PVAccessServer(context_t context, callback_t callback)
+    : p_impl(new PVAccessServerImpl(std::move(context), std::move(callback)))
+{
+}
 
 PVAccessServer::~PVAccessServer()
 {

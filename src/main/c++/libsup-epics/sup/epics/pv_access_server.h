@@ -22,6 +22,10 @@
 
 #include <sup/epics/dto_types_fwd.h>
 
+#include <functional>
+#include <string>
+#include <memory>
+
 namespace sup
 {
 namespace epics
@@ -32,7 +36,13 @@ namespace epics
 class PVAccessServer
 {
 public:
-  explicit PVAccessServer();
+  using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
+  using context_t = std::unique_ptr<pvxs::server::Server>;
+
+  //! Constructor.
+  //! @param context PVXS server.
+  //! @param callback A callback to report changed variable.
+  explicit PVAccessServer(context_t context, callback_t callback = {});
   ~PVAccessServer();
 
   PVAccessServer(const PVAccessServer&) = delete;

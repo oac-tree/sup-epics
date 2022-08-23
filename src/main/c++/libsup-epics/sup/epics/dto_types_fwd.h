@@ -38,9 +38,15 @@ namespace pvxs
 class Value;
 class TypeDef;
 struct TypeCode;
+
 namespace client
 {
 class Context;
+}
+
+namespace server
+{
+class Server;
 }
 }  // namespace pvxs
 
