@@ -19,16 +19,22 @@
 
 #include "softioc_utils.h"
 
-#include <cstdio>
+#include <algorithm>
 #include <fstream>
+#include <random>
 #include <sstream>
 
 namespace
 {
 
+//! Generates random file name for temp directory.
 std::string GetTempFileName()
 {
-  return std::tmpnam(nullptr);
+  std::random_device rndm_device;
+  std::mt19937 gen(rndm_device());
+  std::string alphabet = "abcdefgh";
+  std::shuffle(std::begin(alphabet), std::end(alphabet), gen);
+  return "/tmp/sup_epics_tests_" + alphabet + ".out";
 }
 
 const std::string db_content = R"RAW(
