@@ -18,8 +18,8 @@
  *****************************************************************************/
 
 #include "softioc_utils.h"
+#include "mock_utils.h"
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pvxs/server.h>
 #include <pvxs/sharedpv.h>
@@ -30,18 +30,6 @@
 
 using msec = std::chrono::milliseconds;
 using ::testing::_;
-
-//! Mock class to listen for callbacks.
-class MockListener
-{
-public:
-  sup::epics::PVAccessServerVariable::callback_t GetCallBack()
-  {
-    return [this](const sup::dto::AnyValue& value) { OnValueChanged(value); };
-  }
-
-  MOCK_METHOD1(OnValueChanged, void(const sup::dto::AnyValue& value));
-};
 
 class PVAccessServerVariableTests : public ::testing::Test
 {

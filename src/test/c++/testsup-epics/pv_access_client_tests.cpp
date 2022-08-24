@@ -17,7 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <gmock/gmock.h>
+#include "mock_utils.h"
+
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
 #include <pvxs/data.h>
@@ -45,19 +46,6 @@ const std::string kIntChannelName = "PVXS-TESTS:INTSCALAR";
 const std::string kInitialStringChannelValue = "abc";
 const std::string kStringChannelName = "PVXS-TESTS:STRING";
 }  // namespace
-
-//! Mock class to listen for callbacks.
-class MockClientListener
-{
-public:
-  sup::epics::PVAccessClient::callback_t GetCallBack()
-  {
-    return [this](const std::string& name, const sup::dto::AnyValue& value)
-    { OnValueChanged(name, value); };
-  }
-
-  MOCK_METHOD2(OnValueChanged, void(const std::string& name, const sup::dto::AnyValue& value));
-};
 
 class PVAccessClientTest : public ::testing::Test
 {
@@ -198,8 +186,8 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
 
 TEST_F(PVAccessClientTest, TwoClients)
 {
-  MockClientListener listener1;
-  MockClientListener listener2;
+  MockListener listener1;
+  MockListener listener2;
 
   // starting a server with two variables
   m_server.start();
@@ -210,13 +198,13 @@ TEST_F(PVAccessClientTest, TwoClients)
   auto context = CreateSharedContext();
 
   // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnValueChanged(kIntChannelName, _)).Times(1);
-  EXPECT_CALL(listener2, OnValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(1);
 
-  sup::epics::PVAccessClient client0(context, listener1.GetCallBack());
+  sup::epics::PVAccessClient client0(context, listener1.GetNamedCallBack());
   client0.AddVariable(kIntChannelName);
 
-  sup::epics::PVAccessClient client1(context, listener2.GetCallBack());
+  sup::epics::PVAccessClient client1(context, listener2.GetNamedCallBack());
   client1.AddVariable(kIntChannelName);
 
   // checking connection status
@@ -236,8 +224,8 @@ TEST_F(PVAccessClientTest, TwoClients)
   any_value["value"] = 45;
 
   // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnValueChanged(kIntChannelName, any_value)).Times(1);
-  EXPECT_CALL(listener2, OnValueChanged(kIntChannelName, any_value)).Times(1);
+  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, any_value)).Times(1);
+  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, any_value)).Times(1);
 
   EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
 

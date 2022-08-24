@@ -17,7 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <gmock/gmock.h>
+#include "mock_utils.h"
+
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
 #include <pvxs/data.h>
@@ -41,18 +42,6 @@ const int kInitialValue = 42;
 const int kInitialStatus = 1;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
 }  // namespace
-
-//! Mock class to listen for callbacks.
-class MockClientListener
-{
-public:
-  sup::epics::PVAccessClientVariable::callback_t GetCallBack()
-  {
-    return [this](const sup::dto::AnyValue& value) { OnValueChanged(value); };
-  }
-
-  MOCK_METHOD1(OnValueChanged, void(const sup::dto::AnyValue& value));
-};
 
 class PVAccessClientVariableTest : public ::testing::Test
 {
@@ -191,7 +180,7 @@ TEST_F(PVAccessClientVariableTest, GetValueAfterConnection)
 
 TEST_F(PVAccessClientVariableTest, CallbackAfterConnection)
 {
-  MockClientListener listener;
+  MockListener listener;
 
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
@@ -328,8 +317,8 @@ TEST_F(PVAccessClientVariableTest, TwoClients)
 
 TEST_F(PVAccessClientVariableTest, TwoClientsCallbacks)
 {
-  MockClientListener listener1;
-  MockClientListener listener2;
+  MockListener listener1;
+  MockListener listener2;
 
   m_server.start();
   m_shared_pv.open(m_pvxs_value);

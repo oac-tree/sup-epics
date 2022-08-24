@@ -17,9 +17,9 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include "mock_utils.h"
 #include "softioc_utils.h"
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pvxs/server.h>
 #include <sup/dto/anyvalue.h>
@@ -32,19 +32,6 @@ using msec = std::chrono::milliseconds;
 using ::testing::_;
 
 using namespace sup::epics;
-
-//! Mock class to listen for callbacks.
-class MockListener
-{
-public:
-  sup::epics::PVAccessServer::callback_t GetCallBack()
-  {
-    return [this](const std::string& name, const sup::dto::AnyValue& value)
-    { OnValueChanged(name, value); };
-  }
-
-  MOCK_METHOD2(OnValueChanged, void(const std::string& name, const sup::dto::AnyValue& value));
-};
 
 class PVAccessServerTests : public ::testing::Test
 {
@@ -133,7 +120,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PVAccessServer server(CreateServerFromEnv(), listener.GetCallBack());
+  PVAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack());
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(variable_name, any_value);
@@ -149,7 +136,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
 
   // setting up callback expectations
   sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
-  EXPECT_CALL(listener, OnValueChanged(variable_name, expected_any_value)).Times(1);
+  EXPECT_CALL(listener, OnNamedValueChanged(variable_name, expected_any_value)).Times(1);
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
