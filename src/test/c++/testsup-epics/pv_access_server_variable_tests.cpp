@@ -26,11 +26,22 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_variable.h>
 
-#include <iostream>
 #include <thread>
 
 using msec = std::chrono::milliseconds;
 using ::testing::_;
+
+//! Mock class to listen for callbacks.
+class MockListener
+{
+public:
+  sup::epics::PVAccessServerVariable::callback_t GetCallBack()
+  {
+    return [this](const sup::dto::AnyValue& value) { OnValueChanged(value); };
+  }
+
+  MOCK_METHOD1(OnValueChanged, void(const sup::dto::AnyValue& value));
+};
 
 class PVAccessServerVariableTests : public ::testing::Test
 {
@@ -157,5 +168,41 @@ TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
 
   // validating variable cache
   sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  EXPECT_EQ(variable.GetValue(), expected_any_value);
+}
+
+//! Adding variable to a server, then start the server.
+//! Validating variable change on external `pvput`.
+//! Checking callbacks.
+
+TEST_F(PVAccessServerVariableTests, GetAfterPvPutWithCallback)
+{
+  MockListener listener;
+
+  const std::string variable_name{"variable_name"};
+
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::epics::PVAccessServerVariable variable(variable_name, any_value, listener.GetCallBack());
+
+  variable.AddToServer(m_server);
+
+  m_server.start();
+  std::this_thread::sleep_for(msec(20));
+
+  // validating variable using `pvget`
+  auto pvget_output = GetPvGetOutput(variable_name);
+  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
+  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+
+  // setting up callback expectations
+  sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  EXPECT_CALL(listener, OnValueChanged(expected_any_value)).Times(1);
+
+  // changing the value via `pvput`
+  auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
+
+  std::this_thread::sleep_for(msec(20));
+
+  // validating variable cache
   EXPECT_EQ(variable.GetValue(), expected_any_value);
 }

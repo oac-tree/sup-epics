@@ -25,7 +25,6 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
 
-#include <iostream>
 #include <mutex>
 #include <stdexcept>
 
@@ -56,7 +55,6 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   //! Get PVXS value from cache.
   pvxs::Value GetPVXSValue()
   {
-
     // if AnyValue is scalar, turn it into the structure.
     auto struct_any_value =
         sup::dto::IsScalarValue(m_cache) ? ConvertScalarToStruct(m_cache) : m_cache;
@@ -108,6 +106,10 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
     // converting back if necessary a struct with a single scalar field into a scalar
     m_cache = sup::dto::IsScalarValue(m_cache) ? ConvertStructToScalar(any_value) : any_value;
     m_shared_pv.post(value);
+    if (m_callback)
+    {
+      m_callback(m_cache);
+    }
     op->reply();
   }
 };

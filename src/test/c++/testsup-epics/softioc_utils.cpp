@@ -23,7 +23,6 @@
 #include <fstream>
 #include <random>
 #include <sstream>
-
 namespace
 {
 
@@ -32,7 +31,7 @@ std::string GetTempFileName()
 {
   std::random_device rndm_device;
   std::mt19937 gen(rndm_device());
-  std::string alphabet = "abcdefgh";
+  std::string alphabet = "abc123";
   std::shuffle(std::begin(alphabet), std::end(alphabet), gen);
   return "/tmp/sup_epics_tests_" + alphabet + ".out";
 }
