@@ -37,40 +37,43 @@ namespace epics
 struct PVAccessServerVariable::PVAccessServerVariableImpl
 {
   const std::string m_variable_name;
+  sup::dto::AnyValue m_cache;
   const sup::dto::AnyType m_original_type;  //!< Type used during the construction.
   callback_t m_callback;
-  pvxs::Value m_pvxs_value;  //!< value cache
+//  pvxs::Value m_pvxs_value;  //!< value cache
   pvxs::server::SharedPV m_shared_pv;
   std::mutex m_mutex;
 
   PVAccessServerVariableImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
                              callback_t callback)
       : m_variable_name(variable_name)
+      , m_cache(any_value)
       , m_original_type(any_value.GetType())
       , m_callback(std::move(callback))
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
   {
-    m_pvxs_value = GetPVXSValue(any_value);
+//    m_pvxs_value = GetPVXSValue(any_value);
 
     using namespace std::placeholders;
     m_shared_pv.onPut(std::bind(&PVAccessServerVariableImpl::OnPutCallback, this, _1, _2, _3));
   }
 
   //! Converts AnyValue to PVXS value. If AnyValue is scalar, turn it into the structure.
-  static pvxs::Value GetPVXSValue(const sup::dto::AnyValue& any_value)
+  pvxs::Value GetPVXSValue()
   {
     auto struct_any_value =
-        sup::dto::IsScalarValue(any_value) ? ConvertScalarToStruct(any_value) : any_value;
+        sup::dto::IsScalarValue(m_cache) ? ConvertScalarToStruct(m_cache) : m_cache;
     return BuildPVXSValue(struct_any_value);
   }
 
   //! Converts PVXS value to AnyValue. If original type was a scalar, turn PVXS struct to a scalar.
   sup::dto::AnyValue GetAnyValue()
   {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_cache;
+//    std::lock_guard<std::mutex> lock(m_mutex);
 
-    auto result = BuildAnyValue(m_pvxs_value);
-    return sup::dto::IsScalarType(m_original_type) ? ConvertStructToScalar(result) : result;
+//    auto result = BuildAnyValue(m_pvxs_value);
+//    return sup::dto::IsScalarType(m_original_type) ? ConvertStructToScalar(result) : result;
   }
 
   //! Sets the cache variable and schedules update of the shared variable.
@@ -78,18 +81,18 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if (any_value.GetType() != m_original_type)
-    {
-      throw std::runtime_error(
-          "Error in  PVAccessServerVariable::SetValue(): attempt to change type");
-    }
-
-    m_pvxs_value = GetPVXSValue(any_value);
+//    if (any_value.GetType() != m_original_type)
+//    {
+//      throw std::runtime_error(
+//          "Error in  PVAccessServerVariable::SetValue(): attempt to change type");
+//    }
+    m_cache = any_value;
 
     if (m_shared_pv.isOpen())
     {
       std::cout << "xxxx 1.1" << "\n";
-      m_shared_pv.post(m_pvxs_value);
+      auto pvxs_value = GetPVXSValue();
+      m_shared_pv.post(pvxs_value);
       std::cout << "xxxx 1.2" << "\n";
     }
 
@@ -106,7 +109,7 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
     }
 
     server.addPV(m_variable_name, m_shared_pv);
-    m_shared_pv.open(m_pvxs_value);
+    m_shared_pv.open(GetPVXSValue());
   }
 
   void OnPutCallback(pvxs::server::SharedPV& pv, std::unique_ptr<pvxs::server::ExecOp>&& op,
@@ -115,7 +118,10 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
     std::lock_guard<std::mutex> lock(m_mutex);
 
     std::cout << "OnPutCallback `" << op->name() << "` \n";
-    m_pvxs_value = value;
+    auto any_value = BuildAnyValue(value);
+    m_cache = sup::dto::IsScalarValue(m_cache) ? ConvertStructToScalar(any_value) : any_value;
+
+//    m_pvxs_value = value;
     m_shared_pv.post(value);
     op->reply();
 

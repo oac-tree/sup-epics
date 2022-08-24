@@ -87,7 +87,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSet)
   // attempt to set value with different type
   sup::dto::AnyValue struct_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                      {"bool", {sup::dto::BooleanType, true}}};
-  EXPECT_THROW(variable.SetValue(struct_value), std::runtime_error);
+  EXPECT_THROW(variable.SetValue(struct_value), sup::dto::InvalidConversionException);
 }
 
 //! Adding variable to a server. Server is started first.
