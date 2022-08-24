@@ -25,6 +25,7 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
 
+#include <iostream>
 #include <mutex>
 #include <stdexcept>
 
@@ -50,6 +51,9 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
   {
     m_pvxs_value = GetPVXSValue(any_value);
+
+    using namespace std::placeholders;
+    m_shared_pv.onPut(std::bind(&PVAccessServerVariableImpl::OnPutCallback, this, _1, _2, _3));
   }
 
   //! Converts AnyValue to PVXS value. If AnyValue is scalar, turn it into the structure.
@@ -63,6 +67,8 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   //! Converts PVXS value to AnyValue. If original type was a scalar, turn PVXS struct to a scalar.
   sup::dto::AnyValue GetAnyValue()
   {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
     auto result = BuildAnyValue(m_pvxs_value);
     return sup::dto::IsScalarType(m_original_type) ? ConvertStructToScalar(result) : result;
   }
@@ -82,7 +88,9 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
 
     if (m_shared_pv.isOpen())
     {
+      std::cout << "xxxx 1.1" << "\n";
       m_shared_pv.post(m_pvxs_value);
+      std::cout << "xxxx 1.2" << "\n";
     }
 
     return true;
@@ -99,6 +107,18 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
 
     server.addPV(m_variable_name, m_shared_pv);
     m_shared_pv.open(m_pvxs_value);
+  }
+
+  void OnPutCallback(pvxs::server::SharedPV& pv, std::unique_ptr<pvxs::server::ExecOp>&& op,
+                     pvxs::Value&& value)
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    std::cout << "OnPutCallback `" << op->name() << "` \n";
+    m_pvxs_value = value;
+    m_shared_pv.post(value);
+    op->reply();
+
   }
 };
 

@@ -17,6 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include "softioc_utils.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pvxs/server.h>
@@ -24,13 +26,18 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_variable.h>
 
+#include <iostream>
+#include <thread>
+
 using msec = std::chrono::milliseconds;
 using ::testing::_;
 
 class PVAccessServerVariableTests : public ::testing::Test
 {
 public:
-  PVAccessServerVariableTests() : m_server(pvxs::server::Config::isolated().build()) {}
+  //! Constructor.
+  //! @note Configure server from the environment to make pvget, pvput working.
+  PVAccessServerVariableTests() : m_server(pvxs::server::Config::fromEnv().build()) {}
 
   pvxs::server::Server m_server;
 };
@@ -83,16 +90,72 @@ TEST_F(PVAccessServerVariableTests, GetAndSet)
   EXPECT_THROW(variable.SetValue(struct_value), std::runtime_error);
 }
 
-//! Adding variable to a running server.
+//! Adding variable to a server. Server is started first.
 
-TEST_F(PVAccessServerVariableTests, AddToServer)
+TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)
+{
+  m_server.start();
+
+  const std::string variable_name{"variable_name"};
+
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+
+  variable.AddToServer(m_server);
+  std::this_thread::sleep_for(msec(20));
+
+  // validating variable using `pvget` command line utility
+  auto pvget_output = GetPvGetOutput(variable_name);
+  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
+  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+}
+
+//! Adding variable to a server, then start the server.
+
+TEST_F(PVAccessServerVariableTests, AddToServerBeforeServerStart)
 {
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
 
+  variable.AddToServer(m_server);
+
   m_server.start();
+  std::this_thread::sleep_for(msec(20));
+
+  // validating variable using `pvget`
+  auto pvget_output = GetPvGetOutput(variable_name);
+  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
+  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+}
+
+//! Adding variable to a server, then start the server.
+//! Validating variable change on external `pvput`.
+
+TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
+{
+  const std::string variable_name{"variable_name"};
+
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
 
   variable.AddToServer(m_server);
+
+  m_server.start();
+  std::this_thread::sleep_for(msec(20));
+
+  // validating variable using `pvget`
+  auto pvget_output = GetPvGetOutput(variable_name);
+  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
+  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+
+  // changing the value via `pvput`
+  auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
+
+  std::this_thread::sleep_for(msec(20));
+
+  // validating variable cache
+  sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  EXPECT_EQ(variable.GetValue(), expected_any_value);
 }
