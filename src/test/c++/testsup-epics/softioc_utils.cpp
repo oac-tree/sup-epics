@@ -19,6 +19,9 @@
 
 #include "softioc_utils.h"
 
+#include <fstream>
+#include <sstream>
+
 namespace
 {
 const std::string db_content = R"RAW(
@@ -56,12 +59,66 @@ record (waveform,"CA-TESTS:CHARRAY")
 
 }  // unnamed namespace
 
+std::string GetEPICSBinaryPath()
+{
+  return std::string(std::getenv("EPICS_BASE")) + "/bin/"
+         + std::string(std::getenv("EPICS_HOST_ARCH")) + "/";
+}
+
 std::string GetEpicsDBContentString()
 {
   return db_content;
 }
 
-void RemoveFile(const std::string& file_name)
+void RemoveFile(const std::string &file_name)
 {
   std::remove(file_name.c_str());
+}
+
+std::string GetPvGetOutput(const std::vector<std::string> &variable_names,
+                           const std::string &file_name)
+{
+  std::string out_name = file_name.empty() ? std::string("tmp_GetPvGetOutput.out") : file_name;
+
+  std::string variable_names_str;
+  for (auto str : variable_names)
+  {
+    variable_names_str += str + " ";
+  }
+
+  std::string command(GetEPICSBinaryPath() + "pvget -v " + variable_names_str + " > " + out_name);
+  if (std::system(command.c_str()) != 0)
+  {
+    return {};
+  }
+
+  std::stringstream sstr;
+  sstr << std::ifstream(out_name).rdbuf();
+
+//  RemoveFile(out_name);
+
+  return sstr.str();
+}
+
+std::string GetPvGetOutput(const std::string &variable_name, const std::string &file_name)
+{
+  return GetPvGetOutput(std::vector<std::string>({variable_name}), file_name);
+}
+
+std::string PvPut(const std::string &variable_name, const std::string &value)
+{
+  std::string out_name = std::string("tmp_GetPvPutOutput.out");
+
+  std::string command(GetEPICSBinaryPath() + "pvput " + variable_name + " " + value + " > " + out_name);
+  if (std::system(command.c_str()) != 0)
+  {
+    return {};
+  }
+
+  std::stringstream sstr;
+  sstr << std::ifstream(out_name).rdbuf();
+
+//  RemoveFile(out_name);
+
+  return sstr.str();
 }

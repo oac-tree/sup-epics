@@ -36,13 +36,6 @@ void GenerateEpicDatabaseFile(const std::string& name, const std::string& db_fil
   result.close();
 }
 
-// Retrieve path for EPICS binaries
-std::string GetEPICSBinaryPath()
-{
-  return std::string(std::getenv("EPICS_BASE")) + "/bin/"
-         + std::string(std::getenv("EPICS_HOST_ARCH")) + "/";
-}
-
 }  // unnamed namespace
 
 SoftIocRunner::SoftIocRunner(const std::string& session_name) : m_is_active(false)
@@ -61,7 +54,9 @@ SoftIocRunner::~SoftIocRunner()
 void SoftIocRunner::Start(const std::string& db_file_content)
 {
   if (m_is_active)
+  {
     throw std::runtime_error("Error in SoftIocRunner::Start(): thread is already running");
+  }
 
   GenerateEpicDatabaseFile(GetDataBaseFileName(), db_file_content);
 
@@ -75,7 +70,9 @@ void SoftIocRunner::Start(const std::string& db_file_content)
 void SoftIocRunner::Stop()
 {
   if (!m_is_active)
+  {
     throw std::runtime_error("Error in SoftIocRunner::Stop(): was not started");
+  }
 
   const std::string command{"/usr/bin/screen -S " + m_session_name + " -X quit &> /dev/null"};
   std::system(command.c_str());
