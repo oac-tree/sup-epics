@@ -19,11 +19,18 @@
 
 #include "softioc_utils.h"
 
+#include <cstdio>
 #include <fstream>
 #include <sstream>
 
 namespace
 {
+
+std::string GetTempFileName()
+{
+  return std::tmpnam(nullptr);
+}
+
 const std::string db_content = R"RAW(
 record (bo,"CA-TESTS:BOOL")
 {
@@ -78,10 +85,10 @@ void RemoveFile(const std::string &file_name)
 std::string GetPvGetOutput(const std::vector<std::string> &variable_names,
                            const std::string &file_name)
 {
-  std::string out_name = file_name.empty() ? std::string("tmp_GetPvGetOutput.out") : file_name;
+  std::string out_name = file_name.empty() ? GetTempFileName() : file_name;
 
   std::string variable_names_str;
-  for (auto str : variable_names)
+  for (const auto &str : variable_names)
   {
     variable_names_str += str + " ";
   }
@@ -95,7 +102,7 @@ std::string GetPvGetOutput(const std::vector<std::string> &variable_names,
   std::stringstream sstr;
   sstr << std::ifstream(out_name).rdbuf();
 
-//  RemoveFile(out_name);
+  RemoveFile(out_name);
 
   return sstr.str();
 }
@@ -107,18 +114,19 @@ std::string GetPvGetOutput(const std::string &variable_name, const std::string &
 
 std::string PvPut(const std::string &variable_name, const std::string &value)
 {
-  std::string out_name = std::string("tmp_GetPvPutOutput.out");
+  auto out_file_name = GetTempFileName();
 
-  std::string command(GetEPICSBinaryPath() + "pvput " + variable_name + " " + value + " > " + out_name);
+  std::string command(GetEPICSBinaryPath() + "pvput " + variable_name + " " + value + " > "
+                      + out_file_name);
   if (std::system(command.c_str()) != 0)
   {
     return {};
   }
 
   std::stringstream sstr;
-  sstr << std::ifstream(out_name).rdbuf();
+  sstr << std::ifstream(out_file_name).rdbuf();
 
-//  RemoveFile(out_name);
+  RemoveFile(out_file_name);
 
   return sstr.str();
 }
