@@ -60,6 +60,9 @@ public:
   //! asynchronous update. Will throw if assignment was not possible.
   bool SetValue(const sup::dto::AnyValue& value);
 
+  //! Add variable to given server. Will throw if variables has been already added.
+  void AddToServer(pvxs::server::Server& server);
+
 private:
   struct PVAccessServerVariableImpl;
   PVAccessServerVariableImpl* p_impl{nullptr};

@@ -19,6 +19,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <pvxs/server.h>
+#include <pvxs/sharedpv.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_variable.h>
 
@@ -28,10 +30,13 @@ using ::testing::_;
 class PVAccessServerVariableTests : public ::testing::Test
 {
 public:
+  PVAccessServerVariableTests() : m_server(pvxs::server::Config::isolated().build()) {}
+
+  pvxs::server::Server m_server;
 };
 
 //! Check initial state of PVAccessServerVariable.
-//! Where is no PVXS server running.
+//! There is no PVXS server running.
 
 TEST_F(PVAccessServerVariableTests, InitialState)
 {
@@ -57,7 +62,7 @@ TEST_F(PVAccessServerVariableTests, InitialState)
   }
 }
 
-//! Check GetValue and SetValue. Where is no PVXS server running.
+//! Check GetValue and SetValue. There is no PVXS server running.
 
 TEST_F(PVAccessServerVariableTests, GetAndSet)
 {
@@ -76,4 +81,18 @@ TEST_F(PVAccessServerVariableTests, GetAndSet)
   sup::dto::AnyValue struct_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                      {"bool", {sup::dto::BooleanType, true}}};
   EXPECT_THROW(variable.SetValue(struct_value), std::runtime_error);
+}
+
+//! Adding variable to a running server.
+
+TEST_F(PVAccessServerVariableTests, AddToServer)
+{
+  const std::string variable_name{"variable_name"};
+
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+
+  m_server.start();
+
+  variable.AddToServer(m_server);
 }

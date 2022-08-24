@@ -20,6 +20,8 @@
 #include "sup/epics/pvxs/pv_access_server_variable.h"
 
 #include <pvxs/data.h>
+#include <pvxs/server.h>
+#include <pvxs/sharedpv.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
 
@@ -37,6 +39,7 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   const sup::dto::AnyType m_original_type;  //!< Type used during the construction.
   callback_t m_callback;
   pvxs::Value m_pvxs_value;  //!< value cache
+  pvxs::server::SharedPV m_shared_pv;
   std::mutex m_mutex;
 
   PVAccessServerVariableImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
@@ -44,8 +47,9 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
       : m_variable_name(variable_name)
       , m_original_type(any_value.GetType())
       , m_callback(std::move(callback))
+      , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
   {
-    SetCache(any_value);
+    m_pvxs_value = GetPVXSValue(any_value);
   }
 
   //! Converts AnyValue to PVXS value. If AnyValue is scalar, turn it into the structure.
@@ -57,9 +61,9 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   }
 
   //! Converts PVXS value to AnyValue. If original type was a scalar, turn PVXS struct to a scalar.
-  sup::dto::AnyValue GetAnyValue(const pvxs::Value& pvxs_value)
+  sup::dto::AnyValue GetAnyValue()
   {
-    auto result = BuildAnyValue(pvxs_value);
+    auto result = BuildAnyValue(m_pvxs_value);
     return sup::dto::IsScalarType(m_original_type) ? ConvertStructToScalar(result) : result;
   }
 
@@ -76,9 +80,25 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
 
     m_pvxs_value = GetPVXSValue(any_value);
 
-    // FIXME implement shared_pv update
+    if (m_shared_pv.isOpen())
+    {
+      m_shared_pv.post(m_pvxs_value);
+    }
 
     return true;
+  }
+
+  //! Add variable to given server. Initialise shared variable with cache value and make
+  //! it open for exernal connections.
+  void AddToServer(pvxs::server::Server& server)
+  {
+    if (m_shared_pv.isOpen())
+    {
+      throw std::runtime_error("Variable was already added to a server");
+    }
+
+    server.addPV(m_variable_name, m_shared_pv);
+    m_shared_pv.open(m_pvxs_value);
   }
 };
 
@@ -96,12 +116,17 @@ std::string PVAccessServerVariable::GetVariableName() const
 
 dto::AnyValue PVAccessServerVariable::GetValue() const
 {
-  return p_impl->GetAnyValue(p_impl->m_pvxs_value);
+  return p_impl->GetAnyValue();
 }
 
 bool PVAccessServerVariable::SetValue(const dto::AnyValue& value)
 {
   return p_impl->SetCache(value);
+}
+
+void PVAccessServerVariable::AddToServer(pvxs::server::Server& server)
+{
+  p_impl->AddToServer(server);
 }
 
 PVAccessServerVariable::~PVAccessServerVariable()
