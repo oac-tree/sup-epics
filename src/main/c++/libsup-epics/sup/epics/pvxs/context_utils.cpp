@@ -20,6 +20,7 @@
 #include "sup/epics/pvxs/context_utils.h"
 
 #include <pvxs/server.h>
+#include <pvxs/client.h>
 
 namespace sup
 {
@@ -35,7 +36,12 @@ std::unique_ptr<pvxs::server::Server> CreateIsolatedServer()
 std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
 {
   return std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+        new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+}
+
+std::shared_ptr<pvxs::client::Context> CreateClientContextFromEnv()
+{
+  return std::make_shared<pvxs::client::Context>(pvxs::client::Context::fromEnv());
 }
 
 }  // namespace epics

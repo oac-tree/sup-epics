@@ -39,6 +39,9 @@ std::unique_ptr<pvxs::server::Server> CreateIsolatedServer();
 //! Creates PVXS server based on configuration from $EPICS_PVA* environment variables.
 std::unique_ptr<pvxs::server::Server> CreateServerFromEnv();
 
+//! Create client context based on configuration from $EPICS_PVA* environment variables.
+std::shared_ptr<pvxs::client::Context> CreateClientContextFromEnv();
+
 }  // namespace epics
 }  // namespace sup
 

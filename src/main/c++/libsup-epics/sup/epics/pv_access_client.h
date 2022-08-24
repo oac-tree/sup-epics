@@ -37,8 +37,8 @@ namespace epics
 class PVAccessClient
 {
 public:
-  using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
   using context_t = std::shared_ptr<pvxs::client::Context>;
+  using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
 
   //! Constructor.
   //! @param context Shared context for PVXS client.
