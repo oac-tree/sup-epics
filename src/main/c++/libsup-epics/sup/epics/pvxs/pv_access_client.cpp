@@ -23,6 +23,7 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_client_variable.h>
 
+#include <algorithm>
 #include <map>
 #include <stdexcept>
 
@@ -30,6 +31,11 @@ namespace sup
 {
 namespace epics
 {
+
+// ----------------------------------------------------------------------------
+// PVAccessClientImpl
+// ----------------------------------------------------------------------------
+
 struct PVAccessClient::PVAccessClientImpl
 {
   context_t m_context;
@@ -62,6 +68,14 @@ struct PVAccessClient::PVAccessClientImpl
     m_variables.emplace(name, std::move(variable));
   }
 
+  std::vector<std::string> GetVariableNames() const
+  {
+    std::vector<std::string> result;
+    std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
+                   [](decltype(m_variables)::value_type const& pair) { return pair.first; });
+    return result;
+  }
+
   void OnVariableChanged(const std::string& name, const sup::dto::AnyValue& any_value)
   {
     if (m_callback)
@@ -71,9 +85,18 @@ struct PVAccessClient::PVAccessClientImpl
   }
 };
 
+// ----------------------------------------------------------------------------
+// PVAccessClient
+// ----------------------------------------------------------------------------
+
 PVAccessClient::PVAccessClient(context_t context, callback_t callback)
     : p_impl(new PVAccessClientImpl(std::move(context), std::move(callback)))
 {
+}
+
+PVAccessClient::~PVAccessClient()
+{
+  delete p_impl;
 }
 
 void PVAccessClient::AddVariable(const std::string& name)
@@ -83,13 +106,7 @@ void PVAccessClient::AddVariable(const std::string& name)
 
 std::vector<std::string> PVAccessClient::GetVariableNames() const
 {
-  std::vector<std::string> result;
-  for (const auto& entry : p_impl->m_variables)
-  {
-    result.push_back(entry.first);
-  }
-
-  return result;
+  return p_impl->GetVariableNames();
 }
 
 bool PVAccessClient::IsConnected(const std::string& name) const
@@ -116,11 +133,6 @@ bool PVAccessClient::SetValue(const std::string& name, const dto::AnyValue& valu
     throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
   }
   return iter->second->SetValue(value);
-}
-
-PVAccessClient::~PVAccessClient()
-{
-  delete p_impl;
 }
 
 }  // namespace epics

@@ -23,8 +23,9 @@
 #include <sup/epics/dto_types_fwd.h>
 
 #include <functional>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace sup
 {
@@ -49,6 +50,30 @@ public:
   PVAccessServer& operator=(const PVAccessServer&) = delete;
   PVAccessServer(PVAccessServer&&) = delete;
   PVAccessServer& operator=(PVAccessServer&&) = delete;
+
+  //! Add variable to the server with given channl name and initial value. Type of underlying PVA
+  //! record will be deduced from AnyValue type. Will throw if such channel already exists.
+  //! @param name EPICS channel name.
+  //! @param any_value Initial value.
+  void AddVariable(const std::string& name, const sup::dto::AnyValue& any_value);
+
+  //! Returns the names of all managed channels.
+  //! @return List of all channel names.
+  std::vector<std::string> GetVariableNames() const;
+
+  //! Get the value from a specific channel. Will throw if channel was not added yet.
+  //! @param name EPICS channel name.
+  //! @return Channel's value.
+  sup::dto::AnyValue GetValue(const std::string& name) const;
+
+  //! Propagate the value to a specific channel. Will throw if channel was not added yet.
+  //! @param name EPICS channel name.
+  //! @param value Value to be written to the channel.
+  //! @return True if successful, false otherwise.
+  bool SetValue(const std::string& name, const sup::dto::AnyValue& value);
+
+  //! Starts PVXS server and publishes all added variables.
+  void Start();
 
 private:
   struct PVAccessServerImpl;
