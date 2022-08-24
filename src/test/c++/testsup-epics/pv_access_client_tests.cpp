@@ -140,8 +140,7 @@ TEST_F(PVAccessClientTest, AddVariableAndSetValueWhenUnconnected)
   EXPECT_TRUE(::sup::dto::IsEmptyValue(client.GetValue("channel1")));
 
   // it is possible to set values even for unconnected variables
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
-  any_value = 42;
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   EXPECT_TRUE(client.SetValue("channel0", any_value));
 
   // one of the values is updated
