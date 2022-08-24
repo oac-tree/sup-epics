@@ -31,6 +31,10 @@ namespace epics
 {
 
 //! Represents a single variable on board of PVAccessServer.
+//!
+//! @note Based on PVXS shared variable. The variable is initialized with AnyValue used at the
+//! construction. Scalar AnyValues are converted to structs containing a single `value` field. This
+//! is because PVXS shared variables can be initialized only with structs.
 
 class PVAccessServerVariable
 {

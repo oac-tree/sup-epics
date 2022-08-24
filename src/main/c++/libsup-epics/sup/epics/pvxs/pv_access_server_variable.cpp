@@ -39,12 +39,13 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   pvxs::Value m_pvxs_value;  //!< value cache
   std::mutex m_mutex;
 
-  explicit PVAccessServerVariableImpl(const std::string& variable_name,
-                                      const sup::dto::AnyValue& any_value, callback_t callback)
+  PVAccessServerVariableImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
+                             callback_t callback)
       : m_variable_name(variable_name)
       , m_original_type(any_value.GetType())
       , m_callback(std::move(callback))
   {
+    SetCache(any_value);
   }
 
   //! Converts AnyValue to PVXS value. If AnyValue is scalar, turn it into the structure.
@@ -95,7 +96,7 @@ std::string PVAccessServerVariable::GetVariableName() const
 
 dto::AnyValue PVAccessServerVariable::GetValue() const
 {
-  return sup::epics::BuildAnyValue(p_impl->m_pvxs_value);
+  return p_impl->GetAnyValue(p_impl->m_pvxs_value);
 }
 
 bool PVAccessServerVariable::SetValue(const dto::AnyValue& value)
