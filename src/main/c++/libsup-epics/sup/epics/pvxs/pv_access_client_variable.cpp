@@ -126,9 +126,9 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(m_any_value);
 
     // copying the value inside lambda
-    if (auto sp = m_context.lock())
+    if (auto context = m_context.lock())
     {
-      m_operation = sp->put(m_variable_name.c_str())
+      m_operation = context->put(m_variable_name.c_str())
                         .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
                         .exec();
     }
