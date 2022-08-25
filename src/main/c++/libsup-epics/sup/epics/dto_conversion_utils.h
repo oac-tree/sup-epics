@@ -32,22 +32,30 @@ namespace sup
 namespace epics
 {
 
-//! Returns PVXS type from AnyType.
+//! Builds PVXS type from AnyType.
 ::pvxs::TypeDef BuildPVXSType(const ::sup::dto::AnyType& any_type);
 
-//! Returns PVXS value from AnyValue.
+//! Builds PVXS value from AnyValue.
 ::pvxs::Value BuildPVXSValue(const ::sup::dto::AnyValue& any_value);
 
-//! Returns AnyValue from PVXS's value.
+//! Builds AnyValue from PVXS's value.
 ::sup::dto::AnyValue BuildAnyValue(const ::pvxs::Value& pvxs_value);
 
-//! Convert scalar AnyValue to struct AnyValue with `value` field.
+//! Converts scalar AnyValue to struct AnyValue with `value` field.
 //! Used to publish scalars via PVXS server.
 ::sup::dto::AnyValue ConvertScalarToStruct(const ::sup::dto::AnyValue& any_value);
 
-//! Convert struct AnyValue to scalar AnyValue. Struct must contain a single field named `value`.
+//! Converts struct AnyValue to scalar AnyValue. Struct must contain a single field named `value`.
 //! Used to publish scalars via PVXS server.
 ::sup::dto::AnyValue ConvertStructToScalar(const ::sup::dto::AnyValue& any_value);
+
+//! Builds PVXS value from AnyValue. If AnyValue contains a scalar, on the PVXS side it will be
+//! converted to a struct with a single `value` field.
+::pvxs::Value BuildScalarAwarePVXSValue(const ::sup::dto::AnyValue& any_value);
+
+//! Builds AnyValue from PVXS's value. If PVXS value contains a struct with single field `value`,
+//! and this field is a scalar, it will be converted to a scalar AnyValue.
+::sup::dto::AnyValue BuildScalarAwareAnyValue(const ::pvxs::Value& pvxs_value);
 
 }  // namespace epics
 

@@ -25,6 +25,7 @@
 #include <sup/epics/dto_conversion_utils.h>
 #include <sup/epics/utils/anyvalue_from_pvxs_builder.h>
 #include <sup/epics/utils/pvxs_type_builder.h>
+#include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
 
 #include <stdexcept>
@@ -32,7 +33,8 @@
 namespace
 {
 const std::string kValueFieldName("value");
-}
+const std::vector<std::string> kExpectedMembersInScalarStruct({kValueFieldName});
+}  // namespace
 
 namespace sup
 {
@@ -72,24 +74,38 @@ sup::dto::AnyValue ConvertScalarToStruct(const sup::dto::AnyValue& any_value)
 
 dto::AnyValue ConvertStructToScalar(const dto::AnyValue& any_value)
 {
-  static const std::vector<std::string> expected_members({kValueFieldName});
   if (!sup::dto::IsStructValue(any_value))
   {
     throw std::runtime_error("Error in ConvertScalarToStruct: given value is not a struct");
   }
 
-  if (any_value.MemberNames() != expected_members)
+  if (any_value.MemberNames() != kExpectedMembersInScalarStruct)
   {
     throw std::runtime_error(
         "Error in ConvertScalarToStruct: unexpected list of members in a struct");
   }
 
-  if(!sup::dto::IsScalarValue(any_value[kValueFieldName]))
+  if (!sup::dto::IsScalarValue(any_value[kValueFieldName]))
   {
     throw std::runtime_error("Error in ConvertScalarToStruct: unexpected field type");
   }
 
   return any_value[kValueFieldName];
+}
+
+pvxs::Value BuildScalarAwarePVXSValue(const dto::AnyValue& any_value)
+{
+  auto to_convert =
+      sup::dto::IsScalarValue(any_value) ? ConvertScalarToStruct(any_value) : any_value;
+  return BuildPVXSValue(to_convert);
+}
+
+dto::AnyValue BuildScalarAwareAnyValue(const pvxs::Value& pvxs_value)
+{
+  const bool is_scalar_struct = GetMemberNames(pvxs_value) == kExpectedMembersInScalarStruct
+                                && IsScalar(pvxs_value[kValueFieldName]);
+  auto to_convert = is_scalar_struct ? pvxs_value[kValueFieldName] : pvxs_value;
+  return BuildAnyValue(to_convert);
 }
 
 }  // namespace epics

@@ -22,6 +22,7 @@
 #include <pvxs/nt.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/utils/pvxs_utils.h>
 
 #include <iostream>
 
@@ -70,4 +71,73 @@ TEST_F(DtoConversionUtilsTests, ConvertStructToScalar)
                                     {"bool", {sup::dto::BooleanType, true}}};
   sup::dto::AnyValue nested_struct = {{"value", two_scalars}};
   EXPECT_THROW(ConvertStructToScalar(nested_struct), std::runtime_error);
+}
+
+//! Validating BuildScalarAwarePVXSValue utility function. Building PVXS value from scalar AnyValue.
+//! Expecting to get a struct with single `value` field.
+
+TEST_F(DtoConversionUtilsTests, BuildScalarAwarePVXSValueFromScalar)
+{
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+
+  auto pvxs_value = BuildScalarAwarePVXSValue(any_value);
+
+  EXPECT_TRUE(pvxs_value.valid());
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(GetMemberNames(pvxs_value), std::vector<std::string>({"value"}));
+  EXPECT_EQ(pvxs_value["value"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["value"].as<int32_t>(), 42);
+}
+
+//! Validating BuildScalarAwarePVXSValue utility function. Building PVXS value from AnyValue
+//! representing a struct with a single field. Expecting one-to-one conversion.
+
+TEST_F(DtoConversionUtilsTests, BuildScalarAwarePVXSValueFromStructWithSingleField)
+{
+  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32Type, 42}}}};
+
+  auto pvxs_value = BuildScalarAwarePVXSValue(any_value);
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 1);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed"}));
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
+}
+
+//! Validating BuildScalarAwareAnyValue utility function. PVXS value contain a struct with
+//! single `value` field.  Expecting to get back a scalar.
+TEST_F(DtoConversionUtilsTests, BuildScalarAwareAnyValueFromStructWithSingleField)
+{
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("value")}).create();
+  pvxs_value["value"] = 42;
+
+  auto anyvalue = BuildScalarAwareAnyValue(pvxs_value);
+
+  sup::dto::AnyType expected_anytype = {sup::dto::SignedInteger32Type};
+
+  EXPECT_EQ(anyvalue.GetType(), expected_anytype);
+  EXPECT_FALSE(::sup::dto::IsStructValue(anyvalue));
+  EXPECT_EQ(anyvalue, 42);
+}
+
+//! Validating BuildScalarAwarePVXSValue utility function. Building PVXS value from AnyValue
+//! representing a struct with a single custom field. Expecting one-to-one conversion.
+
+TEST_F(DtoConversionUtilsTests, BuildScalarAwareAnyValueFromStructWithCustomField)
+{
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("field")}).create();
+  pvxs_value["field"] = 42;
+
+  auto anyvalue = BuildScalarAwareAnyValue(pvxs_value);
+
+  sup::dto::AnyType expected_anytype = {{"field", {sup::dto::SignedInteger32Type}}};
+
+  EXPECT_EQ(anyvalue.GetType(), expected_anytype);
+  EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
+  EXPECT_EQ(anyvalue["field"].As<sup::dto::int32>(), 42);
 }
