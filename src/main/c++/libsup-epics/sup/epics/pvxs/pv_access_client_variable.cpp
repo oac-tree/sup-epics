@@ -39,13 +39,14 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
 {
   using subscription_t = pvxs::client::Subscription;
   std::string m_variable_name;
-  pvxs::Value m_pvxs_value;
+//  pvxs::Value m_pvxs_value;
   context_t m_context;
   callback_t m_callback;
+  ::sup::dto::AnyValue m_cache;
   bool m_is_connected{false};
   std::shared_ptr<subscription_t> m_subscription;
   std::shared_ptr<pvxs::client::Operation> m_operation;
-  std::mutex m_mutex;
+  mutable std::mutex m_mutex;
 
   PVAccessClientVariableImpl(const std::string& variable_name, context_t context,
                              callback_t callback)
@@ -70,11 +71,18 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     }
   }
 
+  sup::dto::AnyValue GetAnyValue() const
+  {
+    std::lock_guard<std::mutex> guard(m_mutex);
+    return m_cache;
+  }
+
   //! Processes monitoring events coming from PVXS. Function updates isConnected
   //! flag and the value of cache variable accordint to server reports.
   void ProcessMonitorEvents(subscription_t& sub)
   {
     std::lock_guard<std::mutex> guard(m_mutex);
+
     bool can_pop{true};
     while (can_pop)
     {
@@ -83,10 +91,10 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
         auto update = sub.pop();
         if (update)
         {
-          m_pvxs_value = update;
+          m_cache = sup::epics::BuildScalarAwareAnyValue(update);
           if (m_callback)
           {
-            m_callback(sup::epics::BuildAnyValue(m_pvxs_value));
+            m_callback(m_cache);
           }
         }
         else
@@ -113,14 +121,16 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   bool SetCache(const sup::dto::AnyValue& any_value)
   {
     std::lock_guard<std::mutex> guard(m_mutex);
-    pvxs::Value new_pvxs_value = sup::epics::BuildPVXSValue(any_value);
 
-    m_pvxs_value = new_pvxs_value;
+    m_cache = any_value;
+
+    auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(m_cache);
+
     // copying the value inside lambda
     if (auto sp = m_context.lock())
     {
       m_operation = sp->put(m_variable_name.c_str())
-                        .build([new_pvxs_value](pvxs::Value&& /*proto*/) { return new_pvxs_value; })
+                        .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
                         .exec();
     }
     else
@@ -159,7 +169,7 @@ bool PVAccessClientVariable::IsConnected() const
 
 sup::dto::AnyValue PVAccessClientVariable::GetValue() const
 {
-  return sup::epics::BuildAnyValue(p_impl->m_pvxs_value);
+  return p_impl->GetAnyValue();
 }
 
 bool PVAccessClientVariable::SetValue(const sup::dto::AnyValue& value)

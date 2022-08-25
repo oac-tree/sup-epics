@@ -77,7 +77,6 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_TRUE(client.IsConnected(channel_name));
   EXPECT_EQ(server.GetValue(channel_name), any_value0);
 
-  // FIXME for the moment client doesn't perform implicit conversion from struct to scalar
   auto client_value = client.GetValue(channel_name);
-  EXPECT_EQ(client_value["value"], any_value0);
+  EXPECT_EQ(client_value, any_value0);
 }

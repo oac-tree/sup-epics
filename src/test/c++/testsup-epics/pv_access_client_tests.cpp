@@ -140,6 +140,8 @@ TEST_F(PVAccessClientTest, AddVariableAndSetValueWhenUnconnected)
 //! client. Two variables have been added to the client. Check connection status and GetValue,
 //! SetValue functionality.
 
+// FIXME
+
 TEST_F(PVAccessClientTest, TwoDifferentChannels)
 {
   // starting a server with two variables
@@ -161,13 +163,16 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   // checking updated values
   auto any_value0 = client.GetValue(kIntChannelName);
   EXPECT_EQ(any_value0["value"], kInitialIntChannelValue);
+
+  // m_shared_string_pv is a `struct-scalar`, i.e. a struct with a single `value` field
+  // PVAccessClient sees it as a simple scalar
   auto any_value1 = client.GetValue(kStringChannelName);
-  EXPECT_EQ(any_value1["value"], kInitialStringChannelValue);
+  EXPECT_EQ(any_value1, kInitialStringChannelValue);
 
   // setting values
   any_value0["value"] = kInitialIntChannelValue + 1;
   EXPECT_TRUE(client.SetValue(kIntChannelName, any_value0));
-  any_value1["value"] = std::string("abc2");
+  any_value1 = std::string("abc2");
   EXPECT_TRUE(client.SetValue(kStringChannelName, any_value1));
 
   std::this_thread::sleep_for(msec(20));

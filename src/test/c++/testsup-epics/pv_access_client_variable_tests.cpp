@@ -369,15 +369,22 @@ TEST_F(PVAccessClientVariableTest, TwoClientsCallbacks)
   EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
 
-//! Server with variable and initial value created before the client.
-//! The client sets the value on the server using a custom structure, with value filed.
-//! The test proves, that `pvxs::server::Server` allows updating server variable with pvxs::Value
-//! that doesn't much the remote one. It will use only matching fields.
+//! Validating implicit struct-scalar conversion. A `struct-scalar` is a special structure
+//! with a single `value` field holding a scalar. The current implementation is that scalars on
+//! AnyValue side becomes a `struct-scalar` on the PVXS side. Similarly, `struct-scalar` on PVXS
+//! side should become a bare scalar on AnyValue side.
+//!
+//! Server with variable and initial value created before the client. Variable contains PVXS value
+//! with a struct with a single `value` field.
 
-TEST_F(PVAccessClientVariableTest, SetFromSimilarStructure)
+TEST_F(PVAccessClientVariableTest, GetSetFromClientForScalarAwareCase)
 {
+  auto pvxs_struct_scalar_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("value")}).create();
+  pvxs_struct_scalar_value["value"] = 42;
+
   m_server.start();
-  m_shared_pv.open(m_pvxs_value);
+  m_shared_pv.open(pvxs_struct_scalar_value);
   auto shared_context = CreateSharedContext();
 
   sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
@@ -385,17 +392,16 @@ TEST_F(PVAccessClientVariableTest, SetFromSimilarStructure)
 
   EXPECT_TRUE(variable.IsConnected());
 
-  // constructing a structure that doesn't coincide with variable on server side
-  // however it has `value` field
-  sup::dto::AnyValue any_value = {{{"value", {sup::dto::SignedInteger32Type, 22}}}};
+  // retrieving value
+  auto any_value = variable.GetValue();
+  EXPECT_EQ(any_value.GetType(), sup::dto::SignedInteger32Type);
+  EXPECT_EQ(any_value, kInitialValue);
 
-  // setting custom AnyValue via client
+  // modifying the field in retrieved value
+  any_value = kInitialValue + 1;
   EXPECT_TRUE(variable.SetValue(any_value));
   std::this_thread::sleep_for(msec(20));
 
-  // We see that the `value` field has bin updated on server side.
-  // The field `alarm.status` on server side remained untouched.
   auto shared_value = m_shared_pv.fetch();
-  EXPECT_EQ(shared_value["value"].as<int>(), 22);
-  EXPECT_EQ(shared_value["alarm.status"].as<int>(), kInitialStatus);
+  EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 1);
 }
