@@ -30,6 +30,11 @@ namespace sup
 {
 namespace epics
 {
+
+// ----------------------------------------------------------------------------
+// PVAccessClientVariableImpl
+// ----------------------------------------------------------------------------
+
 struct PVAccessClientVariable::PVAccessClientVariableImpl
 {
   using subscription_t = pvxs::client::Subscription;
@@ -125,6 +130,10 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     return true;
   }
 };
+
+// ----------------------------------------------------------------------------
+// PVAccessClientVariable
+// ----------------------------------------------------------------------------
 
 PVAccessClientVariable::PVAccessClientVariable(const std::string& variable_name, context_t context,
                                                callback_t callback)

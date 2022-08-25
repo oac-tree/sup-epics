@@ -33,6 +33,10 @@ namespace sup
 namespace epics
 {
 
+// ----------------------------------------------------------------------------
+// PVAccessServerVariableImpl
+// ----------------------------------------------------------------------------
+
 struct PVAccessServerVariable::PVAccessServerVariableImpl
 {
   const std::string m_variable_name;
@@ -53,13 +57,7 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   }
 
   //! Get PVXS value from cache.
-  pvxs::Value GetPVXSValue()
-  {
-    // if AnyValue is scalar, turn it into the structure.
-    auto struct_any_value =
-        sup::dto::IsScalarValue(m_cache) ? ConvertScalarToStruct(m_cache) : m_cache;
-    return BuildPVXSValue(struct_any_value);
-  }
+  pvxs::Value GetPVXSValue() { return BuildScalarAwarePVXSValue(m_cache); }
 
   //! Get AnyValue stored in cache.
   sup::dto::AnyValue GetAnyValue()
@@ -102,9 +100,8 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    auto any_value = BuildAnyValue(value);
-    // converting back if necessary a struct with a single scalar field into a scalar
-    m_cache = sup::dto::IsScalarValue(m_cache) ? ConvertStructToScalar(any_value) : any_value;
+    m_cache = BuildScalarAwareAnyValue(value);
+
     m_shared_pv.post(value);
     if (m_callback)
     {
@@ -113,6 +110,10 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
     op->reply();
   }
 };
+
+// ----------------------------------------------------------------------------
+// PVAccessServerVariable
+// ----------------------------------------------------------------------------
 
 PVAccessServerVariable::PVAccessServerVariable(const std::string& variable_name,
                                                const sup::dto::AnyValue& any_value,
