@@ -59,24 +59,30 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating server with single variable
   PVAccessServer server(std::move(pvxs_server));
-  sup::dto::AnyValue any_value0{sup::dto::SignedInteger32Type, 42};
-  server.AddVariable(channel_name, any_value0);
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  server.AddVariable(channel_name, any_value);
 
   server.Start();
   std::this_thread::sleep_for(msec(20));
 
   // Checking variable on server side
-  EXPECT_EQ(server.GetValue(channel_name), any_value0);
+  EXPECT_EQ(server.GetValue(channel_name), any_value);
 
   // creating a client with single variable
   PVAccessClient client(client_context);
   client.AddVariable(channel_name);
 
-  // checking connection and updated values
+  // checking connection and updated values on server and client sides
   std::this_thread::sleep_for(msec(20));
+  EXPECT_EQ(server.GetValue(channel_name), any_value);
   EXPECT_TRUE(client.IsConnected(channel_name));
-  EXPECT_EQ(server.GetValue(channel_name), any_value0);
+  EXPECT_EQ(client.GetValue(channel_name), any_value);
 
-  auto client_value = client.GetValue(channel_name);
-  EXPECT_EQ(client_value, any_value0);
+  // changing the value via the server and checking values on server and client sides
+  sup::dto::AnyValue new_any_value1{sup::dto::SignedInteger32Type, 43};
+  server.SetValue(channel_name, new_any_value1);
+
+  std::this_thread::sleep_for(msec(40));
+  EXPECT_EQ(server.GetValue(channel_name), new_any_value1);
+  EXPECT_EQ(client.GetValue(channel_name), new_any_value1);
 }

@@ -25,6 +25,7 @@
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_variable.h>
+#include <sup/epics/pvxs/context_utils.h>
 
 #include <thread>
 
@@ -33,12 +34,6 @@ using ::testing::_;
 
 class PVAccessServerVariableTests : public ::testing::Test
 {
-public:
-  //! Constructor.
-  //! @note Configure server from the environment to make pvget, pvput working.
-  PVAccessServerVariableTests() : m_server(pvxs::server::Config::fromEnv().build()) {}
-
-  pvxs::server::Server m_server;
 };
 
 //! Check initial state of PVAccessServerVariable.
@@ -89,18 +84,43 @@ TEST_F(PVAccessServerVariableTests, GetAndSet)
   EXPECT_THROW(variable.SetValue(struct_value), sup::dto::InvalidConversionException);
 }
 
+//! Check GetValue and SetValue. Server is running.
+
+TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServer)
+{
+  auto server = sup::epics::CreateIsolatedServer();
+
+  const std::string variable_name{"variable_name"};
+
+  // creating variable based on scalar
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+  EXPECT_EQ(variable.GetValue(), any_value);
+
+  variable.AddToServer(*server);
+  std::this_thread::sleep_for(msec(20));
+
+  // setting new value and checking the result
+  sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
+  EXPECT_TRUE(variable.SetValue(new_any_value));
+
+  std::this_thread::sleep_for(msec(20));
+  EXPECT_EQ(variable.GetValue(), new_any_value);
+}
+
 //! Adding variable to a server. Server is started first.
 
 TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)
 {
-  m_server.start();
+  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+  server->start();
 
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
 
-  variable.AddToServer(m_server);
+  variable.AddToServer(*server);
   std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget` command line utility
@@ -113,14 +133,16 @@ TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)
 
 TEST_F(PVAccessServerVariableTests, AddToServerBeforeServerStart)
 {
+  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
 
-  variable.AddToServer(m_server);
+  variable.AddToServer(*server);
 
-  m_server.start();
+  server->start();
   std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
@@ -134,14 +156,16 @@ TEST_F(PVAccessServerVariableTests, AddToServerBeforeServerStart)
 
 TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
 {
+  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
 
-  variable.AddToServer(m_server);
+  variable.AddToServer(*server);
 
-  m_server.start();
+  server->start();
   std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
@@ -165,6 +189,8 @@ TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
 
 TEST_F(PVAccessServerVariableTests, GetAfterPvPutWithCallback)
 {
+  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+
   MockListener listener;
 
   const std::string variable_name{"variable_name"};
@@ -172,9 +198,9 @@ TEST_F(PVAccessServerVariableTests, GetAfterPvPutWithCallback)
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   sup::epics::PVAccessServerVariable variable(variable_name, any_value, listener.GetCallBack());
 
-  variable.AddToServer(m_server);
+  variable.AddToServer(*server);
 
-  m_server.start();
+  server->start();
   std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`

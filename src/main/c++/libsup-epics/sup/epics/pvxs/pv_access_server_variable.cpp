@@ -25,6 +25,7 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
 
+#include <iostream>
 #include <mutex>
 #include <stdexcept>
 
@@ -40,7 +41,8 @@ namespace epics
 struct PVAccessServerVariable::PVAccessServerVariableImpl
 {
   const std::string m_variable_name;
-  sup::dto::AnyValue m_cache;
+  sup::dto::AnyValue m_any_value;  //!< The main value of this variable.
+  pvxs::Value m_pvxs_cache;        //!< Necessary for open/post operations of SharedPV
   callback_t m_callback;
   pvxs::server::SharedPV m_shared_pv;
   std::mutex m_mutex;
@@ -48,7 +50,8 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   PVAccessServerVariableImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
                              callback_t callback)
       : m_variable_name(variable_name)
-      , m_cache(any_value)
+      , m_any_value(any_value)
+      , m_pvxs_cache(BuildScalarAwarePVXSValue(m_any_value))
       , m_callback(std::move(callback))
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
   {
@@ -57,27 +60,28 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
         std::bind(&PVAccessServerVariableImpl::OnSharedValueChanged, this, _1, _2, _3));
   }
 
-  //! Get PVXS value from cache.
-  pvxs::Value GetPVXSValue() { return BuildScalarAwarePVXSValue(m_cache); }
-
   //! Get AnyValue stored in cache.
   sup::dto::AnyValue GetAnyValue()
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-    return m_cache;
+    return m_any_value;
   }
 
   //! Sets the cache variable and schedules update of the shared variable.
-  bool SetCache(const sup::dto::AnyValue& any_value)
+  bool SetAnyValue(const sup::dto::AnyValue& any_value)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    m_cache = any_value;
+    m_any_value = any_value;
 
+    // assigning value to shared variable
     if (m_shared_pv.isOpen())
     {
-      auto pvxs_value = GetPVXSValue();
-      m_shared_pv.post(pvxs_value);
+      // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer
+      // alive since server::SharedPV relies on that.
+      auto pvxs_value = BuildScalarAwarePVXSValue(m_any_value);
+      m_pvxs_cache.assign(pvxs_value);
+      m_shared_pv.post(m_pvxs_cache);
     }
 
     return true;
@@ -93,7 +97,7 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
     }
 
     server.addPV(m_variable_name, m_shared_pv);
-    m_shared_pv.open(GetPVXSValue());
+    m_shared_pv.open(m_pvxs_cache);
   }
 
   void OnSharedValueChanged(pvxs::server::SharedPV& /*pv*/,
@@ -101,12 +105,16 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    m_cache = BuildScalarAwareAnyValue(value);
+    m_any_value = BuildScalarAwareAnyValue(value);
 
-    m_shared_pv.post(value);
+    // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer alive
+    // since server::SharedPV relies on that.
+    m_pvxs_cache.assign(value);
+    m_shared_pv.post(m_pvxs_cache);
+
     if (m_callback)
     {
-      m_callback(m_cache);
+      m_callback(m_any_value);
     }
     op->reply();
   }
@@ -135,7 +143,7 @@ dto::AnyValue PVAccessServerVariable::GetValue() const
 
 bool PVAccessServerVariable::SetValue(const dto::AnyValue& value)
 {
-  return p_impl->SetCache(value);
+  return p_impl->SetAnyValue(value);
 }
 
 void PVAccessServerVariable::AddToServer(pvxs::server::Server& server)
