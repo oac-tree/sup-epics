@@ -53,7 +53,8 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
   {
     using namespace std::placeholders;
-    m_shared_pv.onPut(std::bind(&PVAccessServerVariableImpl::OnPutCallback, this, _1, _2, _3));
+    m_shared_pv.onPut(
+        std::bind(&PVAccessServerVariableImpl::OnSharedValueChanged, this, _1, _2, _3));
   }
 
   //! Get PVXS value from cache.
@@ -95,8 +96,8 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
     m_shared_pv.open(GetPVXSValue());
   }
 
-  void OnPutCallback(pvxs::server::SharedPV& /*pv*/, std::unique_ptr<pvxs::server::ExecOp>&& op,
-                     pvxs::Value&& value)
+  void OnSharedValueChanged(pvxs::server::SharedPV& /*pv*/,
+                            std::unique_ptr<pvxs::server::ExecOp>&& op, pvxs::Value&& value)
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
