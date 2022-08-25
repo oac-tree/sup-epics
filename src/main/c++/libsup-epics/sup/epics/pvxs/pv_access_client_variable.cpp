@@ -39,10 +39,9 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
 {
   using subscription_t = pvxs::client::Subscription;
   std::string m_variable_name;
-//  pvxs::Value m_pvxs_value;
   context_t m_context;
   callback_t m_callback;
-  ::sup::dto::AnyValue m_cache;
+  ::sup::dto::AnyValue m_any_value;
   bool m_is_connected{false};
   std::shared_ptr<subscription_t> m_subscription;
   std::shared_ptr<pvxs::client::Operation> m_operation;
@@ -74,7 +73,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   sup::dto::AnyValue GetAnyValue() const
   {
     std::lock_guard<std::mutex> guard(m_mutex);
-    return m_cache;
+    return m_any_value;
   }
 
   //! Processes monitoring events coming from PVXS. Function updates isConnected
@@ -91,10 +90,10 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
         auto update = sub.pop();
         if (update)
         {
-          m_cache = sup::epics::BuildScalarAwareAnyValue(update);
+          m_any_value = sup::epics::BuildScalarAwareAnyValue(update);
           if (m_callback)
           {
-            m_callback(m_cache);
+            m_callback(m_any_value);
           }
         }
         else
@@ -118,13 +117,13 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   }
 
   //! Sets the cache variable and schedules update of the server.
-  bool SetCache(const sup::dto::AnyValue& any_value)
+  bool SetAnyValue(const sup::dto::AnyValue& any_value)
   {
     std::lock_guard<std::mutex> guard(m_mutex);
 
-    m_cache = any_value;
+    m_any_value = any_value;
 
-    auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(m_cache);
+    auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(m_any_value);
 
     // copying the value inside lambda
     if (auto sp = m_context.lock())
@@ -137,6 +136,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     {
       throw std::runtime_error("Error in PVAccessClientVariable: context has expired.");
     }
+
     return true;
   }
 };
@@ -174,7 +174,7 @@ sup::dto::AnyValue PVAccessClientVariable::GetValue() const
 
 bool PVAccessClientVariable::SetValue(const sup::dto::AnyValue& value)
 {
-  return p_impl->SetCache(value);
+  return p_impl->SetAnyValue(value);
 }
 
 bool PVAccessClientVariable::WaitForConnected(double timeout_sec) const

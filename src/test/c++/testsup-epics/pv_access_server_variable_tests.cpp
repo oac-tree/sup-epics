@@ -108,6 +108,37 @@ TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServer)
   EXPECT_EQ(variable.GetValue(), new_any_value);
 }
 
+//! Check GetValue and SetValue. Server is running.
+//! Same as above, callbacks are added.
+
+TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServerWithCallbacks)
+{
+  MockListener listener;
+
+  auto server = sup::epics::CreateIsolatedServer();
+
+  const std::string variable_name{"variable_name"};
+
+  // creating variable based on scalar
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::epics::PVAccessServerVariable variable(variable_name, any_value, listener.GetCallBack());
+  EXPECT_EQ(variable.GetValue(), any_value);
+
+  variable.AddToServer(*server);
+  std::this_thread::sleep_for(msec(20));
+
+  // setting new value and checking the result
+  sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
+  // setting up callback expectations
+  EXPECT_CALL(listener, OnValueChanged(new_any_value)).Times(1);
+
+  EXPECT_TRUE(variable.SetValue(new_any_value));
+
+  std::this_thread::sleep_for(msec(20));
+  EXPECT_EQ(variable.GetValue(), new_any_value);
+}
+
+
 //! Adding variable to a server. Server is started first.
 
 TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)

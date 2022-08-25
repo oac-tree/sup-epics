@@ -84,6 +84,11 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
       m_shared_pv.post(m_pvxs_cache);
     }
 
+    if (m_callback) // for some reason `post` above doesn't trigger OnSharedValueChanged
+    {
+      m_callback(m_any_value);
+    }
+
     return true;
   }
 
