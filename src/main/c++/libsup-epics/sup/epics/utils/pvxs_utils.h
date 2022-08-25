@@ -25,6 +25,7 @@
 
 #include <sup/epics/dto_types_fwd.h>
 
+#include <string>
 #include <vector>
 
 namespace sup
@@ -52,6 +53,9 @@ bool IsStruct(const ::pvxs::Value& value);
 
 //! Returns vector of children.
 std::vector<::pvxs::Value> GetChildren(const pvxs::Value& pvxs_value);
+
+//! Returns names of member fields in given value.
+std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value);
 
 }  // namespace epics
 }  // namespace sup

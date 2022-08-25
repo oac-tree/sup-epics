@@ -61,6 +61,17 @@ bool IsStruct(const pvxs::Value &value)
   return value.type() == pvxs::TypeCode::Struct;
 }
 
+bool IsScalarArray(const pvxs::TypeCode &type_code)
+{
+  // for some reason type_code.isarray() is true for Null types too
+  return type_code != pvxs::TypeCode::Null && type_code.isarray();
+}
+
+bool IsScalarArray(const pvxs::Value &value)
+{
+  return IsScalarArray(value.type());
+}
+
 std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
 {
   std::vector<pvxs::Value> result;
@@ -71,15 +82,14 @@ std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
   return result;
 }
 
-bool IsScalarArray(const pvxs::TypeCode &type_code)
+std::vector<std::string> GetMemberNames(const pvxs::Value &pvxs_value)
 {
-  // for some reason type_code.isarray() is true for Null types too
-  return type_code != pvxs::TypeCode::Null && type_code.isarray();
-}
-
-bool IsScalarArray(const pvxs::Value &value)
-{
-  return IsScalarArray(value.type());
+  std::vector<std::string> result;
+  for (auto fld : pvxs_value.ichildren())
+  {
+    result.push_back(pvxs_value.nameOf(fld));
+  }
+  return result;
 }
 
 }  // namespace epics

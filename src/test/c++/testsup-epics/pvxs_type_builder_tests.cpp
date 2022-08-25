@@ -20,6 +20,7 @@
 #include <sup/epics/utils/pvxs_type_builder.h>
 
 #include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/utils/pvxs_utils.h>
 
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
@@ -36,17 +37,6 @@ using namespace ::sup::epics;
 
 class PvxsTypeBuilderTests : public ::testing::Test
 {
-public:
-  //! Returns vector of field names in a given `pvxs_value`.
-  static std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value)
-  {
-    std::vector<std::string> result;
-    for (auto fld : pvxs_value.ichildren())
-    {
-      result.push_back(pvxs_value.nameOf(fld));
-    }
-    return result;
-  }
 };
 
 TEST_F(PvxsTypeBuilderTests, EmptyType)

@@ -195,3 +195,38 @@ TEST_F(PvxsUtilsTests, GetChildrenForSimpleStruct)
   EXPECT_EQ(value["field"].as<int32_t>(), 44);
   EXPECT_EQ(child.as<int32_t>(), 44);
 }
+
+TEST_F(PvxsUtilsTests, GetMemberNames)
+{
+  {  // empty value
+    pvxs::Value value;
+    EXPECT_TRUE(GetMemberNames(value).empty());
+  }
+
+  // scalar
+  {
+    auto value = ::pvxs::TypeDef(::pvxs::TypeCode::Int16).create();
+    EXPECT_TRUE(GetMemberNames(value).empty());
+  }
+
+  // struct with single field
+  {
+    auto value = pvxs::TypeDef(pvxs::TypeCode::Struct, "simple_t",
+                               {pvxs::Member(pvxs::TypeCode::Int32, "field")})
+                     .create();
+    EXPECT_EQ(GetMemberNames(value), std::vector<std::string>({"field"}));
+  }
+
+  // struct with two nested struct
+  {
+    auto member1 = pvxs::members::Struct(
+        "struct1", "struct1_name", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
+    auto member2 = pvxs::members::Struct(
+        "struct2", {pvxs::members::Int8("first"), pvxs::members::UInt8("second")});
+
+    auto value =
+        ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "struct_name", {member1, member2}).create();
+
+    EXPECT_EQ(GetMemberNames(value), std::vector<std::string>({"struct1", "struct2"}));
+  }
+}
