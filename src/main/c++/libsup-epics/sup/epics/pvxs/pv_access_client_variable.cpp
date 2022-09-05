@@ -26,6 +26,11 @@
 #include <mutex>
 #include <thread>
 
+namespace
+{
+const double kOnSetMaxWaitingTimeInSec = 1.0;
+}
+
 namespace sup
 {
 namespace epics
@@ -45,7 +50,8 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   bool m_is_connected{false};
   std::shared_ptr<subscription_t> m_subscription;
   std::shared_ptr<pvxs::client::Operation> m_operation;
-  mutable std::mutex m_mutex;
+  mutable std::mutex m_event_mutex;  //!< used during events coming from EPICS
+  mutable std::mutex m_onset_mutex;  //!< used during set from the user
 
   PVAccessClientVariableImpl(const std::string& variable_name, context_t context,
                              callback_t callback)
@@ -70,9 +76,15 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     }
   }
 
+  bool IsConnected() const
+  {
+    std::lock_guard<std::mutex> guard(m_event_mutex);
+    return m_is_connected;
+  }
+
   sup::dto::AnyValue GetAnyValue() const
   {
-    std::lock_guard<std::mutex> guard(m_mutex);
+    std::lock_guard<std::mutex> guard(m_event_mutex);
     return m_any_value;
   }
 
@@ -80,7 +92,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   //! flag and the value of cache variable accordint to server reports.
   void ProcessMonitorEvents(subscription_t& sub)
   {
-    std::lock_guard<std::mutex> guard(m_mutex);
+    std::lock_guard<std::mutex> guard(m_event_mutex);
 
     bool can_pop{true};
     while (can_pop)
@@ -119,11 +131,14 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
   //! Sets the cache variable and schedules update of the server.
   bool SetAnyValue(const sup::dto::AnyValue& any_value)
   {
-    std::lock_guard<std::mutex> guard(m_mutex);
+    if (!IsConnected())
+    {
+      return false;
+    }
 
-    m_any_value = any_value;
+    std::lock_guard<std::mutex> guard(m_onset_mutex);
 
-    auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(m_any_value);
+    auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(any_value);
 
     // copying the value inside lambda
     if (auto context = m_context.lock())
@@ -131,6 +146,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
       m_operation = context->put(m_variable_name.c_str())
                         .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
                         .exec();
+      m_operation->wait(kOnSetMaxWaitingTimeInSec);
     }
     else
     {
@@ -164,7 +180,7 @@ std::string PVAccessClientVariable::GetVariableName() const
 
 bool PVAccessClientVariable::IsConnected() const
 {
-  return p_impl->m_is_connected;
+  return p_impl->IsConnected();
 }
 
 sup::dto::AnyValue PVAccessClientVariable::GetValue() const
