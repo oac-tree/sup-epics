@@ -94,11 +94,10 @@ TEST_F(PVAccessClientVariableTests, SetValueWhenUnconnected)
   // seting the value
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
   any_value = 42;
-  EXPECT_TRUE(variable.SetValue(any_value));
+  EXPECT_FALSE(variable.SetValue(any_value));
 
-  // expecting to get same value
-  auto result = variable.GetValue();
-  EXPECT_EQ(any_value, result);
+  // expecting to get old value
+  EXPECT_TRUE(::sup::dto::IsEmptyValue(variable.GetValue()));
 }
 
 //! Checking the method WaitForConnected.
@@ -235,7 +234,7 @@ TEST_F(PVAccessClientVariableTests, SetFromClient)
 //!
 //! This test often hangs and it is disabled for the moment. FIXME.
 
-TEST_F(PVAccessClientVariableTests, DISABLED_MultipleSetFromClient)
+TEST_F(PVAccessClientVariableTests, MultipleSetFromClient)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
