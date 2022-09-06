@@ -146,7 +146,19 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
       m_operation = context->put(m_variable_name.c_str())
                         .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
                         .exec();
-      m_operation->wait(kOnSetMaxWaitingTimeInSec);
+
+      try
+      {
+        m_operation->wait(kOnSetMaxWaitingTimeInSec);
+      }
+      catch (const pvxs::client::Timeout& ex)
+      {
+        return false;
+      }
+      catch (const pvxs::client::Interrupted& ex)
+      {
+        return false;
+      }
     }
     else
     {
