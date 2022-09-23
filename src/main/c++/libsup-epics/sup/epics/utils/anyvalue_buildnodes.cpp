@@ -242,7 +242,7 @@ AbstractAnyValueBuildNode::NodeType EndArrayElementBuildNode::GetNodeType() cons
 
 //! Processes the stack, finalizes the adding of the element to StartArrayBuildNode.
 //! @note It will remove two last nodes (with the value, and StartArrayElementNode) and then
-//! create a field in the remaining StartStructBuildNode.
+//! create a field in the remaining StartArrayBuildNode.
 
 bool EndArrayElementBuildNode::Process(std::stack<node_t> &stack)
 {
