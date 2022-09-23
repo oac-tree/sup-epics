@@ -106,6 +106,19 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       }
     }
   }
+
+  void AddChildren(Node& node, NodeContext context)
+  {
+    auto children =  GetChildren(node.m_value);
+    // iteration in reverse order
+    for (auto it = children.rbegin(); it != children.rend(); ++it)
+    {
+      Node child_node{*it, context};
+      child_node.m_name = node.m_value.nameOf(*it);
+      m_stack.push(child_node);
+    }
+  }
+
   //! Process PVXS value representing a struct.
   void ProcessStructNode(Node& node)
   {
@@ -126,12 +139,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 
       auto children = GetChildren(node.m_value);
       // iteration in reverse order
-      for (auto it = children.rbegin(); it != children.rend(); ++it)
-      {
-        Node child_node{*it, kStructField};
-        child_node.m_name = node.m_value.nameOf(*it);
-        m_stack.push(child_node);
-      }
+      AddChildren(node, kStructField);
     }
   }
 
