@@ -2,8 +2,8 @@ target_sources(${library_name} PRIVATE
   CMakeLists.txt
   abstract_anyvalue_buildnode.cpp
   abstract_anyvalue_buildnode.h
-  anyvalue_build_adapter_v2.cpp
-  anyvalue_build_adapter_v2.h
+  anyvalue_build_adapter.cpp
+  anyvalue_build_adapter.h
   anyvalue_buildnode_utils.cpp
   anyvalue_buildnode_utils.h
   anyvalue_buildnodes.cpp

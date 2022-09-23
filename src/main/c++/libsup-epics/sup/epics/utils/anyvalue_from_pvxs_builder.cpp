@@ -22,7 +22,7 @@
 #include <pvxs/data.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/utils/anyvalue_build_adapter_v2.h>
+#include <sup/epics/utils/anyvalue_build_adapter.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 
@@ -67,7 +67,7 @@ struct Node
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
-  AnyValueBuildAdapterV2 m_builder;
+  AnyValueBuildAdapter m_builder;
   std::stack<Node> m_stack;
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)

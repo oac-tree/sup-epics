@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_V2_H_
-#define SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_V2_H_
+#ifndef SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_H_
+#define SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_H_
 
 #include <sup/dto/basic_scalar_types.h>
 #include <sup/epics/dto_types_fwd.h>
@@ -33,11 +33,11 @@ namespace epics
 
 //! Builds AnyValue in step-wise manner by calling methods to add fields and structs.
 
-class AnyValueBuildAdapterV2
+class AnyValueBuildAdapter
 {
 public:
-  AnyValueBuildAdapterV2();
-  ~AnyValueBuildAdapterV2();
+  AnyValueBuildAdapter();
+  ~AnyValueBuildAdapter();
 
   sup::dto::AnyValue MoveAnyValue() const;
 
@@ -79,11 +79,11 @@ public:
   int GetStackSize() const;
 
 private:
-  struct AnyValueBuildAdapterV2Impl;
-  std::unique_ptr<AnyValueBuildAdapterV2Impl> p_impl;
+  struct AnyValueBuildAdapterImpl;
+  std::unique_ptr<AnyValueBuildAdapterImpl> p_impl;
 };
 
 }  // namespace epics
 }  // namespace sup
 
-#endif  // SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_V2_H_
+#endif  // SUP_EPICS_UTILS_ANYVALUE_BUILD_ADAPTER_H_

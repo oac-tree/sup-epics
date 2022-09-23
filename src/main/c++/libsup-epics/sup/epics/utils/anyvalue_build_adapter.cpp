@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/utils/anyvalue_build_adapter_v2.h"
+#include "sup/epics/utils/anyvalue_build_adapter.h"
 
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
@@ -32,7 +32,7 @@ namespace sup
 namespace epics
 {
 
-struct AnyValueBuildAdapterV2::AnyValueBuildAdapterV2Impl
+struct AnyValueBuildAdapter::AnyValueBuildAdapterImpl
 {
   std::stack<AbstractAnyValueBuildNode::node_t> m_stack;
 
@@ -49,71 +49,71 @@ struct AnyValueBuildAdapterV2::AnyValueBuildAdapterV2Impl
   void AddValueNode(const ::sup::dto::AnyValue &value) { ProcessNode<AnyValueBuildNode>(value); }
 };
 
-AnyValueBuildAdapterV2::AnyValueBuildAdapterV2() : p_impl(new AnyValueBuildAdapterV2Impl) {}
+AnyValueBuildAdapter::AnyValueBuildAdapter() : p_impl(new AnyValueBuildAdapterImpl) {}
 
-sup::dto::AnyValue AnyValueBuildAdapterV2::MoveAnyValue() const
+sup::dto::AnyValue AnyValueBuildAdapter::MoveAnyValue() const
 {
   return p_impl->m_stack.empty() ? sup::dto::AnyValue() : p_impl->m_stack.top()->MoveAnyValue();
 }
 
-AnyValueBuildAdapterV2::~AnyValueBuildAdapterV2() = default;
+AnyValueBuildAdapter::~AnyValueBuildAdapter() = default;
 
-void AnyValueBuildAdapterV2::Bool(sup::dto::boolean value)
+void AnyValueBuildAdapter::Bool(sup::dto::boolean value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::Int8(sup::dto::int8 value)
+void AnyValueBuildAdapter::Int8(sup::dto::int8 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::UInt8(sup::dto::uint8 value)
+void AnyValueBuildAdapter::UInt8(sup::dto::uint8 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::Int16(sup::dto::int16 value)
+void AnyValueBuildAdapter::Int16(sup::dto::int16 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::UInt16(sup::dto::uint16 value)
+void AnyValueBuildAdapter::UInt16(sup::dto::uint16 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::Int32(sup::dto::int32 value)
+void AnyValueBuildAdapter::Int32(sup::dto::int32 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::UInt32(sup::dto::uint32 value)
+void AnyValueBuildAdapter::UInt32(sup::dto::uint32 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::Int64(sup::dto::int64 value)
+void AnyValueBuildAdapter::Int64(sup::dto::int64 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::UInt64(sup::dto::uint64 value)
+void AnyValueBuildAdapter::UInt64(sup::dto::uint64 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::Float32(sup::dto::float32 value)
+void AnyValueBuildAdapter::Float32(sup::dto::float32 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::Float64(sup::dto::float64 value)
+void AnyValueBuildAdapter::Float64(sup::dto::float64 value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
 
-void AnyValueBuildAdapterV2::String(const std::string &value)
+void AnyValueBuildAdapter::String(const std::string &value)
 {
   p_impl->AddValueNode(::sup::dto::AnyValue(value));
 }
@@ -126,27 +126,27 @@ void AnyValueBuildAdapterV2::String(const std::string &value)
 //! 2. StartArrayElement was called before. Then the value will be added to the array elements.
 //! 2. StartField was called before. Then the value will be added to current struct as a field.
 
-void AnyValueBuildAdapterV2::AddValue(const sup::dto::AnyValue &anyvalue)
+void AnyValueBuildAdapter::AddValue(const sup::dto::AnyValue &anyvalue)
 {
   p_impl->AddValueNode(anyvalue);
 }
 
-void AnyValueBuildAdapterV2::StartStruct(const std::string &struct_name)
+void AnyValueBuildAdapter::StartStruct(const std::string &struct_name)
 {
   p_impl->ProcessNode<StartStructBuildNode>(struct_name);
 }
 
-void AnyValueBuildAdapterV2::EndStruct()
+void AnyValueBuildAdapter::EndStruct()
 {
   p_impl->ProcessNode<EndStructBuildNode>();
 }
 
-void AnyValueBuildAdapterV2::StartField(const std::string &field_name)
+void AnyValueBuildAdapter::StartField(const std::string &field_name)
 {
   p_impl->ProcessNode<StartFieldBuildNode>(field_name);
 }
 
-void AnyValueBuildAdapterV2::EndField()
+void AnyValueBuildAdapter::EndField()
 {
   p_impl->ProcessNode<EndFieldBuildNode>();
 }
@@ -155,24 +155,24 @@ void AnyValueBuildAdapterV2::EndField()
 //! @param anyvalue Scalar anyvalue, completed structure or array.
 //! @note Equivalent of calls StartField/AddValue/EndField.
 
-void AnyValueBuildAdapterV2::AddMember(const std::string &name, sup::dto::AnyValue anyvalue)
+void AnyValueBuildAdapter::AddMember(const std::string &name, sup::dto::AnyValue anyvalue)
 {
   StartField(name);
   AddValue(anyvalue);
   EndField();
 }
 
-void AnyValueBuildAdapterV2::StartArray(const std::string &array_name)
+void AnyValueBuildAdapter::StartArray(const std::string &array_name)
 {
   p_impl->ProcessNode<StartArrayBuildNode>(array_name);
 }
 
-void AnyValueBuildAdapterV2::StartArrayElement()
+void AnyValueBuildAdapter::StartArrayElement()
 {
   p_impl->ProcessNode<StartArrayElementBuildNode>();
 }
 
-void AnyValueBuildAdapterV2::EndArrayElement()
+void AnyValueBuildAdapter::EndArrayElement()
 {
   p_impl->ProcessNode<EndArrayElementBuildNode>();
 }
@@ -181,19 +181,19 @@ void AnyValueBuildAdapterV2::EndArrayElement()
 //! @param anyvalue Scalar anyvalue, completed structure or array.
 //! @note Equivalent of calls StartArrayElement/AddValue/EndArrayElement.
 
-void AnyValueBuildAdapterV2::AddArrayElement(const sup::dto::AnyValue &anyvalue)
+void AnyValueBuildAdapter::AddArrayElement(const sup::dto::AnyValue &anyvalue)
 {
   StartArrayElement();
   AddValue(anyvalue);
   EndArrayElement();
 }
 
-void AnyValueBuildAdapterV2::EndArray()
+void AnyValueBuildAdapter::EndArray()
 {
   p_impl->ProcessNode<EndArrayBuildNode>();
 }
 
-int AnyValueBuildAdapterV2::GetStackSize() const
+int AnyValueBuildAdapter::GetStackSize() const
 {
   return static_cast<int>(p_impl->m_stack.size());
 }
