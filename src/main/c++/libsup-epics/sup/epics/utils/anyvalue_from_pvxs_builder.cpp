@@ -26,8 +26,8 @@
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 
-#include <sstream>
 #include <list>
+#include <sstream>
 #include <stack>
 #include <stdexcept>
 
@@ -35,6 +35,13 @@ namespace sup
 {
 namespace epics
 {
+
+enum NodeContext
+{
+  kRoot,
+  kStructField,
+  kArrayElement
+};
 
 struct Node
 {
@@ -48,7 +55,13 @@ struct Node
   //! Will be true if `value` is a struct and all children are processed.
   bool m_is_visited{false};
 
-  Node(::pvxs::Value value, const std::string& name) : m_value(value), m_name(name) {}
+  NodeContext m_context;
+
+  Node(::pvxs::Value value, NodeContext context = kRoot) : m_value(value), m_context(context) {}
+
+  bool IsArrayContext() const { return m_context == kArrayElement; }
+
+  bool IsStructContext() const { return m_context == kStructField; }
 };
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
@@ -60,10 +73,10 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   {
     if (IsEmptyValue(pvxs_value))
     {
-        return; // by default AnyValueBuildAdapter will generate empty AnyValue
+      return;  // by default AnyValueBuildAdapter will generate empty AnyValue
     }
 
-    m_pvxs_stack.push({pvxs_value, std::string()});
+    m_pvxs_stack.push({pvxs_value});
     ProcessStack();
   }
 
@@ -91,10 +104,8 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
         ostr << "AnyValueFromPVXSBuilder: unsupported PVXS value \n" << node.m_value;
         throw std::runtime_error(ostr.str());
       }
-
     }
   }
-
   //! Process PVXS value representing a struct.
   void ProcessStructNode(Node& node)
   {
@@ -117,7 +128,9 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       // iteration in reverse order
       for (auto it = children.rbegin(); it != children.rend(); ++it)
       {
-        m_pvxs_stack.push({*it, node.m_value.nameOf(*it)});
+        Node child_node{*it, kStructField};
+        child_node.m_name = node.m_value.nameOf(*it);
+        m_pvxs_stack.push(child_node);
       }
     }
   }
