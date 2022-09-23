@@ -67,7 +67,7 @@ struct Node
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
   AnyValueBuildAdapter m_builder;
-  std::stack<Node> m_pvxs_stack;
+  std::stack<Node> m_stack;
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
   {
@@ -76,15 +76,15 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       return;  // by default AnyValueBuildAdapter will generate empty AnyValue
     }
 
-    m_pvxs_stack.push({pvxs_value});
+    m_stack.push({pvxs_value});
     ProcessStack();
   }
 
   void ProcessStack()
   {
-    while (!m_pvxs_stack.empty())
+    while (!m_stack.empty())
     {
-      auto& node = m_pvxs_stack.top();
+      auto& node = m_stack.top();
 
       if (IsStruct(node.m_value))
       {
@@ -114,7 +114,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       // All children have been already added to the struct. It's time to tell the builder
       // that the struct has to be added to its own parent.
       m_builder.EndStruct(node.m_name);
-      m_pvxs_stack.pop();  // we don't need the node anymore
+      m_stack.pop();  // we don't need the node anymore
     }
     else
     {
@@ -130,7 +130,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       {
         Node child_node{*it, kStructField};
         child_node.m_name = node.m_value.nameOf(*it);
-        m_pvxs_stack.push(child_node);
+        m_stack.push(child_node);
       }
     }
   }
@@ -141,7 +141,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     // It's a scalar field. Let's add corresponding field to the AnyValue and remove node from
     // stack. We don't need it anymore.
     m_builder.AddMember(node.m_name, GetAnyValueFromScalar(node.m_value));
-    m_pvxs_stack.pop();
+    m_stack.pop();
   }
 
   //! Process PVXS value representing a scalar array.
@@ -150,7 +150,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     // It's a scalar array field. Let's add corresponding field to the AnyValue and remove node from
     // stack. We don't need it anymore.
     m_builder.AddMember(node.m_name, GetAnyValueFromScalarArray(node.m_value));
-    m_pvxs_stack.pop();
+    m_stack.pop();
   }
 
   AnyValueFromPVXSBuilderImpl() = default;
