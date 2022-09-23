@@ -22,10 +22,11 @@
 #include <pvxs/data.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/utils/anyvalue_build_adapter.h>
+#include <sup/epics/utils/anyvalue_build_adapter_v2.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 
+#include <cassert>
 #include <list>
 #include <sstream>
 #include <stack>
@@ -66,7 +67,7 @@ struct Node
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
-  AnyValueBuildAdapter m_builder;
+  AnyValueBuildAdapterV2 m_builder;
   std::stack<Node> m_stack;
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
@@ -107,9 +108,90 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     }
   }
 
+  void ProcessStructNode(Node& node)
+  {
+    if (node.m_is_visited)
+    {
+      ProcessVisitedStructNode(node);
+    }
+    else
+    {
+      ProcessNewStructNode(node);
+    }
+  }
+
+  void ProcessArrayNode(Node& node)
+  {
+    if (node.m_is_visited)
+    {
+      ProcessVisitedArrayNode(node);
+    }
+    else
+    {
+      ProcessNewArrayNode(node);
+    }
+  }
+
+  void ProcessNewStructNode(Node& node)
+  {
+    StartComposite(node);
+    m_builder.StartStruct(node.m_value.id());
+    AddChildren(node, NodeContext::kStructField);
+  }
+
+  void ProcessVisitedStructNode(Node& node)
+  {
+    m_builder.EndStruct();
+    EndComposite(node);
+  }
+
+  void ProcessNewArrayNode(Node& node)
+  {
+    StartComposite(node);
+    m_builder.StartArray(node.m_value.id());
+    AddChildren(node, NodeContext::kArrayElement);
+  }
+
+  void ProcessVisitedArrayNode(Node& node)
+  {
+    m_builder.EndArray();
+    EndComposite(node);
+  }
+
+  void StartComposite(Node& node)
+  {
+    assert(node.m_is_visited == false);
+    node.m_is_visited = true;
+
+    if (node.IsStructContext())
+    {
+      m_builder.StartField(node.m_name);
+    }
+    else if (node.IsArrayContext())
+    {
+      m_builder.StartArrayElement();
+    }
+
+    // this is top level object
+  }
+
+  void EndComposite(Node& node)
+  {
+    assert(node.m_is_visited);
+    if (node.IsStructContext())
+    {
+      m_builder.EndField();
+    }
+    else if (node.IsArrayContext())
+    {
+      m_builder.EndArrayElement();
+    }
+    m_stack.pop();  // we don't need the node anymore
+  }
+
   void AddChildren(Node& node, NodeContext context)
   {
-    auto children =  GetChildren(node.m_value);
+    auto children = GetChildren(node.m_value);
     // iteration in reverse order
     for (auto it = children.rbegin(); it != children.rend(); ++it)
     {
@@ -119,46 +201,20 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     }
   }
 
-  //! Process PVXS value representing a struct.
-  void ProcessStructNode(Node& node)
-  {
-    if (node.m_is_visited)
-    {
-      // All children have been already added to the struct. It's time to tell the builder
-      // that the struct has to be added to its own parent.
-      m_builder.EndStruct(node.m_name);
-      m_stack.pop();  // we don't need the node anymore
-    }
-    else
-    {
-      // We found a struct which we haven't seen before. Let's tell the builder to create
-      // underlying AnyValue, and let's add children to the stack.
-      // We are not poping struct node, we will get back to it later.
-      m_builder.StartStruct(node.m_value.id());
-      node.m_is_visited = true;
-
-      auto children = GetChildren(node.m_value);
-      // iteration in reverse order
-      AddChildren(node, kStructField);
-    }
-  }
-
   //! Process PVXS value representing a scalar.
   void ProcessScalarNode(Node& node)
   {
-    // It's a scalar field. Let's add corresponding field to the AnyValue and remove node from
-    // stack. We don't need it anymore.
-    m_builder.AddMember(node.m_name, GetAnyValueFromScalar(node.m_value));
-    m_stack.pop();
+    StartComposite(node);
+    m_builder.AddValue(GetAnyValueFromScalar(node.m_value));
+    EndComposite(node);
   }
 
   //! Process PVXS value representing a scalar array.
   void ProcessScalarArrayNode(Node& node)
   {
-    // It's a scalar array field. Let's add corresponding field to the AnyValue and remove node from
-    // stack. We don't need it anymore.
-    m_builder.AddMember(node.m_name, GetAnyValueFromScalarArray(node.m_value));
-    m_stack.pop();
+    StartComposite(node);
+    m_builder.AddValue(GetAnyValueFromScalarArray(node.m_value));
+    EndComposite(node);
   }
 
   AnyValueFromPVXSBuilderImpl() = default;
