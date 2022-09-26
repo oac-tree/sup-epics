@@ -36,6 +36,7 @@ namespace epics
 class AbstractAnyValueBuildNode
 {
 public:
+  virtual ~AbstractAnyValueBuildNode() = default;
   using node_t = std::unique_ptr<AbstractAnyValueBuildNode>;
 
   enum class NodeType
