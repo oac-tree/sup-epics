@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+#include <pvxs/sharedArray.h>
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
@@ -509,4 +510,26 @@ TEST_F(AnyValueFromPVXSBuilderTests, InitialisedNTEnum)
   EXPECT_EQ(any_value["timeStamp.nanoseconds"], -2);
   EXPECT_EQ(any_value["timeStamp.userTag"].GetTypeCode(), sup::dto::TypeCode::Int32);
   EXPECT_EQ(any_value["timeStamp.userTag"], -3);
+}
+
+//! Build AnyValue from the array containing two structures. Each structure has a single
+//! `field_name` field with a scalar.
+
+TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
+{
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "array_name", {pvxs::members::Int32("field_name")})
+          .create();
+
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+  arr[0] = array_field.allocMember();
+  arr[0]["field_name"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["field_name"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+  std::cout << pvxs_value << "\n";
 }
