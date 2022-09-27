@@ -64,7 +64,8 @@ bool IsStruct(const pvxs::Value &value)
 bool IsScalarArray(const pvxs::TypeCode &type_code)
 {
   // for some reason type_code.isarray() is true for Null types too
-  return type_code != pvxs::TypeCode::Null && type_code.isarray();
+  return type_code != pvxs::TypeCode::Null && type_code != pvxs::TypeCode::StructA
+         && type_code.isarray();
 }
 
 bool IsScalarArray(const pvxs::Value &value)
