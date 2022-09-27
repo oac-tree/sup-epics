@@ -73,6 +73,11 @@ bool IsScalarArray(const pvxs::Value &value)
   return IsScalarArray(value.type());
 }
 
+bool IsStructArray(const pvxs::Value &value)
+{
+  return value.type() == pvxs::TypeCode::StructA;
+}
+
 std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
 {
   std::vector<pvxs::Value> result;

@@ -51,6 +51,9 @@ bool IsScalarArray(const ::pvxs::Value& value);
 //! Returns true if given value is a struct.
 bool IsStruct(const ::pvxs::Value& value);
 
+//! Returns true if given value is an array of structs.
+bool IsStructArray(const ::pvxs::Value& value);
+
 //! Returns vector of children.
 std::vector<::pvxs::Value> GetChildren(const pvxs::Value& pvxs_value);
 
