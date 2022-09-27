@@ -554,3 +554,45 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
 
   EXPECT_EQ(any_value, expected_array_value);
 }
+
+//! Build AnyValue from the structure with array with two structures.
+
+TEST_F(AnyValueFromPVXSBuilderTests, StructureWithArrayWithStructure)
+{
+  // building PVXS struct with array with structs
+  // it is not clear how to assign struct_name to external struct and internal structs
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
+                      {pvxs::members::StructA("array_field", {pvxs::members::Int8("first"),
+                                                              pvxs::members::UInt8("second")})})
+          .create();
+
+  ::pvxs::Value array_field(pvxs_value["array_field"]);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+  arr[0] = array_field.allocMember();
+  arr[0]["first"] = -43;
+  arr[0]["second"] = 44;
+  arr[1] = array_field.allocMember();
+  arr[1]["first"] = 42;
+  arr[1]["second"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  // constructing expected any value
+  // Setting empty names for internal structs and for external struct
+  sup::dto::AnyValue struct_value1 = {{{"first", {sup::dto::SignedInteger8Type, -43}},
+                                       {"second", {sup::dto::UnsignedInteger8Type, 44}}},
+                                      ""};
+  sup::dto::AnyValue struct_value2 = {{{"first", {sup::dto::SignedInteger8Type, 42}},
+                                       {"second", {sup::dto::UnsignedInteger8Type, 43}}},
+                                      ""};
+
+  auto array_value = sup::dto::ArrayValue({struct_value1, struct_value2}, "");
+
+  sup::dto::AnyValue expected_struct_value = {{{"array_field", array_value}}, ""};
+
+  // building any_value
+  auto any_value = BuildAnyValue(pvxs_value);
+
+  EXPECT_EQ(any_value, expected_struct_value);
+}
