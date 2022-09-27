@@ -131,6 +131,7 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
 
   auto pvxs_value =
       ::pvxs::TypeDef(::pvxs::TypeCode::Struct, struct_name, {member1, member2}).create();
+  EXPECT_EQ(pvxs_value.id(), struct_name);
   pvxs_value["struct1.signed"] = 42;
   pvxs_value["struct1.bool"] = true;
   pvxs_value["struct2.first"] = -43;
@@ -518,9 +519,9 @@ TEST_F(AnyValueFromPVXSBuilderTests, InitialisedNTEnum)
 TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
 {
   // building PVXS value representing an array of structs with two elements
-  auto pvxs_value =
-      ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "array_name", {pvxs::members::Int32("field_name")})
-          .create();
+  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+                                    {pvxs::members::Int32("field_name")})
+                        .create();
 
   ::pvxs::Value array_field(pvxs_value);
   ::pvxs::shared_array<::pvxs::Value> arr(2);
@@ -533,11 +534,23 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
 
   // learning how read it back
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+  // arrays doesn't have names for some reason
+  EXPECT_TRUE(pvxs_value.id().empty());
+
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
 
   // building any_value
-//  auto any_value = BuildAnyValue(pvxs_value);
+  auto any_value = BuildAnyValue(pvxs_value);
+
+  // expected any value
+  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                      "struct_name"};
+  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                      "struct_name"};
+  auto expected_array_value = sup::dto::ArrayValue({{struct_value1}, struct_value2});
+
+  EXPECT_EQ(any_value, expected_array_value);
 }

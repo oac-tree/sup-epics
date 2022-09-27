@@ -99,6 +99,10 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
       {
         ProcessScalarArrayNode(node);
       }
+      else if (IsStructArray(node.m_value))
+      {
+        ProcessArrayNode(node);
+      }
       else
       {
         std::ostringstream ostr;
@@ -196,7 +200,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     for (auto it = children.rbegin(); it != children.rend(); ++it)
     {
       Node child_node{*it, context};
-      child_node.m_name = node.m_value.nameOf(*it);
+      child_node.m_name = GetFieldNameOfChild(node.m_value, *it);
       m_stack.push(child_node);
     }
   }
