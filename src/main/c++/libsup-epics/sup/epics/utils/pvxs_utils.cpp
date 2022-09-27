@@ -81,9 +81,22 @@ bool IsStructArray(const pvxs::Value &value)
 std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
 {
   std::vector<pvxs::Value> result;
-  for (auto fld : pvxs_value.ichildren())
+
+  if (pvxs_value.type() != pvxs::TypeCode::StructA)
   {
-    result.push_back(fld);
+    for (auto fld : pvxs_value.ichildren())
+    {
+      result.push_back(fld);
+    }
+  }
+  else
+  {
+    auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+    for(size_t i=0; i<array_data.size(); ++i)
+    {
+      result.push_back(array_data[i]);
+    }
+
   }
   return result;
 }

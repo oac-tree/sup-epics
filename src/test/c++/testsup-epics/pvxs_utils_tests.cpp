@@ -192,13 +192,15 @@ TEST_F(PvxsUtilsTests, IsStructArray)
   EXPECT_FALSE(IsStructArray(TypeDef(TypeCode::UnionA).create()));
 }
 
-//! Testing GetChildren() utility function. It is used for testing in other places.
+//! Testing GetChildren() utility function for the case of scalars.
 
 TEST_F(PvxsUtilsTests, GetChildrenForScalar)
 {
   auto value = ::pvxs::TypeDef(::pvxs::TypeCode::Int16).create();
   EXPECT_TRUE(GetChildren(value).empty());
 }
+
+//! Testing GetChildren() utility function for structs.
 
 TEST_F(PvxsUtilsTests, GetChildrenForSimpleStruct)
 {
@@ -235,6 +237,31 @@ TEST_F(PvxsUtilsTests, GetChildrenForSimpleStruct)
   // check that old objects have been updated
   EXPECT_EQ(value["field"].as<int32_t>(), 44);
   EXPECT_EQ(child.as<int32_t>(), 44);
+}
+
+//! Testing GetChildren() utility function for structs.
+
+TEST_F(PvxsUtilsTests, GetChildrenForArrayOfStructs)
+{
+  // building PVXS value representing an array of structs with two elements
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "array_name", {pvxs::members::Int32("field_name")})
+          .create();
+
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+  arr[0] = array_field.allocMember();
+  arr[0]["field_name"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["field_name"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  // finally checking our convenience function to access children
+  auto children = GetChildren(pvxs_value);
+  ASSERT_EQ(children.size(), 2);
+  EXPECT_EQ(children[0]["field_name"].as<int32_t>(), 42);
+  EXPECT_EQ(children[1]["field_name"].as<int32_t>(), 43);
 }
 
 TEST_F(PvxsUtilsTests, GetMemberNames)
