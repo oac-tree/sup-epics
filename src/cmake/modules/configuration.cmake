@@ -26,7 +26,9 @@ get_filename_component(SUPEPICS_PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." AB
 set(SUPEPICS_SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 set(SUPEPICS_BUILDVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
-set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+endif()
 
 # -----------------------------------------------------------------------------
 # Directories
@@ -47,7 +49,7 @@ file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 find_package(Threads)
 
 if (NOT SUPEPICS_CODAC)
-  find_package(COACompact REQUIRED sup-dto)
+  find_package(sup-dto REQUIRED)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -56,6 +58,6 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 if (COVERAGE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fprofile-arcs -ftest-coverage --coverage")
-    message(INFO " Coverage enabled ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fprofile-arcs -ftest-coverage --coverage")
+  message(INFO " Coverage enabled ${CMAKE_CXX_FLAGS}")
 endif()
