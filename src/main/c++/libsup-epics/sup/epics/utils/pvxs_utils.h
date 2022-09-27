@@ -60,6 +60,9 @@ std::vector<::pvxs::Value> GetChildren(const pvxs::Value& pvxs_value);
 //! Returns names of member fields in given value.
 std::vector<std::string> GetMemberNames(const ::pvxs::Value& pvxs_value);
 
+//! Returns the name of the field under which the child is known to parent
+std::string GetFieldNameOfChild(const ::pvxs::Value& parent, const ::pvxs::Value& child);
+
 }  // namespace epics
 }  // namespace sup
 

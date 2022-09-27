@@ -298,3 +298,34 @@ TEST_F(PvxsUtilsTests, GetMemberNames)
     EXPECT_EQ(GetMemberNames(value), std::vector<std::string>({"struct1", "struct2"}));
   }
 }
+
+TEST_F(PvxsUtilsTests, GetFieldNameOfChild)
+{
+  {  // for structs
+    auto parent = pvxs::TypeDef(pvxs::TypeCode::Struct, "simple_t",
+                                {pvxs::Member(pvxs::TypeCode::Int32, "field")})
+                      .create();
+    EXPECT_EQ(GetFieldNameOfChild(parent, parent["field"]), std::string("field"));
+  }
+
+  {  // for array of structs
+    auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "array_name",
+                                      {pvxs::members::Int32("field_name")})
+                          .create();
+
+    ::pvxs::Value array_field(pvxs_value);
+    ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+    arr[0] = array_field.allocMember();
+    arr[0]["field_name"] = 42;
+    arr[1] = array_field.allocMember();
+    arr[1]["field_name"] = 43;
+    array_field = arr.freeze().castTo<const void>();
+
+    // finally checking our convenience function to access children
+    auto children = GetChildren(pvxs_value);
+
+    // array of structure reports empty name for its children
+    EXPECT_EQ(GetFieldNameOfChild(pvxs_value, children[0]), std::string());
+  }
+}

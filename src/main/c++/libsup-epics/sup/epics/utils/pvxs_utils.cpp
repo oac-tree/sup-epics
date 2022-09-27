@@ -92,11 +92,10 @@ std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
   else
   {
     auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
-    for(size_t i=0; i<array_data.size(); ++i)
+    for (size_t i = 0; i < array_data.size(); ++i)
     {
       result.push_back(array_data[i]);
     }
-
   }
   return result;
 }
@@ -109,6 +108,11 @@ std::vector<std::string> GetMemberNames(const pvxs::Value &pvxs_value)
     result.push_back(pvxs_value.nameOf(fld));
   }
   return result;
+}
+
+std::string GetFieldNameOfChild(const pvxs::Value &parent, const pvxs::Value &child)
+{
+  return IsStruct(parent) ? parent.nameOf(child) : std::string();
 }
 
 }  // namespace epics
