@@ -107,7 +107,7 @@
                         </package>
                         <package name="tests">
                             <!-- Unit Test -->
-                            <include type="file" source="bin/unit-tests" target="tests/${project.artifactId}/unit-tests"/>
+                            <include type="file" source="bin/testsup-epics" target="tests/${project.artifactId}/testsup-epics"/>
                             <!-- Package dependencies -->
                             <requires version="current">%{codac_rpm_prefix}-${project.artifactId}-devel</requires>
                             <requires version="current" buildOnly="true">gtest-devel</requires>
