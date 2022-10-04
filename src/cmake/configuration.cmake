@@ -13,20 +13,18 @@ get_filename_component(SUP_EPICS_PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." A
 
 if (DEFINED ENV{CODAC_ROOT})
   message(STATUS "CODAC environment detected at $ENV{CODAC_ROOT}")
-  set(SUPEPICS_CODAC ON)
+  set(SUP_EPICS_CODAC ON)
 else()
   message(STATUS "No CODAC environment detected")
-  set(SUPEPICS_CODAC OFF)
+  set(SUP_EPICS_CODAC OFF)
 endif()
 
 # -----------------------------------------------------------------------------
 # Variables
 # -----------------------------------------------------------------------------
 
-get_filename_component(SUPEPICS_PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
-
-set(SUPEPICS_SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
-set(SUPEPICS_BUILDVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+set(SUP_EPICS_SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
+set(SUP_EPICS_BUILDVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
@@ -48,7 +46,7 @@ endif()
 
 find_package(Threads)
 
-if (NOT SUPEPICS_CODAC)
+if (NOT SUP_EPICS_CODAC)
   find_package(sup-dto REQUIRED)
 endif()
 

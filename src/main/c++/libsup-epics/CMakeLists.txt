@@ -2,7 +2,7 @@ set(library_name sup-epics)
 
 add_library(${library_name} SHARED "")
 
-if (SUPEPICS_CODAC)
+if (SUP_EPICS_CODAC)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
   target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup $ENV{CODAC_ROOT}/epics/include $ENV{CODAC_ROOT}/epics/include/os/Linux $ENV{CODAC_ROOT}/epics/include/compiler/gcc)
   target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib $ENV{CODAC_ROOT}/epics/lib/linux-x86_64)
@@ -21,8 +21,8 @@ add_subdirectory(sup)
 
 set_target_properties(${library_name} PROPERTIES
     EXPORT_NAME sup-epics
-    SOVERSION ${SUPEPICS_SOVERSION}
-    VERSION ${SUPEPICS_BUILDVERSION}
+    SOVERSION ${SUP_EPICS_SOVERSION}
+    VERSION ${SUP_EPICS_BUILDVERSION}
 )
 
 install(TARGETS ${library_name} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
