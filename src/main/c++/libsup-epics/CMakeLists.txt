@@ -25,6 +25,8 @@ set_target_properties(${library_name} PROPERTIES
     VERSION ${SUPEPICS_BUILDVERSION}
 )
 
+install(TARGETS ${library_name} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 install(FILES
         sup/epics/ca_types.h
         sup/epics/channel_access_client.h

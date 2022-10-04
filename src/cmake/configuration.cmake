@@ -9,11 +9,13 @@ include(GNUInstallDirs)
 # Find if we are on CODAC infrastructure
 # -----------------------------------------------------------------------------
 
+get_filename_component(SUP_EPICS_PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+
 if (DEFINED ENV{CODAC_ROOT})
   message(STATUS "CODAC environment detected at $ENV{CODAC_ROOT}")
   set(SUPEPICS_CODAC ON)
 else()
-  message(STATUS "No CODAC environment detected - expecting COACompact installed")
+  message(STATUS "No CODAC environment detected")
   set(SUPEPICS_CODAC OFF)
 endif()
 
@@ -34,13 +36,11 @@ endif()
 # Directories
 # -----------------------------------------------------------------------------
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TARGET_DIRECTORY}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${TARGET_DIRECTORY}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-file(MAKE_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+if (DEFINED ENV{CODAC_ROOT})
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SUP_EPICS_PROJECT_DIR}/target/bin)
+else()
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+endif()
 
 # -----------------------------------------------------------------------------
 # Dependencies
