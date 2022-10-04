@@ -1,13 +1,5 @@
 target_sources(${library_name} PRIVATE
   CMakeLists.txt
-  abstract_anyvalue_buildnode.cpp
-  abstract_anyvalue_buildnode.h
-  anyvalue_build_adapter.cpp
-  anyvalue_build_adapter.h
-  anyvalue_buildnode_utils.cpp
-  anyvalue_buildnode_utils.h
-  anyvalue_buildnodes.cpp
-  anyvalue_buildnodes.h
   anyvalue_from_pvxs_builder.cpp
   anyvalue_from_pvxs_builder.h
   dto_conversion_utils.cpp

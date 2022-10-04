@@ -22,7 +22,7 @@
 #include <pvxs/data.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/utils/anyvalue_build_adapter.h>
+#include <sup/dto/anyvalue_composer.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 
@@ -67,7 +67,7 @@ struct Node
 
 struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 {
-  AnyValueBuildAdapter m_builder;
+  sup::dto::AnyValueComposer m_composer;
   std::stack<Node> m_stack;
 
   void ProcessPvxsValue(const pvxs::Value& pvxs_value)
@@ -139,26 +139,26 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   void ProcessNewStructNode(Node& node)
   {
     StartComposite(node);
-    m_builder.StartStruct(node.m_value.id());
+    m_composer.StartStruct(node.m_value.id());
     AddChildren(node, NodeContext::kStructField);
   }
 
   void ProcessVisitedStructNode(Node& node)
   {
-    m_builder.EndStruct();
+    m_composer.EndStruct();
     EndComposite(node);
   }
 
   void ProcessNewArrayNode(Node& node)
   {
     StartComposite(node);
-    m_builder.StartArray(node.m_value.id());
+    m_composer.StartArray(node.m_value.id());
     AddChildren(node, NodeContext::kArrayElement);
   }
 
   void ProcessVisitedArrayNode(Node& node)
   {
-    m_builder.EndArray();
+    m_composer.EndArray();
     EndComposite(node);
   }
 
@@ -169,11 +169,11 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 
     if (node.IsStructContext())
     {
-      m_builder.StartField(node.m_name);
+      m_composer.StartField(node.m_name);
     }
     else if (node.IsArrayContext())
     {
-      m_builder.StartArrayElement();
+      m_composer.StartArrayElement();
     }
 
     // this is top level object
@@ -184,11 +184,11 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
     assert(node.m_is_visited);
     if (node.IsStructContext())
     {
-      m_builder.EndField();
+      m_composer.EndField();
     }
     else if (node.IsArrayContext())
     {
-      m_builder.EndArrayElement();
+      m_composer.EndArrayElement();
     }
     m_stack.pop();  // we don't need the node anymore
   }
@@ -209,7 +209,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   void ProcessScalarNode(Node& node)
   {
     StartComposite(node);
-    m_builder.AddValue(GetAnyValueFromScalar(node.m_value));
+    m_composer.AddValue(GetAnyValueFromScalar(node.m_value));
     EndComposite(node);
   }
 
@@ -217,7 +217,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   void ProcessScalarArrayNode(Node& node)
   {
     StartComposite(node);
-    m_builder.AddValue(GetAnyValueFromScalarArray(node.m_value));
+    m_composer.AddValue(GetAnyValueFromScalarArray(node.m_value));
     EndComposite(node);
   }
 
@@ -232,7 +232,7 @@ AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value)
 
 dto::AnyValue AnyValueFromPVXSBuilder::MoveAnyType() const
 {
-  return std::move(p_impl->m_builder.MoveAnyValue());
+  return std::move(p_impl->m_composer.MoveAnyValue());
 }
 
 AnyValueFromPVXSBuilder::~AnyValueFromPVXSBuilder() = default;
