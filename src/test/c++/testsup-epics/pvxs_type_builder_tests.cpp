@@ -17,17 +17,14 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/utils/pvxs_type_builder.h>
-
-#include <sup/epics/dto_conversion_utils.h>
-#include <sup/epics/utils/pvxs_utils.h>
-
-#include <sup/dto/anytype_helper.h>
-#include <sup/dto/anyvalue.h>
-
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+#include <sup/dto/anytype_helper.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/utils/pvxs_type_builder.h>
+#include <sup/epics/utils/pvxs_utils.h>
 
 #include <iostream>
 
@@ -240,7 +237,7 @@ TEST_F(PvxsTypeBuilderTests, PVXSTypeArrayInStruct)
 
 //! Build PVXS type from AnyType representing an array of integers inside the struct.
 
-TEST_F(PvxsTypeBuilderTests,ArrayInStruct)
+TEST_F(PvxsTypeBuilderTests, ArrayInStruct)
 {
   const int n_elements = 42;
   sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32Type);
@@ -253,4 +250,25 @@ TEST_F(PvxsTypeBuilderTests,ArrayInStruct)
   EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
   auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
   EXPECT_EQ(data.size(), 0);
+}
+
+//!  Build PVXS type from AnyType representing an array containing two structures. Each structure
+//!  has a single
+//! `field_name` field with a scalar.
+
+TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
+{
+  // expected any value
+  sup::dto::AnyType struct_type = {{{"field_name", sup::dto::SignedInteger32Type}}, "struct_name"};
+  sup::dto::AnyType array(2, struct_type);
+
+  std::cout << sup::dto::AnyTypeToJSONString(array, true) << std::endl;
+
+  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+                                    {pvxs::members::Int32("field_name")})
+                        .create();
+//  std::cout << pvxs_value << std::endl;
+
+
+//  auto value = BuildPVXSType(array).create();
 }

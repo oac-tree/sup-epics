@@ -151,7 +151,7 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetPVXSTypeCode)
 
 //! Checks GetPVXSBaseTypeCode method to construct PVXS TypeCode from AnyType (base types).
 
-TEST_F(DtoTypeCodeConversionUtilsTests, GetBaseAnyType)
+TEST_F(DtoTypeCodeConversionUtilsTests, GetAnyTypeCode)
 {
   // scalar case
   EXPECT_EQ(GetAnyTypeCode(::pvxs::TypeCode::Null), ::sup::dto::TypeCode::Empty);

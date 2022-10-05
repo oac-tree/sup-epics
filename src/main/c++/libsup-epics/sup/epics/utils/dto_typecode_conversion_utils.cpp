@@ -56,8 +56,8 @@ const std::map<sup::dto::TypeCode, pvxs::TypeCode> kTypeCodeMap = {
     {sup::dto::TypeCode::Struct, pvxs::TypeCode::Struct},
 };
 
-//! Correspondance of AnyValue element type code to PVXS TypeCode (arrays).
-const std::map<sup::dto::TypeCode, pvxs::TypeCode> kArrayTypeCodeMap = {
+//! Correspondance of AnyValue array element type code to PVXS TypeCode (arrays).
+const std::map<sup::dto::TypeCode, pvxs::TypeCode> kArrayElementTypeCodeMap = {
     {sup::dto::TypeCode::Bool, pvxs::TypeCode::BoolA},
     {sup::dto::TypeCode::Int8, pvxs::TypeCode::Int8A},
     {sup::dto::TypeCode::UInt8, pvxs::TypeCode::UInt8A},
@@ -125,14 +125,14 @@ pvxs::TypeCode GetPVXSArrayTypeCode(const dto::AnyType& any_type)
 {
   return any_type.GetTypeCode() == sup::dto::TypeCode::Char8
              ? pvxs::TypeCode::UInt8A
-             : FindTypeCode(kArrayTypeCodeMap, any_type);
+             : FindTypeCode(kArrayElementTypeCodeMap, any_type);
 }
 
 dto::TypeCode GetAnyTypeCode(const pvxs::TypeCode& pvxs_type)
 {
   if (IsScalarArray(pvxs_type))
   {
-    return FindAnyTypeCode(kArrayTypeCodeMap, pvxs_type);
+    return FindAnyTypeCode(kArrayElementTypeCodeMap, pvxs_type);
   }
 
   return FindAnyTypeCode(kTypeCodeMap, pvxs_type);
