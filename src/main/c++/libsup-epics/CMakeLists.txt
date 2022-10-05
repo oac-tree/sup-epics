@@ -1,6 +1,7 @@
 set(library_name sup-epics)
 
 add_library(${library_name} SHARED "")
+add_library(sup-epics::sup-epics ALIAS ${library_name}) # alias for build-tree usage
 
 if (SUP_EPICS_CODAC)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
@@ -25,7 +26,8 @@ set_target_properties(${library_name} PROPERTIES
     VERSION ${SUP_EPICS_BUILDVERSION}
 )
 
-install(TARGETS ${library_name} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${library_name} EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set_target_properties(${library_name} PROPERTIES EXPORT_NAME sup-epics)
 
 install(FILES
         sup/epics/ca_types.h

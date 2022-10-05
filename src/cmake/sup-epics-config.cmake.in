@@ -1,0 +1,17 @@
+#  SUP_EPICS_INCLUDE_DIRS - include directories
+#  SUP_EPICS_LIBRARIES    - libraries to link against
+
+get_filename_component(SUP_EPICS_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+find_dependency(sup-dto)
+
+if(TARGET sup-epics::sup-epics)
+else()
+  message(STATUS "sup-epics-config.cmake including ${SUP_EPICS_CMAKE_DIR}/sup-epics-targets.cmake")
+ include("${SUP_EPICS_CMAKE_DIR}/sup-epics-targets.cmake")
+endif()
+
+set(SUP_EPICS_LIBRARIES sup-epics::sup-epics)
+
+message(STATUS "sup-epics-config.cmake in ${CMAKE_CURRENT_LIST_FILE}")
+message(STATUS "SUP_EPICS_LIBRARIES ${SUP_EPICS_LIBRARIES}")
