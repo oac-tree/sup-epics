@@ -92,6 +92,7 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
 {
   std::cout << "ArrayProlog() value:" << anytype << std::endl;
+  p_impl->m_struct_stack.push(GetPVXSTypeCode(*anytype));
 }
 
 void PvxsTypeBuilder::ArrayElementSeparator()
@@ -102,8 +103,8 @@ void PvxsTypeBuilder::ArrayElementSeparator()
 void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 {
   std::cout << "AddArrayEpilog() value:" << anytype << std::endl;
-
-  p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
+  p_impl->m_last_processed = p_impl->m_struct_stack.top();
+  p_impl->m_struct_stack.pop();
 }
 
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)

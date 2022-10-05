@@ -269,6 +269,5 @@ TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
                         .create();
 //  std::cout << pvxs_value << std::endl;
 
-
-//  auto value = BuildPVXSType(array).create();
+  auto value = BuildPVXSType(array).create();
 }
