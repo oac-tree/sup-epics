@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PVXS_CONTEXT_UTILS_H_
-#define SUP_EPICS_PVXS_CONTEXT_UTILS_H_
+#ifndef SUP_EPICS_PV_ACCESS_CONTEXT_UTILS_H_
+#define SUP_EPICS_PV_ACCESS_CONTEXT_UTILS_H_
 
-//! @file context_utils.h
+//! @file pv_access_context_utils.h
 //! Collection of utility functions related to the configuration of PVXS client/server.
 //! The main purpose of this file is to hide PVXS internals as much as possible.
 
@@ -45,4 +45,4 @@ std::shared_ptr<pvxs::client::Context> CreateClientContextFromEnv();
 }  // namespace epics
 }  // namespace sup
 
-#endif  // SUP_EPICS_PVXS_CONTEXT_UTILS_H_
+#endif  // SUP_EPICS_PV_ACCESS_CONTEXT_UTILS_H_

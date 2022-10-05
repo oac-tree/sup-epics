@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxs/context_utils.h"
+#include "sup/epics/pv_access_context_utils.h"
 
 #include <pvxs/server.h>
 #include <pvxs/client.h>

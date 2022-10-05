@@ -24,7 +24,7 @@
 #include <pvxs/server.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pv_access_server.h>
-#include <sup/epics/pvxs/context_utils.h>
+#include <sup/epics/pv_access_context_utils.h>
 
 #include <thread>
 
