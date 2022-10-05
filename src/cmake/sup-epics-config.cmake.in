@@ -7,7 +7,6 @@ find_dependency(sup-dto)
 
 if(TARGET sup-epics::sup-epics)
 else()
-  message(STATUS "sup-epics-config.cmake including ${SUP_EPICS_CMAKE_DIR}/sup-epics-targets.cmake")
  include("${SUP_EPICS_CMAKE_DIR}/sup-epics-targets.cmake")
 endif()
 
