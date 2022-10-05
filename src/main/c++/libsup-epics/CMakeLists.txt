@@ -13,7 +13,9 @@ else()
   find_package(EPICS REQUIRED)
   target_link_directories(${library_name} PUBLIC ${EPICS_LINK_DIRECTORIES})
   target_link_libraries(${library_name} PUBLIC pthread sup-dto::sup-dto ${EPICS_LIBRARIES})
-  target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}$<SEMICOLON>${EPICS_INCLUDE_DIRECTORIES}>)
+  target_include_directories(${library_name} PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}$<SEMICOLON>${EPICS_INCLUDE_DIRECTORIES}>)
 endif()
 
 add_subdirectory(sup)
@@ -37,5 +39,6 @@ install(FILES
         sup/epics/dto_types_fwd.h
         sup/epics/pv_access_client.h
         sup/epics/pv_access_server.h
+        sup/epics/pv_access_context_utils.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
 )

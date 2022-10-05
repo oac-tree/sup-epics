@@ -2,8 +2,14 @@
 #  SUP_EPICS_LIBRARIES    - libraries to link against
 
 get_filename_component(SUP_EPICS_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
 
 find_dependency(sup-dto)
+
+# to find FindEPICS.cmake
+list(APPEND CMAKE_MODULE_PATH ${SUP_EPICS_CMAKE_DIR})
+find_dependency(EPICS)
+list(REMOVE_AT CMAKE_MODULE_PATH -1)
 
 if(TARGET sup-epics::sup-epics)
 else()
