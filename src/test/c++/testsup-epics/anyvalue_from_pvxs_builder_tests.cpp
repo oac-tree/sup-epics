@@ -532,16 +532,6 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
   arr[1]["field_name"] = 43;
   array_field = arr.freeze().castTo<const void>();
 
-  // learning how read it back
-  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
-  // arrays doesn't have names in PVXS
-  EXPECT_TRUE(pvxs_value.id().empty());
-
-  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
-  EXPECT_EQ(array_data.size(), 2);
-  EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
-  EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
-
   // building any_value
   auto any_value = BuildAnyValue(pvxs_value);
 

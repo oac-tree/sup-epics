@@ -107,3 +107,32 @@ TEST_F(PvxsValueBasicsTests, PVXSValueBasicsAttemptToAssign)
   EXPECT_EQ(struct_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(struct_value.as<int>(), 43);
 }
+
+//! Studying how to construct and populate array of structures.
+
+TEST_F(PvxsValueBasicsTests, ArrayWithTwoStructureElements)
+{
+  // building PVXS value representing an array of structs with two elements
+  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+                                    {pvxs::members::Int32("field_name")})
+                        .create();
+
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+  arr[0] = array_field.allocMember();
+  arr[0]["field_name"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["field_name"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  // learning how read it back
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+  // arrays doesn't have names in PVXS
+  EXPECT_TRUE(pvxs_value.id().empty());
+
+  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+  EXPECT_EQ(array_data.size(), 2);
+  EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
+  EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
+}
