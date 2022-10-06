@@ -19,6 +19,7 @@
 
 #include <pvxs/data.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
+#include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
 
 #include <iostream>
@@ -73,7 +74,11 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   pvxs::Value m_current;  //! current position
 
   std::stack<::pvxs::Value> m_struct_stack;
-  bool m_array_mode{false};
+
+  bool IsScalarArrayMode() const
+  {
+    return !m_struct_stack.empty() && IsScalarArray(m_struct_stack.top());
+  }
 };
 
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
@@ -137,7 +142,6 @@ void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ArrayProlog() value:" << anyvalue << std::endl;
   p_impl->m_struct_stack.push(p_impl->m_current);
-  p_impl->m_array_mode = true;
 }
 
 void PvxsValueBuilder::ArrayElementSeparator()
@@ -148,7 +152,6 @@ void PvxsValueBuilder::ArrayElementSeparator()
 void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
-  p_impl->m_array_mode = false;
   p_impl->m_current = p_impl->m_struct_stack.top();
   p_impl->m_struct_stack.pop();
   AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_current);
@@ -163,7 +166,7 @@ void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarEpilog() value:" << anyvalue << std::endl;
 
-  if (!p_impl->m_array_mode)
+  if (!p_impl->IsScalarArrayMode())
   {
     AssignAnyValueToPVXSValueScalar(*anyvalue, p_impl->m_current);
   }
