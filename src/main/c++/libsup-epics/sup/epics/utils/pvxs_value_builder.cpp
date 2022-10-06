@@ -152,9 +152,14 @@ void PvxsValueBuilder::ArrayElementSeparator()
 void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
+
+  if (p_impl->IsScalarArrayMode())
+  {
+    AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_struct_stack.top());
+  }
+
   p_impl->m_current = p_impl->m_struct_stack.top();
   p_impl->m_struct_stack.pop();
-  AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_current);
 }
 
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
