@@ -93,3 +93,40 @@ TEST_F(PvxsValueBuilderTests, StructWithSingleField)
   EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
 }
+
+//! Build PVXS value from a structure with two fields.
+
+TEST_F(PvxsValueBuilderTests, StructWithTwoFields)
+{
+  sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                  {"bool", {sup::dto::BooleanType, true}}};
+
+  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
+                                   {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
+  PvxsValueBuilder builder(pvxs_type);
+
+  builder.StructProlog(&any_value);
+  builder.MemberProlog(&any_value["signed"], "signed");
+  builder.ScalarProlog(&any_value["signed"]);
+  builder.ScalarEpilog(&any_value["signed"]);
+  builder.MemberEpilog(&any_value["signed"], "signed");
+  builder.StructMemberSeparator();
+  builder.MemberProlog(&any_value["bool"], "bool");
+  builder.ScalarProlog(&any_value["bool"]);
+  builder.ScalarEpilog(&any_value["bool"]);
+  builder.MemberEpilog(&any_value["bool"], "bool");
+  builder.StructEpilog(&any_value);
+
+  auto pvxs_value = builder.GetPVXSValue();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 2);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed", "bool"}));
+
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
+  EXPECT_EQ(pvxs_value["bool"].type(), ::pvxs::TypeCode::Bool);
+  EXPECT_EQ(pvxs_value["bool"].as<bool>(), true);
+}
