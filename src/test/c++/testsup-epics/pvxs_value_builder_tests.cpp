@@ -294,3 +294,35 @@ TEST_F(PvxsValueBuilderTests, TwoNestedStructs)
   EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), -43);
   EXPECT_EQ(pvxs_value["struct2.second"].as<uint32_t>(), 44);
 }
+
+//! Build PVXS value from AnyValue representing an array of integers.
+
+TEST_F(PvxsValueBuilderTests, ArrayOfIntegers)
+{
+  // original anyvalue
+  const int n_elements = 2;
+  sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
+  any_value[0] = 42;
+
+  // initializing builder
+  auto pvxs_type = pvxs::TypeDef(pvxs::TypeCode::Int32A);
+  PvxsValueBuilder builder(pvxs_type);
+
+  // building PVXS value
+  builder.ArrayProlog(&any_value);
+  builder.ScalarProlog(&any_value[0]);
+  builder.ScalarEpilog(&any_value[0]);
+  builder.ArrayElementSeparator();
+  builder.ScalarProlog(&any_value[1]);
+  builder.ScalarEpilog(&any_value[1]);
+  builder.ArrayEpilog(&any_value);
+
+  auto pvxs_value = builder.GetPVXSValue();
+
+  // validating PVXS value
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32A);
+  auto data = pvxs_value.as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 42);
+  EXPECT_EQ(data[1], 0);
+}
