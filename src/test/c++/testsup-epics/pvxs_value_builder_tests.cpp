@@ -153,8 +153,9 @@ TEST_F(PvxsValueBuilderTests, NestedStruct)
   sup::dto::AnyValue any_value = {{"scalars", two_scalars}};
 
   // initialising builder
-  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Struct,
-                              {pvxs::members::Struct("scalars", {pvxs::members::Int32("signed"),                                                                pvxs::members::Bool("bool")})});
+  auto pvxs_type = ::pvxs::TypeDef(
+      ::pvxs::TypeCode::Struct, {pvxs::members::Struct("scalars", {pvxs::members::Int32("signed"),
+                                                                   pvxs::members::Bool("bool")})});
   PvxsValueBuilder builder(pvxs_type);
 
   // building PVXS value
@@ -197,5 +198,99 @@ TEST_F(PvxsValueBuilderTests, NestedStruct)
 
   EXPECT_EQ(pvxs_value["scalars.signed"].as<int32_t>(), 42);
   EXPECT_EQ(pvxs_value["scalars.bool"].as<bool>(), true);
+}
 
+//! Build PVXS value from a structure with two fields inside parent structure.
+
+TEST_F(PvxsValueBuilderTests, TwoNestedStructs)
+{
+  // original any_value
+  const std::string struct_name = "struct_name";
+  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                    {"bool", {sup::dto::BooleanType, true}}};
+
+  sup::dto::AnyValue any_value{{{"struct1", two_scalars},
+                                {"struct2",
+                                 {{"first", {sup::dto::SignedInteger8Type, 1}},
+                                  {"second", {sup::dto::SignedInteger8Type, 2}}}}},
+                               struct_name};
+
+  // initializing builder
+  auto member1 = pvxs::members::Struct(
+      "struct1", "struct1_name", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
+  auto member2 = pvxs::members::Struct(
+      "struct2", {pvxs::members::Int8("first"), pvxs::members::Int8("second")});
+
+  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Struct, struct_name, {member1, member2});
+  PvxsValueBuilder builder(pvxs_type);
+
+  // building PVXS value
+  builder.StructProlog(&any_value);
+
+  builder.MemberProlog(&any_value["struct1"], "struct1");
+  builder.StructProlog(&any_value["struct1"]);
+  builder.MemberProlog(&any_value["struct1.signed"], "signed");
+  builder.ScalarProlog(&any_value["struct1.signed"]);
+  builder.ScalarEpilog(&any_value["struct1.signed"]);
+  builder.MemberEpilog(&any_value["struct1.signed"], "signed");
+  builder.StructMemberSeparator();
+  builder.MemberProlog(&any_value["struct1.bool"], "bool");
+  builder.ScalarProlog(&any_value["struct1.bool"]);
+  builder.ScalarEpilog(&any_value["struct1.bool"]);
+  builder.MemberEpilog(&any_value["struct1.bool"], "bool");
+  builder.StructEpilog(&any_value["struct1"]);
+  builder.MemberEpilog(&any_value["struct1"], "struct1");
+
+  builder.StructMemberSeparator();
+
+  builder.MemberProlog(&any_value["struct2"], "struct2");
+  builder.StructProlog(&any_value["struct2"]);
+  builder.MemberProlog(&any_value["struct2.first"], "first");
+  builder.ScalarProlog(&any_value["struct2.first"]);
+  builder.ScalarEpilog(&any_value["struct2.first"]);
+  builder.MemberEpilog(&any_value["struct2.first"], "first");
+  builder.StructMemberSeparator();
+  builder.MemberProlog(&any_value["struct2.second"], "second");
+  builder.ScalarProlog(&any_value["struct2.second"]);
+  builder.ScalarEpilog(&any_value["struct2.second"]);
+  builder.MemberEpilog(&any_value["struct2.second"], "second");
+  builder.StructEpilog(&any_value["struct2"]);
+  builder.MemberEpilog(&any_value["struct2"], "struct2");
+
+  builder.StructEpilog(&any_value);
+
+  auto pvxs_value = builder.GetPVXSValue();
+
+  // validating PVXS value
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 2);
+  EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"struct1", "struct2"}));
+
+  // first branch
+  auto struct1_value = pvxs_value["struct1"];
+  EXPECT_EQ(struct1_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(struct1_value.nmembers(), 2);
+
+  auto struct1_fields = GetMemberNames(struct1_value);
+  EXPECT_EQ(struct1_fields, std::vector<std::string>({"signed", "bool"}));
+  EXPECT_EQ(pvxs_value["struct1.signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["struct1.bool"].type(), ::pvxs::TypeCode::Bool);
+
+  EXPECT_EQ(pvxs_value["struct1.signed"].as<int32_t>(), 42);
+  EXPECT_EQ(pvxs_value["struct1.bool"].as<bool>(), true);
+
+  // second branch
+  auto struct2_value = pvxs_value["struct2"];
+  EXPECT_EQ(struct2_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(struct2_value.nmembers(), 2);
+
+  auto struct2_fields = GetMemberNames(struct2_value);
+  EXPECT_EQ(struct2_fields, std::vector<std::string>({"first", "second"}));
+  EXPECT_EQ(pvxs_value["struct2.first"].type(), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), 1);
+  EXPECT_EQ(pvxs_value["struct2.second"].as<int32_t>(), 2);
 }

@@ -131,7 +131,7 @@ TEST_F(PvxsValueBuilderExtendedTests, NestedStruct)
 
 //! Build PVXS value from AnyValue representing a struct with two nested structs.
 
-TEST_F(PvxsValueBuilderExtendedTests, TwoNestedStruct)
+TEST_F(PvxsValueBuilderExtendedTests, TwoNestedStructs)
 {
   const std::string struct_name = "struct_name";
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
