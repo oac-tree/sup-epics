@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include <pvxs/data.h>
+#include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
@@ -72,6 +73,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
   pvxs::Value m_result;   //!< place for the result
   pvxs::Value m_current;  //! current position
+  int m_index = 0;
 
   std::stack<::pvxs::Value> m_struct_stack;
 
@@ -141,12 +143,28 @@ void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ArrayProlog() value:" << anyvalue << std::endl;
+  p_impl->m_index = 0;
+
   p_impl->m_struct_stack.push(p_impl->m_current);
+
+  if (!p_impl->IsScalarArrayMode())
+  {
+    std::cout << "ArrayProlog " << anyvalue->NumberOfElements() << std::endl;
+    pvxs::shared_array<pvxs::Value> array(anyvalue->NumberOfElements());
+    for (size_t i = 0; i < anyvalue->NumberOfElements(); ++i)
+    {
+      array[i] = p_impl->m_current.allocMember();
+    }
+    p_impl->m_current = array.freeze();
+//    p_impl->m_current = p_impl->m_current[index++];
+//    p_impl->m_struct_stack.push(p_impl->m_current);
+  }
 }
 
 void PvxsValueBuilder::ArrayElementSeparator()
 {
   std::cout << "AddArrayElementSeparator() " << std::endl;
+  ++p_impl->m_index;
 }
 
 void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
