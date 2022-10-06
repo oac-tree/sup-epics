@@ -211,15 +211,15 @@ TEST_F(PvxsValueBuilderTests, TwoNestedStructs)
 
   sup::dto::AnyValue any_value{{{"struct1", two_scalars},
                                 {"struct2",
-                                 {{"first", {sup::dto::SignedInteger8Type, 1}},
-                                  {"second", {sup::dto::SignedInteger8Type, 2}}}}},
+                                 {{"first", {sup::dto::SignedInteger8Type, -43}},
+                                  {"second", {sup::dto::UnsignedInteger8Type, 44}}}}},
                                struct_name};
 
   // initializing builder
   auto member1 = pvxs::members::Struct(
       "struct1", "struct1_name", {pvxs::members::Int32("signed"), pvxs::members::Bool("bool")});
   auto member2 = pvxs::members::Struct(
-      "struct2", {pvxs::members::Int8("first"), pvxs::members::Int8("second")});
+      "struct2", {pvxs::members::Int8("first"), pvxs::members::UInt8("second")});
 
   auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Struct, struct_name, {member1, member2});
   PvxsValueBuilder builder(pvxs_type);
@@ -290,7 +290,7 @@ TEST_F(PvxsValueBuilderTests, TwoNestedStructs)
   auto struct2_fields = GetMemberNames(struct2_value);
   EXPECT_EQ(struct2_fields, std::vector<std::string>({"first", "second"}));
   EXPECT_EQ(pvxs_value["struct2.first"].type(), ::pvxs::TypeCode::Int8);
-  EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
-  EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), 1);
-  EXPECT_EQ(pvxs_value["struct2.second"].as<int32_t>(), 2);
+  EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), -43);
+  EXPECT_EQ(pvxs_value["struct2.second"].as<uint32_t>(), 44);
 }

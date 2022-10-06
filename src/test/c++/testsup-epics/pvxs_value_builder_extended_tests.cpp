@@ -139,8 +139,8 @@ TEST_F(PvxsValueBuilderExtendedTests, TwoNestedStructs)
 
   sup::dto::AnyValue any_value{{{"struct1", two_scalars},
                                 {"struct2",
-                                 {{"first", {sup::dto::SignedInteger8Type, 1}},
-                                  {"second", {sup::dto::SignedInteger8Type, 2}}}}},
+                                 {{"first", {sup::dto::SignedInteger8Type, -43}},
+                                  {"second", {sup::dto::UnsignedInteger8Type, 44}}}}},
                                struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
@@ -173,9 +173,9 @@ TEST_F(PvxsValueBuilderExtendedTests, TwoNestedStructs)
   auto struct2_fields = GetMemberNames(struct2_value);
   EXPECT_EQ(struct2_fields, std::vector<std::string>({"first", "second"}));
   EXPECT_EQ(pvxs_value["struct2.first"].type(), ::pvxs::TypeCode::Int8);
-  EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
-  EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), 1);
-  EXPECT_EQ(pvxs_value["struct2.second"].as<int32_t>(), 2);
+  EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(pvxs_value["struct2.first"].as<int32_t>(), -43);
+  EXPECT_EQ(pvxs_value["struct2.second"].as<uint32_t>(), 44);
 }
 
 //! Build PVXS value from AnyValue representing an array of integers.
