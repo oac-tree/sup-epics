@@ -48,19 +48,48 @@ TEST_F(PvxsValueBuilderTests, FromEmptyType)
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Null);
 }
 
+//! Build PVXS value from a scalar AnyValue.
+
 TEST_F(PvxsValueBuilderTests, FromScalar)
 {
+  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+
   auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Int32);
   PvxsValueBuilder builder(pvxs_type);
 
-  sup::dto::AnyValue anyvalue{sup::dto::SignedInteger32Type, 42};
-
-  builder.ScalarProlog(&anyvalue);
-  builder.ScalarEpilog(&anyvalue);
+  builder.ScalarProlog(&any_value);
+  builder.ScalarEpilog(&any_value);
 
   auto pvxs_value = builder.GetPVXSValue();
 
   EXPECT_TRUE(pvxs_value.valid());
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
+}
+
+//! Build PVXS value from a structure with single field.
+
+TEST_F(PvxsValueBuilderTests, StructWithSingleField)
+{
+  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32Type, 42}}}};
+
+  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("signed")});
+  PvxsValueBuilder builder(pvxs_type);
+
+  builder.StructProlog(&any_value);
+  builder.MemberProlog(&any_value["signed"], "signed");
+  builder.ScalarProlog(&any_value["signed"]);
+  builder.ScalarEpilog(&any_value["signed"]);
+  builder.MemberEpilog(&any_value["signed"], "signed");
+  builder.StructEpilog(&any_value);
+
+  auto pvxs_value = builder.GetPVXSValue();
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value.nmembers(), 1);
+
+  auto names = GetMemberNames(pvxs_value);
+  EXPECT_EQ(names, std::vector<std::string>({"signed"}));
+  EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+  EXPECT_EQ(pvxs_value["signed"].as<int32_t>(), 42);
 }
