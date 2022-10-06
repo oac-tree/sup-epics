@@ -534,7 +534,7 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
 
   // learning how read it back
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
-  // arrays doesn't have names for some reason
+  // arrays doesn't have names in PVXS
   EXPECT_TRUE(pvxs_value.id().empty());
 
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
