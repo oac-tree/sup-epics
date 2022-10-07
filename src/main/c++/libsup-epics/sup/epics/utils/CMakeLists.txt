@@ -1,5 +1,7 @@
 target_sources(${library_name} PRIVATE
   CMakeLists.txt
+  abstract_pvxs_builder_node.cpp
+  abstract_pvxs_builder_node.h
   anyvalue_from_pvxs_builder.cpp
   anyvalue_from_pvxs_builder.h
   dto_conversion_utils.cpp
@@ -7,6 +9,8 @@ target_sources(${library_name} PRIVATE
   dto_scalar_conversion_utils.h
   dto_typecode_conversion_utils.cpp
   dto_typecode_conversion_utils.h
+  pvxs_builder_nodes.cpp
+  pvxs_builder_nodes.h
   pvxs_type_builder.cpp
   pvxs_type_builder.h
   pvxs_utils.cpp

@@ -22,6 +22,7 @@
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
+#include <sup/epics/utils/pvxs_builder_nodes.h>
 
 #include <iostream>
 #include <stack>
@@ -76,11 +77,20 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   int m_index = 0;
 
   std::stack<::pvxs::Value> m_struct_stack;
+  std::stack<std::unique_ptr<AbstractPvxsBuilderNode>> m_nodes;
 
   bool IsScalarArrayMode() const
   {
     return !m_struct_stack.empty() && IsScalarArray(m_struct_stack.top());
   }
+
+  template <typename T, typename... Args>
+  void ProcessComponent(Args &&...args)
+  {
+    auto component = std::unique_ptr<T>(new T((args)...));
+    m_nodes.push(std::move(component));
+  }
+
 };
 
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
@@ -88,6 +98,8 @@ PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsVa
   std::cout << " ----------------\n";
   p_impl->m_result = CreateValueFromType(type_def);
   p_impl->m_current = p_impl->m_result;
+
+  p_impl->ProcessComponent<PvxsBuilderNode>(CreateValueFromType(type_def));
 }
 
 PvxsValueBuilder::~PvxsValueBuilder() = default;
