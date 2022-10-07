@@ -43,6 +43,8 @@ public:
 
   virtual bool IsScalarArrayNode() const;
 
+  virtual void Freeze();
+
 protected:
   pvxs::Value m_pvxs_value;
 };

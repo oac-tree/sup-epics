@@ -79,10 +79,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   std::stack<::pvxs::Value> m_struct_stack;
   std::stack<std::unique_ptr<AbstractPvxsBuilderNode>> m_nodes;
 
-  bool IsScalarArrayMode() const
-  {
-    return IsScalarArray(GetCurrentNode()->GetPvxsValue());
-  }
+  bool IsScalarArrayMode() const { return IsScalarArray(GetCurrentNode()->GetPvxsValue()); }
 
   template <typename T, typename... Args>
   void ProcessComponent(Args &&...args)
@@ -193,6 +190,7 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
 
+  p_impl->GetCurrentNode()->Freeze();
   p_impl->m_nodes.pop();
 }
 

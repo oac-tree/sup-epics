@@ -53,5 +53,10 @@ bool AbstractPvxsBuilderNode::IsScalarArrayNode() const
   return false;
 }
 
+void AbstractPvxsBuilderNode::Freeze()
+{
+// do nothing
+}
+
 }  // namespace epics
 }  // namespace sup

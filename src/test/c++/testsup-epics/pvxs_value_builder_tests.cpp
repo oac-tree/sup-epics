@@ -329,14 +329,14 @@ TEST_F(PvxsValueBuilderTests, ArrayOfIntegers)
 
 //! Build PVXS value from AnyValue representing an array of integers inside the struct.
 
- TEST_F(PvxsValueBuilderTests, ArrayInStruct)
+TEST_F(PvxsValueBuilderTests, ArrayInStruct)
 {
-   // original AnyValue
-   const std::string struct_name{"struct_name"};
-   const int n_elements = 2;
-   sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
-   any_array[0] = 42;
-   sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
+  // original AnyValue
+  const std::string struct_name{"struct_name"};
+  const int n_elements = 2;
+  sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
+  any_array[0] = 42;
+  sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
 
   // initializing builder
   auto pvxs_type =
@@ -367,4 +367,50 @@ TEST_F(PvxsValueBuilderTests, ArrayOfIntegers)
   EXPECT_EQ(data.size(), 2);
   EXPECT_EQ(data[0], 42);
   EXPECT_EQ(data[1], 0);
+}
+
+//! Build PVXS value from AnyValue representing an array of two structures.
+
+TEST_F(PvxsValueBuilderTests, ArrayWithTwoStructureElements)
+{
+  // original AnyValue
+  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                      "struct_name"};
+  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                      "struct_name"};
+  auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
+
+  // initializing builder
+  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+                                   {pvxs::members::Int32("field_name")});
+  PvxsValueBuilder builder(pvxs_type);
+
+  // building PVXS value
+  builder.ArrayProlog(&anyvalue);
+  builder.StructProlog(&anyvalue[0]);
+  builder.MemberProlog(&anyvalue[0]["field_name"], "field_name");
+  builder.ScalarProlog(&anyvalue[0]["field_name"]);
+  builder.ScalarEpilog(&anyvalue[0]["field_name"]);
+  builder.MemberEpilog(&anyvalue[0]["field_name"], "field_name");
+  builder.StructEpilog(&anyvalue[0]);
+
+  builder.ArrayElementSeparator();
+
+  builder.StructProlog(&anyvalue[1]);
+  builder.MemberProlog(&anyvalue[1]["field_name"], "field_name");
+  builder.ScalarProlog(&anyvalue[1]["field_name"]);
+  builder.ScalarEpilog(&anyvalue[1]["field_name"]);
+  builder.MemberEpilog(&anyvalue[1]["field_name"], "field_name");
+  builder.StructEpilog(&anyvalue[1]);
+
+  builder.ArrayEpilog(&anyvalue);
+
+  auto pvxs_value = builder.GetPVXSValue();
+
+  // validating PVXS value
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::StructA);
+  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+  EXPECT_EQ(array_data.size(), 2);
+  EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
+  EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
 }

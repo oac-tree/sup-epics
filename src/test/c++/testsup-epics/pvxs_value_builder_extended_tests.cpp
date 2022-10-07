@@ -283,5 +283,12 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
                                       "struct_name"};
   auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
 
+  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+                                    {pvxs::members::Int32("field_name")})
+                        .create();
+
+//  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+//                                    {pvxs::members::Int32("field_name")});
+
 //    auto pvxs_value = BuildPVXSValue(anyvalue);
 }
