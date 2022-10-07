@@ -57,6 +57,8 @@ public:
 
   bool IsStructArrayNode() const override;
 
+  void Freeze();
+
 private:
   pvxs::shared_array<pvxs::Value> m_array;
   size_t m_current_index{0};

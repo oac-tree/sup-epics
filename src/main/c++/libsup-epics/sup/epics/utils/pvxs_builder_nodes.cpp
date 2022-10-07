@@ -23,6 +23,7 @@
 #include <sup/epics/utils/pvxs_utils.h>
 
 #include <stdexcept>
+#include <iostream>
 
 namespace sup
 {
@@ -87,15 +88,19 @@ pvxs::Value &StructArrayBuilderNode::GetCurrent()
   {
     throw std::runtime_error("Out of bounds");
   }
+  std::cout << "  GetCurrent " << m_current_index << "\n";
   return m_array[m_current_index];
 }
 
 void StructArrayBuilderNode::ArrayElementSeparator()
 {
+  std::cout << "  ArrayElementSeparator " << m_current_index << "\n";
+
   m_current_index++;
 
   if (m_current_index == m_array.size())
   {
+    std::cout << "  ArrayElementSeparator closing " << m_current_index << "\n";
     m_pvxs_value = m_array.freeze().castTo<const void>();
   }
 }
@@ -103,6 +108,12 @@ void StructArrayBuilderNode::ArrayElementSeparator()
 bool StructArrayBuilderNode::IsStructArrayNode() const
 {
   return true;
+}
+
+void StructArrayBuilderNode::Freeze()
+{
+  std::cout << "  Freeze " << m_current_index << "\n";
+  m_pvxs_value = m_array.freeze().castTo<const void>();
 }
 
 }  // namespace epics
