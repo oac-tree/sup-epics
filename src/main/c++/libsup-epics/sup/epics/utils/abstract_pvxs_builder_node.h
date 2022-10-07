@@ -35,6 +35,14 @@ public:
 
   virtual pvxs::Value GetPvxsValue() const;
 
+  virtual pvxs::Value& GetCurrent();
+
+  virtual void ArrayElementSeparator();
+
+  virtual bool IsStructArrayNode() const;
+
+  virtual bool IsScalarArrayNode() const;
+
 protected:
   pvxs::Value m_pvxs_value;
 };

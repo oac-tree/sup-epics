@@ -20,9 +20,9 @@
 #include <pvxs/data.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
+#include <sup/epics/utils/pvxs_builder_nodes.h>
 #include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
-#include <sup/epics/utils/pvxs_builder_nodes.h>
 
 #include <iostream>
 #include <stack>
@@ -81,7 +81,8 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 
   bool IsScalarArrayMode() const
   {
-    return !m_struct_stack.empty() && IsScalarArray(m_struct_stack.top());
+    //    return !m_struct_stack.empty() && IsScalarArray(m_struct_stack.top());
+    return !m_nodes.empty() && IsScalarArray(GetPvxsValue());
   }
 
   template <typename T, typename... Args>
@@ -91,6 +92,18 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
     m_nodes.push(std::move(component));
   }
 
+  pvxs::Value &GetCurrent() { return m_nodes.top()->GetCurrent(); }
+
+  pvxs::Value GetPvxsValue() const { return m_nodes.top()->GetPvxsValue(); }
+
+  AbstractPvxsBuilderNode *GetCurrentNode()
+  {
+    if (m_nodes.empty())
+    {
+      throw std::runtime_error("Node is empty");
+    }
+    return m_nodes.top().get();
+  }
 };
 
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
@@ -106,7 +119,8 @@ PvxsValueBuilder::~PvxsValueBuilder() = default;
 
 pvxs::Value PvxsValueBuilder::GetPVXSValue() const
 {
-  return p_impl->m_result;
+  return p_impl->m_nodes.empty() ? pvxs::Value() : p_impl->m_nodes.top()->GetCurrent();
+  //  return p_impl->m_result;
 }
 
 void PvxsValueBuilder::EmptyProlog(const sup::dto::AnyValue *anyvalue)
@@ -122,7 +136,8 @@ void PvxsValueBuilder::EmptyEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::StructProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructProlog() value:" << anyvalue << " item:" << std::endl;
-  p_impl->m_struct_stack.push(p_impl->m_current);
+  //  p_impl->m_struct_stack.push(p_impl->m_current);
+  p_impl->ProcessComponent<PvxsBuilderNode>(p_impl->GetCurrent());
 }
 
 void PvxsValueBuilder::StructMemberSeparator()
@@ -133,8 +148,9 @@ void PvxsValueBuilder::StructMemberSeparator()
 void PvxsValueBuilder::StructEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "StructEpilog() value:" << anyvalue << std::endl;
-  p_impl->m_current = p_impl->m_struct_stack.top();
-  p_impl->m_struct_stack.pop();
+  //  p_impl->m_current = p_impl->m_struct_stack.top();
+  //  p_impl->m_struct_stack.pop();
+  p_impl->m_nodes.pop();
 }
 
 void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
@@ -142,69 +158,80 @@ void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
 {
   std::cout << "MemberProlog() " << anyvalue << " " << member_name << std::endl;
 
-  p_impl->m_current = p_impl->m_current[member_name];
+  //  p_impl->m_current = p_impl->m_current[member_name];
+  p_impl->ProcessComponent<PvxsBuilderNode>(p_impl->GetCurrent()[member_name]);
 }
 
 void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
                                     const std::string &member_name)
 {
   std::cout << "MemberEpilog() " << anyvalue << " " << member_name << std::endl;
-  p_impl->m_current = p_impl->m_struct_stack.top();
+  //  p_impl->m_current = p_impl->m_struct_stack.top();
+  p_impl->m_nodes.pop();
 }
 
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ArrayProlog() value:" << anyvalue << std::endl;
-  p_impl->m_index = 0;
+  //  p_impl->m_index = 0;
 
-  p_impl->m_struct_stack.push(p_impl->m_current);
+  //  p_impl->m_struct_stack.push(p_impl->m_current);
+
+  //  if (!p_impl->IsScalarArrayMode())
+  //  {
+  //    std::cout << "ArrayProlog " << anyvalue->NumberOfElements() << std::endl;
+  //    pvxs::shared_array<pvxs::Value> array(anyvalue->NumberOfElements());
+  //    for (size_t i = 0; i < anyvalue->NumberOfElements(); ++i)
+  //    {
+  //      array[i] = p_impl->m_current.allocMember();
+  //    }
+  //    p_impl->m_current = array.freeze();
+  ////    p_impl->m_current = p_impl->m_current[index++];
+  ////    p_impl->m_struct_stack.push(p_impl->m_current);
+  //  }
 
   if (!p_impl->IsScalarArrayMode())
   {
-    std::cout << "ArrayProlog " << anyvalue->NumberOfElements() << std::endl;
-    pvxs::shared_array<pvxs::Value> array(anyvalue->NumberOfElements());
-    for (size_t i = 0; i < anyvalue->NumberOfElements(); ++i)
-    {
-      array[i] = p_impl->m_current.allocMember();
-    }
-    p_impl->m_current = array.freeze();
-//    p_impl->m_current = p_impl->m_current[index++];
-//    p_impl->m_struct_stack.push(p_impl->m_current);
+    p_impl->ProcessComponent<StructArrayBuilderNode>(p_impl->GetCurrent(), anyvalue);
   }
 }
 
 void PvxsValueBuilder::ArrayElementSeparator()
 {
   std::cout << "AddArrayElementSeparator() " << std::endl;
-  ++p_impl->m_index;
+  //  ++p_impl->m_index;
 }
 
 void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
 
-  if (p_impl->IsScalarArrayMode())
+  if (!p_impl->GetCurrentNode()->IsStructArrayNode())
   {
     AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_struct_stack.top());
   }
 
-  p_impl->m_current = p_impl->m_struct_stack.top();
-  p_impl->m_struct_stack.pop();
+  //  p_impl->m_current = p_impl->m_struct_stack.top();
+  //  p_impl->m_struct_stack.pop();
 }
 
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarProlog() value:" << anyvalue << std::endl;
+  if (!p_impl->GetCurrentNode()->IsStructArrayNode())
+  {
+    AssignAnyValueToPVXSValueScalar(*anyvalue, p_impl->GetCurrent());
+  }
 }
 
 void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarEpilog() value:" << anyvalue << std::endl;
 
-  if (!p_impl->IsScalarArrayMode())
-  {
-    AssignAnyValueToPVXSValueScalar(*anyvalue, p_impl->m_current);
-  }
+  //  if (!p_impl->IsScalarArrayMode())
+  //  {
+  //    AssignAnyValueToPVXSValueScalar(*anyvalue, p_impl->m_current);
+  //  }
 }
 
 }  // namespace epics

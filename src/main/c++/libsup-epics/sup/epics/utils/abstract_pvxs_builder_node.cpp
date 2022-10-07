@@ -33,5 +33,25 @@ pvxs::Value AbstractPvxsBuilderNode::GetPvxsValue() const
   return m_pvxs_value;
 }
 
+pvxs::Value &AbstractPvxsBuilderNode::GetCurrent()
+{
+  return m_pvxs_value;
+}
+
+void AbstractPvxsBuilderNode::ArrayElementSeparator()
+{
+  throw std::runtime_error("Not implemented");
+}
+
+bool AbstractPvxsBuilderNode::IsStructArrayNode() const
+{
+  return false;
+}
+
+bool AbstractPvxsBuilderNode::IsScalarArrayNode() const
+{
+  return false;
+}
+
 }  // namespace epics
 }  // namespace sup

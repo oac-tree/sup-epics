@@ -34,12 +34,26 @@ public:
   PvxsBuilderNode(pvxs::Value pvxs_value);
 };
 
+class ScalarArrayBuilderNode : public AbstractPvxsBuilderNode
+{
+public:
+  ScalarArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);
+
+  bool IsScalarArrayNode() const override;
+};
+
 class StructArrayBuilderNode : public AbstractPvxsBuilderNode
 {
 public:
   StructArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);
 
-  void AddElement(pvxs::Value pvxs_value);
+  //  void AddElement(pvxs::Value pvxs_value);
+
+  virtual pvxs::Value &GetCurrent() override;
+
+  void ArrayElementSeparator() override;
+
+  bool IsStructArrayNode() const override;
 
 private:
   pvxs::shared_array<pvxs::Value> m_array;
