@@ -91,7 +91,7 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
 
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "ArrayProlog() value:" << anytype << std::endl;
+  std::cout << "ArrayProlog() value:" << anytype << " " << GetPVXSTypeCode(*anytype) << " " << std::endl;
   p_impl->m_struct_stack.push(GetPVXSTypeCode(*anytype));
 }
 

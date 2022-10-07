@@ -105,6 +105,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
 {
   std::cout << " ----------------\n";
+  std::cout << type_def << std::endl;
   p_impl->m_result = CreateValueFromType(type_def);
   p_impl->m_current = p_impl->m_result;
 
