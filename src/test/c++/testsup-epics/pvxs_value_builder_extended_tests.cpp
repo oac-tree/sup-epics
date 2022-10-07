@@ -272,16 +272,16 @@ TEST_F(PvxsValueBuilderExtendedTests, NTEnum)
   EXPECT_EQ(pvxs_value["timeStamp.userTag"].as<int32_t>(), -3);
 }
 
-////! Build PVXS value from AnyValue representing an array of two structures.
+//! Build PVXS value from AnyValue representing an array of two structures.
 
-//TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
-//{
-//  // building any value
-//  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-//                                      "struct_name"};
-//  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-//                                      "struct_name"};
-//  auto anyvalue = sup::dto::ArrayValue({{struct_value1}, struct_value2});
+TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
+{
+  // building any value
+  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                      "struct_name"};
+  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                      "struct_name"};
+  auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
 
-//  //  auto pvxs_value = BuildPVXSValue(anyvalue);
-//}
+//    auto pvxs_value = BuildPVXSValue(anyvalue);
+}
