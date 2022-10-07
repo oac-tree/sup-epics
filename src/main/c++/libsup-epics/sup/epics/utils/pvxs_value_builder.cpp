@@ -82,7 +82,8 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   bool IsScalarArrayMode() const
   {
     //    return !m_struct_stack.empty() && IsScalarArray(m_struct_stack.top());
-    return !m_nodes.empty() && IsScalarArray(GetPvxsValue());
+//    return !m_nodes.empty() && IsScalarArray(GetPvxsValue());
+    return IsScalarArray(GetCurrentNode()->GetPvxsValue());
   }
 
   template <typename T, typename... Args>
@@ -96,7 +97,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 
   pvxs::Value GetPvxsValue() const { return m_nodes.top()->GetPvxsValue(); }
 
-  AbstractPvxsBuilderNode *GetCurrentNode()
+  AbstractPvxsBuilderNode *GetCurrentNode() const
   {
     if (m_nodes.empty())
     {
@@ -192,10 +193,12 @@ void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
 
   if (p_impl->IsScalarArrayMode())
   {
+    std::cout << "1.1";
     p_impl->ProcessComponent<ScalarArrayBuilderNode>(p_impl->GetCurrent(), anyvalue);
   }
   else
   {
+    std::cout << "1.2";
     p_impl->ProcessComponent<StructArrayBuilderNode>(p_impl->GetCurrent(), anyvalue);
   }
 }
@@ -224,10 +227,12 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "ScalarProlog() value:" << anyvalue << std::endl;
-  if (!p_impl->GetCurrentNode()->IsStructArrayNode())
+  if (!p_impl->GetCurrentNode()->IsScalarArrayNode())
   {
+    std::cout << "aaaaa 1.1" << std::endl;
     AssignAnyValueToPVXSValueScalar(*anyvalue, p_impl->GetCurrent());
   }
+  std::cout << "aaaaa 1.2" << std::endl;
 }
 
 void PvxsValueBuilder::ScalarEpilog(const sup::dto::AnyValue *anyvalue)
