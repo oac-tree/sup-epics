@@ -20,6 +20,7 @@
 #ifndef SUP_EPICS_UTILS_PVXS_BUILDER_NODES_H_
 #define SUP_EPICS_UTILS_PVXS_BUILDER_NODES_H_
 
+#include <sup/epics/dto_types_fwd.h>
 #include <sup/epics/utils/abstract_pvxs_builder_node.h>
 
 namespace sup
@@ -36,7 +37,13 @@ public:
 class StructArrayBuilderNode : public AbstractPvxsBuilderNode
 {
 public:
-  StructArrayBuilderNode(pvxs::Value pvxs_value);
+  StructArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);
+
+  void AddElement(pvxs::Value pvxs_value);
+
+private:
+  pvxs::shared_array<pvxs::Value> m_array;
+  size_t m_current_index{0};
 };
 
 }  // namespace epics

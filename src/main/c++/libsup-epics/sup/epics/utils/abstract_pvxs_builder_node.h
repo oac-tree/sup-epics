@@ -31,8 +31,11 @@ class AbstractPvxsBuilderNode
 {
 public:
   AbstractPvxsBuilderNode(pvxs::Value pvxs_value);
+  ~AbstractPvxsBuilderNode() = default;
 
-private:
+  virtual pvxs::Value GetPvxsValue() const;
+
+protected:
   pvxs::Value m_pvxs_value;
 };
 

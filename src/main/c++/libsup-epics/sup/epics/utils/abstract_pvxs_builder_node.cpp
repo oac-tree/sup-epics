@@ -28,5 +28,10 @@ AbstractPvxsBuilderNode::AbstractPvxsBuilderNode(pvxs::Value pvxs_value) : m_pvx
 {
 }
 
+pvxs::Value AbstractPvxsBuilderNode::GetPvxsValue() const
+{
+  return m_pvxs_value;
+}
+
 }  // namespace epics
 }  // namespace sup
