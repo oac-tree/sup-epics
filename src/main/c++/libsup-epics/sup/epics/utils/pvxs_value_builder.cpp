@@ -190,7 +190,11 @@ void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
   ////    p_impl->m_struct_stack.push(p_impl->m_current);
   //  }
 
-  if (!p_impl->IsScalarArrayMode())
+  if (p_impl->IsScalarArrayMode())
+  {
+    p_impl->ProcessComponent<ScalarArrayBuilderNode>(p_impl->GetCurrent(), anyvalue);
+  }
+  else
   {
     p_impl->ProcessComponent<StructArrayBuilderNode>(p_impl->GetCurrent(), anyvalue);
   }
@@ -200,19 +204,21 @@ void PvxsValueBuilder::ArrayElementSeparator()
 {
   std::cout << "AddArrayElementSeparator() " << std::endl;
   //  ++p_impl->m_index;
+  p_impl->GetCurrentNode()->ArrayElementSeparator();
 }
 
 void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   std::cout << "AddArrayEpilog() value:" << anyvalue << std::endl;
 
-  if (!p_impl->GetCurrentNode()->IsStructArrayNode())
-  {
-    AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_struct_stack.top());
-  }
+//  if (!p_impl->GetCurrentNode()->IsStructArrayNode())
+//  {
+//    AssignAnyValueToPVXSValueScalarArray(*anyvalue, p_impl->m_struct_stack.top());
+//  }
 
   //  p_impl->m_current = p_impl->m_struct_stack.top();
-  //  p_impl->m_struct_stack.pop();
+//    p_impl->m_struct_stack.pop();
+  p_impl->m_nodes.pop();
 }
 
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)

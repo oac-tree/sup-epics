@@ -39,6 +39,8 @@ class ScalarArrayBuilderNode : public AbstractPvxsBuilderNode
 public:
   ScalarArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);
 
+  void ArrayElementSeparator() override;
+
   bool IsScalarArrayNode() const override;
 };
 

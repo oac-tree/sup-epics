@@ -43,6 +43,11 @@ ScalarArrayBuilderNode::ScalarArrayBuilderNode(pvxs::Value pvxs_value,
   AssignAnyValueToPVXSValueScalarArray(*any_value, pvxs_value);
 }
 
+void ScalarArrayBuilderNode::ArrayElementSeparator()
+{
+  // do nothing, already was already build
+}
+
 bool ScalarArrayBuilderNode::IsScalarArrayNode() const
 {
   return true;

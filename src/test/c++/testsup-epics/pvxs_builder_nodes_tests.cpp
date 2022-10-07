@@ -36,16 +36,40 @@ class PvxsBuilderNodesTests : public ::testing::Test
 {
 };
 
+TEST_F(PvxsBuilderNodesTests, ScalarArrayBuilderNodeInitialState)
+{
+  sup::dto::AnyValue any_value =
+      sup::dto::ArrayValue({{sup::dto::SignedInteger32Type, 1}, 2}, "my_array_t");
+
+  auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
+
+  ScalarArrayBuilderNode node(pvxs_value, &any_value);
+  EXPECT_TRUE(node.IsScalarArrayNode());
+  EXPECT_FALSE(node.IsStructArrayNode());
+
+  auto result = node.GetPvxsValue();
+  EXPECT_EQ(result.type(), ::pvxs::TypeCode::Int32A);
+  auto data = result.as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 1);
+  EXPECT_EQ(data[1], 2);
+
+  // attempt to create node from wrong type (not an array)
+  EXPECT_THROW(
+      ScalarArrayBuilderNode(::pvxs::TypeDef(::pvxs::TypeCode::Int32).create(), &any_value),
+      std::runtime_error);
+}
+
 //! Testing class StructArrayBuilderNode in the
 
-//TEST_F(PvxsBuilderNodesTests, StructArrayBuilderNodeAddElement)
+// TEST_F(PvxsBuilderNodesTests, StructArrayBuilderNodeAddElement)
 //{
-//  // preparing any_value
-//  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-//                                      "struct_name"};
-//  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-//                                      "struct_name"};
-//  auto any_value = sup::dto::ArrayValue({{struct_value1}, struct_value2});
+//   // preparing any_value
+//   sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+//                                       "struct_name"};
+//   sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+//                                       "struct_name"};
+//   auto any_value = sup::dto::ArrayValue({{struct_value1}, struct_value2});
 
 //  // defining pvxs_value (no values assignedm structs are unallocated)
 //  auto pvxs_value = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
