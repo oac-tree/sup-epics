@@ -23,7 +23,6 @@
 #include <sup/epics/utils/pvxs_utils.h>
 
 #include <stdexcept>
-#include <iostream>
 
 namespace sup
 {
@@ -31,6 +30,10 @@ namespace epics
 {
 
 PvxsBuilderNode::PvxsBuilderNode(pvxs::Value pvxs_value) : AbstractPvxsBuilderNode(pvxs_value) {}
+
+// ----------------------------------------------------------------------------
+// ScalarArrayBuilderNode
+// ----------------------------------------------------------------------------
 
 ScalarArrayBuilderNode::ScalarArrayBuilderNode(pvxs::Value pvxs_value,
                                                const dto::AnyValue *any_value)
@@ -46,7 +49,7 @@ ScalarArrayBuilderNode::ScalarArrayBuilderNode(pvxs::Value pvxs_value,
 
 void ScalarArrayBuilderNode::ArrayElementSeparator()
 {
-  // do nothing, already was already build
+  // do nothing, array was already filled in constructor
 }
 
 bool ScalarArrayBuilderNode::IsScalarArrayNode() const
@@ -54,33 +57,19 @@ bool ScalarArrayBuilderNode::IsScalarArrayNode() const
   return true;
 }
 
+// ----------------------------------------------------------------------------
+// StructArrayBuilderNode
+// ----------------------------------------------------------------------------
+
 StructArrayBuilderNode::StructArrayBuilderNode(pvxs::Value pvxs_value,
                                                const sup::dto::AnyValue *any_value)
     : AbstractPvxsBuilderNode(pvxs_value), m_array(any_value->NumberOfElements())
 {
-  ::pvxs::Value tmp(pvxs_value);
-
   for (size_t i = 0; i < any_value->NumberOfElements(); ++i)
   {
-    m_array[i] = tmp.allocMember();
+    m_array[i] = pvxs_value.allocMember();
   }
 }
-
-// void StructArrayBuilderNode::AddElement(pvxs::Value pvxs_value)
-//{
-//   if (m_current_index >= m_array.size())
-//   {
-//     throw std::runtime_error("Attempt to add too much elements in the array");
-//   }
-
-//  m_array[m_current_index].assign(pvxs_value);
-//  ++m_current_index;
-
-//  if (m_current_index == m_array.size())
-//  {
-//    m_pvxs_value = m_array.freeze().castTo<const void>();
-//  }
-//}
 
 pvxs::Value &StructArrayBuilderNode::GetCurrent()
 {
@@ -88,19 +77,15 @@ pvxs::Value &StructArrayBuilderNode::GetCurrent()
   {
     throw std::runtime_error("Out of bounds");
   }
-  std::cout << "  GetCurrent " << m_current_index << "\n";
   return m_array[m_current_index];
 }
 
 void StructArrayBuilderNode::ArrayElementSeparator()
 {
-  std::cout << "  ArrayElementSeparator " << m_current_index << "\n";
-
   m_current_index++;
 
   if (m_current_index == m_array.size())
   {
-    std::cout << "  ArrayElementSeparator closing " << m_current_index << "\n";
     m_pvxs_value = m_array.freeze().castTo<const void>();
   }
 }
@@ -112,7 +97,6 @@ bool StructArrayBuilderNode::IsStructArrayNode() const
 
 void StructArrayBuilderNode::Freeze()
 {
-  std::cout << "  Freeze " << m_current_index << "\n";
   m_pvxs_value = m_array.freeze().castTo<const void>();
 }
 
