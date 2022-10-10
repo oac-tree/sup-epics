@@ -71,7 +71,7 @@ namespace epics
 
 struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
-  std::stack<std::unique_ptr<AbstractPvxsBuilderNode>> m_nodes;
+  std::stack<std::unique_ptr<PvxsBuilderNode>> m_nodes;
 
   bool IsScalarArrayMode() const { return IsScalarArray(GetCurrentNode()->GetPvxsValueRef()); }
 
@@ -84,7 +84,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 
   pvxs::Value &GetCurrent() { return m_nodes.top()->GetPvxsValueRef(); }
 
-  AbstractPvxsBuilderNode *GetCurrentNode() const
+  PvxsBuilderNode *GetCurrentNode() const
   {
     if (m_nodes.empty())
     {

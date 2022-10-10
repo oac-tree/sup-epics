@@ -20,21 +20,38 @@
 #ifndef SUP_EPICS_UTILS_PVXS_BUILDER_NODES_H_
 #define SUP_EPICS_UTILS_PVXS_BUILDER_NODES_H_
 
+#include <pvxs/data.h>
 #include <sup/epics/dto_types_fwd.h>
-#include <sup/epics/utils/abstract_pvxs_builder_node.h>
 
 namespace sup
 {
 namespace epics
 {
 
-class PvxsBuilderNode : public AbstractPvxsBuilderNode
+class PvxsBuilderNode
 {
 public:
   PvxsBuilderNode(pvxs::Value pvxs_value);
+
+  virtual ~PvxsBuilderNode() = default;
+
+  virtual pvxs::Value GetPvxsValue() const;
+
+  virtual pvxs::Value &GetPvxsValueRef();
+
+  virtual void ArrayElementSeparator();
+
+  virtual bool IsStructArrayNode() const;
+
+  virtual bool IsScalarArrayNode() const;
+
+  virtual void Freeze();
+
+protected:
+  pvxs::Value m_pvxs_value;
 };
 
-class ScalarArrayBuilderNode : public AbstractPvxsBuilderNode
+class ScalarArrayBuilderNode : public PvxsBuilderNode
 {
 public:
   ScalarArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);
@@ -44,7 +61,7 @@ public:
   bool IsScalarArrayNode() const override;
 };
 
-class StructArrayBuilderNode : public AbstractPvxsBuilderNode
+class StructArrayBuilderNode : public PvxsBuilderNode
 {
 public:
   StructArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);

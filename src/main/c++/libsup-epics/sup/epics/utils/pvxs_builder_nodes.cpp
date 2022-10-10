@@ -29,7 +29,41 @@ namespace sup
 namespace epics
 {
 
-PvxsBuilderNode::PvxsBuilderNode(pvxs::Value pvxs_value) : AbstractPvxsBuilderNode(pvxs_value) {}
+// ----------------------------------------------------------------------------
+// PvxsBuilderNode
+// ----------------------------------------------------------------------------
+
+PvxsBuilderNode::PvxsBuilderNode(pvxs::Value pvxs_value) : m_pvxs_value(pvxs_value) {}
+
+pvxs::Value PvxsBuilderNode::GetPvxsValue() const
+{
+  return m_pvxs_value;
+}
+
+pvxs::Value &PvxsBuilderNode::GetPvxsValueRef()
+{
+  return m_pvxs_value;
+}
+
+void PvxsBuilderNode::ArrayElementSeparator()
+{
+  throw std::runtime_error("Not implemented");
+}
+
+bool PvxsBuilderNode::IsStructArrayNode() const
+{
+  return false;
+}
+
+bool PvxsBuilderNode::IsScalarArrayNode() const
+{
+  return false;
+}
+
+void PvxsBuilderNode::Freeze()
+{
+  // do nothing
+}
 
 // ----------------------------------------------------------------------------
 // ScalarArrayBuilderNode
@@ -37,7 +71,7 @@ PvxsBuilderNode::PvxsBuilderNode(pvxs::Value pvxs_value) : AbstractPvxsBuilderNo
 
 ScalarArrayBuilderNode::ScalarArrayBuilderNode(pvxs::Value pvxs_value,
                                                const dto::AnyValue *any_value)
-    : AbstractPvxsBuilderNode(pvxs_value)
+    : PvxsBuilderNode(pvxs_value)
 {
   if (!IsScalarArray(pvxs_value))
   {
@@ -63,7 +97,7 @@ bool ScalarArrayBuilderNode::IsScalarArrayNode() const
 
 StructArrayBuilderNode::StructArrayBuilderNode(pvxs::Value pvxs_value,
                                                const sup::dto::AnyValue *any_value)
-    : AbstractPvxsBuilderNode(pvxs_value), m_array(any_value->NumberOfElements())
+    : PvxsBuilderNode(pvxs_value), m_array(any_value->NumberOfElements())
 {
   for (size_t i = 0; i < any_value->NumberOfElements(); ++i)
   {

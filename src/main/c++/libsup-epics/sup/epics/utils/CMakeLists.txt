@@ -1,7 +1,5 @@
 target_sources(${library_name} PRIVATE
   CMakeLists.txt
-  abstract_pvxs_builder_node.cpp
-  abstract_pvxs_builder_node.h
   anyvalue_from_pvxs_builder.cpp
   anyvalue_from_pvxs_builder.h
   dto_conversion_utils.cpp
