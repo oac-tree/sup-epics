@@ -47,7 +47,7 @@ TEST_F(PvxsBuilderNodesTests, ScalarArrayBuilderNodeInitialState)
   EXPECT_TRUE(node.IsScalarArrayNode());
   EXPECT_FALSE(node.IsStructArrayNode());
 
-  auto result = node.GetPvxsValue();
+  auto result = node.GetPvxsValueRef();
   EXPECT_EQ(result.type(), ::pvxs::TypeCode::Int32A);
   auto data = result.as<::pvxs::shared_array<const int32_t>>();
   EXPECT_EQ(data.size(), 2);
@@ -80,33 +80,17 @@ TEST_F(PvxsBuilderNodesTests, StructArrayBuilderNodeAddElement)
   EXPECT_FALSE(node.IsScalarArrayNode());
   EXPECT_TRUE(node.IsStructArrayNode());
 
-  std::cout << pvxs_value << "\n";
-
-  // adding elements to the node
-  //  auto pvxs_struct_value1 =
-  //      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("field_name")}).create();
-  //  pvxs_struct_value1["field_name"] = 42;
-  //  auto pvxs_struct_value2 =
-  //      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("field_name")}).create();
-  //  pvxs_struct_value2["field_name"] = 43;
-
-  auto& pvxs_value_element0 = node.GetCurrent();
+  auto& pvxs_value_element0 = node.GetPvxsValueRef();
   pvxs_value_element0["field_name"] = 42;
 
   node.ArrayElementSeparator();
 
-  auto& pvxs_value_element1 = node.GetCurrent();
+  auto& pvxs_value_element1 = node.GetPvxsValueRef();
   pvxs_value_element1["field_name"] = 43;
 
   EXPECT_TRUE(&pvxs_value_element0 != &pvxs_value_element1);
 
   node.Freeze();
-
-  //  node.AddElement(pvxs_struct_value1);
-  //  node.AddElement(pvxs_struct_value2);
-
-  //  // it is not possible to add more than number of elements defined in AnyValue
-  //  EXPECT_THROW(node.AddElement(pvxs_struct_value2), std::runtime_error);
 
   // retrieving result
   auto pvxs_result = node.GetPvxsValue();

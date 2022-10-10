@@ -33,7 +33,7 @@ pvxs::Value AbstractPvxsBuilderNode::GetPvxsValue() const
   return m_pvxs_value;
 }
 
-pvxs::Value &AbstractPvxsBuilderNode::GetCurrent()
+pvxs::Value &AbstractPvxsBuilderNode::GetPvxsValueRef()
 {
   return m_pvxs_value;
 }
@@ -55,7 +55,7 @@ bool AbstractPvxsBuilderNode::IsScalarArrayNode() const
 
 void AbstractPvxsBuilderNode::Freeze()
 {
-// do nothing
+  // do nothing
 }
 
 }  // namespace epics

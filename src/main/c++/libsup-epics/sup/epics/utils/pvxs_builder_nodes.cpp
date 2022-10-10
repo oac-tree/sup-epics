@@ -71,7 +71,7 @@ StructArrayBuilderNode::StructArrayBuilderNode(pvxs::Value pvxs_value,
   }
 }
 
-pvxs::Value &StructArrayBuilderNode::GetCurrent()
+pvxs::Value &StructArrayBuilderNode::GetPvxsValueRef()
 {
   if (m_current_index >= m_array.size())
   {

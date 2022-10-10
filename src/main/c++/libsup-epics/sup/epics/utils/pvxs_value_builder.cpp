@@ -73,7 +73,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 {
   std::stack<std::unique_ptr<AbstractPvxsBuilderNode>> m_nodes;
 
-  bool IsScalarArrayMode() const { return IsScalarArray(GetCurrentNode()->GetPvxsValue()); }
+  bool IsScalarArrayMode() const { return IsScalarArray(GetCurrentNode()->GetPvxsValueRef()); }
 
   template <typename T, typename... Args>
   void ProcessComponent(Args &&...args)
@@ -82,7 +82,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
     m_nodes.push(std::move(component));
   }
 
-  pvxs::Value &GetCurrent() { return m_nodes.top()->GetCurrent(); }
+  pvxs::Value &GetCurrent() { return m_nodes.top()->GetPvxsValueRef(); }
 
   AbstractPvxsBuilderNode *GetCurrentNode() const
   {
@@ -103,7 +103,7 @@ PvxsValueBuilder::~PvxsValueBuilder() = default;
 
 pvxs::Value PvxsValueBuilder::GetPVXSValue() const
 {
-  return p_impl->m_nodes.empty() ? pvxs::Value() : pvxs::Value(p_impl->m_nodes.top()->GetCurrent());
+  return p_impl->m_nodes.empty() ? pvxs::Value() : p_impl->m_nodes.top()->GetPvxsValue();
 }
 
 void PvxsValueBuilder::EmptyProlog(const sup::dto::AnyValue *anyvalue)

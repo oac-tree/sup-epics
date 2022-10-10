@@ -35,7 +35,7 @@ public:
 
   virtual pvxs::Value GetPvxsValue() const;
 
-  virtual pvxs::Value& GetCurrent();
+  virtual pvxs::Value& GetPvxsValueRef();
 
   virtual void ArrayElementSeparator();
 
