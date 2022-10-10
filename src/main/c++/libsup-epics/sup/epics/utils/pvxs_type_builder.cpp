@@ -24,7 +24,6 @@
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/dto_typecode_conversion_utils.h>
 
-#include <iostream>
 #include <stack>
 #include <stdexcept>
 
@@ -50,71 +49,82 @@ pvxs::TypeDef PvxsTypeBuilder::GetPVXSType() const
 
 void PvxsTypeBuilder::EmptyProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "EmptyProlog() value:" << anytype << std::endl;
+  (void)anytype;
+  //  std::cout << "EmptyProlog() value:" << anytype << std::endl;
 }
 
 void PvxsTypeBuilder::EmptyEpilog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "EmptyEpilog() value:" << anytype << std::endl;
+  (void)anytype;
+  //  std::cout << "EmptyEpilog() value:" << anytype << std::endl;
 }
 
 void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "StructProlog() value:" << anytype << std::endl;
+  (void)anytype;
+  //  std::cout << "StructProlog() value:" << anytype << std::endl;
   p_impl->m_struct_stack.push(
       ::pvxs::TypeDef(GetPVXSTypeCode(*anytype), anytype->GetTypeName(), {}));
 }
 
 void PvxsTypeBuilder::StructMemberSeparator()
 {
-  std::cout << "StructMemberSeparator() " << std::endl;
+  //  std::cout << "StructMemberSeparator() " << std::endl;
 }
 
 void PvxsTypeBuilder::StructEpilog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "StructEpilog() value:" << anytype << std::endl;
+  (void)anytype;
+  //  std::cout << "StructEpilog() value:" << anytype << std::endl;
   p_impl->m_last_processed = p_impl->m_struct_stack.top();
   p_impl->m_struct_stack.pop();
 }
 
 void PvxsTypeBuilder::MemberProlog(const sup::dto::AnyType* anytype, const std::string& member_name)
 {
-  std::cout << "MemberProlog() " << anytype << " " << member_name << std::endl;
+  (void)anytype;
+  (void)member_name;
+  //  std::cout << "MemberProlog() " << anytype << " " << member_name << std::endl;
 }
 
 void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::string& member_name)
 {
-  std::cout << "MemberEpilog() " << anytype << " " << member_name << " " << std::endl;
+  (void)anytype;
+  (void)member_name;
+  //  std::cout << "MemberEpilog() " << anytype << " " << member_name << " " << std::endl;
   auto& top = p_impl->m_struct_stack.top();
   top += {p_impl->m_last_processed.as(member_name)};
 }
 
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "ArrayProlog() value:" << anytype << " " << GetPVXSTypeCode(*anytype) << " " << std::endl;
+  //  std::cout << "ArrayProlog() value:" << anytype << " " << GetPVXSTypeCode(*anytype) << " " <<
+  //  std::endl;
   p_impl->m_struct_stack.push(GetPVXSTypeCode(*anytype));
 }
 
 void PvxsTypeBuilder::ArrayElementSeparator()
 {
-  std::cout << "AddArrayElementSeparator() " << std::endl;
+  //  std::cout << "AddArrayElementSeparator() " << std::endl;
 }
 
 void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "AddArrayEpilog() value:" << anytype << std::endl;
+  (void)anytype;
+  //  std::cout << "AddArrayEpilog() value:" << anytype << std::endl;
   p_impl->m_last_processed = p_impl->m_struct_stack.top();
   p_impl->m_struct_stack.pop();
 }
 
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "ScalarProlog() value:" << anytype << std::endl;
+  (void)anytype;
+  //  std::cout << "ScalarProlog() value:" << anytype << std::endl;
 }
 
 void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 {
-  std::cout << "ScalarEpilog() value:" << anytype << std::endl;
+  //  std::cout << "ScalarEpilog() value:" << anytype << std::endl;
 
   p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
 }
