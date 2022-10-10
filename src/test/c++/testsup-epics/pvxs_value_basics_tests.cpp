@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
+#include <sup/epics/utils/pvxs_utils.h>
 
 //! Tests to understand how to construct PVXS values.
 
@@ -135,4 +136,37 @@ TEST_F(PvxsValueBasicsTests, ArrayWithTwoStructureElements)
   EXPECT_EQ(array_data.size(), 2);
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
+}
+
+//! Studying how to create TypeDef for structure programmatically.
+
+TEST_F(PvxsValueBasicsTests, CreateTypeDefForStruct)
+{
+  // creating type_def for structure without specifying fields
+  auto pvxs_type_struct = ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "struct_name", {});
+
+  // adding fields
+  pvxs::TypeDef field_type1 = ::pvxs::TypeDef(::pvxs::TypeCode::Int8);
+  pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
+  pvxs_type_struct += {field_type1.as("first")};
+  pvxs_type_struct += {field_type1.as("second")};
+
+  auto pvxs_value = pvxs_type_struct.create();
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::Struct);
+  EXPECT_EQ(sup::epics::GetMemberNames(pvxs_value), std::vector<std::string>({"first", "second"}));
+}
+
+//! Studying how to create TypeDef for the array of structures programmatically.
+
+TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
+{
+  auto pvxs_type_struct =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "struct_name",
+                      {pvxs::members::Int8("first"), pvxs::members::UInt8("second")});
+
+  auto pvxs_type_array =
+      ::pvxs::TypeDef(::pvxs::TypeCode::StructA);
+
+  // for the moment it is not clear how to construct type for StructA in step-wise manner
+  // TODO continue
 }
