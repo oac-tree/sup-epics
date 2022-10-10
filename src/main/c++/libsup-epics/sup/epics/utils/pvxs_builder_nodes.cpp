@@ -117,11 +117,6 @@ pvxs::Value &StructArrayBuilderNode::GetPvxsValueRef()
 void StructArrayBuilderNode::ArrayElementSeparator()
 {
   m_current_index++;
-
-  if (m_current_index == m_array.size())
-  {
-    m_pvxs_value = m_array.freeze().castTo<const void>();
-  }
 }
 
 bool StructArrayBuilderNode::IsStructArrayNode() const
