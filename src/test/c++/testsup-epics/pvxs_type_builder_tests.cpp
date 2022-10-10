@@ -253,46 +253,37 @@ TEST_F(PvxsTypeBuilderTests, ArrayInStruct)
 }
 
 //!  Build PVXS type from AnyType representing an array containing two structures. Each structure
-//!  has a single
-//! `field_name` field with a scalar.
+//!  has a single `field_name` field with a scalar.
 
-//TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
-//{
-//  // building AnyType representing array of structs
-//  sup::dto::AnyType struct_type = {{{"field_name", sup::dto::SignedInteger32Type}}, "struct_name"};
-//  sup::dto::AnyType array(2, struct_type);
+//! Test is failing since we don't know how build StructA types in step-wise manner.
 
-//  std::cout << sup::dto::AnyTypeToJSONString(array, true) << std::endl;
+TEST_F(PvxsTypeBuilderTests, DISABLED_ArrayWithTwoStructureElements)
+{
+  // building AnyType representing array of structs
+  sup::dto::AnyType struct_type = {{{"field_name", sup::dto::SignedInteger32Type}}, "struct_name"};
+  sup::dto::AnyType array(2, struct_type);
 
-////  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
-////                                    {pvxs::members::Int32("field_name")});
+  auto pvxs_type_result = BuildPVXSType(array);
 
-////  auto pvxs_value = pvxs_type.create();
-////  std::cout << pvxs_type << std::endl;
-////  std::cout << pvxs_value << std::endl;
+  // We can't check a type because of the lack of getters. We will check the value.
+  auto pvxs_value = pvxs_type_result.create();
 
-//  // Seems it is not possible in PVXS to check constructed type, especially if it is an array.
-//  // We have to construct a Value from it, try to allocate all fields, and if we succeed, then
-//  // the type was constructed correctly.
+  // arrays doesn't have names in PVXS
+  EXPECT_TRUE(pvxs_value.id().empty());
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
-//  auto pvxs_type_result = BuildPVXSType(array);
-//  auto pvxs_value = pvxs_type_result.create();
-//  // arrays doesn't have names in PVXS
-//  EXPECT_TRUE(pvxs_value.id().empty());
-//  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+  // This is the only known way to file the array
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+  arr[0] = array_field.allocMember();
+  arr[0]["field_name"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["field_name"] = 43;
+  array_field = arr.freeze().castTo<const void>();
 
-//  // This is the only known way to fille the array
-//  ::pvxs::Value array_field(pvxs_value);
-//  ::pvxs::shared_array<::pvxs::Value> arr(2);
-//  arr[0] = array_field.allocMember();
-//  arr[0]["field_name"] = 42;
-//  arr[1] = array_field.allocMember();
-//  arr[1]["field_name"] = 43;
-//  array_field = arr.freeze().castTo<const void>();
-
-//  // reading the data back
-//  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
-//  EXPECT_EQ(array_data.size(), 2);
-//  EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
-//  EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
-//}
+  // reading the data back
+  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+  EXPECT_EQ(array_data.size(), 2);
+  EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
+  EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
+}
