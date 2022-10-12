@@ -31,9 +31,9 @@ ChannelAccessClient::ChannelAccessClient(VariableUpdatedCallback cb)
 
 ChannelAccessClient::~ChannelAccessClient() = default;
 
-bool ChannelAccessClient::AddVariable(const std::string& name, const sup::dto::AnyType& type)
+bool ChannelAccessClient::AddVariable(const std::string& channel, const sup::dto::AnyType& type)
 {
-  if (pv_map.find(name) != pv_map.end())
+  if (pv_map.find(channel) != pv_map.end())
   {
     return false;
   }
@@ -41,14 +41,14 @@ bool ChannelAccessClient::AddVariable(const std::string& name, const sup::dto::A
   try
   {
     pv.reset(
-      new ChannelAccessPV(name, type,
-        std::bind(&ChannelAccessClient::OnVariableUpdated, this, name, std::placeholders::_1)));
+      new ChannelAccessPV(channel, type,
+        std::bind(&ChannelAccessClient::OnVariableUpdated, this, channel, std::placeholders::_1)));
   }
   catch(const std::runtime_error&)
   {
     return false;
   }
-  pv_map.emplace(name, std::move(pv));
+  pv_map.emplace(channel, std::move(pv));
   return true;
 }
 
@@ -62,9 +62,9 @@ std::vector<std::string> ChannelAccessClient::GetVariableNames() const
   return result;
 }
 
-bool ChannelAccessClient::IsConnected(const std::string& name) const
+bool ChannelAccessClient::IsConnected(const std::string& channel) const
 {
-  auto it = pv_map.find(name);
+  auto it = pv_map.find(channel);
   if (it == pv_map.end())
   {
     return false;
@@ -72,9 +72,9 @@ bool ChannelAccessClient::IsConnected(const std::string& name) const
   return it->second->IsConnected();
 }
 
-sup::dto::AnyValue ChannelAccessClient::GetValue(const std::string& name) const
+sup::dto::AnyValue ChannelAccessClient::GetValue(const std::string& channel) const
 {
-  auto it = pv_map.find(name);
+  auto it = pv_map.find(channel);
   if (it == pv_map.end())
   {
     return {};
@@ -82,9 +82,9 @@ sup::dto::AnyValue ChannelAccessClient::GetValue(const std::string& name) const
   return it->second->GetValue();
 }
 
-ChannelAccessPV::ExtendedValue ChannelAccessClient::GetExtendedValue(const std::string& name) const
+ChannelAccessPV::ExtendedValue ChannelAccessClient::GetExtendedValue(const std::string& channel) const
 {
-  auto it = pv_map.find(name);
+  auto it = pv_map.find(channel);
   if (it == pv_map.end())
   {
     return {};
@@ -92,9 +92,9 @@ ChannelAccessPV::ExtendedValue ChannelAccessClient::GetExtendedValue(const std::
   return it->second->GetExtendedValue();
 }
 
-bool ChannelAccessClient::SetValue(const std::string& name, const sup::dto::AnyValue& value)
+bool ChannelAccessClient::SetValue(const std::string& channel, const sup::dto::AnyValue& value)
 {
-  auto it = pv_map.find(name);
+  auto it = pv_map.find(channel);
   if (it == pv_map.end())
   {
     return false;
@@ -102,9 +102,9 @@ bool ChannelAccessClient::SetValue(const std::string& name, const sup::dto::AnyV
   return it->second->SetValue(value);
 }
 
-bool ChannelAccessClient::WaitForConnected(const std::string& name, double timeout_sec) const
+bool ChannelAccessClient::WaitForConnected(const std::string& channel, double timeout_sec) const
 {
-  auto it = pv_map.find(name);
+  auto it = pv_map.find(channel);
   if (it == pv_map.end())
   {
     return false;
@@ -112,9 +112,9 @@ bool ChannelAccessClient::WaitForConnected(const std::string& name, double timeo
   return it->second->WaitForConnected(timeout_sec);
 }
 
-bool ChannelAccessClient::RemoveVariable(const std::string& name)
+bool ChannelAccessClient::RemoveVariable(const std::string& channel)
 {
-  auto it = pv_map.find(name);
+  auto it = pv_map.find(channel);
   if (it == pv_map.end())
   {
     return false;
@@ -124,11 +124,11 @@ bool ChannelAccessClient::RemoveVariable(const std::string& name)
 }
 
 void ChannelAccessClient::OnVariableUpdated(
-  const std::string& name, const ChannelAccessPV::ExtendedValue& value)
+  const std::string& channel, const ChannelAccessPV::ExtendedValue& value)
 {
   if (var_updated_cb)
   {
-    var_updated_cb(name, value);
+    var_updated_cb(channel, value);
   }
 }
 

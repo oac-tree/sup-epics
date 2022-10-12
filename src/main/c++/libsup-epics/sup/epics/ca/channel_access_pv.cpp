@@ -37,15 +37,15 @@ ChannelAccessPV::ExtendedValue::ExtendedValue()
 {}
 
 ChannelAccessPV::ChannelAccessPV(
-  const std::string& name, const sup::dto::AnyType& type, VariableChangedCallback cb)
-  : channel_name{name}
+  const std::string& channel, const sup::dto::AnyType& type, VariableChangedCallback cb)
+  : channel_name{channel}
   , cache{}
   , id{0}
   , mon_mtx{}
   , connected_cv{}
   , var_changed_cb{std::move(cb)}
 {
-  id = SharedCAChannelManager().AddChannel(name, type,
+  id = SharedCAChannelManager().AddChannel(channel, type,
     std::bind(&ChannelAccessPV::OnConnectionChanged, this, std::placeholders::_1),
     std::bind(&ChannelAccessPV::OnMonitorCalled, this, std::placeholders::_1));
   if (id == 0)

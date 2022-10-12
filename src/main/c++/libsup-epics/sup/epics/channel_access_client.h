@@ -61,12 +61,12 @@ public:
     /**
    * @brief Add a new variable with the given channel and type.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    * @param type Type to use for this variable.
    *
    * @return True if variable was successfully constructed, false otherwise.
    */
-  bool AddVariable(const std::string& name, const sup::dto::AnyType& type);
+  bool AddVariable(const std::string& channel, const sup::dto::AnyType& type);
 
     /**
    * @brief Retrieve the names of all managed channels.
@@ -78,60 +78,60 @@ public:
     /**
    * @brief Check if specific channel is connected.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    *
    * @return True if channel is connected, false otherwise.
    */
-  bool IsConnected(const std::string& name) const;
+  bool IsConnected(const std::string& channel) const;
 
     /**
    * @brief Retrieve the value from a specific channel.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    *
    * @return Channel's value if connected, empty value otherwise.
    */
-  sup::dto::AnyValue GetValue(const std::string& name) const;
+  sup::dto::AnyValue GetValue(const std::string& channel) const;
 
     /**
    * @brief Retrieve extended information from a specific channel.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    *
    * @return Structure with value and different status fields (e.g. connected, status, etc.)
    */
-  ChannelAccessPV::ExtendedValue GetExtendedValue(const std::string& name) const;
+  ChannelAccessPV::ExtendedValue GetExtendedValue(const std::string& channel) const;
 
     /**
    * @brief Propagate the value to a specific channel.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    * @param value Value to be written to the channel.
    *
    * @return True if successful, false otherwise.
    */
-  bool SetValue(const std::string& name, const sup::dto::AnyValue& value);
+  bool SetValue(const std::string& channel, const sup::dto::AnyValue& value);
 
   /**
    * @brief This method waits for a specific channel to be connected with a timeout.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    * @param timeout_sec Timeout in seconds to wait for the channel to be connected.
    * @return True if the channel was connected within the timeout period.
    */
-  bool WaitForConnected(const std::string& name, double timeout_sec) const;
+  bool WaitForConnected(const std::string& channel, double timeout_sec) const;
 
   /**
    * @brief Remove the variable with the given name.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    *
    * @return True if the variable was successfully removed.
    */
-  bool RemoveVariable(const std::string& name);
+  bool RemoveVariable(const std::string& channel);
 
 private:
-  void OnVariableUpdated(const std::string& name, const ChannelAccessPV::ExtendedValue& value);
+  void OnVariableUpdated(const std::string& channel, const ChannelAccessPV::ExtendedValue& value);
   std::map<std::string, std::unique_ptr<ChannelAccessPV>> pv_map;
   VariableUpdatedCallback var_updated_cb;
 };

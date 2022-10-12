@@ -45,7 +45,7 @@ public:
   /**
    * @brief Constructor.
    *
-   * @param name EPICS channel name.
+   * @param channel EPICS channel name.
    * @param type Type to use for the connected channel.
    * @param cb Callback function to call when the variable's value or status changed.
    *
@@ -54,7 +54,7 @@ public:
    * @throws std::runtime_error when the EPICS context or channel could not be created (not
    * related to the fact that the specific PV might not be connected).
    */
-  ChannelAccessPV(const std::string& name, const sup::dto::AnyType& type,
+  ChannelAccessPV(const std::string& channel, const sup::dto::AnyType& type,
                   VariableChangedCallback cb = {});
 
     /**
