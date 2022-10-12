@@ -101,20 +101,13 @@ bool ChannelAccessPV::SetValue(const sup::dto::AnyValue& value)
 
 bool ChannelAccessPV::WaitForConnected(double timeout_sec) const
 {
-  auto timeout = std::chrono::system_clock::now() +
+  auto end_time = std::chrono::system_clock::now() +
                  std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
   std::unique_lock<std::mutex> lk(mon_mtx);
-  bool connected = cache.connected;
-  while (!connected)
-  {
-    auto wait_result = connected_cv.wait_until(lk, timeout);
-    if (wait_result == std::cv_status::timeout)
-    {
-      return false;
-    }
-    connected = cache.connected;
-  }
-  return connected;
+  auto pred = [this]{
+    return cache.connected;
+  };
+  return connected_cv.wait_until(lk, end_time, pred);
 }
 
 void ChannelAccessPV::OnConnectionChanged(bool connected)
