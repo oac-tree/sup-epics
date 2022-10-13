@@ -20,6 +20,7 @@
 #include <sup/epics/channel_access_pv.h>
 
 #include <sup/epics/ca/ca_channel_manager.h>
+
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
@@ -42,7 +43,7 @@ ChannelAccessPV::ChannelAccessPV(
   , cache{}
   , id{0}
   , mon_mtx{}
-  , connected_cv{}
+  , monitor_cv{}
   , var_changed_cb{std::move(cb)}
 {
   id = SharedCAChannelManager().AddChannel(channel, type,
@@ -107,7 +108,18 @@ bool ChannelAccessPV::WaitForConnected(double timeout_sec) const
   auto pred = [this]{
     return cache.connected;
   };
-  return connected_cv.wait_until(lk, end_time, pred);
+  return monitor_cv.wait_until(lk, end_time, pred);
+}
+
+bool ChannelAccessPV::WaitForValidValue(double timeout_sec) const
+{
+  auto end_time = std::chrono::system_clock::now() +
+                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  std::unique_lock<std::mutex> lk(mon_mtx);
+  auto pred = [this]{
+    return cache.connected && !sup::dto::IsEmptyValue(cache.value);
+  };
+  return monitor_cv.wait_until(lk, end_time, pred);
 }
 
 void ChannelAccessPV::OnConnectionChanged(bool connected)
@@ -118,7 +130,7 @@ void ChannelAccessPV::OnConnectionChanged(bool connected)
     cache.connected = connected;
     result = cache;
   }
-  connected_cv.notify_one();
+  monitor_cv.notify_one();
   if (var_changed_cb)
   {
     var_changed_cb(result);
@@ -136,6 +148,7 @@ void ChannelAccessPV::OnMonitorCalled(const CAMonitorInfo& info)
     cache.value = info.value;
     result = cache;
   }
+  monitor_cv.notify_one();
   if (var_changed_cb)
   {
     var_changed_cb(result);

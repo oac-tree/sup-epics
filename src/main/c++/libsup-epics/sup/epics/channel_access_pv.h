@@ -115,6 +115,17 @@ public:
    */
   bool WaitForConnected(double timeout_sec) const;
 
+  /**
+   * @brief This method waits with a timeout for the variable cache to be valid.
+   *
+   * @param timeout_sec Timeout in seconds to wait for the variable to be valid.
+   * @return True if the variable was valid within the timeout period.
+   *
+   * @note Valid in this context means that at least one successful monitor callback was issued and
+   * the channel is connected. After a reconnect, it will not wait for an extra callback.
+   */
+  bool WaitForValidValue(double timeout_sec) const;
+
 private:
   void OnConnectionChanged(bool connected);
   void OnMonitorCalled(const CAMonitorInfo& info);
@@ -122,7 +133,7 @@ private:
   ExtendedValue cache;
   ChannelID id;
   mutable std::mutex mon_mtx;
-  mutable std::condition_variable connected_cv;
+  mutable std::condition_variable monitor_cv;
   VariableChangedCallback var_changed_cb;
 };
 }  // namespace epics

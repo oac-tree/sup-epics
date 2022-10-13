@@ -122,6 +122,18 @@ public:
   bool WaitForConnected(const std::string& channel, double timeout_sec) const;
 
   /**
+   * @brief This method waits with a timeout for a specific channel to have a valid value.
+   *
+   * @param channel EPICS channel name.
+   * @param timeout_sec Timeout in seconds to wait for the channel's value to be valid.
+   * @return True if the channel's value was valid within the timeout period.
+   *
+   * @note Valid in this context means that at least one successful monitor callback was issued and
+   * the channel is connected. After a reconnect, it will not wait for an extra callback.
+   */
+  bool WaitForValidValue(const std::string& channel, double timeout_sec) const;
+
+  /**
    * @brief Remove the variable with the given name.
    *
    * @param channel EPICS channel name.

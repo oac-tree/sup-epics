@@ -60,6 +60,49 @@ public:
 
 SoftIocRunner ChannelAccessClientTest::m_softioc_service{"ChannelAccessClientTest"};
 
+TEST_F(ChannelAccessClientTest, ConnectAndRead)
+{
+  using namespace sup::epics;
+
+  // Assert the softIoc is active
+  ASSERT_TRUE(m_softioc_service.IsActive());
+
+  // preparing client
+  ChannelAccessClient client;
+  EXPECT_TRUE(client.AddVariable(BOOL_CHANNEL, sup::dto::BooleanType));
+  EXPECT_TRUE(client.AddVariable(FLOAT_CHANNEL, sup::dto::Float32Type));
+  EXPECT_TRUE(client.AddVariable(STRING_CHANNEL, sup::dto::StringType));
+
+  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
+  EXPECT_TRUE(client.AddVariable(CHARRAY_CHANNEL, char_array_t));
+
+  // waiting for variables to have valid values
+  EXPECT_TRUE(client.WaitForValidValue(BOOL_CHANNEL, 5.0));
+  EXPECT_TRUE(client.WaitForValidValue(FLOAT_CHANNEL, 1.0));
+  EXPECT_TRUE(client.WaitForValidValue(STRING_CHANNEL, 1.0));
+  EXPECT_TRUE(client.WaitForValidValue(CHARRAY_CHANNEL, 1.0));
+
+  // check bool
+  auto bool_val = client.GetValue(BOOL_CHANNEL);
+  EXPECT_FALSE(sup::dto::IsEmptyValue(bool_val));
+  EXPECT_EQ(bool_val.GetType(), sup::dto::BooleanType);
+
+  // check float
+  auto float_val = client.GetValue(FLOAT_CHANNEL);
+  EXPECT_FALSE(sup::dto::IsEmptyValue(float_val));
+  EXPECT_EQ(float_val.GetType(), sup::dto::Float32Type);
+
+  // check string
+  auto string_val = client.GetValue(STRING_CHANNEL);
+  EXPECT_FALSE(sup::dto::IsEmptyValue(string_val));
+  EXPECT_EQ(string_val.GetType(), sup::dto::StringType);
+
+  // check bool
+  auto chararray_val = client.GetValue(CHARRAY_CHANNEL);
+  EXPECT_FALSE(sup::dto::IsEmptyValue(chararray_val));
+  EXPECT_EQ(chararray_val.GetType(), char_array_t);
+}
+
 TEST_F(ChannelAccessClientTest, SingleClient)
 {
   using namespace sup::epics;

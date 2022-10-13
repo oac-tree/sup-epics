@@ -33,7 +33,7 @@
 static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec);
 
-class ChannelAccessVariableTest : public ::testing::Test
+class ChannelAccessPVTest : public ::testing::Test
 {
 public:
   // Create single service for all tests.
@@ -50,9 +50,51 @@ public:
   static SoftIocRunner m_softioc_service;
 };
 
-SoftIocRunner ChannelAccessVariableTest::m_softioc_service{"ChannelAccessVariableTest"};
+SoftIocRunner ChannelAccessPVTest::m_softioc_service{"ChannelAccessPVTest"};
 
-TEST_F(ChannelAccessVariableTest, SingleReadWrite)
+TEST_F(ChannelAccessPVTest, ConnectAndRead)
+{
+  using namespace sup::epics;
+
+  // Assert the softIoc is active
+  ASSERT_TRUE(m_softioc_service.IsActive());
+
+  // preparing variables
+  ChannelAccessPV ca_bool_var("CA-TESTS:BOOL", sup::dto::BooleanType);
+  ChannelAccessPV ca_float_var("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  ChannelAccessPV ca_string_var("CA-TESTS:STRING", sup::dto::StringType);
+
+  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
+  ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
+
+  // waiting for variables to have valid values
+  EXPECT_TRUE(ca_bool_var.WaitForValidValue(5.0));
+  EXPECT_TRUE(ca_float_var.WaitForValidValue(1.0));
+  EXPECT_TRUE(ca_string_var.WaitForValidValue(1.0));
+  EXPECT_TRUE(ca_chararray_var.WaitForValidValue(1.0));
+
+  // check bool
+  auto bool_val = ca_bool_var.GetValue();
+  EXPECT_FALSE(sup::dto::IsEmptyValue(bool_val));
+  EXPECT_EQ(bool_val.GetType(), sup::dto::BooleanType);
+
+  // check float
+  auto float_val = ca_float_var.GetValue();
+  EXPECT_FALSE(sup::dto::IsEmptyValue(float_val));
+  EXPECT_EQ(float_val.GetType(), sup::dto::Float32Type);
+
+  // check string
+  auto string_val = ca_string_var.GetValue();
+  EXPECT_FALSE(sup::dto::IsEmptyValue(string_val));
+  EXPECT_EQ(string_val.GetType(), sup::dto::StringType);
+
+  // check bool
+  auto chararray_val = ca_chararray_var.GetValue();
+  EXPECT_FALSE(sup::dto::IsEmptyValue(chararray_val));
+  EXPECT_EQ(chararray_val.GetType(), char_array_t);
+}
+
+TEST_F(ChannelAccessPVTest, SingleReadWrite)
 {
   using namespace sup::epics;
 
@@ -117,7 +159,7 @@ TEST_F(ChannelAccessVariableTest, SingleReadWrite)
   EXPECT_NE(timestamp, 0);
 }
 
-TEST_F(ChannelAccessVariableTest, MultipleReadWrite)
+TEST_F(ChannelAccessPVTest, MultipleReadWrite)
 {
   using namespace sup::epics;
 

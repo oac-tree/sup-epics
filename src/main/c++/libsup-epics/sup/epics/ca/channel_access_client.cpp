@@ -112,6 +112,16 @@ bool ChannelAccessClient::WaitForConnected(const std::string& channel, double ti
   return it->second->WaitForConnected(timeout_sec);
 }
 
+bool ChannelAccessClient::WaitForValidValue(const std::string& channel, double timeout_sec) const
+{
+  auto it = pv_map.find(channel);
+  if (it == pv_map.end())
+  {
+    return false;
+  }
+  return it->second->WaitForValidValue(timeout_sec);
+}
+
 bool ChannelAccessClient::RemoveVariable(const std::string& channel)
 {
   auto it = pv_map.find(channel);
