@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CHANNEL_ACCESS_VARIABLE_H_
-#define SUP_EPICS_CHANNEL_ACCESS_VARIABLE_H_
+#ifndef SUP_EPICS_CHANNEL_ACCESS_PV_H_
+#define SUP_EPICS_CHANNEL_ACCESS_PV_H_
 
 #include <sup/epics/ca_types.h>
 
@@ -140,4 +140,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CHANNEL_ACCESS_VARIABLE_H_
+#endif  // SUP_EPICS_CHANNEL_ACCESS_PV_H_
