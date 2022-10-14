@@ -32,14 +32,14 @@
 using msec = std::chrono::milliseconds;
 using ::testing::_;
 
-class PVAccessServerVariableTests : public ::testing::Test
+class PvAccessServerPVTests : public ::testing::Test
 {
 };
 
 //! Check initial state of PvAccessServerPV.
 //! There is no PVXS server running.
 
-TEST_F(PVAccessServerVariableTests, InitialState)
+TEST_F(PvAccessServerPVTests, InitialState)
 {
   const std::string variable_name{"variable_name"};
 
@@ -65,7 +65,7 @@ TEST_F(PVAccessServerVariableTests, InitialState)
 
 //! Check GetValue and SetValue. There is no PVXS server running.
 
-TEST_F(PVAccessServerVariableTests, GetAndSet)
+TEST_F(PvAccessServerPVTests, GetAndSet)
 {
   const std::string variable_name{"variable_name"};
 
@@ -86,7 +86,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSet)
 
 //! Check GetValue and SetValue. Server is running.
 
-TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServer)
+TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
 {
   auto server = sup::epics::CreateIsolatedServer();
 
@@ -111,7 +111,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServer)
 //! Check GetValue and SetValue. Server is running.
 //! Same as above, callbacks are added.
 
-TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServerWithCallbacks)
+TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
 {
   MockListener listener;
 
@@ -141,7 +141,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServerWithCallbacks)
 
 //! Adding variable to a server. Server is started first.
 
-TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)
+TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 {
   auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
   server->start();
@@ -162,7 +162,7 @@ TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)
 
 //! Adding variable to a server, then start the server.
 
-TEST_F(PVAccessServerVariableTests, AddToServerBeforeServerStart)
+TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 {
   auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
 
@@ -185,7 +185,7 @@ TEST_F(PVAccessServerVariableTests, AddToServerBeforeServerStart)
 //! Adding variable to a server, then start the server.
 //! Validating variable change on external `pvput`.
 
-TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
+TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 {
   auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
 
@@ -218,7 +218,7 @@ TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
 //! Validating variable change on external `pvput`.
 //! Checking callbacks.
 
-TEST_F(PVAccessServerVariableTests, GetAfterPvPutWithCallback)
+TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
 {
   auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
 

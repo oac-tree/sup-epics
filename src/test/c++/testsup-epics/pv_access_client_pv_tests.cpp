@@ -43,12 +43,12 @@ const int kInitialStatus = 1;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
 }  // namespace
 
-class PVAccessClientVariableTests : public ::testing::Test
+class PvAccessClientPVTests : public ::testing::Test
 {
 public:
   using shared_context_t = std::shared_ptr<pvxs::client::Context>;
 
-  PVAccessClientVariableTests()
+  PvAccessClientPVTests()
       : m_pvxs_value(pvxs::nt::NTScalar{pvxs::TypeCode::Int32}.create())
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
       , m_server(pvxs::server::Config::isolated().build().addPV(kChannelName, m_shared_pv))
@@ -70,7 +70,7 @@ public:
 
 //! Initial state of PvAccessClientPV when no server exists.
 
-TEST_F(PVAccessClientVariableTests, InitialStateWhenNoServer)
+TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 {
   auto shared_context = CreateSharedContext();
 
@@ -86,7 +86,7 @@ TEST_F(PVAccessClientVariableTests, InitialStateWhenNoServer)
 
 //! Sets the value through the unconnected client. The value of the cache should be changed.
 
-TEST_F(PVAccessClientVariableTests, SetValueWhenUnconnected)
+TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 {
   auto shared_context = CreateSharedContext();
   sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
@@ -102,7 +102,7 @@ TEST_F(PVAccessClientVariableTests, SetValueWhenUnconnected)
 
 //! Checking the method WaitForConnected.
 
-TEST_F(PVAccessClientVariableTests, WaitForConnected)
+TEST_F(PvAccessClientPVTests, WaitForConnected)
 {
   auto shared_context = CreateSharedContext();
   sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
@@ -118,7 +118,7 @@ TEST_F(PVAccessClientVariableTests, WaitForConnected)
 //! A server with a single variable is created before the client.
 //! Checks client connected/disconnected status.
 
-TEST_F(PVAccessClientVariableTests, DisconnectionOnServerStop)
+TEST_F(PvAccessClientPVTests, DisconnectionOnServerStop)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
@@ -139,7 +139,7 @@ TEST_F(PVAccessClientVariableTests, DisconnectionOnServerStop)
 //! A server with a single variable is created before the client, but started after the client was
 //! created. Checking that the client gets connected after the server start.
 
-TEST_F(PVAccessClientVariableTests, ConnectionOnServerStart)
+TEST_F(PvAccessClientPVTests, ConnectionOnServerStart)
 {
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
@@ -158,7 +158,7 @@ TEST_F(PVAccessClientVariableTests, ConnectionOnServerStart)
 //! A server with a single variable is created and started before the client.
 //! Check the client's initial value of the variable after the connection.
 
-TEST_F(PVAccessClientVariableTests, GetValueAfterConnection)
+TEST_F(PvAccessClientPVTests, GetValueAfterConnection)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
@@ -177,7 +177,7 @@ TEST_F(PVAccessClientVariableTests, GetValueAfterConnection)
 //! The client is constructed with callback provided.
 //! Check the callback value of the variable after the connection.
 
-TEST_F(PVAccessClientVariableTests, CallbackAfterConnection)
+TEST_F(PvAccessClientPVTests, CallbackAfterConnection)
 {
   MockListener listener;
 
@@ -203,7 +203,7 @@ TEST_F(PVAccessClientVariableTests, CallbackAfterConnection)
 //! The client gets the structure from the server, modifies one field, and sets the value back.
 //! Test check that the server value has changed.
 
-TEST_F(PVAccessClientVariableTests, SetFromClient)
+TEST_F(PvAccessClientPVTests, SetFromClient)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
@@ -234,7 +234,7 @@ TEST_F(PVAccessClientVariableTests, SetFromClient)
 //!
 //! This test often hangs and it is disabled for the moment. FIXME.
 
-TEST_F(PVAccessClientVariableTests, MultipleSetFromClient)
+TEST_F(PvAccessClientPVTests, MultipleSetFromClient)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
@@ -273,7 +273,7 @@ TEST_F(PVAccessClientVariableTests, MultipleSetFromClient)
 //! Server with variable and initial value created before two clients.
 //! One client set the value, second checks updated value.
 
-TEST_F(PVAccessClientVariableTests, TwoClients)
+TEST_F(PvAccessClientPVTests, TwoClients)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
@@ -314,7 +314,7 @@ TEST_F(PVAccessClientVariableTests, TwoClients)
 //! One client set the value, second checks updated value.
 //! Both clients are initialised via callbacks.
 
-TEST_F(PVAccessClientVariableTests, TwoClientsCallbacks)
+TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
 {
   MockListener listener1;
   MockListener listener2;
@@ -376,7 +376,7 @@ TEST_F(PVAccessClientVariableTests, TwoClientsCallbacks)
 //! Server with variable and initial value created before the client. Variable contains PVXS value
 //! with a struct with a single `value` field.
 
-TEST_F(PVAccessClientVariableTests, GetSetFromClientForScalarAwareCase)
+TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
 {
   auto pvxs_struct_scalar_value =
       ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("value")}).create();
