@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SPU_EPICS_PVXS_PV_ACCESS_CLIENT_VARIABLE_H_
-#define SPU_EPICS_PVXS_PV_ACCESS_CLIENT_VARIABLE_H_
+#ifndef SPU_EPICS_PVXS_PV_ACCESS_CLIENT_PV_H_
+#define SPU_EPICS_PVXS_PV_ACCESS_CLIENT_PV_H_
 
 #include <sup/epics/dto_types_fwd.h>
 
@@ -37,7 +37,7 @@ namespace epics
 //! into a pvxs::Value container (specified on a server side). The design is based
 //! on a pimpl idiom to hide implementation details.
 
-class PVAccessClientVariable
+class PvAccessClientPV
 {
 public:
   using context_t = std::weak_ptr<pvxs::client::Context>;
@@ -47,14 +47,14 @@ public:
   //! @param variable_name EPICS channel name.
   //! @param context A weak pointer to shared PVXS client's context.
   //! @param callback A callback to report changed variable.
-  explicit PVAccessClientVariable(const std::string& variable_name, context_t context,
+  explicit PvAccessClientPV(const std::string& variable_name, context_t context,
                                   callback_t callback = {});
-  ~PVAccessClientVariable();
+  ~PvAccessClientPV();
 
-  PVAccessClientVariable(const PVAccessClientVariable&) = delete;
-  PVAccessClientVariable& operator=(const PVAccessClientVariable&) = delete;
-  PVAccessClientVariable(PVAccessClientVariable&&) = delete;
-  PVAccessClientVariable& operator=(PVAccessClientVariable&&) = delete;
+  PvAccessClientPV(const PvAccessClientPV&) = delete;
+  PvAccessClientPV& operator=(const PvAccessClientPV&) = delete;
+  PvAccessClientPV(PvAccessClientPV&&) = delete;
+  PvAccessClientPV& operator=(PvAccessClientPV&&) = delete;
 
   std::string GetVariableName() const;
 
@@ -82,4 +82,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SPU_EPICS_PVXS_PV_ACCESS_CLIENT_VARIABLE_H_
+#endif  // SPU_EPICS_PVXS_PV_ACCESS_CLIENT_PV_H_

@@ -21,7 +21,7 @@
 
 #include <pvxs/client.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/pvxs/pv_access_client_variable.h>
+#include <sup/epics/pv_access_client_pv.h>
 
 #include <algorithm>
 #include <map>
@@ -40,7 +40,7 @@ struct PVAccessClient::PVAccessClientImpl
 {
   context_t m_context;
   callback_t m_callback;
-  std::map<std::string, std::unique_ptr<PVAccessClientVariable>> m_variables;
+  std::map<std::string, std::unique_ptr<PvAccessClientPV>> m_variables;
 
   explicit PVAccessClientImpl(context_t context, callback_t callback)
       : m_context(std::move(context)), m_callback(std::move(callback))
@@ -56,15 +56,15 @@ struct PVAccessClient::PVAccessClientImpl
       throw std::runtime_error("Error in PVAccessClient: existing variable name '" + name + "'.");
     }
 
-    PVAccessClientVariable::callback_t variable_callback;
+    PvAccessClientPV::callback_t variable_callback;
     if (m_callback)
     {
       variable_callback = [this, name](const sup::dto::AnyValue& any_value)
       { OnVariableChanged(name, any_value); };
     }
 
-    std::unique_ptr<PVAccessClientVariable> variable(
-        new PVAccessClientVariable(name, m_context, variable_callback));
+    std::unique_ptr<PvAccessClientPV> variable(
+        new PvAccessClientPV(name, m_context, variable_callback));
     m_variables.emplace(name, std::move(variable));
   }
 

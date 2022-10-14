@@ -72,7 +72,7 @@ public:
                    .addPV(kStringChannelName, m_shared_string_pv);
   }
 
-  //! Create PVXS context intended for sharing among multiple PVAccessClientVariable variables.
+  //! Create PVXS context intended for sharing among multiple PvAccessClientPV variables.
   shared_context_t CreateSharedContext()
   {
     return std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());

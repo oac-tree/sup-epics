@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxs/pv_access_client_variable.h"
+#include "sup/epics/pv_access_client_pv.h"
 
 #include <pvxs/client.h>
 #include <sup/dto/anyvalue.h>
@@ -40,7 +40,7 @@ namespace epics
 // PVAccessClientVariableImpl
 // ----------------------------------------------------------------------------
 
-struct PVAccessClientVariable::PVAccessClientVariableImpl
+struct PvAccessClientPV::PVAccessClientVariableImpl
 {
   using subscription_t = pvxs::client::Subscription;
   std::string m_variable_name;
@@ -72,7 +72,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     }
     else
     {
-      throw std::runtime_error("Error in PVAccessClientVariable: context has expired.");
+      throw std::runtime_error("Error in PvAccessClientPV: context has expired.");
     }
   }
 
@@ -162,7 +162,7 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
     }
     else
     {
-      throw std::runtime_error("Error in PVAccessClientVariable: context has expired.");
+      throw std::runtime_error("Error in PvAccessClientPV: context has expired.");
     }
 
     return true;
@@ -170,42 +170,42 @@ struct PVAccessClientVariable::PVAccessClientVariableImpl
 };
 
 // ----------------------------------------------------------------------------
-// PVAccessClientVariable
+// PvAccessClientPV
 // ----------------------------------------------------------------------------
 
-PVAccessClientVariable::PVAccessClientVariable(const std::string& variable_name, context_t context,
+PvAccessClientPV::PvAccessClientPV(const std::string& variable_name, context_t context,
                                                callback_t callback)
     : p_impl(new PVAccessClientVariableImpl(variable_name, context, callback))
 {
   p_impl->InitSubscription();
 }
 
-PVAccessClientVariable::~PVAccessClientVariable()
+PvAccessClientPV::~PvAccessClientPV()
 {
   delete p_impl;
 }
 
-std::string PVAccessClientVariable::GetVariableName() const
+std::string PvAccessClientPV::GetVariableName() const
 {
   return p_impl->m_variable_name;
 }
 
-bool PVAccessClientVariable::IsConnected() const
+bool PvAccessClientPV::IsConnected() const
 {
   return p_impl->IsConnected();
 }
 
-sup::dto::AnyValue PVAccessClientVariable::GetValue() const
+sup::dto::AnyValue PvAccessClientPV::GetValue() const
 {
   return p_impl->GetAnyValue();
 }
 
-bool PVAccessClientVariable::SetValue(const sup::dto::AnyValue& value)
+bool PvAccessClientPV::SetValue(const sup::dto::AnyValue& value)
 {
   return p_impl->SetAnyValue(value);
 }
 
-bool PVAccessClientVariable::WaitForConnected(double timeout_sec) const
+bool PvAccessClientPV::WaitForConnected(double timeout_sec) const
 {
   const size_t msec_in_sec = 1000;
   const std::chrono::milliseconds timeout_precision_msec(10);

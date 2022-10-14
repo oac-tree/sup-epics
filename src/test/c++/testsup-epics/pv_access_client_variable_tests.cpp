@@ -28,7 +28,7 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
-#include <sup/epics/pvxs/pv_access_client_variable.h>
+#include <sup/epics/pv_access_client_pv.h>
 
 #include <memory>
 #include <thread>
@@ -57,7 +57,7 @@ public:
     m_pvxs_value["alarm.status"] = kInitialStatus;
   }
 
-  //! Create PVXS context intended for sharing among multiple PVAccessClientVariable variables.
+  //! Create PVXS context intended for sharing among multiple PvAccessClientPV variables.
   shared_context_t CreateSharedContext()
   {
     return std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
@@ -68,14 +68,14 @@ public:
   pvxs::server::Server m_server;
 };
 
-//! Initial state of PVAccessClientVariable when no server exists.
+//! Initial state of PvAccessClientPV when no server exists.
 
 TEST_F(PVAccessClientVariableTests, InitialStateWhenNoServer)
 {
   auto shared_context = CreateSharedContext();
 
   const std::string expected_name("NON_EXISTING:INT");
-  sup::epics::PVAccessClientVariable variable(expected_name, shared_context);
+  sup::epics::PvAccessClientPV variable(expected_name, shared_context);
 
   EXPECT_EQ(variable.GetVariableName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());
@@ -89,7 +89,7 @@ TEST_F(PVAccessClientVariableTests, InitialStateWhenNoServer)
 TEST_F(PVAccessClientVariableTests, SetValueWhenUnconnected)
 {
   auto shared_context = CreateSharedContext();
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
 
   // seting the value
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
@@ -105,7 +105,7 @@ TEST_F(PVAccessClientVariableTests, SetValueWhenUnconnected)
 TEST_F(PVAccessClientVariableTests, WaitForConnected)
 {
   auto shared_context = CreateSharedContext();
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
 
   // Server is not started, waiting will fail.
   EXPECT_FALSE(variable.WaitForConnected(0.01));
@@ -124,7 +124,7 @@ TEST_F(PVAccessClientVariableTests, DisconnectionOnServerStop)
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
@@ -144,7 +144,7 @@ TEST_F(PVAccessClientVariableTests, ConnectionOnServerStart)
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
   EXPECT_FALSE(variable.IsConnected());
 
   // starting the server
@@ -164,7 +164,7 @@ TEST_F(PVAccessClientVariableTests, GetValueAfterConnection)
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
@@ -189,7 +189,7 @@ TEST_F(PVAccessClientVariableTests, CallbackAfterConnection)
   const auto expected_any_value = sup::epics::BuildAnyValue(m_pvxs_value);
   EXPECT_CALL(listener, OnValueChanged(expected_any_value)).Times(1);
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context, listener.GetCallBack());
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context, listener.GetCallBack());
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
@@ -209,7 +209,7 @@ TEST_F(PVAccessClientVariableTests, SetFromClient)
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
@@ -240,7 +240,7 @@ TEST_F(PVAccessClientVariableTests, MultipleSetFromClient)
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
@@ -279,8 +279,8 @@ TEST_F(PVAccessClientVariableTests, TwoClients)
   m_shared_pv.open(m_pvxs_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable1(kChannelName, shared_context);
-  sup::epics::PVAccessClientVariable variable2(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable1(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable2(kChannelName, shared_context);
 
   std::this_thread::sleep_for(msec(20));
 
@@ -327,9 +327,9 @@ TEST_F(PVAccessClientVariableTests, TwoClientsCallbacks)
   EXPECT_CALL(listener1, OnValueChanged(_)).Times(1);
   EXPECT_CALL(listener2, OnValueChanged(_)).Times(1);
 
-  sup::epics::PVAccessClientVariable variable1(kChannelName, shared_context,
+  sup::epics::PvAccessClientPV variable1(kChannelName, shared_context,
                                                listener1.GetCallBack());
-  sup::epics::PVAccessClientVariable variable2(kChannelName, shared_context,
+  sup::epics::PvAccessClientPV variable2(kChannelName, shared_context,
                                                listener2.GetCallBack());
 
   std::this_thread::sleep_for(msec(20));
@@ -386,7 +386,7 @@ TEST_F(PVAccessClientVariableTests, GetSetFromClientForScalarAwareCase)
   m_shared_pv.open(pvxs_struct_scalar_value);
   auto shared_context = CreateSharedContext();
 
-  sup::epics::PVAccessClientVariable variable(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV variable(kChannelName, shared_context);
   std::this_thread::sleep_for(msec(20));
 
   EXPECT_TRUE(variable.IsConnected());
