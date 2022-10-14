@@ -36,19 +36,19 @@ namespace epics
 //! construction. Scalar AnyValues are converted to structs containing a single `value` field. This
 //! is because PVXS shared variables can be initialized only with structs.
 
-class PVAccessServerVariable
+class PvAccessServerPV
 {
 public:
   using callback_t = std::function<void(const sup::dto::AnyValue&)>;
 
-  PVAccessServerVariable(const std::string& variable_name, const sup::dto::AnyValue& any_value,
+  PvAccessServerPV(const std::string& variable_name, const sup::dto::AnyValue& any_value,
                          callback_t callback);
-  ~PVAccessServerVariable();
+  ~PvAccessServerPV();
 
-  PVAccessServerVariable(const PVAccessServerVariable&) = delete;
-  PVAccessServerVariable& operator=(const PVAccessServerVariable&) = delete;
-  PVAccessServerVariable(PVAccessServerVariable&&) = delete;
-  PVAccessServerVariable& operator=(PVAccessServerVariable&&) = delete;
+  PvAccessServerPV(const PvAccessServerPV&) = delete;
+  PvAccessServerPV& operator=(const PvAccessServerPV&) = delete;
+  PvAccessServerPV(PvAccessServerPV&&) = delete;
+  PvAccessServerPV& operator=(PvAccessServerPV&&) = delete;
 
   std::string GetVariableName() const;
 

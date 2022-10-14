@@ -24,7 +24,7 @@
 #include <pvxs/server.h>
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/pvxs/pv_access_server_variable.h>
+#include <sup/epics/pv_access_server_pv.h>
 #include <sup/epics/pv_access_context_utils.h>
 
 #include <thread>
@@ -36,7 +36,7 @@ class PVAccessServerVariableTests : public ::testing::Test
 {
 };
 
-//! Check initial state of PVAccessServerVariable.
+//! Check initial state of PvAccessServerPV.
 //! There is no PVXS server running.
 
 TEST_F(PVAccessServerVariableTests, InitialState)
@@ -48,7 +48,7 @@ TEST_F(PVAccessServerVariableTests, InitialState)
 
   {  // variable is based on scalar AnyValue
     sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-    sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+    sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
     EXPECT_EQ(variable.GetVariableName(), variable_name);
     EXPECT_EQ(variable.GetValue(), any_value);
   }
@@ -57,7 +57,7 @@ TEST_F(PVAccessServerVariableTests, InitialState)
     sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                     {"bool", {sup::dto::BooleanType, true}}};
 
-    sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+    sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
     EXPECT_EQ(variable.GetVariableName(), variable_name);
     EXPECT_EQ(variable.GetValue(), any_value);
   }
@@ -71,7 +71,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSet)
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   // setting new value and checking result
@@ -94,7 +94,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServer)
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
@@ -121,7 +121,7 @@ TEST_F(PVAccessServerVariableTests, GetAndSetForIsolatedServerWithCallbacks)
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, listener.GetCallBack());
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack());
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
@@ -149,7 +149,7 @@ TEST_F(PVAccessServerVariableTests, AddToServerAfterServerStart)
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
   std::this_thread::sleep_for(msec(20));
@@ -169,7 +169,7 @@ TEST_F(PVAccessServerVariableTests, AddToServerBeforeServerStart)
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
 
@@ -192,7 +192,7 @@ TEST_F(PVAccessServerVariableTests, GetAfterPvPut)
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, {});
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
 
@@ -227,7 +227,7 @@ TEST_F(PVAccessServerVariableTests, GetAfterPvPutWithCallback)
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PVAccessServerVariable variable(variable_name, any_value, listener.GetCallBack());
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack());
 
   variable.AddToServer(*server);
 

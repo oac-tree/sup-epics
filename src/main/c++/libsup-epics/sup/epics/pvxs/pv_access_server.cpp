@@ -20,7 +20,7 @@
 #include "sup/epics/pv_access_server.h"
 
 #include <pvxs/server.h>
-#include <sup/epics/pvxs/pv_access_server_variable.h>
+#include <sup/epics/pv_access_server_pv.h>
 
 #include <map>
 #include <stdexcept>
@@ -39,7 +39,7 @@ struct PVAccessServer::PVAccessServerImpl
 {
   context_t m_context;
   callback_t m_callback;
-  std::map<std::string, std::unique_ptr<PVAccessServerVariable>> m_variables;
+  std::map<std::string, std::unique_ptr<PvAccessServerPV>> m_variables;
 
   PVAccessServerImpl(context_t context, callback_t callback)
       : m_context(std::move(context)), m_callback(std::move(callback))
@@ -55,15 +55,15 @@ struct PVAccessServer::PVAccessServerImpl
       throw std::runtime_error("Error in PVAccessServer: existing variable name '" + name + "'.");
     }
 
-    PVAccessServerVariable::callback_t variable_callback;
+    PvAccessServerPV::callback_t variable_callback;
     if (m_callback)
     {
       variable_callback = [this, name](const sup::dto::AnyValue& any_value)
       { OnVariableChanged(name, any_value); };
     }
 
-    std::unique_ptr<PVAccessServerVariable> variable(
-        new PVAccessServerVariable(name, any_value, variable_callback));
+    std::unique_ptr<PvAccessServerPV> variable(
+        new PvAccessServerPV(name, any_value, variable_callback));
     m_variables.emplace(name, std::move(variable));
   }
 

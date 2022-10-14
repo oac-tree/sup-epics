@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pvxs/pv_access_server_variable.h"
+#include "sup/epics/pv_access_server_pv.h"
 
 #include <pvxs/data.h>
 #include <pvxs/server.h>
@@ -38,7 +38,7 @@ namespace epics
 // PVAccessServerVariableImpl
 // ----------------------------------------------------------------------------
 
-struct PVAccessServerVariable::PVAccessServerVariableImpl
+struct PvAccessServerPV::PVAccessServerVariableImpl
 {
   const std::string m_variable_name;
   sup::dto::AnyValue m_any_value;  //!< The main value of this variable.
@@ -126,37 +126,37 @@ struct PVAccessServerVariable::PVAccessServerVariableImpl
 };
 
 // ----------------------------------------------------------------------------
-// PVAccessServerVariable
+// PVAccessServerPV
 // ----------------------------------------------------------------------------
 
-PVAccessServerVariable::PVAccessServerVariable(const std::string& variable_name,
+PvAccessServerPV::PvAccessServerPV(const std::string& variable_name,
                                                const sup::dto::AnyValue& any_value,
                                                callback_t callback)
     : p_impl(new PVAccessServerVariableImpl(variable_name, any_value, std::move(callback)))
 {
 }
 
-std::string PVAccessServerVariable::GetVariableName() const
+std::string PvAccessServerPV::GetVariableName() const
 {
   return p_impl->m_variable_name;
 }
 
-dto::AnyValue PVAccessServerVariable::GetValue() const
+dto::AnyValue PvAccessServerPV::GetValue() const
 {
   return p_impl->GetAnyValue();
 }
 
-bool PVAccessServerVariable::SetValue(const dto::AnyValue& value)
+bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
 {
   return p_impl->SetAnyValue(value);
 }
 
-void PVAccessServerVariable::AddToServer(pvxs::server::Server& server)
+void PvAccessServerPV::AddToServer(pvxs::server::Server& server)
 {
   p_impl->AddToServer(server);
 }
 
-PVAccessServerVariable::~PVAccessServerVariable()
+PvAccessServerPV::~PvAccessServerPV()
 {
   delete p_impl;
 }
