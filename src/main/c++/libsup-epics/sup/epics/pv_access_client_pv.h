@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SPU_EPICS_PVXS_PV_ACCESS_CLIENT_PV_H_
-#define SPU_EPICS_PVXS_PV_ACCESS_CLIENT_PV_H_
+#ifndef SUP_EPICS_PV_ACCESS_CLIENT_PV_H_
+#define SUP_EPICS_PV_ACCESS_CLIENT_PV_H_
 
 #include <sup/epics/dto_types_fwd.h>
 
@@ -82,4 +82,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SPU_EPICS_PVXS_PV_ACCESS_CLIENT_PV_H_
+#endif  // SUP_EPICS_PV_ACCESS_CLIENT_PV_H_
