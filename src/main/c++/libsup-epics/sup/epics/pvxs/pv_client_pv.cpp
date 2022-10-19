@@ -21,6 +21,9 @@
 
 #include <pvxs/client.h>
 
+#include <chrono>
+#include <cmath>
+
 namespace sup
 {
 namespace epics
@@ -34,16 +37,19 @@ PvClientPV::ExtendedValue::ExtendedValue()
 PvClientPV::PvClientPV(const std::string& channel, const sup::dto::AnyType& anytype,
                        VariableChangedCallback cb)
     : m_channel_name{channel}
+    , m_anytype{anytype}
     , m_cache{}
+    , m_mon_mtx{}
+    , m_cv{}
     , m_changed_cb{std::move(cb)}
 {
-  m_cache.value = sup::dto::AnyValue(anytype);
 }
 
 PvClientPV::~PvClientPV() = default;
 
 bool PvClientPV::IsConnected() const
 {
+  std::lock_guard<std::mutex> lk(m_mon_mtx);
   return m_cache.connected;
 }
 
@@ -54,11 +60,17 @@ std::string PvClientPV::GetChannelName() const
 
 sup::dto::AnyValue PvClientPV::GetValue() const
 {
+  std::lock_guard<std::mutex> lk(m_mon_mtx);
+  if (!m_cache.connected)
+  {
+    return {};
+  }
   return m_cache.value;
 }
 
 PvClientPV::ExtendedValue PvClientPV::GetExtendedValue() const
 {
+  std::lock_guard<std::mutex> lk(m_mon_mtx);
   return m_cache;
 }
 
@@ -70,14 +82,24 @@ bool PvClientPV::SetValue(const sup::dto::AnyValue& value)
 
 bool PvClientPV::WaitForConnected(double timeout_sec) const
 {
-  (void)timeout_sec;
-  return true;
+  auto end_time = std::chrono::system_clock::now() +
+                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  std::unique_lock<std::mutex> lk(m_mon_mtx);
+  auto pred = [this]{
+    return m_cache.connected;
+  };
+  return m_cv.wait_until(lk, end_time, pred);
 }
 
 bool PvClientPV::WaitForValidValue(double timeout_sec) const
 {
-  (void)timeout_sec;
-  return true;
+  auto end_time = std::chrono::system_clock::now() +
+                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  std::unique_lock<std::mutex> lk(m_mon_mtx);
+  auto pred = [this]{
+    return m_cache.connected && !sup::dto::IsEmptyValue(m_cache.value);
+  };
+  return m_cv.wait_until(lk, end_time, pred);
 }
 
 }  // namespace epics

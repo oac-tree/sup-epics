@@ -22,8 +22,9 @@
 
 #include <sup/dto/anyvalue.h>
 
+#include <condition_variable>
 #include <functional>
-#include <memory>
+#include <mutex>
 #include <string>
 
 namespace sup
@@ -57,7 +58,7 @@ public:
    *
    * @return True if the variable was connected within the timeout period.
    */
-  PvClientPV(const std::string& channel, const sup::dto::AnyType& type,
+  PvClientPV(const std::string& channel, const sup::dto::AnyType& anytype,
              VariableChangedCallback cb = {});
   ~PvClientPV();
 
@@ -124,7 +125,10 @@ public:
 
 private:
   const std::string m_channel_name;
+  sup::dto::AnyType m_anytype;
   ExtendedValue m_cache;
+  mutable std::mutex m_mon_mtx;
+  mutable std::condition_variable m_cv;
   VariableChangedCallback m_changed_cb;
 };
 
