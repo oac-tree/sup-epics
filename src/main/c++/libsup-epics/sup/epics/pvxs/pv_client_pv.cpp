@@ -16,13 +16,14 @@
  * refer to the file ITER-LICENSE.TXT located in the top level directory
  * of the distribution package.
  *****************************************************************************/
+#include <sup/epics/pv_client_pv.h>
 
-#include "sup/epics/pv_client_pv.h"
+#include "pv_access_client_pv_impl.h"
 
-#include <pvxs/client.h>
-
-#include <chrono>
-#include <cmath>
+namespace
+{
+std::shared_ptr<pvxs::client::Context> GetSharedClientContext();
+}  // unnamed namespace
 
 namespace sup
 {
@@ -34,74 +35,62 @@ PvClientPV::ExtendedValue::ExtendedValue()
   , value{}
 {}
 
-PvClientPV::PvClientPV(const std::string& channel, const sup::dto::AnyType& anytype,
-                       VariableChangedCallback cb)
-    : m_channel_name{channel}
-    , m_anytype{anytype}
-    , m_cache{}
-    , m_mon_mtx{}
-    , m_cv{}
-    , m_changed_cb{std::move(cb)}
-{
-}
+PvClientPV::PvClientPV(const std::string& channel, VariableChangedCallback cb)
+  : m_impl{new PvAccessClientPVImpl(channel, GetSharedClientContext(), cb)}
+{}
+
+PvClientPV::PvClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl)
+  : m_impl{std::move(impl)}
+{}
 
 PvClientPV::~PvClientPV() = default;
 
 bool PvClientPV::IsConnected() const
 {
-  std::lock_guard<std::mutex> lk(m_mon_mtx);
-  return m_cache.connected;
+  return m_impl->IsConnected();
 }
 
 std::string PvClientPV::GetChannelName() const
 {
-  return m_channel_name;
+  return m_impl->GetChannelName();
 }
 
 sup::dto::AnyValue PvClientPV::GetValue() const
 {
-  std::lock_guard<std::mutex> lk(m_mon_mtx);
-  if (!m_cache.connected)
-  {
-    return {};
-  }
-  return m_cache.value;
+  return m_impl->GetValue();
 }
 
 PvClientPV::ExtendedValue PvClientPV::GetExtendedValue() const
 {
-  std::lock_guard<std::mutex> lk(m_mon_mtx);
-  return m_cache;
+  return m_impl->GetExtendedValue();
 }
 
 bool PvClientPV::SetValue(const sup::dto::AnyValue& value)
 {
-  (void)value;
-  return true;
+  return m_impl->SetValue(value);
 }
 
 bool PvClientPV::WaitForConnected(double timeout_sec) const
 {
-  auto end_time = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
-  std::unique_lock<std::mutex> lk(m_mon_mtx);
-  auto pred = [this]{
-    return m_cache.connected;
-  };
-  return m_cv.wait_until(lk, end_time, pred);
+  return m_impl->WaitForConnected(timeout_sec);
 }
 
 bool PvClientPV::WaitForValidValue(double timeout_sec) const
 {
-  auto end_time = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
-  std::unique_lock<std::mutex> lk(m_mon_mtx);
-  auto pred = [this]{
-    return m_cache.connected && !sup::dto::IsEmptyValue(m_cache.value);
-  };
-  return m_cv.wait_until(lk, end_time, pred);
+  return m_impl->WaitForValidValue(timeout_sec);
 }
 
 }  // namespace epics
 
 }  // namespace sup
+
+namespace
+{
+std::shared_ptr<pvxs::client::Context> GetSharedClientContext()
+{
+  static std::shared_ptr<pvxs::client::Context> context =
+    std::make_shared<pvxs::client::Context>(pvxs::client::Context::fromEnv());
+  return context;
+}
+
+}  // unnamed namespace

@@ -17,20 +17,22 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PV_CLIENT_PV_H_
-#define SUP_EPICS_PV_CLIENT_PV_H_
+#ifndef SUP_EPICS_PV_CLIENT_PV_IMPL_H_
+#define SUP_EPICS_PV_CLIENT_PV_IMPL_H_
 
-#include <sup/dto/anyvalue.h>
+#include <sup/epics/pv_client_pv.h>
 
-#include <functional>
+#include <pvxs/client.h>
+
+#include <condition_variable>
 #include <memory>
+#include <mutex>
+#include <string>
 
 namespace sup
 {
 namespace epics
 {
-class PvAccessClientPVImpl;
-
 //! Represents a client to access/update a single pvAccess variable with value cache
 //! and asyncronious update.
 //!
@@ -38,38 +40,26 @@ class PvAccessClientPVImpl;
 //! into a pvxs::Value container (specified on a server side). The design is based
 //! on a pimpl idiom to hide implementation details.
 
-class PvClientPV
+class PvAccessClientPVImpl
 {
 public:
-  struct ExtendedValue
-  {
-    ExtendedValue();
-    bool connected;
-    sup::dto::AnyValue value;
-  };
-  using VariableChangedCallback = std::function<void(const ExtendedValue&)>;
-
   /**
    * @brief Constructor.
    *
    * @param channel EPICS channel name.
+   * @param type Type to use for the connected channel.
    * @param cb Callback function to call when the variable's value or status changed.
-   */
-  PvClientPV(const std::string& channel, VariableChangedCallback cb = {});
-
-  /**
-   * @brief Constructor.
    *
-   * @param impl Injected implementation.
+   * @return True if the variable was connected within the timeout period.
    */
-  PvClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl);
+  PvAccessClientPVImpl(const std::string& channel, std::shared_ptr<pvxs::client::Context> context,
+                       PvClientPV::VariableChangedCallback cb = {});
+  ~PvAccessClientPVImpl();
 
-  ~PvClientPV();
-
-  PvClientPV(const PvClientPV&) = delete;
-  PvClientPV& operator=(const PvClientPV&) = delete;
-  PvClientPV(PvClientPV&&) = delete;
-  PvClientPV& operator=(PvClientPV&&) = delete;
+  PvAccessClientPVImpl(const PvAccessClientPVImpl&) = delete;
+  PvAccessClientPVImpl& operator=(const PvAccessClientPVImpl&) = delete;
+  PvAccessClientPVImpl(PvAccessClientPVImpl&&) = delete;
+  PvAccessClientPVImpl& operator=(PvAccessClientPVImpl&&) = delete;
 
     /**
    * @brief Check if channel is connected.
@@ -97,7 +87,7 @@ public:
    *
    * @return Structure with value and different status fields (e.g. connected, status, etc.)
    */
-  ExtendedValue GetExtendedValue() const;
+  PvClientPV::ExtendedValue GetExtendedValue() const;
 
     /**
    * @brief Write the value to the EPICS PvAccess server.
@@ -128,11 +118,19 @@ public:
   bool WaitForValidValue(double timeout_sec) const;
 
 private:
-  std::unique_ptr<PvAccessClientPVImpl> m_impl;
+  void ProcessMonitor(pvxs::client::Subscription& sub);
+  const std::string m_channel_name;
+  std::shared_ptr<pvxs::client::Context> m_context;
+  PvClientPV::VariableChangedCallback m_changed_cb;
+  PvClientPV::ExtendedValue m_cache;
+  mutable std::mutex m_mon_mtx;
+  mutable std::condition_variable m_cv;
+  std::shared_ptr<pvxs::client::Subscription> m_subscription;
+  double m_max_put_timeout;
 };
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_PV_CLIENT_PV_H_
+#endif  // SUP_EPICS_PV_CLIENT_PV_IMPL_H_
