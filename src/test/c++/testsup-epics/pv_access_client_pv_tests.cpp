@@ -334,8 +334,8 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   any_value1["value"] = 45;
 
   // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnValueChanged(_)).Times(1);
-  EXPECT_CALL(listener2, OnValueChanged(_)).Times(1);
+  EXPECT_CALL(listener1, OnValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener2, OnValueChanged(_)).Times(::testing::AtLeast(1));
 
   EXPECT_TRUE(variable1.SetValue(any_value1));
 

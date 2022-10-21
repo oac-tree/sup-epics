@@ -17,122 +17,61 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pv_access_client.h"
-
-#include <pvxs/client.h>
-#include <sup/dto/anyvalue.h>
-#include <sup/epics/pv_access_client_pv_old.h>
-
-#include <algorithm>
-#include <map>
-#include <stdexcept>
+#include "pv_access_client_impl.h"
+#include "pv_access_utils.h"
 
 namespace sup
 {
 namespace epics
 {
 
-// ----------------------------------------------------------------------------
-// PVAccessClientImpl
-// ----------------------------------------------------------------------------
+PVAccessClient::PVAccessClient(VariableChangedCallback cb)
+  : m_impl{new PvAccessClientImpl(utils::GetSharedClientContext(), cb)}
+{}
 
-struct PVAccessClient::PVAccessClientImpl
+PVAccessClient::PVAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl)
+  : m_impl{std::move(impl)}
+{}
+
+PVAccessClient::~PVAccessClient() = default;
+
+void PVAccessClient::AddVariable(const std::string& channel)
 {
-  context_t m_context;
-  callback_t m_callback;
-  std::map<std::string, std::unique_ptr<PvAccessClientPV_old>> m_variables;
-
-  explicit PVAccessClientImpl(context_t context, callback_t callback)
-      : m_context(std::move(context)), m_callback(std::move(callback))
-  {
-  }
-
-  //! Adds channel with given name to the map of channels.
-  void AddVariable(const std::string& name)
-  {
-    auto iter = m_variables.find(name);
-    if (iter != m_variables.end())
-    {
-      throw std::runtime_error("Error in PVAccessClient: existing variable name '" + name + "'.");
-    }
-
-    PvAccessClientPV_old::callback_t variable_callback;
-    if (m_callback)
-    {
-      variable_callback = [this, name](const sup::dto::AnyValue& any_value)
-      { OnVariableChanged(name, any_value); };
-    }
-
-    std::unique_ptr<PvAccessClientPV_old> variable(
-        new PvAccessClientPV_old(name, m_context, variable_callback));
-    m_variables.emplace(name, std::move(variable));
-  }
-
-  std::vector<std::string> GetVariableNames() const
-  {
-    std::vector<std::string> result;
-    std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
-                   [](decltype(m_variables)::value_type const& pair) { return pair.first; });
-    return result;
-  }
-
-  void OnVariableChanged(const std::string& name, const sup::dto::AnyValue& any_value)
-  {
-    if (m_callback)
-    {
-      m_callback(name, any_value);
-    }
-  }
-};
-
-// ----------------------------------------------------------------------------
-// PVAccessClient
-// ----------------------------------------------------------------------------
-
-PVAccessClient::PVAccessClient(context_t context, callback_t callback)
-    : p_impl(new PVAccessClientImpl(std::move(context), std::move(callback)))
-{
-}
-
-PVAccessClient::~PVAccessClient()
-{
-  delete p_impl;
-}
-
-void PVAccessClient::AddVariable(const std::string& name)
-{
-  p_impl->AddVariable(name);
+  m_impl->AddVariable(channel);
 }
 
 std::vector<std::string> PVAccessClient::GetVariableNames() const
 {
-  return p_impl->GetVariableNames();
+  return m_impl->GetVariableNames();
 }
 
-bool PVAccessClient::IsConnected(const std::string& name) const
+bool PVAccessClient::IsConnected(const std::string& channel) const
 {
-  auto iter = p_impl->m_variables.find(name);
-  return iter == p_impl->m_variables.end() ? false : iter->second->IsConnected();
+  auto& var_map = m_impl->GetVariables();
+  auto it = var_map.find(channel);
+  return it == var_map.end() ? false : it->second->IsConnected();
 }
 
 dto::AnyValue PVAccessClient::GetValue(const std::string& name) const
 {
-  auto iter = p_impl->m_variables.find(name);
-  if (iter == p_impl->m_variables.end())
+  auto& var_map = m_impl->GetVariables();
+  auto it = var_map.find(name);
+  if (it == var_map.end())
   {
     throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
   }
-  return iter->second->GetValue();
+  return it->second->GetValue();
 }
 
 bool PVAccessClient::SetValue(const std::string& name, const dto::AnyValue& value)
 {
-  auto iter = p_impl->m_variables.find(name);
-  if (iter == p_impl->m_variables.end())
+  auto& var_map = m_impl->GetVariables();
+  auto it = var_map.find(name);
+  if (it == var_map.end())
   {
     throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
   }
-  return iter->second->SetValue(value);
+  return it->second->SetValue(value);
 }
 
 }  // namespace epics

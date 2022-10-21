@@ -4,7 +4,7 @@
  *
  * Description   : Library of SUP components for EPICS network protocol
  *
- * Author        : Gennady Pospelov (IO)
+ * Author        : Walter Van Herck (IO)
  *
  * Copyright (c) : 2010-2022 ITER Organization,
  *                 CS 90 046

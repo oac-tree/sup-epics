@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_PV_ACCESS_CLIENT_H_
 #define SUP_EPICS_PV_ACCESS_CLIENT_H_
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/pv_client_pv.h>
 
 #include <functional>
 #include <memory>
@@ -31,19 +31,21 @@ namespace sup
 {
 namespace epics
 {
+class PvAccessClientImpl;
 
 //! Represents a client to access/update multiple pvAccess variables.
 
 class PVAccessClient
 {
 public:
-  using context_t = std::shared_ptr<pvxs::client::Context>;
-  using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
+  using VariableChangedCallback =
+    std::function<void(const std::string&, const PvClientPV::ExtendedValue&)>;
 
   //! Constructor.
-  //! @param context Shared context for PVXS client.
-  //! @param callback A callback to report changed variable.
-  explicit PVAccessClient(context_t context, callback_t callback = {});
+  //! @param cb A callback to report changed variable.
+  explicit PVAccessClient(VariableChangedCallback cb = {});
+  explicit PVAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl);
+
   ~PVAccessClient();
 
   PVAccessClient(const PVAccessClient&) = delete;
@@ -52,32 +54,31 @@ public:
   PVAccessClient& operator=(PVAccessClient&&) = delete;
 
   //! Add variable with the given channel. Will throw if such channel already exists.
-  //! @param name EPICS channel name.
-  void AddVariable(const std::string& name);
+  //! @param channel EPICS channel name.
+  void AddVariable(const std::string& channel);
 
   //! Returns the names of all managed channels.
   //! @return List of all channel names.
   std::vector<std::string> GetVariableNames() const;
 
   //! Check if specific channel is connected.
-  //! @param name EPICS channel name.
+  //! @param channel EPICS channel name.
   //! @return True if channel is connected, false otherwise.
-  bool IsConnected(const std::string& name) const;
+  bool IsConnected(const std::string& channel) const;
 
   //! Get the value from a specific channel. Will throw if channel was not added yet.
-  //! @param name EPICS channel name.
+  //! @param channel EPICS channel name.
   //! @return Channel's value.
-  sup::dto::AnyValue GetValue(const std::string& name) const;
+  sup::dto::AnyValue GetValue(const std::string& channel) const;
 
   //! Propagate the value to a specific channel. Will throw if channel was not added yet.
-  //! @param name EPICS channel name.
+  //! @param channel EPICS channel name.
   //! @param value Value to be written to the channel.
   //! @return True if successful, false otherwise.
-  bool SetValue(const std::string& name, const sup::dto::AnyValue& value);
+  bool SetValue(const std::string& channel, const sup::dto::AnyValue& value);
 
 private:
-  struct PVAccessClientImpl;
-  PVAccessClientImpl* p_impl{nullptr};
+  std::unique_ptr<PvAccessClientImpl> m_impl;
 };
 
 }  // namespace epics

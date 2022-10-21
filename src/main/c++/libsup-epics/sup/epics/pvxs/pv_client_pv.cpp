@@ -19,11 +19,7 @@
 #include <sup/epics/pv_client_pv.h>
 
 #include "pv_access_client_pv_impl.h"
-
-namespace
-{
-std::shared_ptr<pvxs::client::Context> GetSharedClientContext();
-}  // unnamed namespace
+#include "pv_access_utils.h"
 
 namespace sup
 {
@@ -36,7 +32,7 @@ PvClientPV::ExtendedValue::ExtendedValue()
 {}
 
 PvClientPV::PvClientPV(const std::string& channel, VariableChangedCallback cb)
-  : m_impl{new PvAccessClientPVImpl(channel, GetSharedClientContext(), cb)}
+  : m_impl{new PvAccessClientPVImpl(channel, utils::GetSharedClientContext(), cb)}
 {}
 
 PvClientPV::PvClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl)
@@ -88,14 +84,3 @@ bool operator==(const PvClientPV::ExtendedValue& lhs, const PvClientPV::Extended
 }  // namespace epics
 
 }  // namespace sup
-
-namespace
-{
-std::shared_ptr<pvxs::client::Context> GetSharedClientContext()
-{
-  static std::shared_ptr<pvxs::client::Context> context =
-    std::make_shared<pvxs::client::Context>(pvxs::client::Context::fromEnv());
-  return context;
-}
-
-}  // unnamed namespace

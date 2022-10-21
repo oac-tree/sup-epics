@@ -4,7 +4,7 @@
  *
  * Description   : Library of SUP components for EPICS network protocol
  *
- * Author        : Gennady Pospelov (IO)
+ * Author        : Walter Van Herck (IO)
  *
  * Copyright (c) : 2010-2022 ITER Organization,
  *                 CS 90 046
@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PV_CLIENT_PV_IMPL_H_
-#define SUP_EPICS_PV_CLIENT_PV_IMPL_H_
+#ifndef SUP_EPICS_PV_ACCESS_CLIENT_PV_IMPL_H_
+#define SUP_EPICS_PV_ACCESS_CLIENT_PV_IMPL_H_
 
 #include <sup/epics/pv_client_pv.h>
 
@@ -133,4 +133,4 @@ private:
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_PV_CLIENT_PV_IMPL_H_
+#endif  // SUP_EPICS_PV_ACCESS_CLIENT_PV_IMPL_H_
