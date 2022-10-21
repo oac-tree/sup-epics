@@ -121,7 +121,7 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack());
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack_old());
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
@@ -130,7 +130,7 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
   // setting new value and checking the result
   sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
   // setting up callback expectations
-  EXPECT_CALL(listener, OnValueChanged(new_any_value)).Times(1);
+  EXPECT_CALL(listener, OnValueChanged_old(new_any_value)).Times(1);
 
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
@@ -227,7 +227,7 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack());
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack_old());
 
   variable.AddToServer(*server);
 
@@ -241,7 +241,7 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
 
   // setting up callback expectations
   sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
-  EXPECT_CALL(listener, OnValueChanged(expected_any_value)).Times(1);
+  EXPECT_CALL(listener, OnValueChanged_old(expected_any_value)).Times(1);
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");

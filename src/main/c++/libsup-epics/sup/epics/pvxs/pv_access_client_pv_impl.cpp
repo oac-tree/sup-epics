@@ -141,40 +141,40 @@ bool PvAccessClientPVImpl::WaitForValidValue(double timeout_sec) const
 
 void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
 {
-  PvClientPV::ExtendedValue result;
+  PvClientPV::ExtendedValue result = m_cache;
+  while (true)
   {
-    std::lock_guard<std::mutex> lk(m_mon_mtx);
-    while (true)
+    try
     {
-      try
+      auto update = sub.pop();
+      if (update)
       {
-        auto update = sub.pop();
-        if (update)
+        if (!sup::dto::TryConvert(result.value, sup::epics::BuildScalarAwareAnyValue(update)))
         {
-          if (!sup::dto::TryConvert(m_cache.value, sup::epics::BuildScalarAwareAnyValue(update)))
-          {
-            throw std::runtime_error("PvAccessClientPVImpl received incompatible value update.");
-          }
-        }
-        else
-        {
-          break;
+          throw std::runtime_error("PvAccessClientPVImpl received incompatible value update.");
         }
       }
-      catch (pvxs::client::Connected& ex)
+      else
       {
-        m_cache.connected = true;
-      }
-      catch (pvxs::client::Disconnect& ex)
-      {
-        m_cache.connected = false;
-      }
-      catch (std::exception& ex)
-      {
-        throw ex;
+        break;
       }
     }
-    result = m_cache;
+    catch (pvxs::client::Connected& ex)
+    {
+      result.connected = true;
+    }
+    catch (pvxs::client::Disconnect& ex)
+    {
+      result.connected = false;
+    }
+    catch (std::exception& ex)
+    {
+      throw ex;
+    }
+  }
+  {
+    std::lock_guard<std::mutex> lk(m_mon_mtx);
+    m_cache = result;
   }
   m_cv.notify_one();
   if (m_changed_cb)

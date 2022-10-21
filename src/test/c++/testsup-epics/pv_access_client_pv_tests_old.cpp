@@ -19,8 +19,6 @@
 
 #include "mock_utils.h"
 
-#include <sup/epics/pvxs/pv_access_client_pv_impl.h>
-
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
 #include <pvxs/data.h>
@@ -30,7 +28,7 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
-#include <sup/epics/pv_client_pv.h>
+#include <sup/epics/pv_access_client_pv_old.h>
 
 #include <memory>
 #include <thread>
@@ -43,16 +41,14 @@ namespace
 const int kInitialValue = 42;
 const int kInitialStatus = 1;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
-
-bool BusyWaitFor(double timeout_sec, std::function<bool()> predicate);
 }  // namespace
 
-class PvAccessClientPVTests : public ::testing::Test
+class PvAccessClientPVOldTests : public ::testing::Test
 {
 public:
   using shared_context_t = std::shared_ptr<pvxs::client::Context>;
 
-  PvAccessClientPVTests()
+  PvAccessClientPVOldTests()
       : m_pvxs_value(pvxs::nt::NTScalar{pvxs::TypeCode::Int32}.create())
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
       , m_server(pvxs::server::Config::isolated().build().addPV(kChannelName, m_shared_pv))
@@ -61,14 +57,10 @@ public:
     m_pvxs_value["alarm.status"] = kInitialStatus;
   }
 
-  std::unique_ptr<sup::epics::PvAccessClientPVImpl> CreateClientPVImpl(
-    const std::string& channel, sup::epics::PvClientPV::VariableChangedCallback cb = {})
+  //! Create PVXS context intended for sharing among multiple PvAccessClientPV variables.
+  shared_context_t CreateSharedContext()
   {
-    std::shared_ptr<pvxs::client::Context> context =
-      std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
-    std::unique_ptr<sup::epics::PvAccessClientPVImpl> result{
-      new sup::epics::PvAccessClientPVImpl(channel, context, cb)};
-    return std::move(result);
+    return std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
   }
 
   pvxs::Value m_pvxs_value;
@@ -78,12 +70,14 @@ public:
 
 //! Initial state of PvAccessClientPV when no server exists.
 
-TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
+TEST_F(PvAccessClientPVOldTests, InitialStateWhenNoServer)
 {
-  const std::string expected_name("NON_EXISTING:INT");
-  sup::epics::PvClientPV variable(CreateClientPVImpl(expected_name));
+  auto shared_context = CreateSharedContext();
 
-  EXPECT_EQ(variable.GetChannelName(), expected_name);
+  const std::string expected_name("NON_EXISTING:INT");
+  sup::epics::PvAccessClientPV_old variable(expected_name, shared_context);
+
+  EXPECT_EQ(variable.GetVariableName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());
 
   auto any_value = variable.GetValue();
@@ -92,9 +86,10 @@ TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 
 //! Sets the value through the unconnected client. The value of the cache should be changed.
 
-TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
+TEST_F(PvAccessClientPVOldTests, SetValueWhenUnconnected)
 {
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  auto shared_context = CreateSharedContext();
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
 
   // seting the value
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
@@ -107,64 +102,72 @@ TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 
 //! Checking the method WaitForConnected.
 
-TEST_F(PvAccessClientPVTests, WaitForConnected)
+TEST_F(PvAccessClientPVOldTests, WaitForConnected)
 {
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  auto shared_context = CreateSharedContext();
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
 
   // Server is not started, waiting will fail.
   EXPECT_FALSE(variable.WaitForConnected(0.01));
 
   // Server started, waiting will succeed.
   m_server.start();
-  EXPECT_TRUE(variable.WaitForConnected(1.0));
+  EXPECT_TRUE(variable.WaitForConnected(0.1));
 }
 
 //! A server with a single variable is created before the client.
 //! Checks client connected/disconnected status.
 
-TEST_F(PvAccessClientPVTests, DisconnectionOnServerStop)
+TEST_F(PvAccessClientPVOldTests, DisconnectionOnServerStop)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(variable.WaitForConnected(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 
   // stopping server
   m_server.stop();
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [&variable](){ return !variable.IsConnected(); }));
+  EXPECT_FALSE(variable.IsConnected());
 }
 
 //! A server with a single variable is created before the client, but started after the client was
 //! created. Checking that the client gets connected after the server start.
 
-TEST_F(PvAccessClientPVTests, ConnectionOnServerStart)
+TEST_F(PvAccessClientPVOldTests, ConnectionOnServerStart)
 {
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
   EXPECT_FALSE(variable.IsConnected());
 
   // starting the server
   m_server.start();
+  std::this_thread::sleep_for(msec(20));
 
   // checking that the variable is connected
-  EXPECT_TRUE(variable.WaitForConnected(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 }
 
 //! A server with a single variable is created and started before the client.
 //! Check the client's initial value of the variable after the connection.
 
-TEST_F(PvAccessClientPVTests, GetValueAfterConnection)
+TEST_F(PvAccessClientPVOldTests, GetValueAfterConnection)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(variable.WaitForValidValue(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 
   auto result = variable.GetValue();
   EXPECT_EQ(result["value"], kInitialValue);
@@ -174,37 +177,42 @@ TEST_F(PvAccessClientPVTests, GetValueAfterConnection)
 //! The client is constructed with callback provided.
 //! Check the callback value of the variable after the connection.
 
-TEST_F(PvAccessClientPVTests, CallbackAfterConnection)
+TEST_F(PvAccessClientPVOldTests, CallbackAfterConnection)
 {
   MockListener listener;
 
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
   // setting up callback expectations
-  EXPECT_CALL(listener, OnValueChanged(_)).Times(::testing::AtLeast(1));
+  const auto expected_any_value = sup::epics::BuildAnyValue(m_pvxs_value);
+  EXPECT_CALL(listener, OnValueChanged_old(expected_any_value)).Times(1);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName, listener.GetCallBack()));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context, listener.GetCallBack_old());
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(variable.WaitForValidValue(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 
   auto result = variable.GetValue();
   EXPECT_EQ(result["value"], kInitialValue);
-  EXPECT_EQ(result, sup::epics::BuildAnyValue(m_pvxs_value));
+  EXPECT_EQ(result, expected_any_value);
 }
 
 //! Server with variable and initial value created before the client.
 //! The client gets the structure from the server, modifies one field, and sets the value back.
 //! Test check that the server value has changed.
 
-TEST_F(PvAccessClientPVTests, SetFromClient)
+TEST_F(PvAccessClientPVOldTests, SetFromClient)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(variable.WaitForValidValue(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 
   // retrieving value
   auto any_value = variable.GetValue();
@@ -213,11 +221,10 @@ TEST_F(PvAccessClientPVTests, SetFromClient)
   // modifying the field in retrieved value
   any_value["value"] = kInitialValue + 1;
   EXPECT_TRUE(variable.SetValue(any_value));
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_value = m_shared_pv.fetch();
-    return shared_value["value"].as<int>() == kInitialValue + 1;
-  }));
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 1);
 }
 
 //! Server with variable and initial value created before the client.
@@ -227,18 +234,22 @@ TEST_F(PvAccessClientPVTests, SetFromClient)
 //!
 //! This test often hangs and it is disabled for the moment. FIXME.
 
-TEST_F(PvAccessClientPVTests, MultipleSetFromClient)
+TEST_F(PvAccessClientPVOldTests, MultipleSetFromClient)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(variable.WaitForValidValue(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 
   // retrieving value
   auto any_value = variable.GetValue();
   EXPECT_EQ(any_value["value"], kInitialValue);
+
+  //  std::cerr.setstate(std::ios_base::failbit);
 
   // modifying the field in retrieved value
   for (int i = 1; i <= 3; ++i)
@@ -246,31 +257,35 @@ TEST_F(PvAccessClientPVTests, MultipleSetFromClient)
     any_value["value"] = kInitialValue + i;
     EXPECT_TRUE(variable.SetValue(any_value));
   }
+  //  shared_context->hurryUp();
+  //  std::cerr.clear();
+  std::this_thread::sleep_for(msec(20));
 
   // It will generate a log message on the screen
   // "ERR pvxs.client.io Server 127.0.0.1:5075 uses non-existent IOID 268443649.  Ignoring..."
   // This is because the client destroys pvxs::client::Operation with a new SetValue request and the
   // server is not able to finalize the taking of the previous value.
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_value = m_shared_pv.fetch();
-    return shared_value["value"].as<int>() == kInitialValue + 3;
-  }));
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 3);
 }
 
 //! Server with variable and initial value created before two clients.
 //! One client set the value, second checks updated value.
 
-TEST_F(PvAccessClientPVTests, TwoClients)
+TEST_F(PvAccessClientPVOldTests, TwoClients)
 {
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable1(CreateClientPVImpl(kChannelName));
-  sup::epics::PvClientPV variable2(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable1(kChannelName, shared_context);
+  sup::epics::PvAccessClientPV_old variable2(kChannelName, shared_context);
 
-  EXPECT_TRUE(variable1.WaitForValidValue(1.0));
-  EXPECT_TRUE(variable2.WaitForValidValue(1.0));
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable1.IsConnected());
+  EXPECT_TRUE(variable2.IsConnected());
 
   // retrieving value through first variable
   auto any_value1 = variable1.GetValue();
@@ -284,40 +299,43 @@ TEST_F(PvAccessClientPVTests, TwoClients)
   any_value1["value"] = 45;
   EXPECT_TRUE(variable1.SetValue(any_value1));
 
+  std::this_thread::sleep_for(msec(20));
+
   // checking the value through the second variable
-  EXPECT_TRUE(BusyWaitFor(1.0, [&variable2](){
-    auto var2_value = variable2.GetValue();
-    return var2_value["value"] == 45;
-  }));
+  auto any_value3 = variable2.GetValue();
+  EXPECT_EQ(any_value3["value"], 45);
 
   // checking the value on server side
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_value = m_shared_pv.fetch();
-    return shared_value["value"].as<int>() == 45;
-  }));
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
 
 //! Server with variable and initial value created before two clients.
 //! One client set the value, second checks updated value.
 //! Both clients are initialised via callbacks.
 
-TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
+TEST_F(PvAccessClientPVOldTests, TwoClientsCallbacks)
 {
   MockListener listener1;
   MockListener listener2;
 
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
+  auto shared_context = CreateSharedContext();
 
   // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnValueChanged(_)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener1, OnValueChanged_old(_)).Times(1);
+  EXPECT_CALL(listener2, OnValueChanged_old(_)).Times(1);
 
-  sup::epics::PvClientPV variable1(CreateClientPVImpl(kChannelName, listener1.GetCallBack()));
-  sup::epics::PvClientPV variable2(CreateClientPVImpl(kChannelName, listener2.GetCallBack()));
+  sup::epics::PvAccessClientPV_old variable1(kChannelName, shared_context,
+                                               listener1.GetCallBack_old());
+  sup::epics::PvAccessClientPV_old variable2(kChannelName, shared_context,
+                                               listener2.GetCallBack_old());
 
-  EXPECT_TRUE(variable1.WaitForValidValue(1.0));
-  EXPECT_TRUE(variable2.WaitForValidValue(1.0));
+  std::this_thread::sleep_for(msec(20));
+
+  EXPECT_TRUE(variable1.IsConnected());
+  EXPECT_TRUE(variable2.IsConnected());
 
   testing::Mock::VerifyAndClearExpectations(&listener1);
   testing::Mock::VerifyAndClearExpectations(&listener2);
@@ -334,22 +352,20 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   any_value1["value"] = 45;
 
   // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnValueChanged(_)).Times(1);
-  EXPECT_CALL(listener2, OnValueChanged(_)).Times(1);
+  EXPECT_CALL(listener1, OnValueChanged_old(any_value1)).Times(1);
+  EXPECT_CALL(listener2, OnValueChanged_old(any_value1)).Times(1);
 
   EXPECT_TRUE(variable1.SetValue(any_value1));
 
+  std::this_thread::sleep_for(msec(20));
+
   // checking the value through the second variable
-  EXPECT_TRUE(BusyWaitFor(1.0, [&variable2](){
-    auto var2_value = variable2.GetValue();
-    return var2_value["value"] == 45;
-  }));
+  auto any_value3 = variable2.GetValue();
+  EXPECT_EQ(any_value3["value"], 45);
 
   // checking the value on server side
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_value = m_shared_pv.fetch();
-    return shared_value["value"].as<int>() == 45;
-  }));
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), 45);
 }
 
 //! Validating implicit struct-scalar conversion. A `struct-scalar` is a special structure
@@ -360,7 +376,7 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
 //! Server with variable and initial value created before the client. Variable contains PVXS value
 //! with a struct with a single `value` field.
 
-TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
+TEST_F(PvAccessClientPVOldTests, GetSetFromClientForScalarAwareCase)
 {
   auto pvxs_struct_scalar_value =
       ::pvxs::TypeDef(::pvxs::TypeCode::Struct, {pvxs::members::Int32("value")}).create();
@@ -368,10 +384,12 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
 
   m_server.start();
   m_shared_pv.open(pvxs_struct_scalar_value);
+  auto shared_context = CreateSharedContext();
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV_old variable(kChannelName, shared_context);
+  std::this_thread::sleep_for(msec(20));
 
-  EXPECT_TRUE(variable.WaitForValidValue(1.0));
+  EXPECT_TRUE(variable.IsConnected());
 
   // retrieving value
   auto any_value = variable.GetValue();
@@ -381,24 +399,8 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
   // modifying the field in retrieved value
   any_value = kInitialValue + 1;
   EXPECT_TRUE(variable.SetValue(any_value));
+  std::this_thread::sleep_for(msec(20));
 
-  // checking the value on server side
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_value = m_shared_pv.fetch();
-    return shared_value["value"].as<int>() == kInitialValue + 1;
-  }));
-}
-
-namespace
-{
-bool BusyWaitFor(double timeout_sec, std::function<bool()> predicate)
-{
-  long timeout_ns = std::lround(timeout_sec * 1e9);
-  auto time_end = std::chrono::system_clock::now() + std::chrono::nanoseconds(timeout_ns);
-  while(!predicate() && std::chrono::system_clock::now() < time_end)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-  }
-  return predicate();
-}
+  auto shared_value = m_shared_pv.fetch();
+  EXPECT_EQ(shared_value["value"].as<int>(), kInitialValue + 1);
 }

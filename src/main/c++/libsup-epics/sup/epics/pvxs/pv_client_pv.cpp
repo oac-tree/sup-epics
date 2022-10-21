@@ -80,6 +80,11 @@ bool PvClientPV::WaitForValidValue(double timeout_sec) const
   return m_impl->WaitForValidValue(timeout_sec);
 }
 
+bool operator==(const PvClientPV::ExtendedValue& lhs, const PvClientPV::ExtendedValue& rhs)
+{
+  return lhs.connected == rhs.connected && lhs.value == rhs.value;
+}
+
 }  // namespace epics
 
 }  // namespace sup

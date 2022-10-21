@@ -24,6 +24,7 @@
 //! Collection of mock classes to use with googlemock framework.
 
 #include <gmock/gmock.h>
+#include <sup/epics/pv_client_pv.h>
 #include <sup/epics/dto_types_fwd.h>
 
 #include <functional>
@@ -34,9 +35,14 @@
 class MockListener
 {
 public:
-  std::function<void(const sup::dto::AnyValue&)> GetCallBack()
+  sup::epics::PvClientPV::VariableChangedCallback GetCallBack()
   {
-    return [this](const sup::dto::AnyValue& value) { OnValueChanged(value); };
+    return [this](const sup::epics::PvClientPV::ExtendedValue& value) { OnValueChanged(value); };
+  }
+
+  std::function<void(const sup::dto::AnyValue&)> GetCallBack_old()
+  {
+    return [this](const sup::dto::AnyValue& value) { OnValueChanged_old(value); };
   }
 
   std::function<void(const std::string&, const sup::dto::AnyValue&)> GetNamedCallBack()
@@ -45,7 +51,8 @@ public:
     { OnNamedValueChanged(name, value); };
   }
 
-  MOCK_METHOD1(OnValueChanged, void(const sup::dto::AnyValue& value));
+  MOCK_METHOD1(OnValueChanged, void(const sup::epics::PvClientPV::ExtendedValue& value));
+  MOCK_METHOD1(OnValueChanged_old, void(const sup::dto::AnyValue& value));
   MOCK_METHOD2(OnNamedValueChanged, void(const std::string& name, const sup::dto::AnyValue& value));
 };
 

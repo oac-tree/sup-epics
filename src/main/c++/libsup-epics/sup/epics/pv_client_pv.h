@@ -131,6 +131,8 @@ private:
   std::unique_ptr<PvAccessClientPVImpl> m_impl;
 };
 
+bool operator==(const PvClientPV::ExtendedValue& lhs, const PvClientPV::ExtendedValue& rhs);
+
 }  // namespace epics
 
 }  // namespace sup

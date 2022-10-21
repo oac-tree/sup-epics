@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pv_access_client_pv.h"
+#include "sup/epics/pv_access_client_pv_old.h"
 
 #include <pvxs/client.h>
 #include <sup/dto/anyvalue.h>
@@ -40,7 +40,7 @@ namespace epics
 // PVAccessClientVariableImpl
 // ----------------------------------------------------------------------------
 
-struct PvAccessClientPV::PVAccessClientVariableImpl
+struct PvAccessClientPV_old::PVAccessClientVariableImpl
 {
   using subscription_t = pvxs::client::Subscription;
   std::string m_variable_name;
@@ -173,39 +173,39 @@ struct PvAccessClientPV::PVAccessClientVariableImpl
 // PvAccessClientPV
 // ----------------------------------------------------------------------------
 
-PvAccessClientPV::PvAccessClientPV(const std::string& variable_name, context_t context,
+PvAccessClientPV_old::PvAccessClientPV_old(const std::string& variable_name, context_t context,
                                                callback_t callback)
     : p_impl(new PVAccessClientVariableImpl(variable_name, context, callback))
 {
   p_impl->InitSubscription();
 }
 
-PvAccessClientPV::~PvAccessClientPV()
+PvAccessClientPV_old::~PvAccessClientPV_old()
 {
   delete p_impl;
 }
 
-std::string PvAccessClientPV::GetVariableName() const
+std::string PvAccessClientPV_old::GetVariableName() const
 {
   return p_impl->m_variable_name;
 }
 
-bool PvAccessClientPV::IsConnected() const
+bool PvAccessClientPV_old::IsConnected() const
 {
   return p_impl->IsConnected();
 }
 
-sup::dto::AnyValue PvAccessClientPV::GetValue() const
+sup::dto::AnyValue PvAccessClientPV_old::GetValue() const
 {
   return p_impl->GetAnyValue();
 }
 
-bool PvAccessClientPV::SetValue(const sup::dto::AnyValue& value)
+bool PvAccessClientPV_old::SetValue(const sup::dto::AnyValue& value)
 {
   return p_impl->SetAnyValue(value);
 }
 
-bool PvAccessClientPV::WaitForConnected(double timeout_sec) const
+bool PvAccessClientPV_old::WaitForConnected(double timeout_sec) const
 {
   const size_t msec_in_sec = 1000;
   const std::chrono::milliseconds timeout_precision_msec(10);

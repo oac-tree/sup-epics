@@ -37,7 +37,7 @@ namespace epics
 //! into a pvxs::Value container (specified on a server side). The design is based
 //! on a pimpl idiom to hide implementation details.
 
-class PvAccessClientPV
+class PvAccessClientPV_old
 {
 public:
   using context_t = std::weak_ptr<pvxs::client::Context>;
@@ -47,14 +47,14 @@ public:
   //! @param variable_name EPICS channel name.
   //! @param context A weak pointer to shared PVXS client's context.
   //! @param callback A callback to report changed variable.
-  explicit PvAccessClientPV(const std::string& variable_name, context_t context,
+  explicit PvAccessClientPV_old(const std::string& variable_name, context_t context,
                                   callback_t callback = {});
-  ~PvAccessClientPV();
+  ~PvAccessClientPV_old();
 
-  PvAccessClientPV(const PvAccessClientPV&) = delete;
-  PvAccessClientPV& operator=(const PvAccessClientPV&) = delete;
-  PvAccessClientPV(PvAccessClientPV&&) = delete;
-  PvAccessClientPV& operator=(PvAccessClientPV&&) = delete;
+  PvAccessClientPV_old(const PvAccessClientPV_old&) = delete;
+  PvAccessClientPV_old& operator=(const PvAccessClientPV_old&) = delete;
+  PvAccessClientPV_old(PvAccessClientPV_old&&) = delete;
+  PvAccessClientPV_old& operator=(PvAccessClientPV_old&&) = delete;
 
   std::string GetVariableName() const;
 
