@@ -39,7 +39,7 @@ class PvAccessClientImpl
 {
 public:
   PvAccessClientImpl(std::shared_ptr<pvxs::client::Context> context,
-                     PVAccessClient::VariableChangedCallback cb = {});
+                     PVAccessClient::VariableChangedCallback cb);
 
   ~PvAccessClientImpl();
 

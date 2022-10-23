@@ -27,7 +27,7 @@ namespace epics
 {
 
 PvAccessClientImpl::PvAccessClientImpl(std::shared_ptr<pvxs::client::Context> context,
-                                       PVAccessClient::VariableChangedCallback cb = {})
+                                       PVAccessClient::VariableChangedCallback cb)
   : m_variables{}
   , m_context{context}
   , m_cb{cb}
@@ -49,7 +49,7 @@ void PvAccessClientImpl::AddVariable(const std::string& channel)
         [this, channel](const PvClientPV::ExtendedValue& value) {
           OnVariableChanged(channel, value);
         })};
-  m_variables.emplace(channel, std::move(pv_impl));
+  m_variables.emplace(channel, new sup::epics::PvClientPV(std::move(pv_impl)));
 }
 
 std::vector<std::string> PvAccessClientImpl::GetVariableNames() const
