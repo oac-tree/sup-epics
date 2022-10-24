@@ -30,7 +30,7 @@
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/pv_access_client_pv.h>
 
 #include <memory>

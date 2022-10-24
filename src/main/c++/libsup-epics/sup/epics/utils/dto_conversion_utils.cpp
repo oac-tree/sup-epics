@@ -22,7 +22,7 @@
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/anyvalue_helper.h>
-#include <sup/epics/dto_conversion_utils.h>
+#include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/utils/anyvalue_from_pvxs_builder.h>
 #include <sup/epics/utils/pvxs_type_builder.h>
 #include <sup/epics/utils/pvxs_utils.h>
