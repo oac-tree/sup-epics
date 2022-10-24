@@ -120,7 +120,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PVAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack());
+  PVAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack_old());
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(variable_name, any_value);
@@ -136,7 +136,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
 
   // setting up callback expectations
   sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
-  EXPECT_CALL(listener, OnNamedValueChanged(variable_name, expected_any_value)).Times(1);
+  EXPECT_CALL(listener, OnNamedValueChanged_old(variable_name, expected_any_value)).Times(1);
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");

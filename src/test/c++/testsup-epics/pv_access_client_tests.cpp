@@ -19,6 +19,8 @@
 
 #include "mock_utils.h"
 
+#include <sup/epics/pvxs/pv_access_client_impl.h>
+
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
 #include <pvxs/data.h>
@@ -72,10 +74,15 @@ public:
                    .addPV(kStringChannelName, m_shared_string_pv);
   }
 
-  //! Create PVXS context intended for sharing among multiple PvAccessClientPV variables.
-  shared_context_t CreateSharedContext()
+  //! Create PVXS client implementation from server.
+  std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
+    sup::epics::PVAccessClient::VariableChangedCallback cb = {})
   {
-    return std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
+    std::shared_ptr<pvxs::client::Context> context =
+      std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
+    std::unique_ptr<sup::epics::PvAccessClientImpl> result{
+      new sup::epics::PvAccessClientImpl(context, cb)};
+    return std::move(result);
   }
 
   pvxs::Value m_pvxs_ntscalar_value;            //!< NTScalar containing int as a value
@@ -93,9 +100,7 @@ public:
 
 TEST_F(PVAccessClientTest, InitialState)
 {
-  auto context = CreateSharedContext();
-
-  sup::epics::PVAccessClient client(context);
+  sup::epics::PVAccessClient client(CreateClientImpl());
 
   EXPECT_TRUE(client.GetVariableNames().empty());
   EXPECT_FALSE(client.IsConnected("non-existing-channel"));
@@ -110,9 +115,7 @@ TEST_F(PVAccessClientTest, InitialState)
 
 TEST_F(PVAccessClientTest, AddVariableAndSetValueWhenUnconnected)
 {
-  auto context = CreateSharedContext();
-
-  sup::epics::PVAccessClient client(context);
+  sup::epics::PVAccessClient client(CreateClientImpl());
 
   // adding variables
   client.AddVariable("channel0");
@@ -150,8 +153,7 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   m_shared_string_pv.open(m_pvxs_string_value);
 
   // creating a client with two variables
-  auto context = CreateSharedContext();
-  sup::epics::PVAccessClient client(context);
+  sup::epics::PVAccessClient client(CreateClientImpl());
   client.AddVariable(kIntChannelName);
   client.AddVariable(kStringChannelName);
 
@@ -199,17 +201,14 @@ TEST_F(PVAccessClientTest, TwoClients)
   m_shared_ntscalar_pv.open(m_pvxs_ntscalar_value);
   m_shared_string_pv.open(m_pvxs_string_value);
 
-  // creating two client loooking at the same channel
-  auto context = CreateSharedContext();
-
   // callback expectation on variable connection
   EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(1);
   EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(1);
 
-  sup::epics::PVAccessClient client0(context, listener1.GetNamedCallBack());
+  sup::epics::PVAccessClient client0(CreateClientImpl(listener1.GetNamedCallBack()));
   client0.AddVariable(kIntChannelName);
 
-  sup::epics::PVAccessClient client1(context, listener2.GetNamedCallBack());
+  sup::epics::PVAccessClient client1(CreateClientImpl(listener2.GetNamedCallBack()));
   client1.AddVariable(kIntChannelName);
 
   // checking connection status
@@ -229,8 +228,8 @@ TEST_F(PVAccessClientTest, TwoClients)
   any_value["value"] = 45;
 
   // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, any_value)).Times(1);
-  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, any_value)).Times(1);
+  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(1);
 
   EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
 

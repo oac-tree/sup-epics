@@ -60,6 +60,11 @@ std::vector<std::string> PvAccessClientImpl::GetVariableNames() const
   return result;
 }
 
+const std::map<std::string, std::unique_ptr<PvClientPV>>& PvAccessClientImpl::GetVariables() const
+{
+  return m_variables;
+}
+
 void PvAccessClientImpl::OnVariableChanged(const std::string& channel,
                                            const PvClientPV::ExtendedValue& value)
 {

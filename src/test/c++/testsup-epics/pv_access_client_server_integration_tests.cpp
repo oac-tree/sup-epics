@@ -19,6 +19,8 @@
 
 #include "mock_utils.h"
 
+#include <sup/epics/pvxs/pv_access_client_impl.h>
+
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
 #include <pvxs/server.h>
@@ -41,9 +43,14 @@ class PVAccessClientServerIntegrationTests : public ::testing::Test
 public:
   using client_context_t = std::shared_ptr<pvxs::client::Context>;
 
-  client_context_t CreateClientContext(const pvxs::server::Server& server)
+  std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
+    const pvxs::server::Server& server, sup::epics::PVAccessClient::VariableChangedCallback cb = {})
   {
-    return std::make_shared<pvxs::client::Context>(server.clientConfig().build());
+    std::shared_ptr<pvxs::client::Context> context =
+      std::make_shared<pvxs::client::Context>(server.clientConfig().build());
+    std::unique_ptr<sup::epics::PvAccessClientImpl> result{
+      new sup::epics::PvAccessClientImpl(context, cb)};
+    return std::move(result);
   }
 };
 
@@ -56,7 +63,6 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating PVXS server and corresponding client context
   auto pvxs_server = CreateIsolatedServer();
-  auto client_context = CreateClientContext(*pvxs_server);
 
   // creating server with single variable
   PVAccessServer server(std::move(pvxs_server));
@@ -70,7 +76,7 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_EQ(server.GetValue(channel_name), any_value);
 
   // creating a client with single variable
-  PVAccessClient client(client_context);
+  PVAccessClient client(CreateClientImpl(*pvxs_server));
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides
@@ -111,16 +117,15 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating PVXS server and corresponding client context
   auto pvxs_server = CreateIsolatedServer();
-  auto client_context = CreateClientContext(*pvxs_server);
 
   // creating server with single variable
-  PVAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack());
+  PVAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack_old());
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(channel_name, any_value);
 
   // setting up callback expectations
   EXPECT_CALL(server_listener, OnNamedValueChanged(_, _)).Times(0);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, any_value)).Times(1);
+  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
 
   server.Start();
   std::this_thread::sleep_for(msec(20));
@@ -129,7 +134,7 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_EQ(server.GetValue(channel_name), any_value);
 
   // creating a client with single variable
-  PVAccessClient client(client_context, client_listener.GetNamedCallBack());
+  PVAccessClient client(CreateClientImpl(*pvxs_server, client_listener.GetNamedCallBack()));
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides
@@ -146,8 +151,8 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   sup::dto::AnyValue new_any_value1{sup::dto::SignedInteger32Type, 43};
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged(channel_name, new_any_value1)).Times(1);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, new_any_value1)).Times(1);
+  EXPECT_CALL(server_listener, OnNamedValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(1);
 
   server.SetValue(channel_name, new_any_value1);
 
@@ -163,8 +168,8 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   sup::dto::AnyValue new_any_value2{sup::dto::SignedInteger32Type, 44};
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged(channel_name, new_any_value2)).Times(1);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, new_any_value2)).Times(1);
+  EXPECT_CALL(server_listener, OnNamedValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(1);
 
   client.SetValue(channel_name, new_any_value2);
 
