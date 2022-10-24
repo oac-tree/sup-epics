@@ -159,8 +159,8 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   client.AddVariable(kStringChannelName);
 
   // checking connection status
-  EXPECT_TRUE(BusyWaitFor(1.0, [&client](){ return client.IsConnected(kIntChannelName); }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&client](){ return client.IsConnected(kStringChannelName); }));
+  EXPECT_TRUE(client.WaitForValidValue(kIntChannelName, 1.0));
+  EXPECT_TRUE(client.WaitForValidValue(kStringChannelName, 1.0));
 
   // checking updated values
   auto any_value0 = client.GetValue(kIntChannelName);
@@ -213,8 +213,8 @@ TEST_F(PVAccessClientTest, TwoClients)
   client1.AddVariable(kIntChannelName);
 
   // checking connection status
-  EXPECT_TRUE(BusyWaitFor(1.0, [&client0](){ return client0.IsConnected(kIntChannelName); }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&client1](){ return client1.IsConnected(kIntChannelName); }));
+  EXPECT_TRUE(client0.WaitForValidValue(kIntChannelName, 1.0));
+  EXPECT_TRUE(client1.WaitForValidValue(kIntChannelName, 1.0));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&listener1);

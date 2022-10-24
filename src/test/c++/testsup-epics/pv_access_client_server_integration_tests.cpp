@@ -81,7 +81,7 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // checking connection and updated values on server and client sides
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.IsConnected(channel_name); }));
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // changing the value via the server and checking values on server and client sides
@@ -134,7 +134,7 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // checking connection and updated values on server and client sides
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.IsConnected(channel_name); }));
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // validating callbacks and clearing listeners

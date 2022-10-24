@@ -63,15 +63,40 @@ dto::AnyValue PvAccessClient::GetValue(const std::string& name) const
   return it->second->GetValue();
 }
 
-bool PvAccessClient::SetValue(const std::string& name, const dto::AnyValue& value)
+bool PvAccessClient::SetValue(const std::string& channel, const dto::AnyValue& value)
 {
   auto& var_map = m_impl->GetVariables();
-  auto it = var_map.find(name);
+  auto it = var_map.find(channel);
   if (it == var_map.end())
   {
-    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" +
+                             channel + "'.");
   }
   return it->second->SetValue(value);
+}
+
+bool PvAccessClient::WaitForConnected(const std::string& channel, double timeout_sec) const
+{
+  auto& var_map = m_impl->GetVariables();
+  auto it = var_map.find(channel);
+  if (it == var_map.end())
+  {
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" +
+                             channel + "'.");
+  }
+  return it->second->WaitForConnected(timeout_sec);
+}
+
+bool PvAccessClient::WaitForValidValue(const std::string& channel, double timeout_sec) const
+{
+  auto& var_map = m_impl->GetVariables();
+  auto it = var_map.find(channel);
+  if (it == var_map.end())
+  {
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" +
+                             channel + "'.");
+  }
+  return it->second->WaitForValidValue(timeout_sec);
 }
 
 }  // namespace epics

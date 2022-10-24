@@ -41,9 +41,18 @@ public:
   using VariableChangedCallback =
     std::function<void(const std::string&, const PvAccessClientPV::ExtendedValue&)>;
 
-  //! Constructor.
-  //! @param cb A callback to report changed variable.
+  /**
+   * @brief Constructor.
+   *
+   * @param cb Callback function to call when the variable's value or status changed.
+   */
   explicit PvAccessClient(VariableChangedCallback cb = {});
+
+  /**
+   * @brief Constructor.
+   *
+   * @param impl Injected implementation.
+   */
   explicit PvAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl);
 
   ~PvAccessClient();
@@ -53,29 +62,65 @@ public:
   PvAccessClient(PvAccessClient&&) = delete;
   PvAccessClient& operator=(PvAccessClient&&) = delete;
 
-  //! Add variable with the given channel. Will throw if such channel already exists.
-  //! @param channel EPICS channel name.
+  /**
+   * @brief Add variable with the given channel. Will throw if such channel already exists.
+   *
+   * @param channel EPICS channel name.
+   */
   void AddVariable(const std::string& channel);
 
-  //! Returns the names of all managed channels.
-  //! @return List of all channel names.
+  /**
+   * @brief Returns the names of all managed channels.
+   *
+   * @return List of all channel names.
+   */
   std::vector<std::string> GetVariableNames() const;
 
-  //! Check if specific channel is connected.
-  //! @param channel EPICS channel name.
-  //! @return True if channel is connected, false otherwise.
+  /**
+   * @brief Check if specific channel is connected.
+   *
+   * @param channel EPICS channel name.
+   * @return True if channel is connected, false otherwise.
+   */
   bool IsConnected(const std::string& channel) const;
 
-  //! Get the value from a specific channel. Will throw if channel was not added yet.
-  //! @param channel EPICS channel name.
-  //! @return Channel's value.
+  /**
+   * @brief Get the value from a specific channel. Will throw if channel was not added yet.
+   *
+   * @param channel EPICS channel name.
+   * @return Channel's value.
+   */
   sup::dto::AnyValue GetValue(const std::string& channel) const;
 
-  //! Propagate the value to a specific channel. Will throw if channel was not added yet.
-  //! @param channel EPICS channel name.
-  //! @param value Value to be written to the channel.
-  //! @return True if successful, false otherwise.
+  /**
+   * @brief Propagate the value to a specific channel. Will throw if channel was not added yet.
+   *
+   * @param channel EPICS channel name.
+   * @param value Value to be written to the channel.
+   * @return True if successful, false otherwise.
+   */
   bool SetValue(const std::string& channel, const sup::dto::AnyValue& value);
+
+  /**
+   * @brief This method waits for a specific channel to be connected with a timeout.
+   *
+   * @param channel EPICS channel name.
+   * @param timeout_sec Timeout in seconds to wait for the specific channel to be connected.
+   * @return True if the channel was connected within the timeout period.
+   */
+  bool WaitForConnected(const std::string& channel, double timeout_sec) const;
+
+  /**
+   * @brief This method waits with a timeout for a specific channel cache to be valid.
+   *
+   * @param channel EPICS channel name.
+   * @param timeout_sec Timeout in seconds to wait for the specific channel to be valid.
+   * @return True if the specific channel was valid within the timeout period.
+   *
+   * @note Valid in this context means that at least one successful monitor callback was issued and
+   * the channel is connected. After a reconnect, it will not wait for an extra callback.
+   */
+  bool WaitForValidValue(const std::string& channel, double timeout_sec) const;
 
 private:
   std::unique_ptr<PvAccessClientImpl> m_impl;

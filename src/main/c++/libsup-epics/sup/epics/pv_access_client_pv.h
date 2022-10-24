@@ -55,14 +55,14 @@ public:
    * @param channel EPICS channel name.
    * @param cb Callback function to call when the variable's value or status changed.
    */
-  PvAccessClientPV(const std::string& channel, VariableChangedCallback cb = {});
+  explicit PvAccessClientPV(const std::string& channel, VariableChangedCallback cb = {});
 
   /**
    * @brief Constructor.
    *
    * @param impl Injected implementation.
    */
-  PvAccessClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl);
+  explicit PvAccessClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl);
 
   ~PvAccessClientPV();
 
