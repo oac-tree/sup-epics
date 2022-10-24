@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include "mock_utils.h"
+#include "unit_test_helper.h"
 
 #include <sup/epics/pvxs/pv_access_client_impl.h>
 
@@ -31,8 +32,8 @@
 
 #include <thread>
 
-using msec = std::chrono::milliseconds;
 using ::testing::_;
+using sup::epics::unit_test_helper::BusyWaitFor;
 
 using namespace sup::epics;
 
@@ -63,6 +64,7 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating PVXS server and corresponding client context
   auto pvxs_server = CreateIsolatedServer();
+  PVAccessClient client(CreateClientImpl(*pvxs_server));
 
   // creating server with single variable
   PVAccessServer server(std::move(pvxs_server));
@@ -70,38 +72,32 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   server.AddVariable(channel_name, any_value);
 
   server.Start();
-  std::this_thread::sleep_for(msec(20));
 
   // Checking variable on server side
-  EXPECT_EQ(server.GetValue(channel_name), any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
 
   // creating a client with single variable
-  PVAccessClient client(CreateClientImpl(*pvxs_server));
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_EQ(server.GetValue(channel_name), any_value);
-  EXPECT_TRUE(client.IsConnected(channel_name));
-  EXPECT_EQ(client.GetValue(channel_name), any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.IsConnected(channel_name); }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // changing the value via the server and checking values on server and client sides
   sup::dto::AnyValue new_any_value1{sup::dto::SignedInteger32Type, 43};
   server.SetValue(channel_name, new_any_value1);
 
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_EQ(server.GetValue(channel_name), new_any_value1);
-  std::this_thread::sleep_for(msec(80)); // client requires longer time
-  EXPECT_EQ(client.GetValue(channel_name), new_any_value1);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value1; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value1; }));
 
   // changing the value via the client and checking values on server and client sides
   sup::dto::AnyValue new_any_value2{sup::dto::SignedInteger32Type, 44};
 
   client.SetValue(channel_name, new_any_value2);
 
-  std::this_thread::sleep_for(msec(100));
-  EXPECT_EQ(server.GetValue(channel_name), new_any_value2);
-  EXPECT_EQ(client.GetValue(channel_name), new_any_value2);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value2; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value2; }));
 }
 
 //! Standard scenario. Server with single variable and single client.
@@ -115,33 +111,31 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   const std::string channel_name("channel0");
 
+  // setting up callback expectations
+  EXPECT_CALL(server_listener, OnNamedValueChanged_old(_, _)).Times(0);
+  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
+
   // creating PVXS server and corresponding client context
   auto pvxs_server = CreateIsolatedServer();
+  PVAccessClient client(CreateClientImpl(*pvxs_server, client_listener.GetNamedCallBack()));
 
   // creating server with single variable
   PVAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack_old());
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(channel_name, any_value);
 
-  // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged(_, _)).Times(0);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
-
   server.Start();
-  std::this_thread::sleep_for(msec(20));
 
   // Checking variable on server side
-  EXPECT_EQ(server.GetValue(channel_name), any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
 
   // creating a client with single variable
-  PVAccessClient client(CreateClientImpl(*pvxs_server, client_listener.GetNamedCallBack()));
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_EQ(server.GetValue(channel_name), any_value);
-  EXPECT_TRUE(client.IsConnected(channel_name));
-  EXPECT_EQ(client.GetValue(channel_name), any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.IsConnected(channel_name); }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&server_listener);
@@ -151,14 +145,13 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   sup::dto::AnyValue new_any_value1{sup::dto::SignedInteger32Type, 43};
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(server_listener, OnNamedValueChanged_old(channel_name, _)).Times(1);
   EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(1);
 
   server.SetValue(channel_name, new_any_value1);
 
-  std::this_thread::sleep_for(msec(100));
-  EXPECT_EQ(server.GetValue(channel_name), new_any_value1);
-  EXPECT_EQ(client.GetValue(channel_name), new_any_value1);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value1; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value1; }));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&server_listener);
@@ -168,16 +161,18 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   sup::dto::AnyValue new_any_value2{sup::dto::SignedInteger32Type, 44};
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(server_listener, OnNamedValueChanged_old(channel_name, _)).Times(1);
   EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(1);
 
   client.SetValue(channel_name, new_any_value2);
 
-  std::this_thread::sleep_for(msec(100));
-  EXPECT_EQ(server.GetValue(channel_name), new_any_value2);
-  EXPECT_EQ(client.GetValue(channel_name), new_any_value2);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value2; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value2; }));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&server_listener);
   testing::Mock::VerifyAndClearExpectations(&client_listener);
+
+  // ignore possible disconnect callback
+  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(0));
 }

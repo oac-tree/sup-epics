@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include "mock_utils.h"
+#include "unit_test_helper.h"
 
 #include <sup/epics/pvxs/pv_access_client_impl.h>
 
@@ -36,8 +37,8 @@
 #include <stdexcept>
 #include <thread>
 
-using msec = std::chrono::milliseconds;
 using ::testing::_;
+using sup::epics::unit_test_helper::BusyWaitFor;
 
 namespace
 {
@@ -158,9 +159,8 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   client.AddVariable(kStringChannelName);
 
   // checking connection status
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_TRUE(client.IsConnected(kIntChannelName));
-  EXPECT_TRUE(client.IsConnected(kStringChannelName));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&client](){ return client.IsConnected(kIntChannelName); }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&client](){ return client.IsConnected(kStringChannelName); }));
 
   // checking updated values
   auto any_value0 = client.GetValue(kIntChannelName);
@@ -177,14 +177,15 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   any_value1 = std::string("abc2");
   EXPECT_TRUE(client.SetValue(kStringChannelName, any_value1));
 
-  std::this_thread::sleep_for(msec(20));
-
   // checking values on server side
-  auto shared_int_value = m_shared_ntscalar_pv.fetch();
-  EXPECT_EQ(shared_int_value["value"].as<int>(), kInitialIntChannelValue + 1);
-
-  auto shared_string_value = m_shared_string_pv.fetch();
-  EXPECT_EQ(shared_string_value["value"].as<std::string>(), std::string("abc2"));
+  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
+    auto shared_int_value = m_shared_ntscalar_pv.fetch();
+    return shared_int_value["value"].as<int>() == kInitialIntChannelValue + 1;
+  }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
+    auto shared_string_value = m_shared_string_pv.fetch();
+    return shared_string_value["value"].as<std::string>() == std::string("abc2");
+  }));
 }
 
 //! Standard scenario. Server with two different variables was created and started before
@@ -202,8 +203,8 @@ TEST_F(PVAccessClientTest, TwoClients)
   m_shared_string_pv.open(m_pvxs_string_value);
 
   // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(1);
-  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
 
   sup::epics::PVAccessClient client0(CreateClientImpl(listener1.GetNamedCallBack()));
   client0.AddVariable(kIntChannelName);
@@ -212,9 +213,8 @@ TEST_F(PVAccessClientTest, TwoClients)
   client1.AddVariable(kIntChannelName);
 
   // checking connection status
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_TRUE(client0.IsConnected(kIntChannelName));
-  EXPECT_TRUE(client1.IsConnected(kIntChannelName));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&client0](){ return client0.IsConnected(kIntChannelName); }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&client1](){ return client1.IsConnected(kIntChannelName); }));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&listener1);
@@ -233,9 +233,9 @@ TEST_F(PVAccessClientTest, TwoClients)
 
   EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
 
-  std::this_thread::sleep_for(msec(20));
-
   // checking the value through the second variable
-  auto any_value_from_client1 = client1.GetValue(kIntChannelName);
-  EXPECT_EQ(any_value_from_client1["value"], 45);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&client1](){
+    auto any_value_from_client1 = client1.GetValue(kIntChannelName);
+    return any_value_from_client1["value"] == 45;
+  }));
 }

@@ -18,6 +18,7 @@
  *****************************************************************************/
 
 #include "mock_utils.h"
+#include "unit_test_helper.h"
 
 #include <sup/epics/pvxs/pv_access_client_pv_impl.h>
 
@@ -35,8 +36,8 @@
 #include <memory>
 #include <thread>
 
-using msec = std::chrono::milliseconds;
 using ::testing::_;
+using sup::epics::unit_test_helper::BusyWaitFor;
 
 namespace
 {
@@ -44,7 +45,6 @@ const int kInitialValue = 42;
 const int kInitialStatus = 1;
 const std::string kChannelName = "PVXS-TESTS:NTSCALAR";
 
-bool BusyWaitFor(double timeout_sec, std::function<bool()> predicate);
 }  // namespace
 
 class PvAccessClientPVTests : public ::testing::Test
@@ -387,18 +387,4 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
     auto shared_value = m_shared_pv.fetch();
     return shared_value["value"].as<int>() == kInitialValue + 1;
   }));
-}
-
-namespace
-{
-bool BusyWaitFor(double timeout_sec, std::function<bool()> predicate)
-{
-  long timeout_ns = std::lround(timeout_sec * 1e9);
-  auto time_end = std::chrono::system_clock::now() + std::chrono::nanoseconds(timeout_ns);
-  while(!predicate() && std::chrono::system_clock::now() < time_end)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-  }
-  return predicate();
-}
 }
