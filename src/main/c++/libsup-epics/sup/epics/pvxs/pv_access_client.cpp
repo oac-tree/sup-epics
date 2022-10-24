@@ -25,51 +25,51 @@ namespace sup
 namespace epics
 {
 
-PVAccessClient::PVAccessClient(VariableChangedCallback cb)
+PvAccessClient::PvAccessClient(VariableChangedCallback cb)
   : m_impl{new PvAccessClientImpl(utils::GetSharedClientContext(), cb)}
 {}
 
-PVAccessClient::PVAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl)
+PvAccessClient::PvAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl)
   : m_impl{std::move(impl)}
 {}
 
-PVAccessClient::~PVAccessClient() = default;
+PvAccessClient::~PvAccessClient() = default;
 
-void PVAccessClient::AddVariable(const std::string& channel)
+void PvAccessClient::AddVariable(const std::string& channel)
 {
   m_impl->AddVariable(channel);
 }
 
-std::vector<std::string> PVAccessClient::GetVariableNames() const
+std::vector<std::string> PvAccessClient::GetVariableNames() const
 {
   return m_impl->GetVariableNames();
 }
 
-bool PVAccessClient::IsConnected(const std::string& channel) const
+bool PvAccessClient::IsConnected(const std::string& channel) const
 {
   auto& var_map = m_impl->GetVariables();
   auto it = var_map.find(channel);
   return it == var_map.end() ? false : it->second->IsConnected();
 }
 
-dto::AnyValue PVAccessClient::GetValue(const std::string& name) const
+dto::AnyValue PvAccessClient::GetValue(const std::string& name) const
 {
   auto& var_map = m_impl->GetVariables();
   auto it = var_map.find(name);
   if (it == var_map.end())
   {
-    throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" + name + "'.");
   }
   return it->second->GetValue();
 }
 
-bool PVAccessClient::SetValue(const std::string& name, const dto::AnyValue& value)
+bool PvAccessClient::SetValue(const std::string& name, const dto::AnyValue& value)
 {
   auto& var_map = m_impl->GetVariables();
   auto it = var_map.find(name);
   if (it == var_map.end())
   {
-    throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" + name + "'.");
   }
   return it->second->SetValue(value);
 }

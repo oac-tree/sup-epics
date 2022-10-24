@@ -21,7 +21,7 @@
 #define SUP_EPICS_PV_ACCESS_CLIENT_IMPL_H_
 
 #include <sup/epics/pv_access_client.h>
-#include <sup/epics/pv_client_pv.h>
+#include <sup/epics/pv_access_client_pv.h>
 #include <sup/dto/anyvalue.h>
 
 #include <pvxs/client.h>
@@ -39,7 +39,7 @@ class PvAccessClientImpl
 {
 public:
   PvAccessClientImpl(std::shared_ptr<pvxs::client::Context> context,
-                     PVAccessClient::VariableChangedCallback cb);
+                     PvAccessClient::VariableChangedCallback cb);
 
   ~PvAccessClientImpl();
 
@@ -47,14 +47,14 @@ public:
 
   std::vector<std::string> GetVariableNames() const;
 
-  const std::map<std::string, std::unique_ptr<PvClientPV>>& GetVariables() const;
+  const std::map<std::string, std::unique_ptr<PvAccessClientPV>>& GetVariables() const;
 
-  void OnVariableChanged(const std::string& channel, const PvClientPV::ExtendedValue& value);
+  void OnVariableChanged(const std::string& channel, const PvAccessClientPV::ExtendedValue& value);
 
 private:
-  std::map<std::string, std::unique_ptr<PvClientPV>> m_variables;
+  std::map<std::string, std::unique_ptr<PvAccessClientPV>> m_variables;
   std::shared_ptr<pvxs::client::Context> m_context;
-  PVAccessClient::VariableChangedCallback m_cb;
+  PvAccessClient::VariableChangedCallback m_cb;
 };
 
 }  // namespace epics

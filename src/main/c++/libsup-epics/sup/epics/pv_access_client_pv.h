@@ -38,7 +38,7 @@ class PvAccessClientPVImpl;
 //! into a pvxs::Value container (specified on a server side). The design is based
 //! on a pimpl idiom to hide implementation details.
 
-class PvClientPV
+class PvAccessClientPV
 {
 public:
   struct ExtendedValue
@@ -55,21 +55,21 @@ public:
    * @param channel EPICS channel name.
    * @param cb Callback function to call when the variable's value or status changed.
    */
-  PvClientPV(const std::string& channel, VariableChangedCallback cb = {});
+  PvAccessClientPV(const std::string& channel, VariableChangedCallback cb = {});
 
   /**
    * @brief Constructor.
    *
    * @param impl Injected implementation.
    */
-  PvClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl);
+  PvAccessClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl);
 
-  ~PvClientPV();
+  ~PvAccessClientPV();
 
-  PvClientPV(const PvClientPV&) = delete;
-  PvClientPV& operator=(const PvClientPV&) = delete;
-  PvClientPV(PvClientPV&&) = delete;
-  PvClientPV& operator=(PvClientPV&&) = delete;
+  PvAccessClientPV(const PvAccessClientPV&) = delete;
+  PvAccessClientPV& operator=(const PvAccessClientPV&) = delete;
+  PvAccessClientPV(PvAccessClientPV&&) = delete;
+  PvAccessClientPV& operator=(PvAccessClientPV&&) = delete;
 
     /**
    * @brief Check if channel is connected.
@@ -131,7 +131,7 @@ private:
   std::unique_ptr<PvAccessClientPVImpl> m_impl;
 };
 
-bool operator==(const PvClientPV::ExtendedValue& lhs, const PvClientPV::ExtendedValue& rhs);
+bool operator==(const PvAccessClientPV::ExtendedValue& lhs, const PvAccessClientPV::ExtendedValue& rhs);
 
 }  // namespace epics
 

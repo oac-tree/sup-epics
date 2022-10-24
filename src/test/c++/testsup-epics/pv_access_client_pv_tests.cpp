@@ -31,7 +31,7 @@
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/dto_conversion_utils.h>
-#include <sup/epics/pv_client_pv.h>
+#include <sup/epics/pv_access_client_pv.h>
 
 #include <memory>
 #include <thread>
@@ -62,7 +62,7 @@ public:
   }
 
   std::unique_ptr<sup::epics::PvAccessClientPVImpl> CreateClientPVImpl(
-    const std::string& channel, sup::epics::PvClientPV::VariableChangedCallback cb = {})
+    const std::string& channel, sup::epics::PvAccessClientPV::VariableChangedCallback cb = {})
   {
     std::shared_ptr<pvxs::client::Context> context =
       std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
@@ -81,7 +81,7 @@ public:
 TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 {
   const std::string expected_name("NON_EXISTING:INT");
-  sup::epics::PvClientPV variable(CreateClientPVImpl(expected_name));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(expected_name));
 
   EXPECT_EQ(variable.GetChannelName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());
@@ -94,7 +94,7 @@ TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 
 TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 {
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   // seting the value
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
@@ -109,7 +109,7 @@ TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 
 TEST_F(PvAccessClientPVTests, WaitForConnected)
 {
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   // Server is not started, waiting will fail.
   EXPECT_FALSE(variable.WaitForConnected(0.01));
@@ -127,7 +127,7 @@ TEST_F(PvAccessClientPVTests, DisconnectionOnServerStop)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForConnected(1.0));
 
@@ -144,7 +144,7 @@ TEST_F(PvAccessClientPVTests, ConnectionOnServerStart)
 {
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
   EXPECT_FALSE(variable.IsConnected());
 
   // starting the server
@@ -162,7 +162,7 @@ TEST_F(PvAccessClientPVTests, GetValueAfterConnection)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -184,7 +184,7 @@ TEST_F(PvAccessClientPVTests, CallbackAfterConnection)
   // setting up callback expectations
   EXPECT_CALL(listener, OnValueChanged(_)).Times(::testing::AtLeast(1));
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName, listener.GetCallBack()));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName, listener.GetCallBack()));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -202,7 +202,7 @@ TEST_F(PvAccessClientPVTests, SetFromClient)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -232,7 +232,7 @@ TEST_F(PvAccessClientPVTests, MultipleSetFromClient)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -266,8 +266,8 @@ TEST_F(PvAccessClientPVTests, TwoClients)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvClientPV variable1(CreateClientPVImpl(kChannelName));
-  sup::epics::PvClientPV variable2(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable1(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable2(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable1.WaitForValidValue(1.0));
   EXPECT_TRUE(variable2.WaitForValidValue(1.0));
@@ -313,8 +313,8 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   EXPECT_CALL(listener1, OnValueChanged(_)).Times(::testing::AtLeast(1));
   EXPECT_CALL(listener2, OnValueChanged(_)).Times(::testing::AtLeast(1));
 
-  sup::epics::PvClientPV variable1(CreateClientPVImpl(kChannelName, listener1.GetCallBack()));
-  sup::epics::PvClientPV variable2(CreateClientPVImpl(kChannelName, listener2.GetCallBack()));
+  sup::epics::PvAccessClientPV variable1(CreateClientPVImpl(kChannelName, listener1.GetCallBack()));
+  sup::epics::PvAccessClientPV variable2(CreateClientPVImpl(kChannelName, listener2.GetCallBack()));
 
   EXPECT_TRUE(variable1.WaitForValidValue(1.0));
   EXPECT_TRUE(variable2.WaitForValidValue(1.0));
@@ -369,7 +369,7 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
   m_server.start();
   m_shared_pv.open(pvxs_struct_scalar_value);
 
-  sup::epics::PvClientPV variable(CreateClientPVImpl(kChannelName));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 

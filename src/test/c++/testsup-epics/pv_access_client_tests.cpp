@@ -77,7 +77,7 @@ public:
 
   //! Create PVXS client implementation from server.
   std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
-    sup::epics::PVAccessClient::VariableChangedCallback cb = {})
+    sup::epics::PvAccessClient::VariableChangedCallback cb = {})
   {
     std::shared_ptr<pvxs::client::Context> context =
       std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
@@ -96,12 +96,12 @@ public:
   pvxs::server::Server m_server;
 };
 
-//! Check initial state of PVAccessClient when no server is running, and no variables have been
+//! Check initial state of PvAccessClient when no server is running, and no variables have been
 //! added. Server was created (but not started) before the client.
 
 TEST_F(PVAccessClientTest, InitialState)
 {
-  sup::epics::PVAccessClient client(CreateClientImpl());
+  sup::epics::PvAccessClient client(CreateClientImpl());
 
   EXPECT_TRUE(client.GetVariableNames().empty());
   EXPECT_FALSE(client.IsConnected("non-existing-channel"));
@@ -116,7 +116,7 @@ TEST_F(PVAccessClientTest, InitialState)
 
 TEST_F(PVAccessClientTest, AddVariableAndSetValueWhenUnconnected)
 {
-  sup::epics::PVAccessClient client(CreateClientImpl());
+  sup::epics::PvAccessClient client(CreateClientImpl());
 
   // adding variables
   client.AddVariable("channel0");
@@ -154,7 +154,7 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   m_shared_string_pv.open(m_pvxs_string_value);
 
   // creating a client with two variables
-  sup::epics::PVAccessClient client(CreateClientImpl());
+  sup::epics::PvAccessClient client(CreateClientImpl());
   client.AddVariable(kIntChannelName);
   client.AddVariable(kStringChannelName);
 
@@ -167,7 +167,7 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
   EXPECT_EQ(any_value0["value"], kInitialIntChannelValue);
 
   // m_shared_string_pv is a `struct-scalar`, i.e. a struct with a single `value` field
-  // PVAccessClient sees it as a simple scalar
+  // PvAccessClient sees it as a simple scalar
   auto any_value1 = client.GetValue(kStringChannelName);
   EXPECT_EQ(any_value1, kInitialStringChannelValue);
 
@@ -206,10 +206,10 @@ TEST_F(PVAccessClientTest, TwoClients)
   EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
   EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
 
-  sup::epics::PVAccessClient client0(CreateClientImpl(listener1.GetNamedCallBack()));
+  sup::epics::PvAccessClient client0(CreateClientImpl(listener1.GetNamedCallBack()));
   client0.AddVariable(kIntChannelName);
 
-  sup::epics::PVAccessClient client1(CreateClientImpl(listener2.GetNamedCallBack()));
+  sup::epics::PvAccessClient client1(CreateClientImpl(listener2.GetNamedCallBack()));
   client1.AddVariable(kIntChannelName);
 
   // checking connection status

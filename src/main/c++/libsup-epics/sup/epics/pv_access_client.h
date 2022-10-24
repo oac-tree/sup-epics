@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_PV_ACCESS_CLIENT_H_
 #define SUP_EPICS_PV_ACCESS_CLIENT_H_
 
-#include <sup/epics/pv_client_pv.h>
+#include <sup/epics/pv_access_client_pv.h>
 
 #include <functional>
 #include <memory>
@@ -35,23 +35,23 @@ class PvAccessClientImpl;
 
 //! Represents a client to access/update multiple pvAccess variables.
 
-class PVAccessClient
+class PvAccessClient
 {
 public:
   using VariableChangedCallback =
-    std::function<void(const std::string&, const PvClientPV::ExtendedValue&)>;
+    std::function<void(const std::string&, const PvAccessClientPV::ExtendedValue&)>;
 
   //! Constructor.
   //! @param cb A callback to report changed variable.
-  explicit PVAccessClient(VariableChangedCallback cb = {});
-  explicit PVAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl);
+  explicit PvAccessClient(VariableChangedCallback cb = {});
+  explicit PvAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl);
 
-  ~PVAccessClient();
+  ~PvAccessClient();
 
-  PVAccessClient(const PVAccessClient&) = delete;
-  PVAccessClient& operator=(const PVAccessClient&) = delete;
-  PVAccessClient(PVAccessClient&&) = delete;
-  PVAccessClient& operator=(PVAccessClient&&) = delete;
+  PvAccessClient(const PvAccessClient&) = delete;
+  PvAccessClient& operator=(const PvAccessClient&) = delete;
+  PvAccessClient(PvAccessClient&&) = delete;
+  PvAccessClient& operator=(PvAccessClient&&) = delete;
 
   //! Add variable with the given channel. Will throw if such channel already exists.
   //! @param channel EPICS channel name.

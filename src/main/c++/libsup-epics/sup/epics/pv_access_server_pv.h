@@ -30,7 +30,7 @@ namespace sup
 namespace epics
 {
 
-//! Represents a single variable on board of PVAccessServer.
+//! Represents a single variable on board of PvAccessServer.
 //!
 //! @note Based on PVXS shared variable. The variable is initialized with AnyValue used at the
 //! construction. Scalar AnyValues are converted to structs containing a single `value` field. This

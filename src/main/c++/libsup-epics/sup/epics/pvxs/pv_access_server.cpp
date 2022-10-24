@@ -35,7 +35,7 @@ namespace epics
 // PVAccessServerImpl
 // ----------------------------------------------------------------------------
 
-struct PVAccessServer::PVAccessServerImpl
+struct PvAccessServer::PVAccessServerImpl
 {
   context_t m_context;
   callback_t m_callback;
@@ -52,7 +52,7 @@ struct PVAccessServer::PVAccessServerImpl
     auto iter = m_variables.find(name);
     if (iter != m_variables.end())
     {
-      throw std::runtime_error("Error in PVAccessServer: existing variable name '" + name + "'.");
+      throw std::runtime_error("Error in PvAccessServer: existing variable name '" + name + "'.");
     }
 
     PvAccessServerPV::callback_t variable_callback;
@@ -85,51 +85,50 @@ struct PVAccessServer::PVAccessServerImpl
 };
 
 // ----------------------------------------------------------------------------
-// PVAccessServer
+// PvAccessServer
 // ----------------------------------------------------------------------------
 
-PVAccessServer::PVAccessServer(context_t context, callback_t callback)
+PvAccessServer::PvAccessServer(context_t context, callback_t callback)
     : p_impl(new PVAccessServerImpl(std::move(context), std::move(callback)))
 {
 }
 
-PVAccessServer::~PVAccessServer()
+PvAccessServer::~PvAccessServer()
 {
   delete p_impl;
 }
 
-void PVAccessServer::AddVariable(const std::string& name, const dto::AnyValue& any_value)
+void PvAccessServer::AddVariable(const std::string& name, const dto::AnyValue& any_value)
 {
   p_impl->AddVariable(name, any_value);
 }
 
-std::vector<std::string> PVAccessServer::GetVariableNames() const
+std::vector<std::string> PvAccessServer::GetVariableNames() const
 {
   return p_impl->GetVariableNames();
 }
 
-dto::AnyValue PVAccessServer::GetValue(const std::string &name) const
+dto::AnyValue PvAccessServer::GetValue(const std::string &name) const
 {
   auto iter = p_impl->m_variables.find(name);
   if (iter == p_impl->m_variables.end())
   {
-    throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + name + "'.");
   }
   return iter->second->GetValue();
 }
 
-bool PVAccessServer::SetValue(const std::string &name, const dto::AnyValue &value)
+bool PvAccessServer::SetValue(const std::string &name, const dto::AnyValue &value)
 {
   auto iter = p_impl->m_variables.find(name);
   if (iter == p_impl->m_variables.end())
   {
-    throw std::runtime_error("Error in PVAccessClient: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + name + "'.");
   }
   return iter->second->SetValue(value);
-
 }
 
-void PVAccessServer::Start()
+void PvAccessServer::Start()
 {
   for(const auto& entry : p_impl->m_variables)
   {

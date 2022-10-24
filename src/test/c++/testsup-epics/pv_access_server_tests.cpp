@@ -41,7 +41,7 @@ class PVAccessServerTests : public ::testing::Test
 
 TEST_F(PVAccessServerTests, InitialState)
 {
-  PVAccessServer server(CreateIsolatedServer());
+  PvAccessServer server(CreateIsolatedServer());
 
   EXPECT_TRUE(server.GetVariableNames().empty());
 
@@ -55,7 +55,7 @@ TEST_F(PVAccessServerTests, InitialState)
 
 TEST_F(PVAccessServerTests, AddVariableAndGetSetWithoutRunning)
 {
-  PVAccessServer server(CreateIsolatedServer());
+  PvAccessServer server(CreateIsolatedServer());
 
   // adding the channel and checking the value
   sup::dto::AnyValue any_value0{sup::dto::SignedInteger32Type, 42};
@@ -87,7 +87,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPut)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PVAccessServer server(CreateServerFromEnv());
+  PvAccessServer server(CreateServerFromEnv());
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(variable_name, any_value);
@@ -120,7 +120,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PVAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack_old());
+  PvAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack_old());
 
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(variable_name, any_value);

@@ -24,7 +24,7 @@
 //! Collection of mock classes to use with googlemock framework.
 
 #include <gmock/gmock.h>
-#include <sup/epics/pv_client_pv.h>
+#include <sup/epics/pv_access_client_pv.h>
 #include <sup/epics/pv_access_client.h>
 #include <sup/epics/dto_types_fwd.h>
 
@@ -36,9 +36,9 @@
 class MockListener
 {
 public:
-  sup::epics::PvClientPV::VariableChangedCallback GetCallBack()
+  sup::epics::PvAccessClientPV::VariableChangedCallback GetCallBack()
   {
-    return [this](const sup::epics::PvClientPV::ExtendedValue& value) { OnValueChanged(value); };
+    return [this](const sup::epics::PvAccessClientPV::ExtendedValue& value) { OnValueChanged(value); };
   }
 
   std::function<void(const sup::dto::AnyValue&)> GetCallBack_old()
@@ -46,9 +46,9 @@ public:
     return [this](const sup::dto::AnyValue& value) { OnValueChanged_old(value); };
   }
 
-  sup::epics::PVAccessClient::VariableChangedCallback GetNamedCallBack()
+  sup::epics::PvAccessClient::VariableChangedCallback GetNamedCallBack()
   {
-    return [this](const std::string& name, const sup::epics::PvClientPV::ExtendedValue& value)
+    return [this](const std::string& name, const sup::epics::PvAccessClientPV::ExtendedValue& value)
     { OnNamedValueChanged(name, value); };
   }
 
@@ -58,10 +58,10 @@ public:
     { OnNamedValueChanged_old(name, value); };
   }
 
-  MOCK_METHOD1(OnValueChanged, void(const sup::epics::PvClientPV::ExtendedValue& value));
+  MOCK_METHOD1(OnValueChanged, void(const sup::epics::PvAccessClientPV::ExtendedValue& value));
   MOCK_METHOD1(OnValueChanged_old, void(const sup::dto::AnyValue& value));
   MOCK_METHOD2(OnNamedValueChanged,
-               void(const std::string& name, const sup::epics::PvClientPV::ExtendedValue& value));
+               void(const std::string& name, const sup::epics::PvAccessClientPV::ExtendedValue& value));
   MOCK_METHOD2(OnNamedValueChanged_old,
                void(const std::string& name, const sup::dto::AnyValue& value));
 };

@@ -38,7 +38,7 @@ install(FILES
         sup/epics/dto_conversion_utils.h
         sup/epics/dto_types_fwd.h
         sup/epics/pv_access_client.h
-        sup/epics/pv_access_client_pv_old.h
+        sup/epics/pv_access_client_pv.h
         sup/epics/pv_access_server.h
         sup/epics/pv_access_server_pv.h
         sup/epics/pv_access_context_utils.h

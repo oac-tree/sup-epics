@@ -27,7 +27,7 @@ namespace epics
 {
 
 PvAccessClientImpl::PvAccessClientImpl(std::shared_ptr<pvxs::client::Context> context,
-                                       PVAccessClient::VariableChangedCallback cb)
+                                       PvAccessClient::VariableChangedCallback cb)
   : m_variables{}
   , m_context{context}
   , m_cb{cb}
@@ -41,15 +41,15 @@ void PvAccessClientImpl::AddVariable(const std::string& channel)
   auto iter = m_variables.find(channel);
   if (iter != m_variables.end())
   {
-    throw std::runtime_error("Error in PVAccessClient: existing variable name '" + channel + "'.");
+    throw std::runtime_error("Error in PvAccessClientImpl: existing variable name '" + channel + "'.");
   }
 
   std::unique_ptr<sup::epics::PvAccessClientPVImpl> pv_impl{
       new sup::epics::PvAccessClientPVImpl(channel, m_context,
-        [this, channel](const PvClientPV::ExtendedValue& value) {
+        [this, channel](const PvAccessClientPV::ExtendedValue& value) {
           OnVariableChanged(channel, value);
         })};
-  m_variables.emplace(channel, new sup::epics::PvClientPV(std::move(pv_impl)));
+  m_variables.emplace(channel, new sup::epics::PvAccessClientPV(std::move(pv_impl)));
 }
 
 std::vector<std::string> PvAccessClientImpl::GetVariableNames() const
@@ -60,13 +60,13 @@ std::vector<std::string> PvAccessClientImpl::GetVariableNames() const
   return result;
 }
 
-const std::map<std::string, std::unique_ptr<PvClientPV>>& PvAccessClientImpl::GetVariables() const
+const std::map<std::string, std::unique_ptr<PvAccessClientPV>>& PvAccessClientImpl::GetVariables() const
 {
   return m_variables;
 }
 
 void PvAccessClientImpl::OnVariableChanged(const std::string& channel,
-                                           const PvClientPV::ExtendedValue& value)
+                                           const PvAccessClientPV::ExtendedValue& value)
 {
   if (m_cb)
   {

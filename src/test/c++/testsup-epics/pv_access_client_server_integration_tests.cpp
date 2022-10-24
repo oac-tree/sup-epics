@@ -37,7 +37,7 @@ using sup::epics::unit_test_helper::BusyWaitFor;
 
 using namespace sup::epics;
 
-//! Testing PVAccessServer and PVAccessClient together.
+//! Testing PvAccessServer and PvAccessClient together.
 
 class PVAccessClientServerIntegrationTests : public ::testing::Test
 {
@@ -45,7 +45,7 @@ public:
   using client_context_t = std::shared_ptr<pvxs::client::Context>;
 
   std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
-    const pvxs::server::Server& server, sup::epics::PVAccessClient::VariableChangedCallback cb = {})
+    const pvxs::server::Server& server, sup::epics::PvAccessClient::VariableChangedCallback cb = {})
   {
     std::shared_ptr<pvxs::client::Context> context =
       std::make_shared<pvxs::client::Context>(server.clientConfig().build());
@@ -64,10 +64,10 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating PVXS server and corresponding client context
   auto pvxs_server = CreateIsolatedServer();
-  PVAccessClient client(CreateClientImpl(*pvxs_server));
+  PvAccessClient client(CreateClientImpl(*pvxs_server));
 
   // creating server with single variable
-  PVAccessServer server(std::move(pvxs_server));
+  PvAccessServer server(std::move(pvxs_server));
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(channel_name, any_value);
 
@@ -117,10 +117,10 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating PVXS server and corresponding client context
   auto pvxs_server = CreateIsolatedServer();
-  PVAccessClient client(CreateClientImpl(*pvxs_server, client_listener.GetNamedCallBack()));
+  PvAccessClient client(CreateClientImpl(*pvxs_server, client_listener.GetNamedCallBack()));
 
   // creating server with single variable
-  PVAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack_old());
+  PvAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack_old());
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   server.AddVariable(channel_name, any_value);
 

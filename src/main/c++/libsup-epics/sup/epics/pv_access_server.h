@@ -34,7 +34,7 @@ namespace epics
 
 //! Represents a server to run multiple pvAccess variables.
 
-class PVAccessServer
+class PvAccessServer
 {
 public:
   using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
@@ -43,13 +43,13 @@ public:
   //! Constructor.
   //! @param context PVXS server.
   //! @param callback A callback to report changed variable.
-  explicit PVAccessServer(context_t context, callback_t callback = {});
-  ~PVAccessServer();
+  explicit PvAccessServer(context_t context, callback_t callback = {});
+  ~PvAccessServer();
 
-  PVAccessServer(const PVAccessServer&) = delete;
-  PVAccessServer& operator=(const PVAccessServer&) = delete;
-  PVAccessServer(PVAccessServer&&) = delete;
-  PVAccessServer& operator=(PVAccessServer&&) = delete;
+  PvAccessServer(const PvAccessServer&) = delete;
+  PvAccessServer& operator=(const PvAccessServer&) = delete;
+  PvAccessServer(PvAccessServer&&) = delete;
+  PvAccessServer& operator=(PvAccessServer&&) = delete;
 
   //! Add variable to the server with given channl name and initial value. Type of underlying PVA
   //! record will be deduced from AnyValue type. Will throw if such channel already exists.

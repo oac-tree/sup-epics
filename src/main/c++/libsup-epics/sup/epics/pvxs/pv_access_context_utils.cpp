@@ -39,10 +39,5 @@ std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
         new pvxs::server::Server(pvxs::server::Config::fromEnv()));
 }
 
-std::shared_ptr<pvxs::client::Context> CreateClientContextFromEnv()
-{
-  return std::make_shared<pvxs::client::Context>(pvxs::client::Context::fromEnv());
-}
-
 }  // namespace epics
 }  // namespace sup

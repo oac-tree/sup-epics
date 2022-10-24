@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_PV_ACCESS_CLIENT_PV_IMPL_H_
 #define SUP_EPICS_PV_ACCESS_CLIENT_PV_IMPL_H_
 
-#include <sup/epics/pv_client_pv.h>
+#include <sup/epics/pv_access_client_pv.h>
 
 #include <pvxs/client.h>
 
@@ -53,7 +53,7 @@ public:
    * @return True if the variable was connected within the timeout period.
    */
   PvAccessClientPVImpl(const std::string& channel, std::shared_ptr<pvxs::client::Context> context,
-                       PvClientPV::VariableChangedCallback cb = {});
+                       PvAccessClientPV::VariableChangedCallback cb = {});
   ~PvAccessClientPVImpl();
 
   PvAccessClientPVImpl(const PvAccessClientPVImpl&) = delete;
@@ -87,7 +87,7 @@ public:
    *
    * @return Structure with value and different status fields (e.g. connected, status, etc.)
    */
-  PvClientPV::ExtendedValue GetExtendedValue() const;
+  PvAccessClientPV::ExtendedValue GetExtendedValue() const;
 
     /**
    * @brief Write the value to the EPICS PvAccess server.
@@ -121,8 +121,8 @@ private:
   void ProcessMonitor(pvxs::client::Subscription& sub);
   const std::string m_channel_name;
   std::shared_ptr<pvxs::client::Context> m_context;
-  PvClientPV::VariableChangedCallback m_changed_cb;
-  PvClientPV::ExtendedValue m_cache;
+  PvAccessClientPV::VariableChangedCallback m_changed_cb;
+  PvAccessClientPV::ExtendedValue m_cache;
   mutable std::mutex m_mon_mtx;
   mutable std::condition_variable m_cv;
   std::shared_ptr<pvxs::client::Subscription> m_subscription;

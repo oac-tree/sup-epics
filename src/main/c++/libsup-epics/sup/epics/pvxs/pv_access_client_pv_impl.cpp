@@ -34,7 +34,7 @@ namespace epics
 {
 
 PvAccessClientPVImpl::PvAccessClientPVImpl(const std::string& channel,
-  std::shared_ptr<pvxs::client::Context> context, PvClientPV::VariableChangedCallback cb)
+  std::shared_ptr<pvxs::client::Context> context, PvAccessClientPV::VariableChangedCallback cb)
   : m_channel_name{channel}
   , m_context{std::move(context)}
   , m_changed_cb{std::move(cb)}
@@ -81,7 +81,7 @@ sup::dto::AnyValue PvAccessClientPVImpl::GetValue() const
   return m_cache.value;
 }
 
-PvClientPV::ExtendedValue PvAccessClientPVImpl::GetExtendedValue() const
+PvAccessClientPV::ExtendedValue PvAccessClientPVImpl::GetExtendedValue() const
 {
   std::lock_guard<std::mutex> lk(m_mon_mtx);
   return m_cache;
@@ -141,7 +141,7 @@ bool PvAccessClientPVImpl::WaitForValidValue(double timeout_sec) const
 
 void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
 {
-  PvClientPV::ExtendedValue result = m_cache;
+  PvAccessClientPV::ExtendedValue result = m_cache;
   while (true)
   {
     try
