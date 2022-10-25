@@ -1,5 +1,4 @@
 target_sources(${library_name} PRIVATE
-  pv_access_context_utils.cpp
   pv_access_client.cpp
   pv_access_client_impl.cpp
   pv_access_client_pv.cpp

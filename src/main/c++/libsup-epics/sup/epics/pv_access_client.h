@@ -57,10 +57,11 @@ public:
 
   ~PvAccessClient();
 
+  PvAccessClient(PvAccessClient&& other);
+  PvAccessClient& operator=(PvAccessClient&& other);
+
   PvAccessClient(const PvAccessClient&) = delete;
   PvAccessClient& operator=(const PvAccessClient&) = delete;
-  PvAccessClient(PvAccessClient&&) = delete;
-  PvAccessClient& operator=(PvAccessClient&&) = delete;
 
   /**
    * @brief Add variable with the given channel. Will throw if such channel already exists.

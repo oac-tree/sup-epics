@@ -46,10 +46,10 @@ namespace epics
 class PvAccessServerPV
 {
 public:
-  using callback_t = std::function<void(const sup::dto::AnyValue&)>;
+  using VariableChangedCallback = std::function<void(const sup::dto::AnyValue&)>;
 
   PvAccessServerPV(const std::string& variable_name, const sup::dto::AnyValue& any_value,
-                         callback_t callback);
+                         VariableChangedCallback callback);
   ~PvAccessServerPV();
 
   PvAccessServerPV(const PvAccessServerPV&) = delete;
@@ -76,7 +76,7 @@ private:
   const std::string m_variable_name;
   sup::dto::AnyValue m_any_value;  //!< The main value of this variable.
   pvxs::Value m_pvxs_cache;        //!< Necessary for open/post operations of SharedPV
-  callback_t m_callback;
+  VariableChangedCallback m_callback;
   pvxs::server::SharedPV m_shared_pv;
   mutable std::mutex m_mutex;
 

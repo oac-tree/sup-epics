@@ -33,7 +33,8 @@ namespace epics
 class PvAccessServerImpl
 {
 public:
-  PvAccessServerImpl(PvAccessServer::context_t context, PvAccessServer::callback_t callback);
+  PvAccessServerImpl(std::unique_ptr<pvxs::server::Server>&& context,
+                     PvAccessServer::VariableChangedCallback callback);
 
   //! Adds channel with given name to the map of channels.
   void AddVariable(const std::string& name, const dto::AnyValue& any_value);
@@ -42,14 +43,25 @@ public:
 
   const std::map<std::string, std::unique_ptr<PvAccessServerPV>>& GetVariables() const;
 
-  PvAccessServer::context_t& GetContext();
+  std::unique_ptr<pvxs::server::Server>& GetContext();
+
+  std::shared_ptr<pvxs::client::Context> GetClientContext();
 
 private:
   void OnVariableChanged(const std::string& name, const sup::dto::AnyValue& any_value);
-  PvAccessServer::context_t m_context;
-  PvAccessServer::callback_t m_callback;
+  std::unique_ptr<pvxs::server::Server> m_context;
+  PvAccessServer::VariableChangedCallback m_callback;
   std::map<std::string, std::unique_ptr<PvAccessServerPV>> m_variables;
+  std::shared_ptr<pvxs::client::Context> m_client_context;
 };
+
+//! Creates PvAccess server implementation suitable for unit tests.
+std::unique_ptr<PvAccessServerImpl> CreateIsolatedServerImpl(
+  PvAccessServer::VariableChangedCallback cb);
+
+//! Creates PvAccess server implementation from $EPICS_PVA* environment variables.
+std::unique_ptr<PvAccessServerImpl> CreateServerImplFromEnv(
+  PvAccessServer::VariableChangedCallback cb);
 
 }  // namespace epics
 

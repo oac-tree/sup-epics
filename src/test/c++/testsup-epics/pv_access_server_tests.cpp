@@ -24,7 +24,6 @@
 #include <pvxs/server.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pv_access_server.h>
-#include <sup/epics/pv_access_context_utils.h>
 
 #include <thread>
 
@@ -41,7 +40,7 @@ class PVAccessServerTests : public ::testing::Test
 
 TEST_F(PVAccessServerTests, InitialState)
 {
-  PvAccessServer server(CreateIsolatedServer());
+  PvAccessServer server(PvAccessServer::Isolated);
 
   EXPECT_TRUE(server.GetVariableNames().empty());
 
@@ -55,7 +54,7 @@ TEST_F(PVAccessServerTests, InitialState)
 
 TEST_F(PVAccessServerTests, AddVariableAndGetSetWithoutRunning)
 {
-  PvAccessServer server(CreateIsolatedServer());
+  PvAccessServer server(PvAccessServer::Isolated);
 
   // adding the channel and checking the value
   sup::dto::AnyValue any_value0({
@@ -91,7 +90,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPut)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PvAccessServer server(CreateServerFromEnv());
+  PvAccessServer server;
 
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
@@ -128,7 +127,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PvAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack_old());
+  PvAccessServer server(listener.GetNamedCallBack_old());
 
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}

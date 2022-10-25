@@ -19,6 +19,7 @@
 
 #include "pv_access_server_impl.h"
 
+#include <pvxs/client.h>
 #include <pvxs/server.h>
 
 #include <stdexcept>
@@ -27,9 +28,12 @@ namespace sup
 {
 namespace epics
 {
-PvAccessServerImpl::PvAccessServerImpl(PvAccessServer::context_t context,
-                                       PvAccessServer::callback_t callback)
-    : m_context(std::move(context)), m_callback(std::move(callback))
+PvAccessServerImpl::PvAccessServerImpl(std::unique_ptr<pvxs::server::Server>&& context,
+                                       PvAccessServer::VariableChangedCallback callback)
+  : m_context(std::move(context))
+  , m_callback(std::move(callback))
+  , m_variables{}
+  , m_client_context{std::make_shared<pvxs::client::Context>(m_context->clientConfig().build())}
 {}
 
 //! Adds channel with given name to the map of channels.
@@ -41,7 +45,7 @@ void PvAccessServerImpl::AddVariable(const std::string& name, const dto::AnyValu
     throw std::runtime_error("Error in PvAccessServer: existing variable name '" + name + "'.");
   }
 
-  PvAccessServerPV::callback_t variable_callback;
+  PvAccessServerPV::VariableChangedCallback variable_callback;
   if (m_callback)
   {
     variable_callback = [this, name](const sup::dto::AnyValue& any_value)
@@ -67,9 +71,14 @@ PvAccessServerImpl::GetVariables() const
   return m_variables;
 }
 
-PvAccessServer::context_t& PvAccessServerImpl::GetContext()
+std::unique_ptr<pvxs::server::Server>& PvAccessServerImpl::GetContext()
 {
   return m_context;
+}
+
+std::shared_ptr<pvxs::client::Context> PvAccessServerImpl::GetClientContext()
+{
+  return m_client_context;
 }
 
 void PvAccessServerImpl::OnVariableChanged(const std::string& name,
@@ -79,6 +88,24 @@ void PvAccessServerImpl::OnVariableChanged(const std::string& name,
   {
     m_callback(name, any_value);
   }
+}
+
+std::unique_ptr<PvAccessServerImpl> CreateIsolatedServerImpl(
+  PvAccessServer::VariableChangedCallback cb)
+{
+  auto server = std::unique_ptr<pvxs::server::Server>(
+      new pvxs::server::Server(pvxs::server::Config::isolated()));
+  return std::unique_ptr<PvAccessServerImpl>(
+    new PvAccessServerImpl(std::move(server), std::move(cb)));
+}
+
+std::unique_ptr<PvAccessServerImpl> CreateServerImplFromEnv(
+  PvAccessServer::VariableChangedCallback cb)
+{
+  auto server = std::unique_ptr<pvxs::server::Server>(
+      new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+  return std::unique_ptr<PvAccessServerImpl>(
+    new PvAccessServerImpl(std::move(server), std::move(cb)));
 }
 
 }  // namespace epics

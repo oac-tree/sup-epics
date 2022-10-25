@@ -35,6 +35,19 @@ PvAccessClient::PvAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl)
 
 PvAccessClient::~PvAccessClient() = default;
 
+PvAccessClient::PvAccessClient(PvAccessClient&& other)
+  : m_impl{std::move(other.m_impl)}
+{}
+
+PvAccessClient& PvAccessClient::operator=(PvAccessClient&& other)
+{
+  if (this != &other)
+  {
+    std::swap(m_impl, other.m_impl);
+  }
+  return *this;
+}
+
 void PvAccessClient::AddVariable(const std::string& channel)
 {
   m_impl->AddVariable(channel);

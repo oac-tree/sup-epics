@@ -25,12 +25,17 @@
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_pv.h>
-#include <sup/epics/pv_access_context_utils.h>
 
 #include <thread>
 
 using msec = std::chrono::milliseconds;
 using ::testing::_;
+
+namespace
+{
+std::unique_ptr<pvxs::server::Server> CreateIsolatedServer();
+std::unique_ptr<pvxs::server::Server> CreateServerFromEnv();
+}  // unnamed namespace
 
 class PvAccessServerPVTests : public ::testing::Test
 {
@@ -91,7 +96,7 @@ TEST_F(PvAccessServerPVTests, GetAndSet)
 
 TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
 {
-  auto server = sup::epics::CreateIsolatedServer();
+  auto server = CreateIsolatedServer();
 
   const std::string variable_name{"variable_name"};
 
@@ -122,7 +127,7 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
 {
   MockListener listener;
 
-  auto server = sup::epics::CreateIsolatedServer();
+  auto server = CreateIsolatedServer();
 
   const std::string variable_name{"variable_name"};
 
@@ -154,7 +159,7 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
 
 TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 {
-  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv(); // to make 'pvget` working
   server->start();
 
   const std::string variable_name{"variable_name"};
@@ -177,7 +182,7 @@ TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 
 TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 {
-  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv(); // to make 'pvget` working
 
   const std::string variable_name{"variable_name"};
 
@@ -202,7 +207,7 @@ TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 
 TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 {
-  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv(); // to make 'pvget` working
 
   const std::string variable_name{"variable_name"};
 
@@ -239,7 +244,7 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 
 TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
 {
-  auto server = sup::epics::CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv(); // to make 'pvget` working
 
   MockListener listener;
 
@@ -274,3 +279,18 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
   // validating variable cache
   EXPECT_EQ(variable.GetValue(), expected_any_value);
 }
+
+namespace
+{
+std::unique_ptr<pvxs::server::Server> CreateIsolatedServer()
+{
+  return std::unique_ptr<pvxs::server::Server>(
+      new pvxs::server::Server(pvxs::server::Config::isolated()));
+}
+
+std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
+{
+  return std::unique_ptr<pvxs::server::Server>(
+        new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+}
+}  // unnamed namespace

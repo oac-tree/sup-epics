@@ -38,6 +38,5 @@ install(FILES
         sup/epics/pv_access_client.h
         sup/epics/pv_access_client_pv.h
         sup/epics/pv_access_server.h
-        sup/epics/pv_access_context_utils.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
 )

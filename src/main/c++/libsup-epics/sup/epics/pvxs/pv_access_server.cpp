@@ -19,9 +19,12 @@
 
 #include "sup/epics/pv_access_server.h"
 
-#include <pvxs/server.h>
+#include <sup/epics/pvxs/pv_access_client_impl.h>
+#include <sup/epics/pvxs/pv_access_client_pv_impl.h>
 #include <sup/epics/pvxs/pv_access_server_pv.h>
 #include <sup/epics/pvxs/pv_access_server_impl.h>
+
+#include <pvxs/server.h>
 
 #include <map>
 #include <stdexcept>
@@ -31,12 +34,14 @@ namespace sup
 {
 namespace epics
 {
-PvAccessServer::PvAccessServer(context_t context, callback_t callback)
-  : p_impl(new PvAccessServerImpl(std::move(context), std::move(callback)))
+PvAccessServer::IsolatedTag PvAccessServer::Isolated{};
+
+PvAccessServer::PvAccessServer(VariableChangedCallback callback)
+  : p_impl{CreateServerImplFromEnv(std::move(callback))}
 {}
 
-PvAccessServer::PvAccessServer(std::unique_ptr<PvAccessServerImpl>&& impl)
-  : p_impl{std::move(impl)}
+PvAccessServer::PvAccessServer(IsolatedTag, VariableChangedCallback callback)
+  : p_impl{CreateIsolatedServerImpl(std::move(callback))}
 {}
 
 PvAccessServer::~PvAccessServer() = default;
@@ -80,6 +85,21 @@ void PvAccessServer::Start()
 
   // starting PVXS server
   p_impl->GetContext()->start();
+}
+
+PvAccessClient PvAccessServer::CreateClient(PvAccessClient::VariableChangedCallback cb)
+{
+  auto client_impl = std::unique_ptr<sup::epics::PvAccessClientImpl>{
+      new sup::epics::PvAccessClientImpl(p_impl->GetClientContext(), cb)};
+  return PvAccessClient{std::move(client_impl)};
+}
+
+PvAccessClientPV PvAccessServer::CreateClientPV(const std::string& channel,
+                                                PvAccessClientPV::VariableChangedCallback cb)
+{
+  auto client_pv_impl = std::unique_ptr<sup::epics::PvAccessClientPVImpl>{
+      new sup::epics::PvAccessClientPVImpl(channel, p_impl->GetClientContext(), cb)};
+  return PvAccessClientPV{std::move(client_pv_impl)};
 }
 
 }  // namespace epics

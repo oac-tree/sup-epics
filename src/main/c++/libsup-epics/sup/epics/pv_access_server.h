@@ -20,6 +20,8 @@
 #ifndef SUP_EPICS_PV_ACCESS_SERVER_H_
 #define SUP_EPICS_PV_ACCESS_SERVER_H_
 
+#include <sup/epics/pv_access_client.h>
+
 #include <sup/dto/anyvalue.h>
 
 #include <functional>
@@ -45,14 +47,15 @@ class PvAccessServerImpl;
 class PvAccessServer
 {
 public:
-  using callback_t = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
-  using context_t = std::unique_ptr<pvxs::server::Server>;
+  using VariableChangedCallback = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
+
+  struct IsolatedTag {};
+  static IsolatedTag Isolated;
 
   //! Constructor.
-  //! @param context PVXS server.
   //! @param callback A callback to report changed variable.
-  explicit PvAccessServer(context_t context, callback_t callback = {});
-  explicit PvAccessServer(std::unique_ptr<PvAccessServerImpl>&& impl);
+  explicit PvAccessServer(VariableChangedCallback callback = {});
+  explicit PvAccessServer(IsolatedTag isolated, VariableChangedCallback callback = {});
   ~PvAccessServer();
 
   PvAccessServer(const PvAccessServer&) = delete;
@@ -83,6 +86,13 @@ public:
 
   //! Starts PVXS server and publishes all added variables.
   void Start();
+
+  //! Create a PvAccess client based on this server's context.
+  PvAccessClient CreateClient(PvAccessClient::VariableChangedCallback cb = {});
+
+  //! Create a PvAccess client based on this server's context.
+  PvAccessClientPV CreateClientPV(const std::string& channel,
+                                  PvAccessClientPV::VariableChangedCallback cb = {});
 
 private:
   std::unique_ptr<PvAccessServerImpl> p_impl;

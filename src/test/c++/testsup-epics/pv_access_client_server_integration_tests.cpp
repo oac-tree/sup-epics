@@ -28,7 +28,6 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pv_access_client.h>
 #include <sup/epics/pv_access_server.h>
-#include <sup/epics/pv_access_context_utils.h>
 
 #include <thread>
 
@@ -42,17 +41,6 @@ using namespace sup::epics;
 class PvAccessClientServerIntegrationTests : public ::testing::Test
 {
 public:
-  using client_context_t = std::shared_ptr<pvxs::client::Context>;
-
-  std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
-    const pvxs::server::Server& server, sup::epics::PvAccessClient::VariableChangedCallback cb = {})
-  {
-    std::shared_ptr<pvxs::client::Context> context =
-      std::make_shared<pvxs::client::Context>(server.clientConfig().build());
-    std::unique_ptr<sup::epics::PvAccessClientImpl> result{
-      new sup::epics::PvAccessClientImpl(context, cb)};
-    return std::move(result);
-  }
 };
 
 //! Standard scenario. Server with single variable and single client.
@@ -62,12 +50,8 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 {
   const std::string channel_name("channel0");
 
-  // creating PVXS server and corresponding client context
-  auto pvxs_server = CreateIsolatedServer();
-  PvAccessClient client(CreateClientImpl(*pvxs_server));
-
   // creating server with single variable
-  PvAccessServer server(std::move(pvxs_server));
+  PvAccessServer server(PvAccessServer::Isolated);
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
   });
@@ -79,6 +63,7 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
 
   // creating a client with single variable
+  PvAccessClient client = server.CreateClient();
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides
@@ -118,12 +103,8 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_CALL(server_listener, OnNamedValueChanged_old(_, _)).Times(0);
   EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
 
-  // creating PVXS server and corresponding client context
-  auto pvxs_server = CreateIsolatedServer();
-  PvAccessClient client(CreateClientImpl(*pvxs_server, client_listener.GetNamedCallBack()));
-
   // creating server with single variable
-  PvAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack_old());
+  PvAccessServer server(PvAccessServer::Isolated, server_listener.GetNamedCallBack_old());
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
   });
@@ -135,6 +116,7 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
 
   // creating a client with single variable
+  PvAccessClient client = server.CreateClient(client_listener.GetNamedCallBack());
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides

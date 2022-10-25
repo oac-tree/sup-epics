@@ -66,10 +66,11 @@ public:
 
   ~PvAccessClientPV();
 
+  PvAccessClientPV(PvAccessClientPV&& other);
+  PvAccessClientPV& operator=(PvAccessClientPV&& other);
+
   PvAccessClientPV(const PvAccessClientPV&) = delete;
   PvAccessClientPV& operator=(const PvAccessClientPV&) = delete;
-  PvAccessClientPV(PvAccessClientPV&&) = delete;
-  PvAccessClientPV& operator=(PvAccessClientPV&&) = delete;
 
     /**
    * @brief Check if channel is connected.

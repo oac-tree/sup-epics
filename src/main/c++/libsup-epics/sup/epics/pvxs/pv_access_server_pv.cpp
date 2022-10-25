@@ -28,7 +28,7 @@ namespace epics
 
 PvAccessServerPV::PvAccessServerPV(const std::string& variable_name,
                                    const sup::dto::AnyValue& any_value,
-                                   callback_t callback)
+                                   VariableChangedCallback callback)
   : m_variable_name(variable_name)
   , m_any_value(any_value)
   , m_pvxs_cache(BuildPVXSValue(m_any_value))

@@ -41,6 +41,19 @@ PvAccessClientPV::PvAccessClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl)
 
 PvAccessClientPV::~PvAccessClientPV() = default;
 
+PvAccessClientPV::PvAccessClientPV(PvAccessClientPV&& other)
+  : m_impl{std::move(other.m_impl)}
+{}
+
+PvAccessClientPV& PvAccessClientPV::operator=(PvAccessClientPV&& other)
+{
+  if (this != &other)
+  {
+    std::swap(m_impl, other.m_impl);
+  }
+  return *this;
+}
+
 bool PvAccessClientPV::IsConnected() const
 {
   return m_impl->IsConnected();
