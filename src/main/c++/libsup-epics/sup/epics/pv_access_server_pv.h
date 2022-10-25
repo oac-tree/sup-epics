@@ -64,8 +64,8 @@ public:
   void AddToServer(pvxs::server::Server& server);
 
 private:
-  struct PVAccessServerVariableImpl;
-  PVAccessServerVariableImpl* p_impl{nullptr};
+  struct PvAccessServerPVImpl;
+  PvAccessServerPVImpl* p_impl{nullptr};
 };
 
 }  // namespace epics

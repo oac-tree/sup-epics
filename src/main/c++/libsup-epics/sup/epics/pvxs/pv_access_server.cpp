@@ -32,16 +32,17 @@ namespace epics
 {
 
 // ----------------------------------------------------------------------------
-// PVAccessServerImpl
+// PvAccessServerImpl
 // ----------------------------------------------------------------------------
 
-struct PvAccessServer::PVAccessServerImpl
+class PvAccessServerImpl
 {
-  context_t m_context;
-  callback_t m_callback;
+public:
+  PvAccessServer::context_t m_context;
+  PvAccessServer::callback_t m_callback;
   std::map<std::string, std::unique_ptr<PvAccessServerPV>> m_variables;
 
-  PVAccessServerImpl(context_t context, callback_t callback)
+  PvAccessServerImpl(PvAccessServer::context_t context, PvAccessServer::callback_t callback)
       : m_context(std::move(context)), m_callback(std::move(callback))
   {
   }
@@ -89,7 +90,7 @@ struct PvAccessServer::PVAccessServerImpl
 // ----------------------------------------------------------------------------
 
 PvAccessServer::PvAccessServer(context_t context, callback_t callback)
-    : p_impl(new PVAccessServerImpl(std::move(context), std::move(callback)))
+    : p_impl(new PvAccessServerImpl(std::move(context), std::move(callback)))
 {
 }
 

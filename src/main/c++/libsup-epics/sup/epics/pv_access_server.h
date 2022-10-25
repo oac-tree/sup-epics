@@ -31,7 +31,7 @@ namespace sup
 {
 namespace epics
 {
-
+class PvAccessServerImpl;
 //! Represents a server to run multiple pvAccess variables.
 
 class PvAccessServer
@@ -76,8 +76,7 @@ public:
   void Start();
 
 private:
-  struct PVAccessServerImpl;
-  PVAccessServerImpl* p_impl{nullptr};
+  PvAccessServerImpl* p_impl{nullptr};
 };
 
 }  // namespace epics

@@ -35,10 +35,10 @@ namespace epics
 {
 
 // ----------------------------------------------------------------------------
-// PVAccessServerVariableImpl
+// PvAccessServerPVImpl
 // ----------------------------------------------------------------------------
 
-struct PvAccessServerPV::PVAccessServerVariableImpl
+struct PvAccessServerPV::PvAccessServerPVImpl
 {
   const std::string m_variable_name;
   sup::dto::AnyValue m_any_value;  //!< The main value of this variable.
@@ -47,7 +47,7 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
   pvxs::server::SharedPV m_shared_pv;
   std::mutex m_mutex;
 
-  PVAccessServerVariableImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
+  PvAccessServerPVImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
                              callback_t callback)
       : m_variable_name(variable_name)
       , m_any_value(any_value)
@@ -61,7 +61,7 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
     }
     using namespace std::placeholders;
     m_shared_pv.onPut(
-        std::bind(&PVAccessServerVariableImpl::OnSharedValueChanged, this, _1, _2, _3));
+        std::bind(&PvAccessServerPVImpl::OnSharedValueChanged, this, _1, _2, _3));
   }
 
   //! Get AnyValue stored in cache.
@@ -140,7 +140,7 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
 PvAccessServerPV::PvAccessServerPV(const std::string& variable_name,
                                                const sup::dto::AnyValue& any_value,
                                                callback_t callback)
-    : p_impl(new PVAccessServerVariableImpl(variable_name, any_value, std::move(callback)))
+    : p_impl(new PvAccessServerPVImpl(variable_name, any_value, std::move(callback)))
 {
 }
 
