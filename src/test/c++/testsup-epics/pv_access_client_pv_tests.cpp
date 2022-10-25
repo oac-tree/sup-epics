@@ -375,16 +375,11 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
 
   // retrieving value
   auto any_value = variable.GetValue();
-  EXPECT_EQ(any_value.GetType(), sup::dto::SignedInteger32Type);
-  EXPECT_EQ(any_value, kInitialValue);
+  EXPECT_TRUE(sup::dto::IsStructValue(any_value));
+  ASSERT_TRUE(any_value.HasField("value"));
+  EXPECT_EQ(any_value["value"], kInitialValue);
 
   // modifying the field in retrieved value
-  any_value = kInitialValue + 1;
-  EXPECT_TRUE(variable.SetValue(any_value));
-
-  // checking the value on server side
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_value = m_shared_pv.fetch();
-    return shared_value["value"].as<int>() == kInitialValue + 1;
-  }));
+  sup::dto::AnyValue update = kInitialValue + 1;
+  EXPECT_THROW(variable.SetValue(update), std::runtime_error);
 }

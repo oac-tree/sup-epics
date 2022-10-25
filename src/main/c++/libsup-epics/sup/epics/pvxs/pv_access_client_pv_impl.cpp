@@ -96,7 +96,11 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
       return false;
     }
   }
-  auto pvxs_value = sup::epics::BuildScalarAwarePVXSValue(value);
+  if (sup::dto::IsScalarValue(value))
+  {
+    throw std::runtime_error("Error in PvAccessClientPV: cannot set a scalar value");
+  }
+  auto pvxs_value = sup::epics::BuildPVXSValue(value);
 
   auto operation = m_context->put(m_channel_name)
                     .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
@@ -149,7 +153,7 @@ void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
       auto update = sub.pop();
       if (update)
       {
-        if (!sup::dto::TryConvert(result.value, sup::epics::BuildScalarAwareAnyValue(update)))
+        if (!sup::dto::TryConvert(result.value, sup::epics::BuildAnyValue(update)))
         {
           throw std::runtime_error("PvAccessClientPVImpl received incompatible value update.");
         }

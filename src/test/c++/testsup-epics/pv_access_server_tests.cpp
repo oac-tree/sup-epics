@@ -58,7 +58,9 @@ TEST_F(PVAccessServerTests, AddVariableAndGetSetWithoutRunning)
   PvAccessServer server(CreateIsolatedServer());
 
   // adding the channel and checking the value
-  sup::dto::AnyValue any_value0{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value0({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   server.AddVariable("channel0", any_value0);
   EXPECT_EQ(server.GetValue("channel0"), any_value0);
 
@@ -74,7 +76,9 @@ TEST_F(PVAccessServerTests, AddVariableAndGetSetWithoutRunning)
   EXPECT_THROW(server.AddVariable("channel1", any_value1), std::runtime_error);
 
   // changing first channel
-  sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
+  sup::dto::AnyValue new_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 45}}
+  });
   EXPECT_TRUE(server.SetValue("channel0", new_any_value));
   EXPECT_EQ(server.GetValue("channel0"), new_any_value);
 }
@@ -89,7 +93,9 @@ TEST_F(PVAccessServerTests, GetAfterPvPut)
   // creating from the environment config to be able to use `pvget` and `pvput`
   PvAccessServer server(CreateServerFromEnv());
 
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   server.AddVariable(variable_name, any_value);
 
   server.Start();
@@ -106,7 +112,9 @@ TEST_F(PVAccessServerTests, GetAfterPvPut)
   std::this_thread::sleep_for(msec(20));
 
   // validating variable cache
-  sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  sup::dto::AnyValue expected_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 4321}}
+  });
   EXPECT_EQ(server.GetValue(variable_name), expected_any_value);
 }
 
@@ -122,7 +130,9 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   // creating from the environment config to be able to use `pvget` and `pvput`
   PvAccessServer server(CreateServerFromEnv(), listener.GetNamedCallBack_old());
 
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   server.AddVariable(variable_name, any_value);
   server.AddVariable("another-variable-name", any_value);
 
@@ -135,7 +145,9 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
 
   // setting up callback expectations
-  sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  sup::dto::AnyValue expected_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 4321}}
+  });
   EXPECT_CALL(listener, OnNamedValueChanged_old(variable_name, expected_any_value)).Times(1);
 
   // changing the value via `pvput`

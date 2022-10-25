@@ -48,9 +48,8 @@ TEST_F(PvAccessServerPVTests, InitialState)
 
   {  // variable is based on scalar AnyValue
     sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-    sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
-    EXPECT_EQ(variable.GetVariableName(), variable_name);
-    EXPECT_EQ(variable.GetValue(), any_value);
+    EXPECT_THROW(sup::epics::PvAccessServerPV variable(variable_name, any_value, {}),
+                 std::runtime_error);
   }
 
   {  // variable is based on struct AnyValue
@@ -70,12 +69,16 @@ TEST_F(PvAccessServerPVTests, GetAndSet)
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   // setting new value and checking result
-  sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
+  sup::dto::AnyValue new_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 45}}
+  });
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
   // attempt to set value with different type
@@ -93,7 +96,9 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
@@ -101,7 +106,9 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
   std::this_thread::sleep_for(msec(20));
 
   // setting new value and checking the result
-  sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
+  sup::dto::AnyValue new_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 45}}
+  });
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
   std::this_thread::sleep_for(msec(20));
@@ -120,7 +127,9 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack_old());
   EXPECT_EQ(variable.GetValue(), any_value);
 
@@ -128,7 +137,9 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
   std::this_thread::sleep_for(msec(20));
 
   // setting new value and checking the result
-  sup::dto::AnyValue new_any_value{sup::dto::SignedInteger32Type, 45};
+  sup::dto::AnyValue new_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 45}}
+  });
   // setting up callback expectations
   EXPECT_CALL(listener, OnValueChanged_old(new_any_value)).Times(1);
 
@@ -148,7 +159,9 @@ TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
@@ -168,7 +181,9 @@ TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
@@ -191,7 +206,9 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
@@ -210,7 +227,9 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
   std::this_thread::sleep_for(msec(20));
 
   // validating variable cache
-  sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  sup::dto::AnyValue expected_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 4321}}
+  });
   EXPECT_EQ(variable.GetValue(), expected_any_value);
 }
 
@@ -226,7 +245,9 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack_old());
 
   variable.AddToServer(*server);
@@ -240,7 +261,9 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
   EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
 
   // setting up callback expectations
-  sup::dto::AnyValue expected_any_value{sup::dto::SignedInteger32Type, 4321};
+  sup::dto::AnyValue expected_any_value({
+    {"value", {sup::dto::SignedInteger32Type, 4321}}
+  });
   EXPECT_CALL(listener, OnValueChanged_old(expected_any_value)).Times(1);
 
   // changing the value via `pvput`

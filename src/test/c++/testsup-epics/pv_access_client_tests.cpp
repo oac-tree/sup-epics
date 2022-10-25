@@ -50,12 +50,12 @@ const std::string kInitialStringChannelValue = "abc";
 const std::string kStringChannelName = "PVXS-TESTS:STRING";
 }  // namespace
 
-class PVAccessClientTest : public ::testing::Test
+class PvAccessClientTest : public ::testing::Test
 {
 public:
   using shared_context_t = std::shared_ptr<pvxs::client::Context>;
 
-  PVAccessClientTest()
+  PvAccessClientTest()
       : m_shared_ntscalar_pv(pvxs::server::SharedPV::buildMailbox())
       , m_shared_string_pv(pvxs::server::SharedPV::buildMailbox())
   {
@@ -99,7 +99,7 @@ public:
 //! Check initial state of PvAccessClient when no server is running, and no variables have been
 //! added. Server was created (but not started) before the client.
 
-TEST_F(PVAccessClientTest, InitialState)
+TEST_F(PvAccessClientTest, InitialState)
 {
   sup::epics::PvAccessClient client(CreateClientImpl());
 
@@ -114,7 +114,7 @@ TEST_F(PVAccessClientTest, InitialState)
 
 //! Check AddVariable when no server is running. Server was created before the client.
 
-TEST_F(PVAccessClientTest, AddVariableAndSetValueWhenUnconnected)
+TEST_F(PvAccessClientTest, AddVariableAndSetValueWhenUnconnected)
 {
   sup::epics::PvAccessClient client(CreateClientImpl());
 
@@ -146,7 +146,7 @@ TEST_F(PVAccessClientTest, AddVariableAndSetValueWhenUnconnected)
 
 // FIXME
 
-TEST_F(PVAccessClientTest, TwoDifferentChannels)
+TEST_F(PvAccessClientTest, TwoDifferentChannels)
 {
   // starting a server with two variables
   m_server.start();
@@ -164,17 +164,19 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
 
   // checking updated values
   auto any_value0 = client.GetValue(kIntChannelName);
+  ASSERT_TRUE(any_value0.HasField("value"));
   EXPECT_EQ(any_value0["value"], kInitialIntChannelValue);
 
   // m_shared_string_pv is a `struct-scalar`, i.e. a struct with a single `value` field
   // PvAccessClient sees it as a simple scalar
   auto any_value1 = client.GetValue(kStringChannelName);
-  EXPECT_EQ(any_value1, kInitialStringChannelValue);
+  ASSERT_TRUE(any_value1.HasField("value"));
+  EXPECT_EQ(any_value1["value"], kInitialStringChannelValue);
 
   // setting values
   any_value0["value"] = kInitialIntChannelValue + 1;
   EXPECT_TRUE(client.SetValue(kIntChannelName, any_value0));
-  any_value1 = std::string("abc2");
+  any_value1["value"] = std::string("abc2");
   EXPECT_TRUE(client.SetValue(kStringChannelName, any_value1));
 
   // checking values on server side
@@ -192,7 +194,7 @@ TEST_F(PVAccessClientTest, TwoDifferentChannels)
 //! clients. Two clients with single variable each are started after. One client sets the value,
 //! checking updated value from second client. Both clients have callbacks.
 
-TEST_F(PVAccessClientTest, TwoClients)
+TEST_F(PvAccessClientTest, TwoClients)
 {
   MockListener listener1;
   MockListener listener2;

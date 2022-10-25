@@ -39,7 +39,7 @@ using namespace sup::epics;
 
 //! Testing PvAccessServer and PvAccessClient together.
 
-class PVAccessClientServerIntegrationTests : public ::testing::Test
+class PvAccessClientServerIntegrationTests : public ::testing::Test
 {
 public:
   using client_context_t = std::shared_ptr<pvxs::client::Context>;
@@ -58,7 +58,7 @@ public:
 //! Standard scenario. Server with single variable and single client.
 //! Start server, check client, change the value via the server and the client.
 
-TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleClient)
+TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleClient)
 {
   const std::string channel_name("channel0");
 
@@ -68,7 +68,9 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating server with single variable
   PvAccessServer server(std::move(pvxs_server));
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   server.AddVariable(channel_name, any_value);
 
   server.Start();
@@ -85,26 +87,27 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // changing the value via the server and checking values on server and client sides
-  sup::dto::AnyValue new_any_value1{sup::dto::SignedInteger32Type, 43};
-  server.SetValue(channel_name, new_any_value1);
+  EXPECT_THROW(server.SetValue(channel_name, 43), std::runtime_error);
+  any_value["value"] = 43;
+  server.SetValue(channel_name, any_value);
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value1; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value1; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // changing the value via the client and checking values on server and client sides
-  sup::dto::AnyValue new_any_value2{sup::dto::SignedInteger32Type, 44};
+  any_value["value"] = 44;
 
-  client.SetValue(channel_name, new_any_value2);
+  client.SetValue(channel_name, any_value);
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value2; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value2; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 }
 
 //! Standard scenario. Server with single variable and single client.
 //! Start server, check client, change the value via the server and the client.
 //! Here we also control callback signaling.
 
-TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleClientWithCallbacks)
+TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleClientWithCallbacks)
 {
   MockListener server_listener;
   MockListener client_listener;
@@ -121,7 +124,9 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
 
   // creating server with single variable
   PvAccessServer server(std::move(pvxs_server), server_listener.GetNamedCallBack_old());
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
   server.AddVariable(channel_name, any_value);
 
   server.Start();
@@ -142,7 +147,9 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   testing::Mock::VerifyAndClearExpectations(&client_listener);
 
   // changing the value via the server and checking values on server and client sides
-  sup::dto::AnyValue new_any_value1{sup::dto::SignedInteger32Type, 43};
+  sup::dto::AnyValue new_any_value1({
+    {"value", {sup::dto::SignedInteger32Type, 43}}
+  });
 
   // setting up callback expectations
   EXPECT_CALL(server_listener, OnNamedValueChanged_old(channel_name, _)).Times(1);
@@ -158,7 +165,9 @@ TEST_F(PVAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   testing::Mock::VerifyAndClearExpectations(&client_listener);
 
   // changing the value via the client and checking values on server and client sides
-  sup::dto::AnyValue new_any_value2{sup::dto::SignedInteger32Type, 44};
+  sup::dto::AnyValue new_any_value2({
+    {"value", {sup::dto::SignedInteger32Type, 44}}
+  });
 
   // setting up callback expectations
   EXPECT_CALL(server_listener, OnNamedValueChanged_old(channel_name, _)).Times(1);

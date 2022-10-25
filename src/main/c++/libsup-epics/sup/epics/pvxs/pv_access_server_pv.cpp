@@ -51,10 +51,14 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
                              callback_t callback)
       : m_variable_name(variable_name)
       , m_any_value(any_value)
-      , m_pvxs_cache(BuildScalarAwarePVXSValue(m_any_value))
+      , m_pvxs_cache(BuildPVXSValue(m_any_value))
       , m_callback(std::move(callback))
       , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
   {
+    if (sup::dto::IsScalarValue(any_value))
+    {
+      throw std::runtime_error("Error in PvAccessServerPV: cannot publish a scalar value");
+    }
     using namespace std::placeholders;
     m_shared_pv.onPut(
         std::bind(&PVAccessServerVariableImpl::OnSharedValueChanged, this, _1, _2, _3));
@@ -70,6 +74,10 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
   //! Sets the cache variable and schedules update of the shared variable.
   bool SetAnyValue(const sup::dto::AnyValue& any_value)
   {
+    if (sup::dto::IsScalarValue(any_value))
+    {
+      throw std::runtime_error("Error in PvAccessServerPV: cannot set a scalar value");
+    }
     std::lock_guard<std::mutex> lock(m_mutex);
 
     m_any_value = any_value;
@@ -79,7 +87,7 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
     {
       // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer
       // alive since server::SharedPV relies on that.
-      auto pvxs_value = BuildScalarAwarePVXSValue(m_any_value);
+      auto pvxs_value = BuildPVXSValue(m_any_value);
       m_pvxs_cache.assign(pvxs_value);
       m_shared_pv.post(m_pvxs_cache);
     }
@@ -110,7 +118,7 @@ struct PvAccessServerPV::PVAccessServerVariableImpl
   {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    m_any_value = BuildScalarAwareAnyValue(value);
+    m_any_value = BuildAnyValue(value);
 
     // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer alive
     // since server::SharedPV relies on that.
