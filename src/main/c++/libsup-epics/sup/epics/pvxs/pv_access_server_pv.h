@@ -20,9 +20,16 @@
 #ifndef SUP_EPICS_PV_ACCESS_SERVER_PV_H_
 #define SUP_EPICS_PV_ACCESS_SERVER_PV_H_
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_conversion_utils.h>
+
+#include <sup/dto/anyvalue.h>
+
+#include <pvxs/data.h>
+#include <pvxs/server.h>
+#include <pvxs/sharedpv.h>
 
 #include <functional>
+#include <mutex>
 #include <string>
 
 namespace sup
@@ -64,6 +71,15 @@ public:
   void AddToServer(pvxs::server::Server& server);
 
 private:
+  void OnSharedValueChanged(pvxs::server::SharedPV& pv,
+                            std::unique_ptr<pvxs::server::ExecOp>&& op, pvxs::Value&& value);
+  const std::string m_variable_name;
+  sup::dto::AnyValue m_any_value;  //!< The main value of this variable.
+  pvxs::Value m_pvxs_cache;        //!< Necessary for open/post operations of SharedPV
+  callback_t m_callback;
+  pvxs::server::SharedPV m_shared_pv;
+  mutable std::mutex m_mutex;
+
   struct PvAccessServerPVImpl;
   PvAccessServerPVImpl* p_impl{nullptr};
 };

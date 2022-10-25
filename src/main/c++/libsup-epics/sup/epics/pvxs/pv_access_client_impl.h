@@ -49,9 +49,8 @@ public:
 
   const std::map<std::string, std::unique_ptr<PvAccessClientPV>>& GetVariables() const;
 
-  void OnVariableChanged(const std::string& channel, const PvAccessClientPV::ExtendedValue& value);
-
 private:
+  void OnVariableChanged(const std::string& channel, const PvAccessClientPV::ExtendedValue& value);
   std::map<std::string, std::unique_ptr<PvAccessClientPV>> m_variables;
   std::shared_ptr<pvxs::client::Context> m_context;
   PvAccessClient::VariableChangedCallback m_cb;

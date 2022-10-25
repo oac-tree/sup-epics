@@ -17,16 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "sup/epics/pv_access_server_pv.h"
+#include "sup/epics/pvxs/pv_access_server_pv.h"
 
-#include <pvxs/data.h>
-#include <pvxs/server.h>
-#include <pvxs/sharedpv.h>
-#include <sup/dto/anyvalue.h>
-#include <sup/epics/utils/dto_conversion_utils.h>
-
-#include <iostream>
-#include <mutex>
 #include <stdexcept>
 
 namespace sup
@@ -34,139 +26,93 @@ namespace sup
 namespace epics
 {
 
-// ----------------------------------------------------------------------------
-// PvAccessServerPVImpl
-// ----------------------------------------------------------------------------
-
-struct PvAccessServerPV::PvAccessServerPVImpl
+PvAccessServerPV::PvAccessServerPV(const std::string& variable_name,
+                                   const sup::dto::AnyValue& any_value,
+                                   callback_t callback)
+  : m_variable_name(variable_name)
+  , m_any_value(any_value)
+  , m_pvxs_cache(BuildPVXSValue(m_any_value))
+  , m_callback(std::move(callback))
+  , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
 {
-  const std::string m_variable_name;
-  sup::dto::AnyValue m_any_value;  //!< The main value of this variable.
-  pvxs::Value m_pvxs_cache;        //!< Necessary for open/post operations of SharedPV
-  callback_t m_callback;
-  pvxs::server::SharedPV m_shared_pv;
-  std::mutex m_mutex;
-
-  PvAccessServerPVImpl(const std::string& variable_name, const sup::dto::AnyValue& any_value,
-                             callback_t callback)
-      : m_variable_name(variable_name)
-      , m_any_value(any_value)
-      , m_pvxs_cache(BuildPVXSValue(m_any_value))
-      , m_callback(std::move(callback))
-      , m_shared_pv(pvxs::server::SharedPV::buildMailbox())
+  if (sup::dto::IsScalarValue(any_value))
   {
-    if (sup::dto::IsScalarValue(any_value))
-    {
-      throw std::runtime_error("Error in PvAccessServerPV: cannot publish a scalar value");
-    }
-    using namespace std::placeholders;
-    m_shared_pv.onPut(
-        std::bind(&PvAccessServerPVImpl::OnSharedValueChanged, this, _1, _2, _3));
+    throw std::runtime_error("Error in PvAccessServerPV: cannot publish a scalar value");
   }
+  using namespace std::placeholders;
+  m_shared_pv.onPut(std::bind(&PvAccessServerPV::OnSharedValueChanged, this, _1, _2, _3));
+}
 
-  //! Get AnyValue stored in cache.
-  sup::dto::AnyValue GetAnyValue()
+PvAccessServerPV::~PvAccessServerPV() = default;
+
+std::string PvAccessServerPV::GetVariableName() const
+{
+  return m_variable_name;
+}
+
+dto::AnyValue PvAccessServerPV::GetValue() const
+{
+  std::lock_guard<std::mutex> lock(m_mutex);
+  return m_any_value;
+}
+
+bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
+{
+  if (sup::dto::IsScalarValue(value))
+  {
+    throw std::runtime_error("Error in PvAccessServerPV: cannot set a scalar value");
+  }
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-    return m_any_value;
+    m_any_value = value;
   }
-
-  //! Sets the cache variable and schedules update of the shared variable.
-  bool SetAnyValue(const sup::dto::AnyValue& any_value)
+  // assigning value to shared variable
+  if (m_shared_pv.isOpen())
   {
-    if (sup::dto::IsScalarValue(any_value))
+    // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer
+    // alive since server::SharedPV relies on that.
     {
-      throw std::runtime_error("Error in PvAccessServerPV: cannot set a scalar value");
-    }
-    std::lock_guard<std::mutex> lock(m_mutex);
-
-    m_any_value = any_value;
-
-    // assigning value to shared variable
-    if (m_shared_pv.isOpen())
-    {
-      // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer
-      // alive since server::SharedPV relies on that.
+      std::lock_guard<std::mutex> lock(m_mutex);
       auto pvxs_value = BuildPVXSValue(m_any_value);
       m_pvxs_cache.assign(pvxs_value);
-      m_shared_pv.post(m_pvxs_cache);
     }
-
-    if (m_callback) // for some reason `post` above doesn't trigger OnSharedValueChanged
-    {
-      m_callback(m_any_value);
-    }
-
-    return true;
+    m_shared_pv.post(m_pvxs_cache);
   }
-
-  //! Add variable to given server. Initialise shared variable with cache value and make
-  //! it open for exernal connections.
-  void AddToServer(pvxs::server::Server& server)
+  if (m_callback)  // for some reason `post` above doesn't trigger OnSharedValueChanged
   {
-    if (m_shared_pv.isOpen())
-    {
-      throw std::runtime_error("Variable was already added to a server");
-    }
-
-    server.addPV(m_variable_name, m_shared_pv);
-    m_shared_pv.open(m_pvxs_cache);
+    m_callback(m_any_value);
   }
+  return true;
+}
 
-  void OnSharedValueChanged(pvxs::server::SharedPV& /*pv*/,
-                            std::unique_ptr<pvxs::server::ExecOp>&& op, pvxs::Value&& value)
+void PvAccessServerPV::AddToServer(pvxs::server::Server& server)
+{
+  if (m_shared_pv.isOpen())
+  {
+    throw std::runtime_error("Variable was already added to a server");
+  }
+  server.addPV(m_variable_name, m_shared_pv);
+  m_shared_pv.open(m_pvxs_cache);
+}
+
+void PvAccessServerPV::OnSharedValueChanged(pvxs::server::SharedPV& /*pv*/,
+                                            std::unique_ptr<pvxs::server::ExecOp>&& op,
+                                            pvxs::Value&& value)
+{
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-
     m_any_value = BuildAnyValue(value);
 
     // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer alive
     // since server::SharedPV relies on that.
     m_pvxs_cache.assign(value);
     m_shared_pv.post(m_pvxs_cache);
-
-    if (m_callback)
-    {
-      m_callback(m_any_value);
-    }
-    op->reply();
   }
-};
-
-// ----------------------------------------------------------------------------
-// PVAccessServerPV
-// ----------------------------------------------------------------------------
-
-PvAccessServerPV::PvAccessServerPV(const std::string& variable_name,
-                                               const sup::dto::AnyValue& any_value,
-                                               callback_t callback)
-    : p_impl(new PvAccessServerPVImpl(variable_name, any_value, std::move(callback)))
-{
-}
-
-std::string PvAccessServerPV::GetVariableName() const
-{
-  return p_impl->m_variable_name;
-}
-
-dto::AnyValue PvAccessServerPV::GetValue() const
-{
-  return p_impl->GetAnyValue();
-}
-
-bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
-{
-  return p_impl->SetAnyValue(value);
-}
-
-void PvAccessServerPV::AddToServer(pvxs::server::Server& server)
-{
-  p_impl->AddToServer(server);
-}
-
-PvAccessServerPV::~PvAccessServerPV()
-{
-  delete p_impl;
+  if (m_callback)
+  {
+    m_callback(m_any_value);
+  }
+  op->reply();
 }
 
 }  // namespace epics

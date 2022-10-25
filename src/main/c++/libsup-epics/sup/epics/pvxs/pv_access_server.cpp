@@ -20,7 +20,8 @@
 #include "sup/epics/pv_access_server.h"
 
 #include <pvxs/server.h>
-#include <sup/epics/pv_access_server_pv.h>
+#include <sup/epics/pvxs/pv_access_server_pv.h>
+#include <sup/epics/pvxs/pv_access_server_impl.h>
 
 #include <map>
 #include <stdexcept>
@@ -30,69 +31,9 @@ namespace sup
 {
 namespace epics
 {
-
-// ----------------------------------------------------------------------------
-// PvAccessServerImpl
-// ----------------------------------------------------------------------------
-
-class PvAccessServerImpl
-{
-public:
-  PvAccessServer::context_t m_context;
-  PvAccessServer::callback_t m_callback;
-  std::map<std::string, std::unique_ptr<PvAccessServerPV>> m_variables;
-
-  PvAccessServerImpl(PvAccessServer::context_t context, PvAccessServer::callback_t callback)
-      : m_context(std::move(context)), m_callback(std::move(callback))
-  {
-  }
-
-  //! Adds channel with given name to the map of channels.
-  void AddVariable(const std::string& name, const dto::AnyValue& any_value)
-  {
-    auto iter = m_variables.find(name);
-    if (iter != m_variables.end())
-    {
-      throw std::runtime_error("Error in PvAccessServer: existing variable name '" + name + "'.");
-    }
-
-    PvAccessServerPV::callback_t variable_callback;
-    if (m_callback)
-    {
-      variable_callback = [this, name](const sup::dto::AnyValue& any_value)
-      { OnVariableChanged(name, any_value); };
-    }
-
-    std::unique_ptr<PvAccessServerPV> variable(
-        new PvAccessServerPV(name, any_value, variable_callback));
-    m_variables.emplace(name, std::move(variable));
-  }
-
-  std::vector<std::string> GetVariableNames() const
-  {
-    std::vector<std::string> result;
-    std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
-                   [](decltype(m_variables)::value_type const& pair) { return pair.first; });
-    return result;
-  }
-
-  void OnVariableChanged(const std::string& name, const sup::dto::AnyValue& any_value)
-  {
-    if (m_callback)
-    {
-      m_callback(name, any_value);
-    }
-  }
-};
-
-// ----------------------------------------------------------------------------
-// PvAccessServer
-// ----------------------------------------------------------------------------
-
 PvAccessServer::PvAccessServer(context_t context, callback_t callback)
     : p_impl(new PvAccessServerImpl(std::move(context), std::move(callback)))
-{
-}
+{}
 
 PvAccessServer::~PvAccessServer()
 {
@@ -111,8 +52,8 @@ std::vector<std::string> PvAccessServer::GetVariableNames() const
 
 dto::AnyValue PvAccessServer::GetValue(const std::string &name) const
 {
-  auto iter = p_impl->m_variables.find(name);
-  if (iter == p_impl->m_variables.end())
+  auto iter = p_impl->GetVariables().find(name);
+  if (iter == p_impl->GetVariables().end())
   {
     throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + name + "'.");
   }
@@ -121,8 +62,8 @@ dto::AnyValue PvAccessServer::GetValue(const std::string &name) const
 
 bool PvAccessServer::SetValue(const std::string &name, const dto::AnyValue &value)
 {
-  auto iter = p_impl->m_variables.find(name);
-  if (iter == p_impl->m_variables.end())
+  auto iter = p_impl->GetVariables().find(name);
+  if (iter == p_impl->GetVariables().end())
   {
     throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + name + "'.");
   }
@@ -131,13 +72,13 @@ bool PvAccessServer::SetValue(const std::string &name, const dto::AnyValue &valu
 
 void PvAccessServer::Start()
 {
-  for(const auto& entry : p_impl->m_variables)
+  for(const auto& entry : p_impl->GetVariables())
   {
-    entry.second->AddToServer(*p_impl->m_context);
+    entry.second->AddToServer(*p_impl->GetContext());
   }
 
   // starting PVXS server
-  p_impl->m_context->start();
+  p_impl->GetContext()->start();
 }
 
 }  // namespace epics
