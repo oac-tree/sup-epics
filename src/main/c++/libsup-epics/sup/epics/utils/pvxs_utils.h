@@ -23,7 +23,7 @@
 //! @file pvxs_utils.h
 //! Collection of utils for PVXS's types and values.
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_types_fwd.h>
 
 #include <string>
 #include <vector>

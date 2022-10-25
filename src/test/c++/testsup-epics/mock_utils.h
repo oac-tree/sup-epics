@@ -26,7 +26,7 @@
 #include <gmock/gmock.h>
 #include <sup/epics/pv_access_client_pv.h>
 #include <sup/epics/pv_access_client.h>
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_types_fwd.h>
 
 #include <functional>
 #include <string>

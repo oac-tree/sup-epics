@@ -24,9 +24,15 @@
 //! Collection of utility functions related to the configuration of PVXS client/server.
 //! The main purpose of this file is to hide PVXS internals as much as possible.
 
-#include <sup/epics/dto_types_fwd.h>
-
 #include <memory>
+
+namespace pvxs
+{
+namespace server
+{
+class Server;
+}  // namespace server
+}  // namespace pvxs
 
 namespace sup
 {

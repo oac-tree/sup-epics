@@ -35,7 +35,6 @@ install(FILES
         sup/epics/ca_types.h
         sup/epics/channel_access_client.h
         sup/epics/channel_access_pv.h
-        sup/epics/dto_types_fwd.h
         sup/epics/pv_access_client.h
         sup/epics/pv_access_client_pv.h
         sup/epics/pv_access_server.h

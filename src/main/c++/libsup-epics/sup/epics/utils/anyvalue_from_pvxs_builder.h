@@ -20,7 +20,7 @@
 #ifndef SUP_EPICS_UTILS_ANYVALUE_FROM_PVXS_BUILDER_H_
 #define SUP_EPICS_UTILS_ANYVALUE_FROM_PVXS_BUILDER_H_
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_types_fwd.h>
 
 #include <memory>
 

@@ -20,12 +20,20 @@
 #ifndef SUP_EPICS_PV_ACCESS_SERVER_H_
 #define SUP_EPICS_PV_ACCESS_SERVER_H_
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/dto/anyvalue.h>
 
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace pvxs
+{
+namespace server
+{
+class Server;
+}  // namespace server
+}  // namespace pvxs
 
 namespace sup
 {
@@ -44,6 +52,7 @@ public:
   //! @param context PVXS server.
   //! @param callback A callback to report changed variable.
   explicit PvAccessServer(context_t context, callback_t callback = {});
+  explicit PvAccessServer(std::unique_ptr<PvAccessServerImpl>&& impl);
   ~PvAccessServer();
 
   PvAccessServer(const PvAccessServer&) = delete;
@@ -76,7 +85,7 @@ public:
   void Start();
 
 private:
-  PvAccessServerImpl* p_impl{nullptr};
+  std::unique_ptr<PvAccessServerImpl> p_impl;
 };
 
 }  // namespace epics

@@ -23,7 +23,7 @@
 //! @file dto_typecode_conversion_utils.h
 //! Collection of utility functions to convert TypeCode of AnyValue to the TypeCode of PVXS value.
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_types_fwd.h>
 
 #include <string>
 

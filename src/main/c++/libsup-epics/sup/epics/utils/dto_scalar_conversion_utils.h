@@ -23,7 +23,7 @@
 //! @file dto_scalar_conversion_utils.h
 //! Collection of utility functions to convert sup-dto's AnyValue scalars to PVXS values.
 
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_types_fwd.h>
 
 #include <string>
 

@@ -32,13 +32,14 @@ namespace sup
 namespace epics
 {
 PvAccessServer::PvAccessServer(context_t context, callback_t callback)
-    : p_impl(new PvAccessServerImpl(std::move(context), std::move(callback)))
+  : p_impl(new PvAccessServerImpl(std::move(context), std::move(callback)))
 {}
 
-PvAccessServer::~PvAccessServer()
-{
-  delete p_impl;
-}
+PvAccessServer::PvAccessServer(std::unique_ptr<PvAccessServerImpl>&& impl)
+  : p_impl{std::move(impl)}
+{}
+
+PvAccessServer::~PvAccessServer() = default;
 
 void PvAccessServer::AddVariable(const std::string& name, const dto::AnyValue& any_value)
 {

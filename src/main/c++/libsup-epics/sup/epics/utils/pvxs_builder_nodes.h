@@ -21,7 +21,7 @@
 #define SUP_EPICS_UTILS_PVXS_BUILDER_NODES_H_
 
 #include <pvxs/data.h>
-#include <sup/epics/dto_types_fwd.h>
+#include <sup/epics/utils/dto_types_fwd.h>
 
 namespace sup
 {
