@@ -29,14 +29,6 @@
 #include <string>
 #include <vector>
 
-namespace pvxs
-{
-namespace server
-{
-class Server;
-}  // namespace server
-}  // namespace pvxs
-
 namespace sup
 {
 namespace epics

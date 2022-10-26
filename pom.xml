@@ -93,6 +93,8 @@
                             <requires version="current" buildOnly="true">cmake</requires>
                             <requires codac="true">sup-dto</requires>
                             <requires codac="true">epics</requires>
+                            <requires codac="true" buildOnly="true">sup-dto-devel</requires>
+                            <requires codac="true" buildOnly="true">epics-devel</requires>
                         </package>
                         <package name="devel">
                             <!-- Libraries -->
@@ -106,8 +108,6 @@
                             </include>
                             <!-- Package dependencies -->
                             <requires version="current">%{codac_rpm_prefix}-${project.artifactId}</requires>
-                            <requires codac="true" buildOnly="true">sup-dto-devel</requires>
-                            <requires codac="true" buildOnly="true">epics-devel</requires>
                         </package>
                         <package name="tests">
                             <!-- Unit Test -->
