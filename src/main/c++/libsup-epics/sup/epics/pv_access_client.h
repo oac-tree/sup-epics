@@ -93,6 +93,15 @@ public:
    */
   sup::dto::AnyValue GetValue(const std::string& channel) const;
 
+    /**
+   * @brief Retrieve extended information on the variable.
+   *
+   * @param channel EPICS channel name.
+   *
+   * @return Structure with value and connected status.
+   */
+  PvAccessClientPV::ExtendedValue GetExtendedValue(const std::string& channel) const;
+
   /**
    * @brief Propagate the value to a specific channel. Will throw if channel was not added yet.
    *

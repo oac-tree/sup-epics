@@ -52,10 +52,21 @@ public:
   struct IsolatedTag {};
   static IsolatedTag Isolated;
 
-  //! Constructor.
-  //! @param callback A callback to report changed variable.
-  explicit PvAccessServer(VariableChangedCallback callback = {});
+  /**
+   * @brief Constructor.
+   *
+   * @param cb Callback function to call when the variable's value changed.
+   */
+  explicit PvAccessServer(VariableChangedCallback cb = {});
+
+  /**
+   * @brief Constructor.
+   *
+   * @param isolated Tag to request an isolated context for testing.
+   * @param cb Callback function to call when the variable's value changed.
+   */
   explicit PvAccessServer(IsolatedTag isolated, VariableChangedCallback callback = {});
+
   ~PvAccessServer();
 
   PvAccessServer(const PvAccessServer&) = delete;
@@ -63,34 +74,64 @@ public:
   PvAccessServer(PvAccessServer&&) = delete;
   PvAccessServer& operator=(PvAccessServer&&) = delete;
 
-  //! Add variable to the server with given channl name and initial value. Type of underlying PVA
-  //! record will be deduced from AnyValue type. Will throw if such channel already exists.
-  //! @param name EPICS channel name.
-  //! @param any_value Initial value.
-  void AddVariable(const std::string& name, const sup::dto::AnyValue& any_value);
+  /**
+   * @brief Add variable to the server with given channel name and initial value.
+   *
+   * @param channel EPICS channel name.
+   * @param any_value Initial value.
+   *
+   * @note The type of the underlying PVA record will be deduced from the AnyValue type.
+   * It will throw if such a channel already exists.
+   */
+  void AddVariable(const std::string& channel, const sup::dto::AnyValue& any_value);
 
-  //! Returns the names of all managed channels.
-  //! @return List of all channel names.
+  /**
+   * @brief Returns the names of all managed channels.
+   *
+   * @return List of all channel names.
+   */
   std::vector<std::string> GetVariableNames() const;
 
-  //! Get the value from a specific channel. Will throw if channel was not added yet.
-  //! @param name EPICS channel name.
-  //! @return Channel's value.
-  sup::dto::AnyValue GetValue(const std::string& name) const;
+  /**
+   * @brief Get the value from a specific channel. Will throw if the channel was not added yet.
+   *
+   * @param channel EPICS channel name.
+   *
+   * @return Channel's value.
+   */
+  sup::dto::AnyValue GetValue(const std::string& channel) const;
 
-  //! Propagate the value to a specific channel. Will throw if channel was not added yet.
-  //! @param name EPICS channel name.
-  //! @param value Value to be written to the channel.
-  //! @return True if successful, false otherwise.
-  bool SetValue(const std::string& name, const sup::dto::AnyValue& value);
+  /**
+   * @brief Propagate the value to a specific channel. Will throw if the channel was not added yet.
+   *
+   * @param channel EPICS channel name.
+   * @param value Value to be written to the channel.
+   *
+   * @return True if successful, false otherwise.
+   */
+  bool SetValue(const std::string& channel, const sup::dto::AnyValue& value);
 
-  //! Starts PVXS server and publishes all added variables.
+  /**
+   * @brief Starts PvAccess server and publishes all added variables.
+   */
   void Start();
 
-  //! Create a PvAccess client based on this server's context.
+  /**
+   * @brief Create a PvAccess client based on this server's context.
+   *
+   * @param cb Optional callback function to add to the client.
+   *
+   * @return A PvAccess client with a context associated to the server.
+   */
   PvAccessClient CreateClient(PvAccessClient::VariableChangedCallback cb = {});
 
-  //! Create a PvAccess client based on this server's context.
+  /**
+   * @brief Create a PvAccess client PV based on this server's context.
+   *
+   * @param cb Optional callback function to add to the client PV.
+   *
+   * @return A PvAccess client PV with a context associated to the server.
+   */
   PvAccessClientPV CreateClientPV(const std::string& channel,
                                   PvAccessClientPV::VariableChangedCallback cb = {});
 

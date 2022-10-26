@@ -19,16 +19,15 @@
 
 #include "mock_utils.h"
 #include "softioc_utils.h"
+#include "unit_test_helper.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/server.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pv_access_server.h>
 
-#include <thread>
-
-using msec = std::chrono::milliseconds;
 using ::testing::_;
+using sup::epics::unit_test_helper::BusyWaitFor;
 
 using namespace sup::epics;
 
@@ -98,23 +97,25 @@ TEST_F(PVAccessServerTests, GetAfterPvPut)
   server.AddVariable(variable_name, any_value);
 
   server.Start();
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
-  auto pvget_output = GetPvGetOutput(variable_name);
-  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
-  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    auto pvget_output = GetPvGetOutput(variable_name);
+    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
+    auto value_found = pvget_output.find("int value 42") != std::string::npos;
+    return varname_found && value_found;
+  }));
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
-
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable cache
   sup::dto::AnyValue expected_any_value({
     {"value", {sup::dto::SignedInteger32Type, 4321}}
   });
-  EXPECT_EQ(server.GetValue(variable_name), expected_any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    return server.GetValue(variable_name) == expected_any_value;
+  }));
 }
 
 //! Standard scenario. Add single variable and start server.
@@ -127,7 +128,7 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   const std::string variable_name{"PVAccessServerTests:GetAfterPvPut"};
 
   // creating from the environment config to be able to use `pvget` and `pvput`
-  PvAccessServer server(listener.GetNamedCallBack_old());
+  PvAccessServer server(listener.GetServerCallBack());
 
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
@@ -136,24 +137,26 @@ TEST_F(PVAccessServerTests, GetAfterPvPutWithCallbacks)
   server.AddVariable("another-variable-name", any_value);
 
   server.Start();
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
-  auto pvget_output = GetPvGetOutput(variable_name);
-  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
-  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    auto pvget_output = GetPvGetOutput(variable_name);
+    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
+    auto value_found = pvget_output.find("int value 42") != std::string::npos;
+    return varname_found && value_found;
+  }));
 
   // setting up callback expectations
   sup::dto::AnyValue expected_any_value({
     {"value", {sup::dto::SignedInteger32Type, 4321}}
   });
-  EXPECT_CALL(listener, OnNamedValueChanged_old(variable_name, expected_any_value)).Times(1);
+  EXPECT_CALL(listener, OnServerValueChanged(variable_name, expected_any_value)).Times(1);
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
 
-  std::this_thread::sleep_for(msec(20));
-
   // validating variable cache
-  EXPECT_EQ(server.GetValue(variable_name), expected_any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    return server.GetValue(variable_name) == expected_any_value;
+  }));
 }

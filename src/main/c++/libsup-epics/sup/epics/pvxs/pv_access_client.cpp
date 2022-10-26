@@ -65,15 +65,26 @@ bool PvAccessClient::IsConnected(const std::string& channel) const
   return it == var_map.end() ? false : it->second->IsConnected();
 }
 
-dto::AnyValue PvAccessClient::GetValue(const std::string& name) const
+dto::AnyValue PvAccessClient::GetValue(const std::string& channel) const
 {
   auto& var_map = m_impl->GetVariables();
-  auto it = var_map.find(name);
+  auto it = var_map.find(channel);
   if (it == var_map.end())
   {
-    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" + channel + "'.");
   }
   return it->second->GetValue();
+}
+
+PvAccessClientPV::ExtendedValue PvAccessClient::GetExtendedValue(const std::string& channel) const
+{
+  auto& var_map = m_impl->GetVariables();
+  auto it = var_map.find(channel);
+  if (it == var_map.end())
+  {
+    throw std::runtime_error("Error in PvAccessClient: non-existing variable name '" + channel + "'.");
+  }
+  return it->second->GetExtendedValue();
 }
 
 bool PvAccessClient::SetValue(const std::string& channel, const dto::AnyValue& value)

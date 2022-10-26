@@ -205,13 +205,13 @@ TEST_F(PvAccessClientTest, TwoClients)
   m_shared_string_pv.open(m_pvxs_string_value);
 
   // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener1, OnClientValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener2, OnClientValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
 
-  sup::epics::PvAccessClient client0(CreateClientImpl(listener1.GetNamedCallBack()));
+  sup::epics::PvAccessClient client0(CreateClientImpl(listener1.GetClientCallBack()));
   client0.AddVariable(kIntChannelName);
 
-  sup::epics::PvAccessClient client1(CreateClientImpl(listener2.GetNamedCallBack()));
+  sup::epics::PvAccessClient client1(CreateClientImpl(listener2.GetClientCallBack()));
   client1.AddVariable(kIntChannelName);
 
   // checking connection status
@@ -230,8 +230,8 @@ TEST_F(PvAccessClientTest, TwoClients)
   any_value["value"] = 45;
 
   // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnNamedValueChanged(kIntChannelName, _)).Times(1);
-  EXPECT_CALL(listener2, OnNamedValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener1, OnClientValueChanged(kIntChannelName, _)).Times(1);
+  EXPECT_CALL(listener2, OnClientValueChanged(kIntChannelName, _)).Times(1);
 
   EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
 

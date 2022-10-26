@@ -26,6 +26,7 @@
 #include <gmock/gmock.h>
 #include <sup/epics/pv_access_client_pv.h>
 #include <sup/epics/pv_access_client.h>
+#include <sup/epics/pv_access_server.h>
 #include <sup/epics/utils/dto_types_fwd.h>
 
 #include <functional>
@@ -36,33 +37,33 @@
 class MockListener
 {
 public:
-  sup::epics::PvAccessClientPV::VariableChangedCallback GetCallBack()
+  sup::epics::PvAccessClientPV::VariableChangedCallback GetClientPVCallBack()
   {
-    return [this](const sup::epics::PvAccessClientPV::ExtendedValue& value) { OnValueChanged(value); };
+    return [this](const sup::epics::PvAccessClientPV::ExtendedValue& value) { OnClientPVValueChanged(value); };
   }
 
-  std::function<void(const sup::dto::AnyValue&)> GetCallBack_old()
+  std::function<void(const sup::dto::AnyValue&)> GetServerPvCallBack()
   {
-    return [this](const sup::dto::AnyValue& value) { OnValueChanged_old(value); };
+    return [this](const sup::dto::AnyValue& value) { OnServerPVValueChanged(value); };
   }
 
-  sup::epics::PvAccessClient::VariableChangedCallback GetNamedCallBack()
+  sup::epics::PvAccessClient::VariableChangedCallback GetClientCallBack()
   {
     return [this](const std::string& name, const sup::epics::PvAccessClientPV::ExtendedValue& value)
-    { OnNamedValueChanged(name, value); };
+    { OnClientValueChanged(name, value); };
   }
 
-  std::function<void(const std::string&, const sup::dto::AnyValue&)> GetNamedCallBack_old()
+  sup::epics::PvAccessServer::VariableChangedCallback GetServerCallBack()
   {
     return [this](const std::string& name, const sup::dto::AnyValue& value)
-    { OnNamedValueChanged_old(name, value); };
+    { OnServerValueChanged(name, value); };
   }
 
-  MOCK_METHOD1(OnValueChanged, void(const sup::epics::PvAccessClientPV::ExtendedValue& value));
-  MOCK_METHOD1(OnValueChanged_old, void(const sup::dto::AnyValue& value));
-  MOCK_METHOD2(OnNamedValueChanged,
+  MOCK_METHOD1(OnClientPVValueChanged, void(const sup::epics::PvAccessClientPV::ExtendedValue& value));
+  MOCK_METHOD1(OnServerPVValueChanged, void(const sup::dto::AnyValue& value));
+  MOCK_METHOD2(OnClientValueChanged,
                void(const std::string& name, const sup::epics::PvAccessClientPV::ExtendedValue& value));
-  MOCK_METHOD2(OnNamedValueChanged_old,
+  MOCK_METHOD2(OnServerValueChanged,
                void(const std::string& name, const sup::dto::AnyValue& value));
 };
 

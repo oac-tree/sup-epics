@@ -17,8 +17,9 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "softioc_utils.h"
 #include "mock_utils.h"
+#include "softioc_utils.h"
+#include "unit_test_helper.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/server.h>
@@ -26,10 +27,8 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_pv.h>
 
-#include <thread>
-
-using msec = std::chrono::milliseconds;
 using ::testing::_;
+using sup::epics::unit_test_helper::BusyWaitFor;
 
 namespace
 {
@@ -108,16 +107,15 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
-  std::this_thread::sleep_for(msec(20));
 
   // setting new value and checking the result
   sup::dto::AnyValue new_any_value({
     {"value", {sup::dto::SignedInteger32Type, 45}}
   });
   EXPECT_TRUE(variable.SetValue(new_any_value));
-
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_EQ(variable.GetValue(), new_any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    return variable.GetValue() == new_any_value;
+  }));
 }
 
 //! Check GetValue and SetValue. Server is running.
@@ -135,25 +133,24 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
   });
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack_old());
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
-  std::this_thread::sleep_for(msec(20));
 
   // setting new value and checking the result
   sup::dto::AnyValue new_any_value({
     {"value", {sup::dto::SignedInteger32Type, 45}}
   });
   // setting up callback expectations
-  EXPECT_CALL(listener, OnValueChanged_old(new_any_value)).Times(1);
+  EXPECT_CALL(listener, OnServerPVValueChanged(new_any_value)).Times(1);
 
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
-  std::this_thread::sleep_for(msec(20));
-  EXPECT_EQ(variable.GetValue(), new_any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    return variable.GetValue() == new_any_value;
+  }));
 }
-
 
 //! Adding variable to a server. Server is started first.
 
@@ -170,12 +167,14 @@ TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget` command line utility
-  auto pvget_output = GetPvGetOutput(variable_name);
-  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
-  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    auto pvget_output = GetPvGetOutput(variable_name);
+    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
+    auto value_found = pvget_output.find("int value 42") != std::string::npos;
+    return varname_found && value_found;
+  }));
 }
 
 //! Adding variable to a server, then start the server.
@@ -194,12 +193,14 @@ TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
   variable.AddToServer(*server);
 
   server->start();
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
-  auto pvget_output = GetPvGetOutput(variable_name);
-  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
-  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    auto pvget_output = GetPvGetOutput(variable_name);
+    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
+    auto value_found = pvget_output.find("int value 42") != std::string::npos;
+    return varname_found && value_found;
+  }));
 }
 
 //! Adding variable to a server, then start the server.
@@ -219,23 +220,25 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
   variable.AddToServer(*server);
 
   server->start();
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
-  auto pvget_output = GetPvGetOutput(variable_name);
-  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
-  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    auto pvget_output = GetPvGetOutput(variable_name);
+    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
+    auto value_found = pvget_output.find("int value 42") != std::string::npos;
+    return varname_found && value_found;
+  }));
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
-
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable cache
   sup::dto::AnyValue expected_any_value({
     {"value", {sup::dto::SignedInteger32Type, 4321}}
   });
-  EXPECT_EQ(variable.GetValue(), expected_any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    return variable.GetValue() == expected_any_value;
+  }));
 }
 
 //! Adding variable to a server, then start the server.
@@ -253,31 +256,33 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
   });
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetCallBack_old());
+  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
 
   variable.AddToServer(*server);
 
   server->start();
-  std::this_thread::sleep_for(msec(20));
 
   // validating variable using `pvget`
-  auto pvget_output = GetPvGetOutput(variable_name);
-  EXPECT_TRUE(pvget_output.find(variable_name) != std::string::npos);
-  EXPECT_TRUE(pvget_output.find("int value 42") != std::string::npos);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    auto pvget_output = GetPvGetOutput(variable_name);
+    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
+    auto value_found = pvget_output.find("int value 42") != std::string::npos;
+    return varname_found && value_found;
+  }));
 
   // setting up callback expectations
   sup::dto::AnyValue expected_any_value({
     {"value", {sup::dto::SignedInteger32Type, 4321}}
   });
-  EXPECT_CALL(listener, OnValueChanged_old(expected_any_value)).Times(1);
+  EXPECT_CALL(listener, OnServerPVValueChanged(expected_any_value)).Times(1);
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
 
-  std::this_thread::sleep_for(msec(20));
-
   // validating variable cache
-  EXPECT_EQ(variable.GetValue(), expected_any_value);
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
+    return variable.GetValue() == expected_any_value;
+  }));
 }
 
 namespace

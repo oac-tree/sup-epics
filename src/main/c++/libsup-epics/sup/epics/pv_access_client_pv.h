@@ -96,7 +96,7 @@ public:
     /**
    * @brief Retrieve extended information on the variable.
    *
-   * @return Structure with value and different status fields (e.g. connected, status, etc.)
+   * @return Structure with value and connected status.
    */
   ExtendedValue GetExtendedValue() const;
 

@@ -182,9 +182,9 @@ TEST_F(PvAccessClientPVTests, CallbackAfterConnection)
   m_shared_pv.open(m_pvxs_value);
 
   // setting up callback expectations
-  EXPECT_CALL(listener, OnValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName, listener.GetCallBack()));
+  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName, listener.GetClientPVCallBack()));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -310,11 +310,11 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   m_shared_pv.open(m_pvxs_value);
 
   // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnValueChanged(_)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener1, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener2, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
 
-  sup::epics::PvAccessClientPV variable1(CreateClientPVImpl(kChannelName, listener1.GetCallBack()));
-  sup::epics::PvAccessClientPV variable2(CreateClientPVImpl(kChannelName, listener2.GetCallBack()));
+  sup::epics::PvAccessClientPV variable1(CreateClientPVImpl(kChannelName, listener1.GetClientPVCallBack()));
+  sup::epics::PvAccessClientPV variable2(CreateClientPVImpl(kChannelName, listener2.GetClientPVCallBack()));
 
   EXPECT_TRUE(variable1.WaitForValidValue(1.0));
   EXPECT_TRUE(variable2.WaitForValidValue(1.0));
@@ -334,8 +334,8 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   any_value1["value"] = 45;
 
   // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnValueChanged(_)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener1, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(listener2, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
 
   EXPECT_TRUE(variable1.SetValue(any_value1));
 

@@ -100,11 +100,11 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   const std::string channel_name("channel0");
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged_old(_, _)).Times(0);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(server_listener, OnServerValueChanged(_, _)).Times(0);
+  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
 
   // creating server with single variable
-  PvAccessServer server(PvAccessServer::Isolated, server_listener.GetNamedCallBack_old());
+  PvAccessServer server(PvAccessServer::Isolated, server_listener.GetServerCallBack());
   sup::dto::AnyValue any_value({
     {"value", {sup::dto::SignedInteger32Type, 42}}
   });
@@ -116,7 +116,7 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
 
   // creating a client with single variable
-  PvAccessClient client = server.CreateClient(client_listener.GetNamedCallBack());
+  PvAccessClient client = server.CreateClient(client_listener.GetClientCallBack());
   client.AddVariable(channel_name);
 
   // checking connection and updated values on server and client sides
@@ -129,41 +129,37 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   testing::Mock::VerifyAndClearExpectations(&client_listener);
 
   // changing the value via the server and checking values on server and client sides
-  sup::dto::AnyValue new_any_value1({
-    {"value", {sup::dto::SignedInteger32Type, 43}}
-  });
+  any_value["value"] = 43;
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged_old(channel_name, _)).Times(1);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(server_listener, OnServerValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(1);
 
-  server.SetValue(channel_name, new_any_value1);
+  server.SetValue(channel_name, any_value);
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value1; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value1; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&server_listener);
   testing::Mock::VerifyAndClearExpectations(&client_listener);
 
   // changing the value via the client and checking values on server and client sides
-  sup::dto::AnyValue new_any_value2({
-    {"value", {sup::dto::SignedInteger32Type, 44}}
-  });
+  any_value["value"] = 44;
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnNamedValueChanged_old(channel_name, _)).Times(1);
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(server_listener, OnServerValueChanged(channel_name, _)).Times(1);
+  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(1);
 
-  client.SetValue(channel_name, new_any_value2);
+  client.SetValue(channel_name, any_value);
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == new_any_value2; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == new_any_value2; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
 
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&server_listener);
   testing::Mock::VerifyAndClearExpectations(&client_listener);
 
   // ignore possible disconnect callback
-  EXPECT_CALL(client_listener, OnNamedValueChanged(channel_name, _)).Times(::testing::AtLeast(0));
+  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(::testing::AtLeast(0));
 }
