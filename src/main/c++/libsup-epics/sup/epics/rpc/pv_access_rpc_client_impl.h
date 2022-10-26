@@ -17,36 +17,36 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "pv_access_rpc_utils.h"
+#ifndef SUP_EPICS_PV_ACCESS_RPC_CLIENT_IMPL_H_
+#define SUP_EPICS_PV_ACCESS_RPC_CLIENT_IMPL_H_
+
+#include <sup/epics/pv_access_rpc_client_config.h>
+
+#include <sup/rpc/protocol.h>
+
+#include <pvxs/client.h>
+
+#include <memory>
 
 namespace sup
 {
 namespace epics
 {
-namespace utils
+class PvAccessRPCClientImpl
 {
+public:
+  explicit PvAccessRPCClientImpl(const PvAccessRPCClientConfig& config);
 
-sup::dto::uint64 GetTimestamp()
-{
-  //TODO: use real time
-  return 0;
-}
+  ~PvAccessRPCClientImpl();
 
-sup::dto::AnyValue CreateRPCRequest(const sup::dto::AnyValue& payload)
-{
-  if (sup::dto::IsEmptyValue(payload))
-  {
-    return {};
-  }
-  sup::dto::AnyValue request = {{
-    { "timestamp", {sup::dto::UnsignedInteger64Type, GetTimestamp()} },
-    { "query", payload }
-  }, "sup::RPCRequest/v1.0"};
-  return request;
-}
-
-}  // namespace utils
+  rpc::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output);
+private:
+  PvAccessRPCClientConfig m_config;
+  std::shared_ptr<pvxs::client::Context> m_context;
+};
 
 }  // namespace epics
 
 }  // namespace sup
+
+#endif  // SUP_EPICS_PV_ACCESS_RPC_CLIENT_IMPL_H_

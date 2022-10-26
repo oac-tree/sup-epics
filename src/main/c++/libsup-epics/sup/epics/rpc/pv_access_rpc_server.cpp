@@ -19,6 +19,24 @@
 
 #include <sup/epics/pv_access_rpc_server.h>
 
+/** When the server receives a request, the following steps are performed:
+  * - Translate the request to AnyValue
+  * - Extract 'query' field
+  *   - if this fails, return specific status code and reason
+  * - Call embedded protocol(query, output) -> result
+  *   - If result is not success, set 'reason' to something like 'protocol-specific issue'
+  * - If needed, translate output to pvxs
+  *   - If failure: return status code
+  * - return reply = { result, timestamp, reason, output } (output is omitted if empty)
+  *
+  * This implies the server requires the following failure statuses/messages:
+  * - Extraction of 'query' field failed: BOTH status and reason
+  * - Protocol did not return success: generic reason message
+  * - Translation of output value failed: status code
+  *
+  * A request structure without a 'query' field could be used to echo back a timestamp
+  */
+
 namespace sup
 {
 namespace epics

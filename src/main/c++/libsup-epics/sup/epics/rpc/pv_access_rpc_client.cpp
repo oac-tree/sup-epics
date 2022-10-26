@@ -19,8 +19,30 @@
 
 #include <sup/epics/pv_access_rpc_client.h>
 
+#include <sup/epics/rpc/pv_access_rpc_client_impl.h>
+
 #include <sup/dto/anyvalue.h>
 #include <sup/rpc/protocol_result.h>
+
+/** When the client's Invoke is called, the following steps are performed:
+  * - Create a request with a timestamp and the provided payload
+  * - Translate this to pvxs
+  *   - If this fails return a specific status code
+  * - Send over the network
+  *   - No response: status code
+  * - Translate response to AnyValue
+  * - Parse the reply
+  *   - Incorrect format: return specific error code
+  * - Return status code and output from the reply
+  *
+  * This implies the client requires the following failure statuses/messages:
+  * - Translation of request structure failed: status code
+  * - No response from server: status code
+  * - Incorrect response format from server: status code
+  *
+  * For echo testing, a request without a 'query' field can be used. The reply should then only
+  * be checked for its 'result', 'timestamp' and 'reason' fields.
+  */
 
 static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
@@ -30,7 +52,7 @@ namespace epics
 {
 
 PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
-  : m_config{config}
+  : m_impl{new PvAccessRPCClientImpl(config)}
 {}
 
 PvAccessRPCClient::~PvAccessRPCClient() = default;
@@ -38,9 +60,7 @@ PvAccessRPCClient::~PvAccessRPCClient() = default;
 rpc::ProtocolResult PvAccessRPCClient::Invoke(const sup::dto::AnyValue& input,
                                               sup::dto::AnyValue& output)
 {
-  (void)input;
-  (void)output;
-  return rpc::Success;
+  return m_impl->Invoke(input, output);
 }
 
 PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)

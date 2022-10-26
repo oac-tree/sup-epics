@@ -24,10 +24,14 @@
 
 #include <sup/rpc/protocol.h>
 
+#include <memory>
+
 namespace sup
 {
 namespace epics
 {
+class PvAccessRPCClientImpl;
+
 class PvAccessRPCClient : public rpc::Protocol
 {
 public:
@@ -37,7 +41,7 @@ public:
 
   rpc::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override;
 private:
-  PvAccessRPCClientConfig m_config;
+  std::unique_ptr<PvAccessRPCClientImpl> m_impl;
 };
 
 PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name);
