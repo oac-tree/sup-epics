@@ -17,36 +17,36 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
-#define SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
+#include <sup/epics/pv_access_rpc_client.h>
 
-#include "pv_access_rpc_server_config.h"
+#include <sup/rpc/protocol_result.h>
 
-#include <sup/rpc/protocol.h>
-
-#include <memory>
+static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
 namespace sup
 {
 namespace epics
 {
-class PvAccessRPCServer
+
+PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
+  : m_config{config}
+{}
+
+PvAccessRPCClient::~PvAccessRPCClient() = default;
+
+rpc::ProtocolResult PvAccessRPCClient::Invoke(const sup::dto::AnyValue& input,
+                                              sup::dto::AnyValue& output)
 {
-public:
-  PvAccessRPCServer(const PvAccessRPCServerConfig& config,
-                    std::unique_ptr<rpc::Protocol>&& protocol);
+  (void)input;
+  (void)output;
+  return rpc::Success;
+}
 
-  ~PvAccessRPCServer();
-
-private:
-  PvAccessRPCServerConfig m_config;
-  std::unique_ptr<rpc::Protocol> m_protocol;
-};
-
-PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name);
+PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)
+{
+  return { service_name, DEFAULT_TIMEOUT_SECONDS };
+}
 
 }  // namespace epics
 
 }  // namespace sup
-
-#endif  // SUP_EPICS_PV_ACCESS_RPC_SERVER_H_

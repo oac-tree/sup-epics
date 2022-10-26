@@ -40,6 +40,8 @@ private:
   PvAccessRPCClientConfig m_config;
 };
 
+PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name);
+
 }  // namespace epics
 
 }  // namespace sup

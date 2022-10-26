@@ -4,15 +4,15 @@ add_library(${library_name} SHARED "")
 add_library(sup-epics::sup-epics ALIAS ${library_name}) # alias for build-tree usage
 
 if (SUP_EPICS_CODAC)
-  target_link_libraries(${library_name} PUBLIC pthread sup-dto pvxs ca)
+  target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib $ENV{CODAC_ROOT}/epics/lib/linux-x86_64)
+  target_link_libraries(${library_name} PUBLIC pthread sup-dto sup-rpc pvxs ca)
   target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
   target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup $ENV{CODAC_ROOT}/epics/include $ENV{CODAC_ROOT}/epics/include/os/Linux $ENV{CODAC_ROOT}/epics/include/compiler/gcc)
-  target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib $ENV{CODAC_ROOT}/epics/lib/linux-x86_64)
 
 else()
   find_package(EPICS REQUIRED)
   target_link_directories(${library_name} PUBLIC ${EPICS_LINK_DIRECTORIES})
-  target_link_libraries(${library_name} PUBLIC pthread sup-dto::sup-dto ${EPICS_LIBRARIES})
+  target_link_libraries(${library_name} PUBLIC pthread sup-dto::sup-dto sup-dto::sup-rpc ${EPICS_LIBRARIES})
   target_include_directories(${library_name} PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}$<SEMICOLON>${EPICS_INCLUDE_DIRECTORIES}>)

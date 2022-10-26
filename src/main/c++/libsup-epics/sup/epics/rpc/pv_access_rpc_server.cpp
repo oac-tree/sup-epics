@@ -17,36 +17,26 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
-#define SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
-
-#include "pv_access_rpc_server_config.h"
-
-#include <sup/rpc/protocol.h>
-
-#include <memory>
+#include <sup/epics/pv_access_rpc_server.h>
 
 namespace sup
 {
 namespace epics
 {
-class PvAccessRPCServer
+
+PvAccessRPCServer::PvAccessRPCServer(const PvAccessRPCServerConfig& config,
+                                     std::unique_ptr<rpc::Protocol>&& protocol)
+  : m_config{config}
+  , m_protocol{std::move(protocol)}
+{}
+
+PvAccessRPCServer::~PvAccessRPCServer() = default;
+
+PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name)
 {
-public:
-  PvAccessRPCServer(const PvAccessRPCServerConfig& config,
-                    std::unique_ptr<rpc::Protocol>&& protocol);
-
-  ~PvAccessRPCServer();
-
-private:
-  PvAccessRPCServerConfig m_config;
-  std::unique_ptr<rpc::Protocol> m_protocol;
-};
-
-PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name);
+  return { service_name };
+}
 
 }  // namespace epics
 
 }  // namespace sup
-
-#endif  // SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
