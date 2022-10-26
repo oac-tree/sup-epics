@@ -17,37 +17,26 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/pv_access_rpc_client.h>
+#ifndef SUP_EPICS_PV_ACCESS_RPC_UTILS_H_
+#define SUP_EPICS_PV_ACCESS_RPC_UTILS_H_
 
 #include <sup/dto/anyvalue.h>
-#include <sup/rpc/protocol_result.h>
-
-static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
 namespace sup
 {
 namespace epics
 {
-
-PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
-  : m_config{config}
-{}
-
-PvAccessRPCClient::~PvAccessRPCClient() = default;
-
-rpc::ProtocolResult PvAccessRPCClient::Invoke(const sup::dto::AnyValue& input,
-                                              sup::dto::AnyValue& output)
+namespace utils
 {
-  (void)input;
-  (void)output;
-  return rpc::Success;
-}
 
-PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)
-{
-  return { service_name, DEFAULT_TIMEOUT_SECONDS };
-}
+sup::dto::uint64 GetTimestamp();
+
+sup::dto::AnyValue CreateRPCRequest(const sup::dto::AnyValue& payload);
+
+}  // namespace utils
 
 }  // namespace epics
 
 }  // namespace sup
+
+#endif  // SUP_EPICS_PV_ACCESS_RPC_UTILS_H_

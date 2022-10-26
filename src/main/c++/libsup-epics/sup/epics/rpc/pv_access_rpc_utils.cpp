@@ -17,35 +17,30 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/pv_access_rpc_client.h>
-
-#include <sup/dto/anyvalue.h>
-#include <sup/rpc/protocol_result.h>
-
-static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
+#include "pv_access_rpc_utils.h"
 
 namespace sup
 {
 namespace epics
 {
 
-PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
-  : m_config{config}
-{}
-
-PvAccessRPCClient::~PvAccessRPCClient() = default;
-
-rpc::ProtocolResult PvAccessRPCClient::Invoke(const sup::dto::AnyValue& input,
-                                              sup::dto::AnyValue& output)
+sup::dto::uint64 GetTimestamp()
 {
-  (void)input;
-  (void)output;
-  return rpc::Success;
+  //TODO: use real time
+  return 0;
 }
 
-PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)
+sup::dto::AnyValue CreateRPCRequest(const sup::dto::AnyValue& payload)
 {
-  return { service_name, DEFAULT_TIMEOUT_SECONDS };
+  if (sup::dto::IsEmptyValue(payload))
+  {
+    return {};
+  }
+  sup::dto::AnyValue request = {{
+    { "timestamp", {sup::dto::UnsignedInteger64Type, GetTimestamp()} },
+    { "query", payload }
+  }, "sup::RPCRequest/v1.0"};
+  return request;
 }
 
 }  // namespace epics
