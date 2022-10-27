@@ -19,6 +19,8 @@
 
 #include <sup/epics/pv_access_rpc_server.h>
 
+#include <sup/epics/rpc/pv_access_rpc_server_impl.h>
+
 /** When the server receives a request, the following steps are performed:
   * - Translate the request to AnyValue
   * - Extract 'query' field
@@ -44,8 +46,7 @@ namespace epics
 
 PvAccessRPCServer::PvAccessRPCServer(const PvAccessRPCServerConfig& config,
                                      std::unique_ptr<rpc::Protocol>&& protocol)
-  : m_config{config}
-  , m_protocol{std::move(protocol)}
+  : m_impl{CreateRPCServerImplFromEnv(config, std::move(protocol))}
 {}
 
 PvAccessRPCServer::~PvAccessRPCServer() = default;

@@ -30,6 +30,8 @@ namespace sup
 {
 namespace epics
 {
+class PvAccessRPCServerImpl;
+
 class PvAccessRPCServer
 {
 public:
@@ -39,8 +41,7 @@ public:
   ~PvAccessRPCServer();
 
 private:
-  PvAccessRPCServerConfig m_config;
-  std::unique_ptr<rpc::Protocol> m_protocol;
+  std::unique_ptr<PvAccessRPCServerImpl> m_impl;
 };
 
 PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name);

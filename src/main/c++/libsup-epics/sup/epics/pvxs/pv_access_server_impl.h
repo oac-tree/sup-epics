@@ -36,6 +36,8 @@ public:
   PvAccessServerImpl(std::unique_ptr<pvxs::server::Server>&& context,
                      PvAccessServer::VariableChangedCallback callback);
 
+  ~PvAccessServerImpl();
+
   //! Adds channel with given name to the map of channels.
   void AddVariable(const std::string& name, const dto::AnyValue& any_value);
 

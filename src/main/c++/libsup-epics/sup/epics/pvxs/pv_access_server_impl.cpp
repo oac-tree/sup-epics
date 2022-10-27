@@ -36,6 +36,11 @@ PvAccessServerImpl::PvAccessServerImpl(std::unique_ptr<pvxs::server::Server>&& c
   , m_client_context{std::make_shared<pvxs::client::Context>(m_context->clientConfig().build())}
 {}
 
+PvAccessServerImpl::~PvAccessServerImpl()
+{
+  m_context->stop();
+}
+
 //! Adds channel with given name to the map of channels.
 void PvAccessServerImpl::AddVariable(const std::string& name, const dto::AnyValue& any_value)
 {
