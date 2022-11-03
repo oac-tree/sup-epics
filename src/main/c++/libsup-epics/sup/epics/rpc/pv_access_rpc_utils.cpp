@@ -34,24 +34,67 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
                                  const PvAccessRPCClientConfig& config,
                                  const sup::dto::AnyValue& request)
 {
-  auto pvxs_request = BuildPVXSValue(request);
-  sup::dto::AnyValue reply;
+  pvxs::Value pvxs_request;
+  try
+  {
+    pvxs_request = BuildPVXSValue(request);
+  }
+  catch(...)
+  {
+    return sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkEncodingError);
+  }
+  pvxs::Value pvxs_reply;
   try
   {
     // Create synchronous request with timeout
-    auto result =
-        context->rpc(config.service_name, pvxs_request).exec()->wait(config.timeout);
-    if (result)
-    {
-      // Extract reply
-      reply = BuildAnyValue(result);
-    }
+    pvxs_reply = context->rpc(config.service_name, pvxs_request).exec()->wait(config.timeout);
   }
   catch (const pvxs::client::Timeout&)
   {
     return sup::rpc::utils::CreateRPCReply(sup::rpc::NotConnected);
   }
+  if (!pvxs_reply)
+  {
+    return sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkDecodingError);
+  }
+  sup::dto::AnyValue reply;
+  try
+  {
+    reply = BuildAnyValue(pvxs_reply);
+  }
+  catch(...)
+  {
+    return sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkDecodingError);
+  }
   return reply;
+}
+
+pvxs::Value HandleRPCCall(sup::dto::AnyFunctor& handler, const pvxs::Value& pvxs_request)
+{
+  sup::dto::AnyValue request;
+  try
+  {
+    request = BuildAnyValue(pvxs_request);
+  }
+  catch(...)
+  {
+    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkDecodingError));
+  }
+  pvxs::Value pvxs_reply;
+  try
+  {
+    auto reply = handler(request);
+    pvxs_reply = BuildPVXSValue(reply);
+  }
+  catch(...)
+  {
+    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkEncodingError));
+  }
+  if (!pvxs_reply)
+  {
+    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkEncodingError));
+  }
+  return pvxs_reply;
 }
 
 }  // namespace utils

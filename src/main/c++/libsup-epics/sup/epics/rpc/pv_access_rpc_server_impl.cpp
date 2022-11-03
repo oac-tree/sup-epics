@@ -58,17 +58,8 @@ void PvAccessRPCServerImpl::Initialise()
     [this](pvxs::server::SharedPV&, std::unique_ptr<pvxs::server::ExecOp>&& op,
            pvxs::Value&& pvxs_request)
     {
-      try
-      {
-        auto request = BuildAnyValue(pvxs_request);
-        auto reply = m_handler->operator()(request);
-        auto pvxs_reply = BuildPVXSValue(reply);
-        op->reply(pvxs_reply);
-      }
-      catch(...)
-      {
-        // translation between AnyValue and pvxs::Value should be handled
-      }
+      auto pvxs_reply = utils::HandleRPCCall(*m_handler, pvxs_request);
+      op->reply(pvxs_reply);
     }
   );
   m_server->start();

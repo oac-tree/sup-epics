@@ -23,7 +23,7 @@
 #include <sup/epics/pv_access_rpc_client_config.h>
 
 #include <sup/dto/anyvalue.h>
-#include <sup/rpc/protocol_result.h>
+#include <sup/dto/any_functor.h>
 
 #include <pvxs/client.h>
 
@@ -39,6 +39,8 @@ namespace utils
 sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
                                  const PvAccessRPCClientConfig& config,
                                  const sup::dto::AnyValue& request);
+
+pvxs::Value HandleRPCCall(sup::dto::AnyFunctor& handler, const pvxs::Value& pvxs_request);
 
 }  // namespace utils
 
