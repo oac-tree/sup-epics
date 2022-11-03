@@ -44,9 +44,16 @@ namespace sup
 namespace epics
 {
 
+PvAccessRPCServer::IsolatedTag PvAccessRPCServer::Isolated{};
+
 PvAccessRPCServer::PvAccessRPCServer(const PvAccessRPCServerConfig& config,
                                      std::unique_ptr<sup::dto::AnyFunctor>&& handler)
   : m_impl{CreateRPCServerImplFromEnv(config, std::move(handler))}
+{}
+
+PvAccessRPCServer::PvAccessRPCServer(IsolatedTag, const PvAccessRPCServerConfig& config,
+                                     std::unique_ptr<sup::dto::AnyFunctor>&& handler)
+  : m_impl{CreateIsolatedRPCServerImpl(config, std::move(handler))}
 {}
 
 PvAccessRPCServer::~PvAccessRPCServer() = default;

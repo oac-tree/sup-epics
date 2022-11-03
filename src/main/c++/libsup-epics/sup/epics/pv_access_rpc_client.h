@@ -37,7 +37,15 @@ class PvAccessRPCClient : public sup::dto::AnyFunctor
 public:
   explicit PvAccessRPCClient(const PvAccessRPCClientConfig& config);
 
+  explicit PvAccessRPCClient(std::unique_ptr<PvAccessRPCClientImpl>&& impl);
+
   ~PvAccessRPCClient();
+
+  PvAccessRPCClient(PvAccessRPCClient&& other);
+  PvAccessRPCClient& operator=(PvAccessRPCClient&& other);
+
+  PvAccessRPCClient(const PvAccessRPCClient&) = delete;
+  PvAccessRPCClient& operator=(const PvAccessRPCClient&) = delete;
 
   sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override;
 private:

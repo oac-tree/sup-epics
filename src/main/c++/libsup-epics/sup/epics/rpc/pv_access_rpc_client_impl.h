@@ -35,7 +35,8 @@ namespace epics
 class PvAccessRPCClientImpl
 {
 public:
-  explicit PvAccessRPCClientImpl(const PvAccessRPCClientConfig& config);
+  PvAccessRPCClientImpl(const PvAccessRPCClientConfig& config,
+                        std::shared_ptr<pvxs::client::Context> context);
 
   ~PvAccessRPCClientImpl();
 

@@ -35,7 +35,14 @@ class PvAccessRPCServerImpl;
 class PvAccessRPCServer
 {
 public:
+  struct IsolatedTag {};
+  static IsolatedTag Isolated;
+
   PvAccessRPCServer(const PvAccessRPCServerConfig& config,
+                    std::unique_ptr<sup::dto::AnyFunctor>&& handler);
+
+  PvAccessRPCServer(IsolatedTag isolated,
+                    const PvAccessRPCServerConfig& config,
                     std::unique_ptr<sup::dto::AnyFunctor>&& handler);
 
   ~PvAccessRPCServer();

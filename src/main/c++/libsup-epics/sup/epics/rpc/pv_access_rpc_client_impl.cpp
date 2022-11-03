@@ -29,9 +29,10 @@ namespace sup
 namespace epics
 {
 
-PvAccessRPCClientImpl::PvAccessRPCClientImpl(const PvAccessRPCClientConfig& config)
+PvAccessRPCClientImpl::PvAccessRPCClientImpl(const PvAccessRPCClientConfig& config,
+                                             std::shared_ptr<pvxs::client::Context> context)
   : m_config{config}
-  , m_context{utils::GetSharedClientContext()}
+  , m_context{context}
 {}
 
 PvAccessRPCClientImpl::~PvAccessRPCClientImpl() = default;

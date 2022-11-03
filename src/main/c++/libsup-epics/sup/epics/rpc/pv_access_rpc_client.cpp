@@ -20,6 +20,7 @@
 #include <sup/epics/pv_access_rpc_client.h>
 
 #include <sup/epics/rpc/pv_access_rpc_client_impl.h>
+#include <sup/epics/pvxs/pv_access_utils.h>
 
 #include <sup/dto/anyvalue.h>
 #include <sup/rpc/protocol_result.h>
@@ -52,10 +53,27 @@ namespace epics
 {
 
 PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
-  : m_impl{new PvAccessRPCClientImpl(config)}
+  : m_impl{new PvAccessRPCClientImpl(config, utils::GetSharedClientContext())}
+{}
+
+PvAccessRPCClient::PvAccessRPCClient(std::unique_ptr<PvAccessRPCClientImpl>&& impl)
+  : m_impl{std::move(impl)}
 {}
 
 PvAccessRPCClient::~PvAccessRPCClient() = default;
+
+PvAccessRPCClient::PvAccessRPCClient(PvAccessRPCClient&& other)
+  : m_impl{std::move(other.m_impl)}
+{}
+
+PvAccessRPCClient& PvAccessRPCClient::operator=(PvAccessRPCClient&& other)
+{
+  if (this != &other)
+  {
+    std::swap(m_impl, other.m_impl);
+  }
+  return *this;
+}
 
 sup::dto::AnyValue PvAccessRPCClient::operator()(const sup::dto::AnyValue& request)
 {
