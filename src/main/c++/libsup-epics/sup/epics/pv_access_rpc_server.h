@@ -22,7 +22,7 @@
 
 #include "pv_access_rpc_server_config.h"
 
-#include <sup/rpc/protocol.h>
+#include <sup/dto/any_functor.h>
 
 #include <memory>
 
@@ -36,7 +36,7 @@ class PvAccessRPCServer
 {
 public:
   PvAccessRPCServer(const PvAccessRPCServerConfig& config,
-                    std::unique_ptr<rpc::Protocol>&& protocol);
+                    std::unique_ptr<sup::dto::AnyFunctor>&& handler);
 
   ~PvAccessRPCServer();
 

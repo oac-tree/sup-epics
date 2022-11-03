@@ -45,8 +45,8 @@ namespace epics
 {
 
 PvAccessRPCServer::PvAccessRPCServer(const PvAccessRPCServerConfig& config,
-                                     std::unique_ptr<rpc::Protocol>&& protocol)
-  : m_impl{CreateRPCServerImplFromEnv(config, std::move(protocol))}
+                                     std::unique_ptr<sup::dto::AnyFunctor>&& handler)
+  : m_impl{CreateRPCServerImplFromEnv(config, std::move(handler))}
 {}
 
 PvAccessRPCServer::~PvAccessRPCServer() = default;

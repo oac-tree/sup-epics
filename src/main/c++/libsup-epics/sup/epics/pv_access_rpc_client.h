@@ -22,7 +22,7 @@
 
 #include "pv_access_rpc_client_config.h"
 
-#include <sup/rpc/protocol.h>
+#include <sup/dto/any_functor.h>
 
 #include <memory>
 
@@ -32,14 +32,14 @@ namespace epics
 {
 class PvAccessRPCClientImpl;
 
-class PvAccessRPCClient : public rpc::Protocol
+class PvAccessRPCClient : public sup::dto::AnyFunctor
 {
 public:
   explicit PvAccessRPCClient(const PvAccessRPCClientConfig& config);
 
   ~PvAccessRPCClient();
 
-  rpc::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override;
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override;
 private:
   std::unique_ptr<PvAccessRPCClientImpl> m_impl;
 };

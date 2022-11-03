@@ -39,7 +39,7 @@ public:
 
   ~PvAccessRPCClientImpl();
 
-  rpc::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output);
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request);
 private:
   PvAccessRPCClientConfig m_config;
   std::shared_ptr<pvxs::client::Context> m_context;

@@ -21,7 +21,6 @@
 
 #include <sup/epics/pvxs/pv_access_utils.h>
 #include <sup/epics/rpc/pv_access_rpc_utils.h>
-#include <sup/epics/utils/dto_conversion_utils.h>
 
 #include <sup/dto/anyvalue_helper.h>
 
@@ -37,24 +36,13 @@ PvAccessRPCClientImpl::PvAccessRPCClientImpl(const PvAccessRPCClientConfig& conf
 
 PvAccessRPCClientImpl::~PvAccessRPCClientImpl() = default;
 
-rpc::ProtocolResult PvAccessRPCClientImpl::Invoke(const sup::dto::AnyValue& input,
-                                                  sup::dto::AnyValue& output)
+sup::dto::AnyValue PvAccessRPCClientImpl::operator()(const sup::dto::AnyValue& request)
 {
-  auto request = utils::CreateRPCRequest(input);
   if (sup::dto::IsEmptyValue(request))
   {
-    return rpc::InvalidRequest;
+    return {};
   }
-  auto reply = utils::ClientRPCCall(m_context, m_config, request);
-  if (reply.HasField(utils::constants::REPLY_PAYLOAD))
-  {
-    if (!sup::dto::TryConvert(output, reply[utils::constants::REPLY_PAYLOAD]))
-    {
-      return rpc::ProtocolError;  //TODO: use correct status
-    }
-  }
-  auto status_code = reply[utils::constants::REPLY_RESULT].As<sup::dto::uint32>();
-  return rpc::ProtocolResult(status_code);
+  return utils::ClientRPCCall(m_context, m_config, request);
 }
 
 }  // namespace epics

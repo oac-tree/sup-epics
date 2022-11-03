@@ -57,10 +57,9 @@ PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
 
 PvAccessRPCClient::~PvAccessRPCClient() = default;
 
-rpc::ProtocolResult PvAccessRPCClient::Invoke(const sup::dto::AnyValue& input,
-                                              sup::dto::AnyValue& output)
+sup::dto::AnyValue PvAccessRPCClient::operator()(const sup::dto::AnyValue& request)
 {
-  return m_impl->Invoke(input, output);
+  return m_impl->operator()(request);
 }
 
 PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)
