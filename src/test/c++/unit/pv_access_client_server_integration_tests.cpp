@@ -163,3 +163,48 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   // ignore possible disconnect callback
   EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(::testing::AtLeast(0));
 }
+
+//! Test with non-isolated server/client. Server with single variable and single client.
+//! Start server, check client, change the value via the server and the client.
+
+TEST_F(PvAccessClientServerIntegrationTests, ClientServerFromEnv)
+{
+  const std::string channel_name("TEST:PVA-ClientServerFromEnv");
+
+  // creating server with single variable
+  PvAccessServer server{};
+  sup::dto::AnyValue any_value({
+    {"value", {sup::dto::SignedInteger32Type, 42}}
+  });
+  server.AddVariable(channel_name, any_value);
+
+  server.Start();
+
+  // Checking variable on server side
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+
+  // creating a client with single variable
+  PvAccessClient client = server.CreateClient();
+  client.AddVariable(channel_name);
+
+  // checking connection and updated values on server and client sides
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
+
+  // changing the value via the server and checking values on server and client sides
+  EXPECT_THROW(server.SetValue(channel_name, 43), std::runtime_error);
+  any_value["value"] = 43;
+  server.SetValue(channel_name, any_value);
+
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
+
+  // changing the value via the client and checking values on server and client sides
+  any_value["value"] = 44;
+
+  client.SetValue(channel_name, any_value);
+
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return server.GetValue(channel_name) == any_value; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&](){ return client.GetValue(channel_name) == any_value; }));
+}
