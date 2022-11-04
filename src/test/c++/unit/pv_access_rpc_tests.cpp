@@ -27,6 +27,8 @@
 
 #include <functional>
 
+static const std::string RETURN_EMPTY_FIELD = "return_empty";
+
 using namespace sup::epics;
 
 //! Testing PvAccessRPCServer and PvAccessRPCClient together.
@@ -76,7 +78,7 @@ TEST_F(PvAccessRPCTests, SingleServerSingleClientSuccess)
 
 //! Fail at client side. Message should not arrive at server.
 
-TEST_F(PvAccessRPCTests, RPCClientErrors)
+TEST_F(PvAccessRPCTests, RPCClientEmptyRequest)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
@@ -90,6 +92,44 @@ TEST_F(PvAccessRPCTests, RPCClientErrors)
   EXPECT_TRUE(sup::dto::IsEmptyValue(reply));
   EXPECT_FALSE(static_cast<bool>(m_request));
   EXPECT_FALSE(static_cast<bool>(m_reply));
+}
+
+TEST_F(PvAccessRPCTests, RPCClientWrongChannel)
+{
+  std::string channel_name = "PvAccessRPCTests:channel";
+  PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
+                           CreateHandler());
+  auto client = server.CreateClient({"DOESNOTEXIST", 0.1});
+
+  sup::dto::AnyValue payload{42};
+  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto reply = client(request);
+  ASSERT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  EXPECT_FALSE(static_cast<bool>(m_request));
+  EXPECT_FALSE(static_cast<bool>(m_reply));
+  EXPECT_EQ(reply[sup::rpc::constants::REPLY_RESULT].As<unsigned int>(),
+            sup::rpc::NotConnected.GetValue());
+}
+
+//! Fail at server side.
+
+TEST_F(PvAccessRPCTests, RPCEmptyReply)
+{
+  std::string channel_name = "PvAccessRPCTests:channel";
+  PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
+                           CreateHandler());
+  auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
+
+  // Send empty value
+  sup::dto::AnyValue payload{42};
+  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  request.AddMember(RETURN_EMPTY_FIELD, true);
+  auto reply = client(request);
+  ASSERT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  EXPECT_FALSE(static_cast<bool>(m_request));
+  EXPECT_FALSE(static_cast<bool>(m_reply));
+  EXPECT_EQ(reply[sup::rpc::constants::REPLY_RESULT].As<unsigned int>(),
+            sup::rpc::NetworkEncodingError.GetValue());
 }
 
 PvAccessRPCTests::PvAccessRPCTests()
@@ -116,6 +156,10 @@ TestHandler::~TestHandler() = default;
 
 sup::dto::AnyValue TestHandler::operator()(const sup::dto::AnyValue& request)
 {
+  if (request.HasField(RETURN_EMPTY_FIELD) && request[RETURN_EMPTY_FIELD].As<bool>())
+  {
+    return {};
+  }
   auto reply = sup::rpc::utils::CreateRPCReply(sup::rpc::Success);
   m_func(request, reply);
   return reply;
