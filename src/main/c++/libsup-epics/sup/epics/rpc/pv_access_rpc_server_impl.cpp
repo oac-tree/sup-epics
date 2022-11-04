@@ -36,6 +36,7 @@ PvAccessRPCServerImpl::PvAccessRPCServerImpl(std::unique_ptr<pvxs::server::Serve
   : m_server{std::move(server)}
   , m_config{config}
   , m_handler{std::move(handler)}
+  , m_client_context{}
 {
   if (!m_server || !m_handler)
   {
@@ -47,6 +48,15 @@ PvAccessRPCServerImpl::PvAccessRPCServerImpl(std::unique_ptr<pvxs::server::Serve
 PvAccessRPCServerImpl::~PvAccessRPCServerImpl()
 {
   m_server->stop();
+}
+
+std::shared_ptr<pvxs::client::Context> PvAccessRPCServerImpl::GetClientContext()
+{
+  if (!m_client_context)
+  {
+    m_client_context = std::make_shared<pvxs::client::Context>(m_server->clientConfig().build());
+  }
+  return m_client_context;
 }
 
 void PvAccessRPCServerImpl::Initialise()

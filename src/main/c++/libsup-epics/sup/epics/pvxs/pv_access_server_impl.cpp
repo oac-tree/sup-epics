@@ -33,7 +33,7 @@ PvAccessServerImpl::PvAccessServerImpl(std::unique_ptr<pvxs::server::Server>&& c
   : m_context(std::move(context))
   , m_callback(std::move(callback))
   , m_variables{}
-  , m_client_context{std::make_shared<pvxs::client::Context>(m_context->clientConfig().build())}
+  , m_client_context{}
 {}
 
 PvAccessServerImpl::~PvAccessServerImpl()
@@ -83,6 +83,10 @@ std::unique_ptr<pvxs::server::Server>& PvAccessServerImpl::GetContext()
 
 std::shared_ptr<pvxs::client::Context> PvAccessServerImpl::GetClientContext()
 {
+  if (!m_client_context)
+  {
+    m_client_context = std::make_shared<pvxs::client::Context>(m_context->clientConfig().build());
+  }
   return m_client_context;
 }
 

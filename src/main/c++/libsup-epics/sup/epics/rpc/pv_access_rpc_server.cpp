@@ -19,6 +19,7 @@
 
 #include <sup/epics/pv_access_rpc_server.h>
 
+#include <sup/epics/rpc/pv_access_rpc_client_impl.h>
 #include <sup/epics/rpc/pv_access_rpc_server_impl.h>
 
 /** When the server receives a request, the following steps are performed:
@@ -57,6 +58,13 @@ PvAccessRPCServer::PvAccessRPCServer(IsolatedTag, const PvAccessRPCServerConfig&
 {}
 
 PvAccessRPCServer::~PvAccessRPCServer() = default;
+
+PvAccessRPCClient PvAccessRPCServer::CreateClient(const PvAccessRPCClientConfig& config)
+{
+  auto context = m_impl->GetClientContext();
+  std::unique_ptr<PvAccessRPCClientImpl> client_impl{new PvAccessRPCClientImpl(config, context)};
+  return PvAccessRPCClient{std::move(client_impl)};
+}
 
 PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name)
 {

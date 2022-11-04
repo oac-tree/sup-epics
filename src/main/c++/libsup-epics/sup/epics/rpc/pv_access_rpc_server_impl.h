@@ -24,6 +24,7 @@
 
 #include <sup/dto/any_functor.h>
 
+#include <pvxs/client.h>
 #include <pvxs/server.h>
 
 #include <memory>
@@ -41,11 +42,14 @@ public:
 
   ~PvAccessRPCServerImpl();
 
+  std::shared_ptr<pvxs::client::Context> GetClientContext();
+
 private:
   void Initialise();
   std::unique_ptr<pvxs::server::Server> m_server;
   PvAccessRPCServerConfig m_config;
   std::unique_ptr<sup::dto::AnyFunctor> m_handler;
+  std::shared_ptr<pvxs::client::Context> m_client_context;
 };
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(

@@ -22,6 +22,8 @@
 
 #include "pv_access_rpc_server_config.h"
 
+#include <sup/epics/pv_access_rpc_client.h>
+
 #include <sup/dto/any_functor.h>
 
 #include <memory>
@@ -46,6 +48,8 @@ public:
                     std::unique_ptr<sup::dto::AnyFunctor>&& handler);
 
   ~PvAccessRPCServer();
+
+  PvAccessRPCClient CreateClient(const PvAccessRPCClientConfig& config);
 
 private:
   std::unique_ptr<PvAccessRPCServerImpl> m_impl;
