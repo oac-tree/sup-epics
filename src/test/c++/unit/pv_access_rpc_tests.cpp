@@ -123,13 +123,35 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
   // Send empty value
   sup::dto::AnyValue payload{42};
   auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  // Although the extra field is not defined by the usual transport protocol (see sup-rpc), our
+  // custom handler will at the server side will use it to return an empty value.
   request.AddMember(RETURN_EMPTY_FIELD, true);
   auto reply = client(request);
   ASSERT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
-  EXPECT_FALSE(static_cast<bool>(m_request));
-  EXPECT_FALSE(static_cast<bool>(m_reply));
+  ASSERT_TRUE(static_cast<bool>(m_request));
+  ASSERT_TRUE(static_cast<bool>(m_reply));
+  EXPECT_TRUE(sup::dto::IsEmptyValue(*m_reply));
   EXPECT_EQ(reply[sup::rpc::constants::REPLY_RESULT].As<unsigned int>(),
             sup::rpc::NetworkEncodingError.GetValue());
+}
+
+//! Standard scenario with non-isolated client/server (created from environment variables).
+
+TEST_F(PvAccessRPCTests, ClientServerFromEnv)
+{
+  std::string channel_name = "PvAccessRPCTests:channel";
+  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), CreateHandler());
+  auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
+
+  // Send simple scalar payload over RPC
+  sup::dto::AnyValue payload{42};
+  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto reply = client(request);
+  EXPECT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  ASSERT_TRUE(static_cast<bool>(m_request));
+  ASSERT_TRUE(static_cast<bool>(m_reply));
+  EXPECT_EQ(request, *m_request);
+  EXPECT_EQ(reply, *m_reply);
 }
 
 PvAccessRPCTests::PvAccessRPCTests()
@@ -156,11 +178,11 @@ TestHandler::~TestHandler() = default;
 
 sup::dto::AnyValue TestHandler::operator()(const sup::dto::AnyValue& request)
 {
-  if (request.HasField(RETURN_EMPTY_FIELD) && request[RETURN_EMPTY_FIELD].As<bool>())
+  sup::dto::AnyValue reply;
+  if (!request.HasField(RETURN_EMPTY_FIELD) || request[RETURN_EMPTY_FIELD].As<bool>() == false)
   {
-    return {};
+    reply = sup::rpc::utils::CreateRPCReply(sup::rpc::Success);
   }
-  auto reply = sup::rpc::utils::CreateRPCReply(sup::rpc::Success);
   m_func(request, reply);
   return reply;
 }
