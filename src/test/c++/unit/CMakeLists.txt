@@ -1,4 +1,4 @@
-set(test testsup-epics)
+set(test unit-tests)
 
 file(GLOB source_files "*.cpp")
 file(GLOB include_files "*.h")

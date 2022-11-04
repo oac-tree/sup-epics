@@ -35,12 +35,12 @@ install(FILES
         sup/epics/ca_types.h
         sup/epics/channel_access_client.h
         sup/epics/channel_access_pv.h
-        sup/epics/pv_access_client.h
         sup/epics/pv_access_client_pv.h
-        sup/epics/pv_access_server.h
-        sup/epics/pv_access_rpc_client.h
+        sup/epics/pv_access_client.h
         sup/epics/pv_access_rpc_client_config.h
-        sup/epics/pv_access_rpc_server.h
+        sup/epics/pv_access_rpc_client.h
         sup/epics/pv_access_rpc_server_config.h
+        sup/epics/pv_access_rpc_server.h
+        sup/epics/pv_access_server.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
 )
