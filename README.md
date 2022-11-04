@@ -1,8 +1,7 @@
 # Supervision and automation system EPICS interface
 
-Library of components to send/receive SUP data-transfer-objects via EPICS Channel Access and PV access network protocols.
-This is bare CMake project intended for the development and prototyping on Linux of the user's choice.
-CODAC packaging will follow at a later stage.
+Library of components to send/receive SUP data-transfer-objects via EPICS Channel Access and PvAccess network protocols.
+This is a CMake project intended development and deployment on most Linux systems.
 
 ## Installation on CODAC development machines
 
@@ -16,13 +15,12 @@ mvn clean install
 
 # install this packages
 git clone https://git.iter.org/scm/coa/sup-epics.git
-mkdir <build>; cd <build>
-cmake <source> && make -j4 && ctest
+mvn clean install
 ```
 
-## Installation on Linux of the user's choice
+## Installation on custom Linux system
 
-The `sup-comon-epics`  requires EPICS, PVXS and `coa-compact` libraries.
+The `sup-epics` module requires EPICS, PVXS and `sup-dto` libraries.
 
 ### Install EPICS and PVXS
 
@@ -50,10 +48,10 @@ export EPICS_HOST_ARCH=$(${EPICS_BASE}/startup/EpicsHostArch)
 export PVXS_DIR=<pvxs>
 ```
 
-### Install coa-compact
+### Install `sup-dto`
 
 ```
-git clone https://git.iter.org/scm/coa/coa-compact.git
+git clone https://git.iter.org/scm/coa/sup-dto.git
 mkdir <build>; cd <build>
 cmake <source> && make -j4 && ctest
 ```
@@ -61,7 +59,7 @@ cmake <source> && make -j4 && ctest
 Please note, that thanks to CMake magic (the magic is located in $HOME/.cmake directory), installation is optional.
 Without installation, libraries will be discoverable right from the build directory.
 
-### Finally, install `cpp-epics`
+### Finally, install `sup-epics`
 
 ```
 git clone https://git.iter.org/scm/coa/sup-epics.git
