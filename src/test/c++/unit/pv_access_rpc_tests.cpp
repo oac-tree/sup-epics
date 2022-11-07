@@ -154,6 +154,23 @@ TEST_F(PvAccessRPCTests, ClientServerFromEnv)
   EXPECT_EQ(reply, *m_reply);
 }
 
+TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
+{
+  std::string channel_name = "PvAccessRPCTests:channel";
+  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), CreateHandler());
+  PvAccessRPCClient client{GetDefaultRPCClientConfig(channel_name)};
+
+  // Send simple scalar payload over RPC
+  sup::dto::AnyValue payload{42};
+  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto reply = client(request);
+  EXPECT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  ASSERT_TRUE(static_cast<bool>(m_request));
+  ASSERT_TRUE(static_cast<bool>(m_reply));
+  EXPECT_EQ(request, *m_request);
+  EXPECT_EQ(reply, *m_reply);
+}
+
 PvAccessRPCTests::PvAccessRPCTests()
   : m_request{}
   , m_reply{}
