@@ -25,26 +25,6 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/rpc/protocol_result.h>
 
-/** When the client's Invoke is called, the following steps are performed:
-  * - Create a request with a timestamp and the provided payload
-  * - Translate this to pvxs
-  *   - If this fails return a specific status code
-  * - Send over the network
-  *   - No response: status code
-  * - Translate response to AnyValue
-  * - Parse the reply
-  *   - Incorrect format: return specific error code
-  * - Return status code and output from the reply
-  *
-  * This implies the client requires the following failure statuses/messages:
-  * - Translation of request structure failed: status code
-  * - No response from server: status code
-  * - Incorrect response format from server: status code
-  *
-  * For echo testing, a request without a 'query' field can be used. The reply should then only
-  * be checked for its 'result', 'timestamp' and 'reason' fields.
-  */
-
 static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
 namespace sup

@@ -34,6 +34,14 @@ namespace epics
 {
 class PvAccessRPCServerImpl;
 
+/** @brief PvAccess based implementation of an RPC server
+ *
+ * @details This PvAccess based implementation of an RPC server forwards requests to an AnyFunctor
+ * interface (see sup-dto). It also implicitly assumes the transport protocol defined in sup-rpc:
+ * although one can send (and receive) AnyValues that are not conforming to the transport protocol,
+ * all error messages are implemented according to that protocol, meaning they contain a status
+ * field, a timestamp and a reason field.
+  */
 class PvAccessRPCServer
 {
 public:
