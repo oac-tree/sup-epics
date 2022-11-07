@@ -145,7 +145,11 @@ bool PvAccessClientPVImpl::WaitForValidValue(double timeout_sec) const
 
 void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
 {
-  PvAccessClientPV::ExtendedValue result = m_cache;
+  PvAccessClientPV::ExtendedValue result;
+  {
+    std::lock_guard<std::mutex> lk(m_mon_mtx);
+    result = m_cache;
+  }
   while (true)
   {
     try
