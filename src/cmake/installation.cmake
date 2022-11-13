@@ -34,6 +34,9 @@ configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/sup-epics-config.cmake.i
     INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
 )
 
+# to use from the build tree
+configure_file(${CMAKE_CURRENT_LIST_DIR}/FindEPICS.cmake ${CMAKE_CURRENT_BINARY_DIR}/FindEPICS.cmake COPYONLY)
+
 # to use in install tree
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config.cmake DESTINATION ${INSTALL_CONFIGDIR})
 
@@ -47,7 +50,4 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config-ve
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config-version.cmake DESTINATION ${INSTALL_CONFIGDIR})
 
 # Installing custom FindEPICS.cmake too
-install(FILES
-    ${CMAKE_CURRENT_LIST_DIR}/FindEPICS.cmake
-    DESTINATION ${INSTALL_CONFIGDIR}
-)
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/FindEPICS.cmake DESTINATION ${INSTALL_CONFIGDIR})
