@@ -35,29 +35,14 @@ static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
 
 class ChannelAccessPVTest : public ::testing::Test
 {
-public:
-  // Create single service for all tests.
-  static void SetUpTestCase()
-  {
-    m_softioc_service.Start(GetEpicsDBContentString());
-  }
-
-  static void TearDownTestCase()
-  {
-    m_softioc_service.Stop();
-  }
-
-  static SoftIocRunner m_softioc_service;
+protected:
+  ChannelAccessPVTest() = default;
+  ~ChannelAccessPVTest() = default;
 };
-
-SoftIocRunner ChannelAccessPVTest::m_softioc_service{"ChannelAccessPVTest"};
 
 TEST_F(ChannelAccessPVTest, ConnectAndRead)
 {
   using namespace sup::epics;
-
-  // Assert the softIoc is active
-  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing variables
   ChannelAccessPV ca_bool_var("CA-TESTS:BOOL", sup::dto::BooleanType);
@@ -97,9 +82,6 @@ TEST_F(ChannelAccessPVTest, ConnectAndRead)
 TEST_F(ChannelAccessPVTest, SingleReadWrite)
 {
   using namespace sup::epics;
-
-  // Assert the softIoc is active
-  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing variables
   ChannelAccessPV ca_bool_var("CA-TESTS:BOOL", sup::dto::BooleanType);
@@ -162,9 +144,6 @@ TEST_F(ChannelAccessPVTest, SingleReadWrite)
 TEST_F(ChannelAccessPVTest, MultipleReadWrite)
 {
   using namespace sup::epics;
-
-  // Assert the softIoc is active
-  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // create variables
   ChannelAccessPV ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32Type);

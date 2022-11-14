@@ -43,29 +43,14 @@ static bool WaitForValue(const sup::epics::ChannelAccessClient& client, const st
 
 class ChannelAccessClientTest : public ::testing::Test
 {
-public:
-  // Create single service for all tests.
-  static void SetUpTestCase()
-  {
-    m_softioc_service.Start(GetEpicsDBContentString());
-  }
-
-  static void TearDownTestCase()
-  {
-    m_softioc_service.Stop();
-  }
-
-  static SoftIocRunner m_softioc_service;
+protected:
+  ChannelAccessClientTest() = default;
+  ~ChannelAccessClientTest() = default;
 };
-
-SoftIocRunner ChannelAccessClientTest::m_softioc_service{"ChannelAccessClientTest"};
 
 TEST_F(ChannelAccessClientTest, ConnectAndRead)
 {
   using namespace sup::epics;
-
-  // Assert the softIoc is active
-  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing client
   ChannelAccessClient client;
@@ -106,9 +91,6 @@ TEST_F(ChannelAccessClientTest, ConnectAndRead)
 TEST_F(ChannelAccessClientTest, SingleClient)
 {
   using namespace sup::epics;
-
-  // Assert the softIoc is active
-  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // preparing client
   ChannelAccessClient client;
@@ -206,9 +188,6 @@ TEST_F(ChannelAccessClientTest, SingleClient)
 TEST_F(ChannelAccessClientTest, MultipleClients)
 {
   using namespace sup::epics;
-
-  // Assert the softIoc is active
-  ASSERT_TRUE(m_softioc_service.IsActive());
 
   // create clients
   ChannelAccessClient client_writer;
