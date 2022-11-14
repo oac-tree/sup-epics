@@ -68,7 +68,7 @@ public:
       std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
     std::unique_ptr<sup::epics::PvAccessClientPVImpl> result{
       new sup::epics::PvAccessClientPVImpl(channel, context, cb)};
-    return std::move(result);
+    return result;
   }
 
   pvxs::Value m_pvxs_value;

@@ -83,7 +83,7 @@ public:
       std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
     std::unique_ptr<sup::epics::PvAccessClientImpl> result{
       new sup::epics::PvAccessClientImpl(context, cb)};
-    return std::move(result);
+    return result;
   }
 
   pvxs::Value m_pvxs_ntscalar_value;            //!< NTScalar containing int as a value
