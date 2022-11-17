@@ -19,8 +19,8 @@ endif()
 if (PVXS_DIR)
   message(STATUS "  PVXS_DIR: ${PVXS_DIR}")
 else()
-  set(PVXS_DIR $ENV{EPICS_BASE})
-  message(STATUS "  PVXS_DIR: node dedicated PVXS installation, relying on EPICS dir ${PVXS_DIR}")
+  message(STATUS "  PVXS_DIR: no dedicated PVXS installation, expecting to find it in ${EPICS_BASE}")
+  set(PVXS_DIR ${EPICS_BASE})
 endif()
 
 # finding architecture
