@@ -11,12 +11,14 @@ include(GNUInstallDirs)
 
 get_filename_component(SUP_EPICS_PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 
-if (DEFINED ENV{CODAC_ROOT})
-  message(STATUS "CODAC environment detected at $ENV{CODAC_ROOT}")
-  set(SUP_EPICS_CODAC ON)
+if (SUP_EPICS_CODAC)
+  if (DEFINED ENV{CODAC_ROOT})
+    message(STATUS "CODAC environment detected at $ENV{CODAC_ROOT}")
+  else()
+    message(FATAL "No CODAC environment detected")
+  endif()
 else()
-  message(STATUS "No CODAC environment detected")
-  set(SUP_EPICS_CODAC OFF)
+  message(STATUS "Compiling without CODAC")
 endif()
 
 # -----------------------------------------------------------------------------
