@@ -174,6 +174,39 @@ TEST_F(ChannelAccessPVTest, MultipleReadWrite)
   EXPECT_TRUE(WaitForValue(ca_float_reader, value2, 5.0));
 }
 
+TEST_F(ChannelAccessPVTest, ShortLivedPV)
+{
+  using namespace sup::epics;
+
+  // create reader pv
+  ChannelAccessPV reader_pv("CA-TESTS:BOOL", sup::dto::BooleanType);
+  EXPECT_TRUE(reader_pv.WaitForConnected(5.0));
+
+  // set first value through shortlived pv
+  bool value = false;
+  {
+    ChannelAccessPV writer_pv("CA-TESTS:BOOL", sup::dto::BooleanType);
+    EXPECT_TRUE(writer_pv.WaitForConnected(5.0));
+
+    EXPECT_TRUE(writer_pv.SetValue(value));
+  }
+
+  // wait for value to reach reader pv
+  EXPECT_TRUE(WaitForValue(reader_pv, value, 2.0));
+
+  // set second value through shortlived pv
+  value = true;
+  {
+    ChannelAccessPV writer_pv("CA-TESTS:BOOL", sup::dto::BooleanType);
+    EXPECT_TRUE(writer_pv.WaitForConnected(5.0));
+
+    EXPECT_TRUE(writer_pv.SetValue(value));
+  }
+
+  // wait for value to reach reader pv
+  EXPECT_TRUE(WaitForValue(reader_pv, value, 2.0));
+}
+
 static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec)
 {
