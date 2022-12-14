@@ -51,7 +51,7 @@ bool AddChannelTask(const std::string& name, chtype type, chid* id,
       return false;
     }
   }
-  ca_pend_io(1);
+  ca_flush_io();
   return true;
 }
 
@@ -61,7 +61,7 @@ bool RemoveChannelTask(chid id)
   {
     return false;
   }
-  ca_pend_io(1);
+  ca_flush_io();
   return true;
 }
 
@@ -71,7 +71,7 @@ bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref)
   {
     return false;
   }
-  ca_pend_io(1);
+  ca_flush_io();
   return true;
 }
 
