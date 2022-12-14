@@ -47,6 +47,10 @@ CAContextHandle::~CAContextHandle()
 
 bool CAContextHandle::HandleTask(std::packaged_task<bool()>&& task)
 {
+  if (halt)
+  {
+    return false;
+  }
   auto result = task.get_future();
   {
     std::lock_guard<std::mutex> lk(task_mtx);
