@@ -135,3 +135,22 @@ std::string PvPut(const std::string &variable_name, const std::string &value)
 
   return sstr.str();
 }
+
+std::string CAPut(const std::string &variable_name, const std::string &value)
+{
+  auto out_file_name = GetTempFileName();
+
+  std::string command(GetEPICSBinaryPath() + "caput " + variable_name + " " + value + " > "
+                      + out_file_name);
+  if (std::system(command.c_str()) != 0)
+  {
+    return {};
+  }
+
+  std::stringstream sstr;
+  sstr << std::ifstream(out_file_name).rdbuf();
+
+  RemoveFile(out_file_name);
+
+  return sstr.str();
+}

@@ -207,6 +207,29 @@ TEST_F(ChannelAccessPVTest, ShortLivedPV)
   EXPECT_TRUE(WaitForValue(reader_pv, value, 2.0));
 }
 
+TEST_F(ChannelAccessPVTest, DestroySameChannelPV)
+{
+  using namespace sup::epics;
+
+  // create first reader pv and set start value
+  ChannelAccessPV reader_1("CA-TESTS:BOOL", sup::dto::BooleanType);
+  EXPECT_TRUE(reader_1.WaitForConnected(5.0));
+  bool value = false;
+  EXPECT_TRUE(reader_1.SetValue(value));
+  EXPECT_TRUE(WaitForValue(reader_1, value, 2.0));
+
+  // Create second pv and destroy it after connecting
+  {
+    ChannelAccessPV reader_2("CA-TESTS:BOOL", sup::dto::BooleanType);
+    EXPECT_TRUE(reader_2.WaitForConnected(5.0));
+  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  // set pv value from command line
+  CAPut("CA-TESTS:BOOL", "TRUE");
+  EXPECT_TRUE(WaitForValue(reader_1, true, 2.0));
+}
+
 static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec)
 {
