@@ -45,6 +45,8 @@ TEST(ChannelAccessBaseTest, DISABLED_MissedCallback)
   ASSERT_EQ(ca_context_create(ca_enable_preemptive_callback), ECA_NORMAL);
 
   // Preconditions
+  mon_count.store(0);
+  conn_count.store(0);
   EXPECT_EQ(mon_count, 0);
   EXPECT_EQ(conn_count, 0);
 
