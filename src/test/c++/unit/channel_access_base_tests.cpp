@@ -40,7 +40,7 @@ static const char* channel_name = "CA_TESTS:LONG";
  * Preconditions for this test:
  * There has to be an EPICS longout record available, with a current value not equal to 1
 */
-TEST(ChannelAccessBaseTest, MissedCallback)
+TEST(ChannelAccessBaseTest, DISABLED_MissedCallback)
 {
   ASSERT_EQ(ca_context_create(ca_enable_preemptive_callback), ECA_NORMAL);
 
