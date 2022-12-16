@@ -82,17 +82,18 @@ TEST(ChannelAccessBaseTest, DISABLED_MissedCallback)
   dummy = 2;
   EXPECT_EQ(ca_array_put(DBR_LONG, 1u, id_2, &dummy), ECA_NORMAL);
   EXPECT_EQ(ca_flush_io(), ECA_NORMAL);
-  // The following two checks are the problematic ones, with everything else passing.
-  // Uncommenting the next line will make those checks pass too!
+  // Uncommenting the next line will fix all checks!
   // std::this_thread::sleep_for(std::chrono::milliseconds(10));
   EXPECT_EQ(ca_clear_channel(id_2), ECA_NORMAL);
   EXPECT_EQ(ca_flush_io(), ECA_NORMAL);
 
+  // The following two checks are the problematic ones, with everything else passing.
+  // The check on the connection count is not an issue.
   // Expect monitoring callbacks to be called twice since last check
   auto larger_than_4 = [](int val){ return val > 4; };
   EXPECT_TRUE(WaitForValue(mon_count, larger_than_4, 2.0));
-  EXPECT_EQ(conn_count, 2);
   EXPECT_GT(mon_count, 4);
+  EXPECT_EQ(conn_count, 2);
 
   // Read PV value, using the first channel. Check that the PV was updated.
   int val_read;
