@@ -67,6 +67,13 @@ record (waveform,"CA-TESTS:CHARRAY")
     field(FTVL, "CHAR")
     field(NELM, "1024")
 }
+
+record (longout,"CA_TESTS:LONG")
+{
+    field(DESC,"Some EPICSv3 record")
+    field(VAL,"0")
+    field(PINI,"YES")
+}
 )RAW";
 
 }  // unnamed namespace

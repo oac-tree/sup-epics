@@ -7,6 +7,7 @@ add_executable(${test} ${include_files})
 target_sources(${test}
   PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/anyvalue_from_pvxs_builder_tests.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/channel_access_base_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/channel_access_client_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/channel_access_pv_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/dto_conversion_utils_tests.cpp
