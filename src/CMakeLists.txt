@@ -3,7 +3,7 @@ set(library_name sup-epics)
 add_library(${library_name} SHARED "")
 add_library(sup-epics::sup-epics ALIAS ${library_name}) # alias for build-tree usage
 
-if (SUP_EPICS_CODAC)
+if (CODAC)
   target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib $ENV{CODAC_ROOT}/epics/lib/linux-x86_64)
   target_link_libraries(${library_name} PUBLIC pthread sup-dto sup-rpc pvxs ca)
   target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)

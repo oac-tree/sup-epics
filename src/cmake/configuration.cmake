@@ -6,19 +6,16 @@ include(CTest)
 include(GNUInstallDirs)
 
 # -----------------------------------------------------------------------------
-# Find if we are on CODAC infrastructure
+# CODAC enviorenment
 # -----------------------------------------------------------------------------
 
-get_filename_component(SUP_EPICS_PROJECT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
-
-if (SUP_EPICS_CODAC)
-  if (DEFINED ENV{CODAC_ROOT})
+if (NOT NO_CODAC AND DEFINED ENV{CODAC_ROOT})
     message(STATUS "CODAC environment detected at $ENV{CODAC_ROOT}")
-  else()
-    message(FATAL "No CODAC environment detected")
-  endif()
+    list(APPEND CMAKE_PREFIX_PATH $ENV{CODAC_ROOT} $ENV{CODAC_ROOT}/common)
+    set(CODAC TRUE)
 else()
   message(STATUS "Compiling without CODAC")
+  set(CODAC FALSE)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -36,11 +33,11 @@ endif()
 # Directories
 # -----------------------------------------------------------------------------
 
-if (DEFINED ENV{CODAC_ROOT})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SUP_EPICS_PROJECT_DIR}/target/bin)
-else()
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+if (NOT DEFINED TEST_OUTPUT_DIRECTORY)
+  set(TEST_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test_bin)
 endif()
+
+file(MAKE_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 
 # -----------------------------------------------------------------------------
 # Dependencies
@@ -48,7 +45,7 @@ endif()
 
 find_package(Threads)
 
-if (NOT SUP_EPICS_CODAC)
+if (NOT CODAC)
   find_package(sup-dto REQUIRED)
 endif()
 

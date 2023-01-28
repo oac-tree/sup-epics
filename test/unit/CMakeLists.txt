@@ -39,4 +39,6 @@ else()
   target_link_libraries(${test} PRIVATE PUBLIC pthread GTest::gtest GTest::gmock sup-epics)
 endif()
 
+set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
+
 gtest_discover_tests(${test})
