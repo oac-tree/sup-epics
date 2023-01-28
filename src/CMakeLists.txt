@@ -1,17 +1,46 @@
-cmake_minimum_required(VERSION 3.14)
-project(sup-epics-project VERSION 0.1.0 LANGUAGES CXX)
+set(library_name sup-epics)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_library(${library_name} SHARED "")
+add_library(sup-epics::sup-epics ALIAS ${library_name}) # alias for build-tree usage
 
-option(COVERAGE "Generate unit test coverage information" OFF)
-option(SUP_EPICS_EXPORT_BUILDTREE "Export build tree in /home/user/.cmake registry" OFF)
-option(SUP_EPICS_CODAC "Compilation for CODAC environment" ON)
+if (SUP_EPICS_CODAC)
+  target_link_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/lib $ENV{CODAC_ROOT}/epics/lib/linux-x86_64)
+  target_link_libraries(${library_name} PUBLIC pthread sup-dto sup-rpc pvxs ca)
+  target_include_directories(${library_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
+  target_include_directories(${library_name} PUBLIC $ENV{CODAC_ROOT}/include $ENV{CODAC_ROOT}/include/sup $ENV{CODAC_ROOT}/epics/include $ENV{CODAC_ROOT}/epics/include/os/Linux $ENV{CODAC_ROOT}/epics/include/compiler/gcc)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../src/cmake)
-include(configuration)
+else()
+  find_package(EPICS REQUIRED)
+  target_link_directories(${library_name} PUBLIC ${EPICS_LINK_DIRECTORIES})
+  target_link_libraries(${library_name} PUBLIC pthread sup-dto::sup-dto sup-dto::sup-rpc ${EPICS_LIBRARIES})
+  target_include_directories(${library_name} PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}$<SEMICOLON>${EPICS_INCLUDE_DIRECTORIES}>)
+endif()
 
-add_subdirectory(main/c++)
-add_subdirectory(test/c++)
+add_subdirectory(sup)
 
-include(installation)
+# -- Installation --
+
+set_target_properties(${library_name} PROPERTIES
+    EXPORT_NAME sup-epics
+    SOVERSION ${SUP_EPICS_SOVERSION}
+    VERSION ${SUP_EPICS_BUILDVERSION}
+)
+
+install(TARGETS ${library_name} EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set_target_properties(${library_name} PROPERTIES EXPORT_NAME sup-epics)
+
+install(FILES
+        sup/epics/ca_types.h
+        sup/epics/channel_access_client.h
+        sup/epics/channel_access_pv.h
+        sup/epics/pv_access_client_pv.h
+        sup/epics/pv_access_client.h
+        sup/epics/pv_access_rpc_client_config.h
+        sup/epics/pv_access_rpc_client.h
+        sup/epics/pv_access_rpc_server_config.h
+        sup/epics/pv_access_rpc_server.h
+        sup/epics/pv_access_server.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
+)

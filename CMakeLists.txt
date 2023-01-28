@@ -11,7 +11,7 @@ option(SUP_EPICS_CODAC "Compilation for CODAC environment" OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/src/cmake)
 include(configuration)
 
-add_subdirectory(src/main/c++)
-add_subdirectory(src/test/c++)
+add_subdirectory(src)
+add_subdirectory(test)
 
 include(installation)
