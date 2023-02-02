@@ -1,4 +1,4 @@
-target_sources(${library_name} PRIVATE
+target_sources(sup-epics PRIVATE
   CMakeLists.txt
   anyvalue_from_pvxs_builder.cpp
   anyvalue_from_pvxs_builder.h

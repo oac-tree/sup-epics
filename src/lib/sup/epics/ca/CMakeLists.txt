@@ -1,5 +1,4 @@
-
-target_sources(${library_name} PRIVATE
+target_sources(sup-epics PRIVATE
     ca_channel_manager.cpp
     ca_channel_tasks.cpp
     ca_context_handle.cpp
