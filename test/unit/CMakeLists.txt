@@ -28,15 +28,13 @@ target_sources(${test}
     ${CMAKE_CURRENT_LIST_DIR}/pvxs_builder_nodes_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pvxs_value_builder_extended_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pvxs_value_builder_tests.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/softioc_runner.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/softioc_utils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/unit_test_helper.cpp
 )
 
 if (GTest_VERSION VERSION_LESS_EQUAL "1.8")
-  target_link_libraries(${test} PRIVATE PUBLIC pthread gtest gmock sup-epics)
+  target_link_libraries(${test} PRIVATE PUBLIC pthread gtest gmock sup-epics sup-epics-test)
 else()
-  target_link_libraries(${test} PRIVATE PUBLIC pthread GTest::gtest GTest::gmock sup-epics)
+  target_link_libraries(${test} PRIVATE PUBLIC pthread GTest::gtest GTest::gmock sup-epics sup-epics-test)
 endif()
 
 set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})

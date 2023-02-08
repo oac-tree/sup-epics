@@ -20,15 +20,15 @@
  *****************************************************************************/
 
 #include <gtest/gtest.h>
-
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
+#include <sup/epics/channel_access_pv.h>
+
 #include <cmath>
 #include <thread>
 
-#include "softioc_runner.h"
-#include "softioc_utils.h"
-#include <sup/epics/channel_access_pv.h>
+#include <sup/epics-test/softioc_runner.h>
+#include <sup/epics-test/softioc_utils.h>
 
 static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec);
@@ -121,8 +121,8 @@ TEST_F(ChannelAccessPVTest, SingleReadWrite)
   // writing long string
   sup::dto::AnyValue chararray_val(1024, sup::dto::Character8Type, "char8[]");
   sup::dto::char8 char_data[1024] =
-        "Some very long string which is longer than the maximum length of EPICSv3 string and "
-        "should be serialised on a waveform record";
+      "Some very long string which is longer than the maximum length of EPICSv3 string and "
+      "should be serialised on a waveform record";
   sup::dto::AssignFromCType(chararray_val, char_data);
   EXPECT_TRUE(ca_chararray_var.SetValue(chararray_val));
 
@@ -132,7 +132,7 @@ TEST_F(ChannelAccessPVTest, SingleReadWrite)
   // retrieve timestamp
   auto now = std::chrono::system_clock::now();
   auto now_timestamp =
-    std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+      std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
   ChannelAccessPV::ExtendedValue ext_boolean;
   EXPECT_NO_THROW(ext_boolean = ca_bool_var.GetExtendedValue());
 
@@ -224,8 +224,8 @@ TEST_F(ChannelAccessPVTest, DISABLED_ShortLivedPV)
 static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec)
 {
-  auto timeout = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  auto timeout =
+      std::chrono::system_clock::now() + std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
   sup::dto::AnyValue value_read = variable.GetValue();
   while (value_read != expected_value)
   {

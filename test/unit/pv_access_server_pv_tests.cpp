@@ -18,7 +18,6 @@
  *****************************************************************************/
 
 #include "mock_utils.h"
-#include "softioc_utils.h"
 #include "unit_test_helper.h"
 
 #include <gtest/gtest.h>
@@ -27,8 +26,11 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_pv.h>
 
-using ::testing::_;
+#include <sup/epics-test/softioc_runner.h>
+#include <sup/epics-test/softioc_utils.h>
+
 using sup::epics::unit_test_helper::BusyWaitFor;
+using ::testing::_;
 
 namespace
 {
@@ -73,16 +75,12 @@ TEST_F(PvAccessServerPVTests, GetAndSet)
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   // setting new value and checking result
-  sup::dto::AnyValue new_any_value({
-    {"value", {sup::dto::SignedInteger32Type, 45}}
-  });
+  sup::dto::AnyValue new_any_value({{"value", {sup::dto::SignedInteger32Type, 45}}});
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
   // attempt to set value with different type
@@ -100,22 +98,16 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
 
   // setting new value and checking the result
-  sup::dto::AnyValue new_any_value({
-    {"value", {sup::dto::SignedInteger32Type, 45}}
-  });
+  sup::dto::AnyValue new_any_value({{"value", {sup::dto::SignedInteger32Type, 45}}});
   EXPECT_TRUE(variable.SetValue(new_any_value));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    return variable.GetValue() == new_any_value;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return variable.GetValue() == new_any_value; }));
 }
 
 //! Check GetValue and SetValue. Server is running.
@@ -130,64 +122,58 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
 
   // setting new value and checking the result
-  sup::dto::AnyValue new_any_value({
-    {"value", {sup::dto::SignedInteger32Type, 45}}
-  });
+  sup::dto::AnyValue new_any_value({{"value", {sup::dto::SignedInteger32Type, 45}}});
   // setting up callback expectations
   EXPECT_CALL(listener, OnServerPVValueChanged(new_any_value)).Times(1);
 
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    return variable.GetValue() == new_any_value;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return variable.GetValue() == new_any_value; }));
 }
 
 //! Adding variable to a server. Server is started first.
 
 TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 {
-  auto server = CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv();  // to make 'pvget` working
   server->start();
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
 
   // validating variable using `pvget` command line utility
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    auto pvget_output = GetPvGetOutput(variable_name);
-    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
-    auto value_found = pvget_output.find("int value 42") != std::string::npos;
-    return varname_found && value_found;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [&]()
+                          {
+                            auto pvget_output = GetPvGetOutput(variable_name);
+                            auto varname_found =
+                                pvget_output.find(variable_name) != std::string::npos;
+                            auto value_found =
+                                pvget_output.find("int value 42") != std::string::npos;
+                            return varname_found && value_found;
+                          }));
 }
 
 //! Adding variable to a server, then start the server.
 
 TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 {
-  auto server = CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv();  // to make 'pvget` working
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
@@ -195,12 +181,16 @@ TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
   server->start();
 
   // validating variable using `pvget`
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    auto pvget_output = GetPvGetOutput(variable_name);
-    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
-    auto value_found = pvget_output.find("int value 42") != std::string::npos;
-    return varname_found && value_found;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [&]()
+                          {
+                            auto pvget_output = GetPvGetOutput(variable_name);
+                            auto varname_found =
+                                pvget_output.find(variable_name) != std::string::npos;
+                            auto value_found =
+                                pvget_output.find("int value 42") != std::string::npos;
+                            return varname_found && value_found;
+                          }));
 }
 
 //! Adding variable to a server, then start the server.
@@ -208,13 +198,11 @@ TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 
 TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 {
-  auto server = CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv();  // to make 'pvget` working
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
@@ -222,23 +210,23 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
   server->start();
 
   // validating variable using `pvget`
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    auto pvget_output = GetPvGetOutput(variable_name);
-    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
-    auto value_found = pvget_output.find("int value 42") != std::string::npos;
-    return varname_found && value_found;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [&]()
+                          {
+                            auto pvget_output = GetPvGetOutput(variable_name);
+                            auto varname_found =
+                                pvget_output.find(variable_name) != std::string::npos;
+                            auto value_found =
+                                pvget_output.find("int value 42") != std::string::npos;
+                            return varname_found && value_found;
+                          }));
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
 
   // validating variable cache
-  sup::dto::AnyValue expected_any_value({
-    {"value", {sup::dto::SignedInteger32Type, 4321}}
-  });
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    return variable.GetValue() == expected_any_value;
-  }));
+  sup::dto::AnyValue expected_any_value({{"value", {sup::dto::SignedInteger32Type, 4321}}});
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return variable.GetValue() == expected_any_value; }));
 }
 
 //! Adding variable to a server, then start the server.
@@ -247,15 +235,13 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 
 TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
 {
-  auto server = CreateServerFromEnv(); // to make 'pvget` working
+  auto server = CreateServerFromEnv();  // to make 'pvget` working
 
   MockListener listener;
 
   const std::string variable_name{"variable_name"};
 
-  sup::dto::AnyValue any_value({
-    {"value", {sup::dto::SignedInteger32Type, 42}}
-  });
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
   sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
 
   variable.AddToServer(*server);
@@ -263,26 +249,26 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
   server->start();
 
   // validating variable using `pvget`
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    auto pvget_output = GetPvGetOutput(variable_name);
-    auto varname_found = pvget_output.find(variable_name) != std::string::npos;
-    auto value_found = pvget_output.find("int value 42") != std::string::npos;
-    return varname_found && value_found;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [&]()
+                          {
+                            auto pvget_output = GetPvGetOutput(variable_name);
+                            auto varname_found =
+                                pvget_output.find(variable_name) != std::string::npos;
+                            auto value_found =
+                                pvget_output.find("int value 42") != std::string::npos;
+                            return varname_found && value_found;
+                          }));
 
   // setting up callback expectations
-  sup::dto::AnyValue expected_any_value({
-    {"value", {sup::dto::SignedInteger32Type, 4321}}
-  });
+  sup::dto::AnyValue expected_any_value({{"value", {sup::dto::SignedInteger32Type, 4321}}});
   EXPECT_CALL(listener, OnServerPVValueChanged(expected_any_value)).Times(1);
 
   // changing the value via `pvput`
   auto pvput_output = PvPut(variable_name, R"RAW("value"=4321)RAW");
 
   // validating variable cache
-  EXPECT_TRUE(BusyWaitFor(1.0, [&](){
-    return variable.GetValue() == expected_any_value;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return variable.GetValue() == expected_any_value; }));
 }
 
 namespace
@@ -296,6 +282,6 @@ std::unique_ptr<pvxs::server::Server> CreateIsolatedServer()
 std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
 {
   return std::unique_ptr<pvxs::server::Server>(
-        new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+      new pvxs::server::Server(pvxs::server::Config::fromEnv()));
 }
 }  // unnamed namespace

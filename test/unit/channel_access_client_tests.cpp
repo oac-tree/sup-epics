@@ -28,8 +28,8 @@
 #include <cmath>
 #include <thread>
 
-#include "softioc_runner.h"
-#include "softioc_utils.h"
+#include <sup/epics-test/softioc_runner.h>
+#include <sup/epics-test/softioc_utils.h>
 #include <sup/epics/channel_access_client.h>
 
 static const std::string BOOL_CHANNEL = "CA-TESTS:BOOL";

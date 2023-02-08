@@ -19,8 +19,8 @@
 * of the distribution package.
 ******************************************************************************/
 
-#include "softioc_runner.h"
-#include "softioc_utils.h"
+#include <sup/epics-test/softioc_runner.h>
+#include <sup/epics-test/softioc_utils.h>
 
 #include <gtest/gtest.h>
 
