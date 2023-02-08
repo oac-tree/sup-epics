@@ -29,7 +29,6 @@ add_subdirectory(rpc)
 # -- Installation --
 
 install(TARGETS sup-epics EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-set_target_properties(sup-epics PROPERTIES EXPORT_NAME sup-epics)
 
 install(FILES
   ca_types.h
