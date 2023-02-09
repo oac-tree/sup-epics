@@ -33,9 +33,6 @@ namespace test
 //! Returns path where EPICS binaries are located.
 std::string GetEPICSBinaryPath();
 
-//! Returns string representing EPICS database file with several testing variables.
-std::string GetEpicsDBContentString();
-
 //! Removes file with given name from disk.
 void RemoveFile(const std::string& file_name);
 

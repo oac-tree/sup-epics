@@ -36,45 +36,6 @@ std::string GetTempFileName()
   return "/tmp/sup_epics_tests_" + alphabet + ".out";
 }
 
-const std::string db_content = R"RAW(
-record (bo,"CA-TESTS:BOOL")
-{
-    field(DESC,"Some EPICSv3 record")
-    field(ONAM,"TRUE")
-    field(OSV,"NO_ALARM")
-    field(ZNAM,"FALSE")
-    field(ZSV,"NO_ALARM")
-    field(VAL,"0")
-}
-
-record (ao,"CA-TESTS:FLOAT")
-{
-    field(DESC,"Some EPICSv3 record")
-    field(DRVH,"5.0")
-    field(DRVL,"-5.0")
-    field(VAL,"0")
-}
-
-record (stringout,"CA-TESTS:STRING")
-{
-    field(DESC,"Some EPICSv3 record")
-    field(VAL,"undefined")
-}
-
-record (waveform,"CA-TESTS:CHARRAY")
-{
-    field(DESC,"Some EPICSv3 record")
-    field(FTVL, "CHAR")
-    field(NELM, "1024")
-}
-
-record (longout,"CA_TESTS:LONG")
-{
-    field(DESC,"Some EPICSv3 record")
-    field(VAL,"0")
-    field(PINI,"YES")
-}
-)RAW";
 
 }  // unnamed namespace
 
@@ -91,10 +52,6 @@ std::string GetEPICSBinaryPath()
          + std::string(std::getenv("EPICS_HOST_ARCH")) + "/";
 }
 
-std::string GetEpicsDBContentString()
-{
-  return db_content;
-}
 
 void RemoveFile(const std::string &file_name)
 {
