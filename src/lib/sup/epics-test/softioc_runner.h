@@ -24,10 +24,17 @@
 
 #include <string>
 
+namespace sup
+{
+namespace epics
+{
+namespace test
+{
+
 //! Provides possibility to start/stop 'softIoc' service on request.
 //! Intended for use with google-test and its SetUpTestCase/TearDownTestCase machinery.
-//! The goal is to isolate the user from startup/shutdown details of softIoc service
-//! and provide a gurantee, that service will be available between Start/Stop calls.
+//! The goal is to isolate the user from startup/shutdown details of the softIoc service
+//! and provide a guarantee, that service will be available between Start/Stop calls.
 class SoftIocRunner
 {
 public:
@@ -50,5 +57,9 @@ protected:
   bool m_is_active;
   std::string m_session_name;
 };
+
+}  // namespace test
+}  // namespace epics
+}  // namespace sup
 
 #endif  // SUP_EPICS_SOFTIOCRUNNER_H_

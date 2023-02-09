@@ -29,6 +29,8 @@
 #include <sup/epics-test/softioc_runner.h>
 #include <sup/epics-test/softioc_utils.h>
 
+using sup::epics::test::GetPvGetOutput;
+using sup::epics::test::PvPut;
 using sup::epics::unit_test_helper::BusyWaitFor;
 using ::testing::_;
 

@@ -23,6 +23,13 @@
 #include <string>
 #include <vector>
 
+namespace sup
+{
+namespace epics
+{
+namespace test
+{
+
 //! Returns path where EPICS binaries are located.
 std::string GetEPICSBinaryPath();
 
@@ -44,5 +51,9 @@ std::string PvPut(const std::string& variable_name, const std::string& value);
 
 //! Put the value into PV with `caput` command, returns string representing command output.
 std::string CAPut(const std::string& variable_name, const std::string& value);
+
+}  // namespace test
+}  // namespace epics
+}  // namespace sup
 
 #endif  // SUP_EPICS_SOFTIOCUTILS_H_

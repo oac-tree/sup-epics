@@ -128,6 +128,9 @@
                             <include type="file" source="include/sup/epics" target="include/sup/epics">
                                 <include>*.h</include>
                             </include>
+                            <include type="file" source="include/sup/epics-test" target="include/sup/epics-test">
+                                <include>*.h</include>
+                            </include>
                         <!-- Package dependencies -->
                         <requires version="current">%{codac_rpm_prefix}-${project.artifactId}</requires>
                     </package>

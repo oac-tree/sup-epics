@@ -177,6 +177,7 @@ TEST_F(ChannelAccessPVTest, MultipleReadWrite)
 TEST_F(ChannelAccessPVTest, DISABLED_ShortLivedPV)
 {
   using namespace sup::epics;
+  using sup::epics::test::CAPut;
 
   // create reader pv
   ChannelAccessPV reader_pv("CA-TESTS:BOOL", sup::dto::BooleanType);

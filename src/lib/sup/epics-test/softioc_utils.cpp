@@ -78,6 +78,13 @@ record (longout,"CA_TESTS:LONG")
 
 }  // unnamed namespace
 
+namespace sup
+{
+namespace epics
+{
+namespace test
+{
+
 std::string GetEPICSBinaryPath()
 {
   return std::string(std::getenv("EPICS_BASE")) + "/bin/"
@@ -161,3 +168,7 @@ std::string CAPut(const std::string &variable_name, const std::string &value)
 
   return sstr.str();
 }
+
+}  // namespace test
+}  // namespace epics
+}  // namespace sup

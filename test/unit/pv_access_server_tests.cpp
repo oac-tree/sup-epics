@@ -28,6 +28,8 @@
 #include <sup/epics-test/softioc_utils.h>
 
 using sup::epics::unit_test_helper::BusyWaitFor;
+using sup::epics::test::PvPut;
+using sup::epics::test::GetPvGetOutput;
 using ::testing::_;
 
 using namespace sup::epics;

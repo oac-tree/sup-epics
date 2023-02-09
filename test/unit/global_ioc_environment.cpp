@@ -33,7 +33,7 @@ public:
   void SetUp() override;
   void TearDown() override;
 
-  SoftIocRunner m_softioc_service;
+  sup::epics::test::SoftIocRunner m_softioc_service;
 };
 
 ::testing::Environment* const ioc_environment =
@@ -47,7 +47,7 @@ IOCEnvironment::~IOCEnvironment() = default;
 
 void IOCEnvironment::SetUp()
 {
-  m_softioc_service.Start(GetEpicsDBContentString());
+  m_softioc_service.Start(sup::epics::test::GetEpicsDBContentString());
 }
 
 void IOCEnvironment::TearDown()
