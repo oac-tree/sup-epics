@@ -18,6 +18,7 @@ target_include_directories(${library_name} PUBLIC
 target_sources(${library_name} PRIVATE
   softioc_runner.cpp
   softioc_utils.cpp
+  unit_test_helper.cpp
 )
 
 # -- Installation --
@@ -26,5 +27,6 @@ install(TARGETS ${library_name} EXPORT sup-epics-targets LIBRARY DESTINATION ${C
 install(FILES
   softioc_runner.h
   softioc_utils.h
+  unit_test_helper.h
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics-test
 )

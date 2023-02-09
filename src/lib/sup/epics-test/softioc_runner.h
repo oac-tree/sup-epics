@@ -19,8 +19,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_SOFTIOCRUNNER_H_
-#define SUP_EPICS_SOFTIOCRUNNER_H_
+#ifndef SUP_EPICS_TEST_SOFTIOC_RUNNER_H_
+#define SUP_EPICS_TEST_SOFTIOC_RUNNER_H_
 
 #include <string>
 
@@ -62,4 +62,4 @@ protected:
 }  // namespace epics
 }  // namespace sup
 
-#endif  // SUP_EPICS_SOFTIOCRUNNER_H_
+#endif  // SUP_EPICS_TEST_SOFTIOC_RUNNER_H_

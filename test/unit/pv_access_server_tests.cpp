@@ -18,7 +18,6 @@
  *****************************************************************************/
 
 #include "mock_utils.h"
-#include "unit_test_helper.h"
 
 #include <gtest/gtest.h>
 #include <pvxs/server.h>
@@ -26,10 +25,11 @@
 #include <sup/epics/pv_access_server.h>
 
 #include <sup/epics-test/softioc_utils.h>
+#include <sup/epics-test/unit_test_helper.h>
 
-using sup::epics::unit_test_helper::BusyWaitFor;
-using sup::epics::test::PvPut;
+using sup::epics::test::BusyWaitFor;
 using sup::epics::test::GetPvGetOutput;
+using sup::epics::test::PvPut;
 using ::testing::_;
 
 using namespace sup::epics;

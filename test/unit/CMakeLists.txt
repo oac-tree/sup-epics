@@ -28,7 +28,6 @@ target_sources(${test}
     ${CMAKE_CURRENT_LIST_DIR}/pvxs_builder_nodes_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pvxs_value_builder_extended_tests.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pvxs_value_builder_tests.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/unit_test_helper.cpp
 )
 
 if (GTest_VERSION VERSION_LESS_EQUAL "1.8")

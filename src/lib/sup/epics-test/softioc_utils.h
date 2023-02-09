@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_SOFTIOCUTILS_H_
-#define SUP_EPICS_SOFTIOCUTILS_H_
+#ifndef SUP_EPICS_TEST_SOFTIOC_UTILS_H_
+#define SUP_EPICS_TEST_SOFTIOC_UTILS_H_
 
 #include <string>
 #include <vector>
@@ -56,4 +56,4 @@ std::string CAPut(const std::string& variable_name, const std::string& value);
 }  // namespace epics
 }  // namespace sup
 
-#endif  // SUP_EPICS_SOFTIOCUTILS_H_
+#endif  // SUP_EPICS_TEST_SOFTIOC_UTILS_H_

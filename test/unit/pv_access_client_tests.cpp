@@ -18,9 +18,6 @@
  *****************************************************************************/
 
 #include "mock_utils.h"
-#include "unit_test_helper.h"
-
-#include <sup/epics/pvxs/pv_access_client_impl.h>
 
 #include <gtest/gtest.h>
 #include <pvxs/client.h>
@@ -30,15 +27,18 @@
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anytype.h>
 #include <sup/dto/anyvalue.h>
-#include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/pv_access_client.h>
+#include <sup/epics/pvxs/pv_access_client_impl.h>
+#include <sup/epics/utils/dto_conversion_utils.h>
 
 #include <memory>
 #include <stdexcept>
 #include <thread>
 
+#include <sup/epics-test/unit_test_helper.h>
+
+using sup::epics::test::BusyWaitFor;
 using ::testing::_;
-using sup::epics::unit_test_helper::BusyWaitFor;
 
 namespace
 {
@@ -77,12 +77,12 @@ public:
 
   //! Create PVXS client implementation from server.
   std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
-    sup::epics::PvAccessClient::VariableChangedCallback cb = {})
+      sup::epics::PvAccessClient::VariableChangedCallback cb = {})
   {
     std::shared_ptr<pvxs::client::Context> context =
-      std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
+        std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
     std::unique_ptr<sup::epics::PvAccessClientImpl> result{
-      new sup::epics::PvAccessClientImpl(context, cb)};
+        new sup::epics::PvAccessClientImpl(context, cb)};
     return result;
   }
 
@@ -180,14 +180,20 @@ TEST_F(PvAccessClientTest, TwoDifferentChannels)
   EXPECT_TRUE(client.SetValue(kStringChannelName, any_value1));
 
   // checking values on server side
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_int_value = m_shared_ntscalar_pv.fetch();
-    return shared_int_value["value"].as<int>() == kInitialIntChannelValue + 1;
-  }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [this](){
-    auto shared_string_value = m_shared_string_pv.fetch();
-    return shared_string_value["value"].as<std::string>() == std::string("abc2");
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [this]()
+                          {
+                            auto shared_int_value = m_shared_ntscalar_pv.fetch();
+                            return shared_int_value["value"].as<int>()
+                                   == kInitialIntChannelValue + 1;
+                          }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [this]()
+                          {
+                            auto shared_string_value = m_shared_string_pv.fetch();
+                            return shared_string_value["value"].as<std::string>()
+                                   == std::string("abc2");
+                          }));
 }
 
 //! Standard scenario. Server with two different variables was created and started before
@@ -236,8 +242,10 @@ TEST_F(PvAccessClientTest, TwoClients)
   EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
 
   // checking the value through the second variable
-  EXPECT_TRUE(BusyWaitFor(1.0, [&client1](){
-    auto any_value_from_client1 = client1.GetValue(kIntChannelName);
-    return any_value_from_client1["value"] == 45;
-  }));
+  EXPECT_TRUE(BusyWaitFor(1.0,
+                          [&client1]()
+                          {
+                            auto any_value_from_client1 = client1.GetValue(kIntChannelName);
+                            return any_value_from_client1["value"] == 45;
+                          }));
 }

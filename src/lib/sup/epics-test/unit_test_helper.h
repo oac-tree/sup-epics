@@ -17,8 +17,8 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_UNIT_TEST_HELPER_H_
-#define SUP_EPICS_UNIT_TEST_HELPER_H_
+#ifndef SUP_EPICS_TEST_UNIT_TEST_HELPER_H_
+#define SUP_EPICS_TEST_UNIT_TEST_HELPER_H_
 
 #include <functional>
 
@@ -26,14 +26,15 @@ namespace sup
 {
 namespace epics
 {
-namespace unit_test_helper
+namespace test
 {
+
 bool BusyWaitFor(double timeout_sec, std::function<bool()> predicate);
 
-}  // namespace unit_test_helper
+}  // namespace test
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_UNIT_TEST_HELPER_H_
+#endif  // SUP_EPICS_TEST_UNIT_TEST_HELPER_H_
