@@ -23,6 +23,8 @@
 #include <fstream>
 #include <random>
 #include <sstream>
+#include <stdexcept>
+
 namespace
 {
 
@@ -35,7 +37,6 @@ std::string GetTempFileName()
   std::shuffle(std::begin(alphabet), std::end(alphabet), gen);
   return "/tmp/sup_epics_tests_" + alphabet + ".out";
 }
-
 
 }  // unnamed namespace
 
@@ -52,6 +53,15 @@ std::string GetEPICSBinaryPath()
          + std::string(std::getenv("EPICS_HOST_ARCH")) + "/";
 }
 
+void ValidateEPICSExecutable(const std::string &exec_name)
+{
+  std::string command("which " + sup::epics::test::GetEPICSBinaryPath()
+                      + exec_name + " > /dev/null 2>&1");
+  if ( std::system(command.c_str()))
+  {
+    throw std::runtime_error("Can't find EPICS executable '" + exec_name + "'");
+  }
+}
 
 void RemoveFile(const std::string &file_name)
 {

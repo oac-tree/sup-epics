@@ -60,6 +60,8 @@ SoftIocRunner::~SoftIocRunner()
 
 void SoftIocRunner::Start(const std::string& db_file_content)
 {
+  ValidateEPICSExecutable("softIoc");
+
   if (m_is_active)
   {
     throw std::runtime_error("Error in SoftIocRunner::Start(): thread is already running");

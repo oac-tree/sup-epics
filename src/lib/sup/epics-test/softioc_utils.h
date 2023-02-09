@@ -33,6 +33,9 @@ namespace test
 //! Returns path where EPICS binaries are located.
 std::string GetEPICSBinaryPath();
 
+//! Validates if given EPICS executable is present. Throws if it is not the case.
+void ValidateEPICSExecutable(const std::string& exec_name);
+
 //! Removes file with given name from disk.
 void RemoveFile(const std::string& file_name);
 
