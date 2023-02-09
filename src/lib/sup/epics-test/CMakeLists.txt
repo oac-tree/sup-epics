@@ -12,7 +12,7 @@ set_target_properties(${library_name} PROPERTIES
 
 target_include_directories(${library_name} PUBLIC
     $<INSTALL_INTERFACE:include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>)
 
 
 target_sources(${library_name} PRIVATE
