@@ -47,17 +47,17 @@ namespace epics
 namespace test
 {
 
-std::string GetEPICSBinaryPath()
+std::string GetEPICSExecutablePath(const std::string &exec_name)
 {
   return std::string(std::getenv("EPICS_BASE")) + "/bin/"
-         + std::string(std::getenv("EPICS_HOST_ARCH")) + "/";
+         + std::string(std::getenv("EPICS_HOST_ARCH")) + "/" + exec_name;
 }
 
 void ValidateEPICSExecutable(const std::string &exec_name)
 {
-  std::string command("which " + sup::epics::test::GetEPICSBinaryPath()
-                      + exec_name + " > /dev/null 2>&1");
-  if ( std::system(command.c_str()))
+  std::string command("which " + sup::epics::test::GetEPICSExecutablePath(exec_name)
+                      + " > /dev/null 2>&1");
+  if (std::system(command.c_str()))
   {
     throw std::runtime_error("Can't find EPICS executable '" + exec_name + "'");
   }
@@ -79,7 +79,8 @@ std::string GetPvGetOutput(const std::vector<std::string> &variable_names,
     variable_names_str += str + " ";
   }
 
-  std::string command(GetEPICSBinaryPath() + "pvget -v " + variable_names_str + " > " + out_name);
+  std::string command(GetEPICSExecutablePath("pvget") + " -v " + variable_names_str + " > "
+                      + out_name);
   if (std::system(command.c_str()) != 0)
   {
     return {};
@@ -102,7 +103,7 @@ std::string PvPut(const std::string &variable_name, const std::string &value)
 {
   auto out_file_name = GetTempFileName();
 
-  std::string command(GetEPICSBinaryPath() + "pvput " + variable_name + " " + value + " > "
+  std::string command(GetEPICSExecutablePath("pvput") + " " + variable_name + " " + value + " > "
                       + out_file_name);
   if (std::system(command.c_str()) != 0)
   {
@@ -121,7 +122,7 @@ std::string CAPut(const std::string &variable_name, const std::string &value)
 {
   auto out_file_name = GetTempFileName();
 
-  std::string command(GetEPICSBinaryPath() + "caput " + variable_name + " " + value + " > "
+  std::string command(GetEPICSExecutablePath("caput") + " " + variable_name + " " + value + " > "
                       + out_file_name);
   if (std::system(command.c_str()) != 0)
   {

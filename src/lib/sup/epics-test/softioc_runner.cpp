@@ -70,7 +70,7 @@ void SoftIocRunner::Start(const std::string& db_file_content)
   GenerateEpicDatabaseFile(GetDataBaseFileName(), db_file_content);
 
   const std::string command{"/usr/bin/screen -d -m -S " + m_session_name + " "
-                            + GetEPICSBinaryPath() + "softIoc -d " + GetDataBaseFileName()
+                            + GetEPICSExecutablePath("softIoc") + " -d " + GetDataBaseFileName()
                             + " &> /dev/null"};
   std::system(command.c_str());
   m_is_active = true;
