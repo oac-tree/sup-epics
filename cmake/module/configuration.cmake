@@ -23,6 +23,11 @@ if (CODAC_FOUND)
   if(CODAC_Python_FOUND AND NOT Python3_EXECUTABLE)
     set(Python3_EXECUTABLE ${CODAC_PYTHON_EXECUTABLE})
   endif()
+
+  # When operating inside a CODAC CICD system build the documentation
+  if (CODAC_CICD)
+    set(COA_BUILD_DOCUMENTATION ON)
+  endif()
 else()
   message(STATUS "Compiling without CODAC")
   set(CODAC FALSE)
@@ -31,6 +36,12 @@ endif()
 # -----------------------------------------------------------------------------
 # Variables
 # -----------------------------------------------------------------------------
+
+if(COVERAGE)
+  # On coverage builds  alsways skip building docs and build tests
+  set(COA_BUILD_DOCUMENTATION OFF)
+  set(COA_BUILD_TESTS ON)
+endif()
 
 set(SUP_EPICS_SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 set(SUP_EPICS_BUILDVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
