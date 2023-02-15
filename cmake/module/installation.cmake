@@ -17,7 +17,7 @@ install(EXPORT sup-epics-targets FILE sup-epics-targets.cmake NAMESPACE sup-epic
 export(TARGETS sup-epics sup-epics-test NAMESPACE sup-epics:: FILE "${PROJECT_BINARY_DIR}/sup-epics-targets.cmake")
 
 # Export the package for use from the build-tree (goes to $HOME/.cmake)
-if(SUP_EPICS_EXPORT_BUILDTREE)
+if(COA_EXPORT_BUILD_TREE)
   set(CMAKE_EXPORT_PACKAGE_REGISTRY ON)
   export(PACKAGE sup-epics)
 endif()
