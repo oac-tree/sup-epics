@@ -53,14 +53,18 @@ std::string GetEPICSExecutablePath(const std::string &exec_name)
          + std::string(std::getenv("EPICS_HOST_ARCH")) + "/" + exec_name;
 }
 
-void ValidateEPICSExecutable(const std::string &exec_name)
+void ValidateShellExecutable(const std::string &exec_name)
 {
-  std::string command("which " + sup::epics::test::GetEPICSExecutablePath(exec_name)
-                      + " > /dev/null 2>&1");
+  std::string command("which " + exec_name + " > /dev/null 2>&1");
   if (std::system(command.c_str()))
   {
-    throw std::runtime_error("Can't find EPICS executable '" + exec_name + "'");
+    throw std::runtime_error("Can't find executable '" + exec_name + "'");
   }
+}
+
+void ValidateEPICSExecutable(const std::string &exec_name)
+{
+  ValidateShellExecutable(sup::epics::test::GetEPICSExecutablePath(exec_name));
 }
 
 void RemoveFile(const std::string &file_name)

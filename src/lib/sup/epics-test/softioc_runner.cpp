@@ -60,6 +60,7 @@ SoftIocRunner::~SoftIocRunner()
 
 void SoftIocRunner::Start(const std::string& db_file_content)
 {
+  ValidateShellExecutable("/usr/bin/screen");
   ValidateEPICSExecutable("softIoc");
 
   if (m_is_active)

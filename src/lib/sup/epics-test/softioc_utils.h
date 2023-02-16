@@ -33,6 +33,9 @@ namespace test
 //! Returns path where EPICS binaries are located.
 std::string GetEPICSExecutablePath(const std::string& exec_name);
 
+//! Validates if given executable is present. Throws if it is not the case.
+void ValidateShellExecutable(const std::string& exec_name);
+
 //! Validates if given EPICS executable is present. Throws if it is not the case.
 void ValidateEPICSExecutable(const std::string& exec_name);
 
