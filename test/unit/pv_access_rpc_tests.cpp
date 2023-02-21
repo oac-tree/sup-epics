@@ -124,7 +124,7 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
   sup::dto::AnyValue payload{42};
   auto request = sup::rpc::utils::CreateRPCRequest(payload);
   // Although the extra field is not defined by the usual transport protocol (see sup-rpc), our
-  // custom handler will at the server side will use it to return an empty value.
+  // custom handler at the server side will use it to return an empty value.
   request.AddMember(RETURN_EMPTY_FIELD, true);
   auto reply = client(request);
   ASSERT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
@@ -132,7 +132,7 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
   ASSERT_TRUE(static_cast<bool>(m_reply));
   EXPECT_TRUE(sup::dto::IsEmptyValue(*m_reply));
   EXPECT_EQ(reply[sup::rpc::constants::REPLY_RESULT].As<unsigned int>(),
-            sup::rpc::NetworkEncodingError.GetValue());
+            sup::rpc::ServerNetworkEncodingError.GetValue());
 }
 
 //! Standard scenario with non-isolated client/server (created from environment variables).

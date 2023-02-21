@@ -41,7 +41,7 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
   }
   catch(...)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkEncodingError);
+    return sup::rpc::utils::CreateRPCReply(sup::rpc::ClientNetworkEncodingError);
   }
   pvxs::Value pvxs_reply;
   try
@@ -55,7 +55,7 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
   }
   if (!pvxs_reply)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkDecodingError);
+    return sup::rpc::utils::CreateRPCReply(sup::rpc::ClientNetworkDecodingError);
   }
   sup::dto::AnyValue reply;
   try
@@ -64,7 +64,7 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
   }
   catch(...)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkDecodingError);
+    return sup::rpc::utils::CreateRPCReply(sup::rpc::ClientNetworkDecodingError);
   }
   return reply;
 }
@@ -78,7 +78,7 @@ pvxs::Value HandleRPCCall(sup::dto::AnyFunctor& handler, const pvxs::Value& pvxs
   }
   catch(...)
   {
-    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkDecodingError));
+    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::ServerNetworkDecodingError));
   }
   pvxs::Value pvxs_reply;
   try
@@ -88,11 +88,11 @@ pvxs::Value HandleRPCCall(sup::dto::AnyFunctor& handler, const pvxs::Value& pvxs
   }
   catch(...)
   {
-    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkEncodingError));
+    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::ServerNetworkEncodingError));
   }
   if (!pvxs_reply)
   {
-    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::NetworkEncodingError));
+    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::ServerNetworkEncodingError));
   }
   return pvxs_reply;
 }
