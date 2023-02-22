@@ -21,7 +21,7 @@
 
 #include <sup/epics/utils/dto_conversion_utils.h>
 
-#include <sup/rpc/protocol_rpc.h>
+#include <sup/protocol/protocol_rpc.h>
 
 namespace sup
 {
@@ -41,7 +41,7 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
   }
   catch(...)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::ClientNetworkEncodingError);
+    return sup::protocol::utils::CreateRPCReply(sup::protocol::ClientNetworkEncodingError);
   }
   pvxs::Value pvxs_reply;
   try
@@ -51,11 +51,11 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
   }
   catch (const pvxs::client::Timeout&)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::NotConnected);
+    return sup::protocol::utils::CreateRPCReply(sup::protocol::NotConnected);
   }
   if (!pvxs_reply)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::ClientNetworkDecodingError);
+    return sup::protocol::utils::CreateRPCReply(sup::protocol::ClientNetworkDecodingError);
   }
   sup::dto::AnyValue reply;
   try
@@ -64,7 +64,7 @@ sup::dto::AnyValue ClientRPCCall(std::shared_ptr<pvxs::client::Context> context,
   }
   catch(...)
   {
-    return sup::rpc::utils::CreateRPCReply(sup::rpc::ClientNetworkDecodingError);
+    return sup::protocol::utils::CreateRPCReply(sup::protocol::ClientNetworkDecodingError);
   }
   return reply;
 }
@@ -78,7 +78,7 @@ pvxs::Value HandleRPCCall(sup::dto::AnyFunctor& handler, const pvxs::Value& pvxs
   }
   catch(...)
   {
-    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::ServerNetworkDecodingError));
+    return BuildPVXSValue(sup::protocol::utils::CreateRPCReply(sup::protocol::ServerNetworkDecodingError));
   }
   pvxs::Value pvxs_reply;
   try
@@ -88,11 +88,11 @@ pvxs::Value HandleRPCCall(sup::dto::AnyFunctor& handler, const pvxs::Value& pvxs
   }
   catch(...)
   {
-    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::ServerNetworkEncodingError));
+    return BuildPVXSValue(sup::protocol::utils::CreateRPCReply(sup::protocol::ServerNetworkEncodingError));
   }
   if (!pvxs_reply)
   {
-    return BuildPVXSValue(sup::rpc::utils::CreateRPCReply(sup::rpc::ServerNetworkEncodingError));
+    return BuildPVXSValue(sup::protocol::utils::CreateRPCReply(sup::protocol::ServerNetworkEncodingError));
   }
   return pvxs_reply;
 }

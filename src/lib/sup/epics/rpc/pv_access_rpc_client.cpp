@@ -23,7 +23,7 @@
 #include <sup/epics/pvxs/pv_access_utils.h>
 
 #include <sup/dto/anyvalue.h>
-#include <sup/rpc/protocol_result.h>
+#include <sup/protocol/protocol_result.h>
 
 static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 

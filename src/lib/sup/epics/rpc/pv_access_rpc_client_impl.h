@@ -22,7 +22,7 @@
 
 #include <sup/epics/pv_access_rpc_client_config.h>
 
-#include <sup/rpc/protocol.h>
+#include <sup/protocol/protocol.h>
 
 #include <pvxs/client.h>
 

@@ -16,7 +16,7 @@ if(NOT COA_NO_CODAC)
   find_package(CODAC OPTIONAL_COMPONENTS site-packages Python MODULE)
 endif()
 if (CODAC_FOUND)
-  # Append CODAC_CMAKE_PREFIXES to cmake seard directories, this helps cmake find packages installed in the CODAC enviorenment 
+  # Append CODAC_CMAKE_PREFIXES to cmake seard directories, this helps cmake find packages installed in the CODAC enviorenment
   list(APPEND CMAKE_PREFIX_PATH ${CODAC_CMAKE_PREFIXES})
 
   # If CODAC module provides python executable, override Python3_EXECUTABLE with it
@@ -68,6 +68,7 @@ find_package(Threads)
 
 if (NOT CODAC)
   find_package(sup-dto REQUIRED)
+  find_package(sup-protocol REQUIRED)
 endif()
 
 # -----------------------------------------------------------------------------

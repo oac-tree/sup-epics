@@ -21,7 +21,7 @@
 #include <sup/epics/pv_access_rpc_server.h>
 
 #include <sup/dto/anyvalue.h>
-#include <sup/rpc/protocol_rpc.h>
+#include <sup/protocol/protocol_rpc.h>
 
 #include <gtest/gtest.h>
 
@@ -67,9 +67,9 @@ TEST_F(PvAccessRPCTests, SingleServerSingleClientSuccess)
 
   // Send simple scalar payload over RPC
   sup::dto::AnyValue payload{42};
-  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto request = sup::protocol::utils::CreateRPCRequest(payload);
   auto reply = client(request);
-  EXPECT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
   ASSERT_TRUE(static_cast<bool>(m_reply));
   EXPECT_EQ(request, *m_request);
@@ -88,7 +88,7 @@ TEST_F(PvAccessRPCTests, RPCClientEmptyRequest)
   // Send empty value
   sup::dto::AnyValue empty{};
   auto reply = client(empty);
-  EXPECT_FALSE(sup::rpc::utils::CheckReplyFormat(reply));
+  EXPECT_FALSE(sup::protocol::utils::CheckReplyFormat(reply));
   EXPECT_TRUE(sup::dto::IsEmptyValue(reply));
   EXPECT_FALSE(static_cast<bool>(m_request));
   EXPECT_FALSE(static_cast<bool>(m_reply));
@@ -102,13 +102,13 @@ TEST_F(PvAccessRPCTests, RPCClientWrongChannel)
   auto client = server.CreateClient({"DOESNOTEXIST", 0.1});
 
   sup::dto::AnyValue payload{42};
-  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto request = sup::protocol::utils::CreateRPCRequest(payload);
   auto reply = client(request);
-  ASSERT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  ASSERT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   EXPECT_FALSE(static_cast<bool>(m_request));
   EXPECT_FALSE(static_cast<bool>(m_reply));
-  EXPECT_EQ(reply[sup::rpc::constants::REPLY_RESULT].As<unsigned int>(),
-            sup::rpc::NotConnected.GetValue());
+  EXPECT_EQ(reply[sup::protocol::constants::REPLY_RESULT].As<unsigned int>(),
+            sup::protocol::NotConnected.GetValue());
 }
 
 //! Fail at server side.
@@ -122,17 +122,17 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
 
   // Send empty value
   sup::dto::AnyValue payload{42};
-  auto request = sup::rpc::utils::CreateRPCRequest(payload);
-  // Although the extra field is not defined by the usual transport protocol (see sup-rpc), our
+  auto request = sup::protocol::utils::CreateRPCRequest(payload);
+  // Although the extra field is not defined by the usual transport protocol (see sup-protocol), our
   // custom handler at the server side will use it to return an empty value.
   request.AddMember(RETURN_EMPTY_FIELD, true);
   auto reply = client(request);
-  ASSERT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  ASSERT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
   ASSERT_TRUE(static_cast<bool>(m_reply));
   EXPECT_TRUE(sup::dto::IsEmptyValue(*m_reply));
-  EXPECT_EQ(reply[sup::rpc::constants::REPLY_RESULT].As<unsigned int>(),
-            sup::rpc::ServerNetworkEncodingError.GetValue());
+  EXPECT_EQ(reply[sup::protocol::constants::REPLY_RESULT].As<unsigned int>(),
+            sup::protocol::ServerNetworkEncodingError.GetValue());
 }
 
 //! Standard scenario with non-isolated client/server (created from environment variables).
@@ -145,9 +145,9 @@ TEST_F(PvAccessRPCTests, ClientServerFromEnv)
 
   // Send simple scalar payload over RPC
   sup::dto::AnyValue payload{42};
-  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto request = sup::protocol::utils::CreateRPCRequest(payload);
   auto reply = client(request);
-  EXPECT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
   ASSERT_TRUE(static_cast<bool>(m_reply));
   EXPECT_EQ(request, *m_request);
@@ -162,9 +162,9 @@ TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 
   // Send simple scalar payload over RPC
   sup::dto::AnyValue payload{42};
-  auto request = sup::rpc::utils::CreateRPCRequest(payload);
+  auto request = sup::protocol::utils::CreateRPCRequest(payload);
   auto reply = client(request);
-  EXPECT_TRUE(sup::rpc::utils::CheckReplyFormat(reply));
+  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
   ASSERT_TRUE(static_cast<bool>(m_reply));
   EXPECT_EQ(request, *m_request);
@@ -198,7 +198,7 @@ sup::dto::AnyValue TestHandler::operator()(const sup::dto::AnyValue& request)
   sup::dto::AnyValue reply;
   if (!request.HasField(RETURN_EMPTY_FIELD) || request[RETURN_EMPTY_FIELD].As<bool>() == false)
   {
-    reply = sup::rpc::utils::CreateRPCReply(sup::rpc::Success);
+    reply = sup::protocol::utils::CreateRPCReply(sup::protocol::Success);
   }
   m_func(request, reply);
   return reply;
