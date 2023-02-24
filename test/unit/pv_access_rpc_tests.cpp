@@ -33,18 +33,6 @@ using namespace sup::epics;
 
 //! Testing PvAccessRPCServer and PvAccessRPCClient together.
 
-class PvAccessRPCTests : public ::testing::Test
-{
-protected:
-  PvAccessRPCTests();
-  ~PvAccessRPCTests();
-
-  std::unique_ptr<sup::dto::AnyFunctor> CreateHandler();
-
-  std::unique_ptr<sup::dto::AnyValue> m_request;
-  std::unique_ptr<sup::dto::AnyValue> m_reply;
-};
-
 class TestHandler : public sup::dto::AnyFunctor
 {
 public:
@@ -56,13 +44,27 @@ private:
   std::function<void(const sup::dto::AnyValue&,const sup::dto::AnyValue&)> m_func;
 };
 
+class PvAccessRPCTests : public ::testing::Test
+{
+protected:
+  PvAccessRPCTests();
+  ~PvAccessRPCTests();
+
+  sup::dto::AnyFunctor& GetHandler();
+
+  std::unique_ptr<sup::dto::AnyValue> m_request;
+  std::unique_ptr<sup::dto::AnyValue> m_reply;
+private:
+  TestHandler m_handler;
+};
+
 //! Standard scenario. Single server and single client.
 
 TEST_F(PvAccessRPCTests, SingleServerSingleClientSuccess)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
-                           CreateHandler());
+                           GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send simple scalar payload over RPC
@@ -82,7 +84,7 @@ TEST_F(PvAccessRPCTests, RPCClientEmptyRequest)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
-                           CreateHandler());
+                           GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send empty value
@@ -98,7 +100,7 @@ TEST_F(PvAccessRPCTests, RPCClientWrongChannel)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
-                           CreateHandler());
+                           GetHandler());
   auto client = server.CreateClient({"DOESNOTEXIST", 0.1});
 
   sup::dto::AnyValue payload{42};
@@ -117,7 +119,7 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
-                           CreateHandler());
+                           GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send empty value
@@ -140,7 +142,7 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
 TEST_F(PvAccessRPCTests, ClientServerFromEnv)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
-  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), CreateHandler());
+  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send simple scalar payload over RPC
@@ -157,7 +159,7 @@ TEST_F(PvAccessRPCTests, ClientServerFromEnv)
 TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
-  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), CreateHandler());
+  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
   PvAccessRPCClient client{GetDefaultRPCClientConfig(channel_name)};
 
   // Send simple scalar payload over RPC
@@ -174,17 +176,17 @@ TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 PvAccessRPCTests::PvAccessRPCTests()
   : m_request{}
   , m_reply{}
+  , m_handler{[this](const sup::dto::AnyValue& request, const sup::dto::AnyValue& reply){
+      m_request.reset(new sup::dto::AnyValue(request));
+      m_reply.reset(new sup::dto::AnyValue(reply));
+    }}
 {}
 
 PvAccessRPCTests::~PvAccessRPCTests() = default;
 
-std::unique_ptr<sup::dto::AnyFunctor> PvAccessRPCTests::CreateHandler()
+sup::dto::AnyFunctor& PvAccessRPCTests::GetHandler()
 {
-  return std::unique_ptr<sup::dto::AnyFunctor>{new TestHandler(
-    [this](const sup::dto::AnyValue& request, const sup::dto::AnyValue& reply){
-      m_request.reset(new sup::dto::AnyValue(request));
-      m_reply.reset(new sup::dto::AnyValue(reply));
-    })};
+  return m_handler;
 }
 
 TestHandler::TestHandler(std::function<void(const sup::dto::AnyValue&,const sup::dto::AnyValue&)> func)

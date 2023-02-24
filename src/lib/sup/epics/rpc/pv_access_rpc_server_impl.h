@@ -38,7 +38,7 @@ class PvAccessRPCServerImpl
 public:
   PvAccessRPCServerImpl(std::unique_ptr<pvxs::server::Server>&& server,
                         const PvAccessRPCServerConfig& config,
-                        std::unique_ptr<sup::dto::AnyFunctor>&& handler);
+                        sup::dto::AnyFunctor& handler);
 
   ~PvAccessRPCServerImpl();
 
@@ -48,15 +48,15 @@ private:
   void Initialise();
   std::unique_ptr<pvxs::server::Server> m_server;
   PvAccessRPCServerConfig m_config;
-  std::unique_ptr<sup::dto::AnyFunctor> m_handler;
+  sup::dto::AnyFunctor& m_handler;
   std::shared_ptr<pvxs::client::Context> m_client_context;
 };
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(
-  const PvAccessRPCServerConfig& config, std::unique_ptr<sup::dto::AnyFunctor>&& handler);
+  const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler);
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateRPCServerImplFromEnv(
-  const PvAccessRPCServerConfig& config, std::unique_ptr<sup::dto::AnyFunctor>&& handler);
+  const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler);
 
 }  // namespace epics
 

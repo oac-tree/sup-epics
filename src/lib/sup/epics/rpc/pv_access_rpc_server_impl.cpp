@@ -32,13 +32,13 @@ namespace epics
 {
 PvAccessRPCServerImpl::PvAccessRPCServerImpl(std::unique_ptr<pvxs::server::Server>&& server,
                                              const PvAccessRPCServerConfig& config,
-                                             std::unique_ptr<sup::dto::AnyFunctor>&& handler)
+                                             sup::dto::AnyFunctor& handler)
   : m_server{std::move(server)}
   , m_config{config}
-  , m_handler{std::move(handler)}
+  , m_handler{handler}
   , m_client_context{}
 {
-  if (!m_server || !m_handler)
+  if (!m_server)
   {
     throw std::runtime_error("PvAccessRPCServer created without server or handler");
   }
@@ -68,7 +68,7 @@ void PvAccessRPCServerImpl::Initialise()
     [this](pvxs::server::SharedPV&, std::unique_ptr<pvxs::server::ExecOp>&& op,
            pvxs::Value&& pvxs_request)
     {
-      auto pvxs_reply = utils::HandleRPCCall(*m_handler, pvxs_request);
+      auto pvxs_reply = utils::HandleRPCCall(m_handler, pvxs_request);
       op->reply(pvxs_reply);
     }
   );
@@ -76,21 +76,21 @@ void PvAccessRPCServerImpl::Initialise()
 }
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(
-  const PvAccessRPCServerConfig& config, std::unique_ptr<sup::dto::AnyFunctor>&& handler)
+  const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler)
 {
   auto server = std::unique_ptr<pvxs::server::Server>(
       new pvxs::server::Server(pvxs::server::Config::isolated()));
   return std::unique_ptr<PvAccessRPCServerImpl>(
-    new PvAccessRPCServerImpl(std::move(server), config, std::move(handler)));
+    new PvAccessRPCServerImpl(std::move(server), config, handler));
 }
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateRPCServerImplFromEnv(
-  const PvAccessRPCServerConfig& config, std::unique_ptr<sup::dto::AnyFunctor>&& handler)
+  const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler)
 {
   auto server = std::unique_ptr<pvxs::server::Server>(
       new pvxs::server::Server(pvxs::server::Config::fromEnv()));
   return std::unique_ptr<PvAccessRPCServerImpl>(
-    new PvAccessRPCServerImpl(std::move(server), config, std::move(handler)));
+    new PvAccessRPCServerImpl(std::move(server), config, handler));
 }
 
 }  // namespace epics
