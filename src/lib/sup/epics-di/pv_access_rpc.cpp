@@ -19,6 +19,8 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include "registered_names.h"
+
 #include <sup/epics/pv_access_rpc_client.h>
 #include <sup/epics/pv_access_rpc_server.h>
 
@@ -35,11 +37,22 @@ std::unique_ptr<PvAccessRPCClientConfig> PvAccessRPCClientConfigDefaultFactoryFu
     new PvAccessRPCClientConfig{GetDefaultRPCClientConfig(service_name)}};
 }
 
+std::unique_ptr<PvAccessRPCClientConfig> PvAccessRPCClientConfigFactoryFunction(
+  const std::string& service_name, double timeout)
+{
+  return std::unique_ptr<PvAccessRPCClientConfig>{
+    new PvAccessRPCClientConfig{service_name, timeout}};
+}
+
 const bool PvAccessRPCClientConfigDefault_Registered =
-  sup::di::GlobalObjectManager().RegisterFactoryFunction("PvAccessRPCClientConfigDefault",
+  sup::di::GlobalObjectManager().RegisterFactoryFunction(PV_ACCESS_RPC_CLIENT_CONFIG_DEFAULT,
     PvAccessRPCClientConfigDefaultFactoryFunction);
 
+const bool PvAccessRPCClientConfig_Registered =
+  sup::di::GlobalObjectManager().RegisterFactoryFunction(PV_ACCESS_RPC_CLIENT_CONFIG,
+    PvAccessRPCClientConfigFactoryFunction);
+
 const bool PvAccessRPCClient_Registered =
-  sup::di::GlobalObjectManager().RegisterFactoryFunction("PvAccessRPCClient",
+  sup::di::GlobalObjectManager().RegisterFactoryFunction(PV_ACCESS_RPC_CLIENT,
     sup::di::ForwardingInstanceFactoryFunction<sup::dto::AnyFunctor, PvAccessRPCClient,
                                                const PvAccessRPCClientConfig&>);

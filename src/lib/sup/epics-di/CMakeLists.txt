@@ -28,3 +28,8 @@ target_sources(${library_name} PRIVATE
 # -- Installation --
 
 install(TARGETS ${library_name} EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(FILES
+  registered_names.h
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics-di
+)
