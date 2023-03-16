@@ -30,7 +30,6 @@ if (CODAC_FOUND)
   endif()
 else()
   message(STATUS "Compiling without CODAC")
-  set(CODAC FALSE)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -66,10 +65,9 @@ file(MAKE_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 
 find_package(Threads)
 
-if (NOT CODAC)
-  find_package(sup-dto REQUIRED)
-  find_package(sup-protocol REQUIRED)
-endif()
+find_package(sup-dto REQUIRED)
+find_package(sup-protocol REQUIRED)
+find_package(sup-di REQUIRED)
 
 # -----------------------------------------------------------------------------
 # Flags
