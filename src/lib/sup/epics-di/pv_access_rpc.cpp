@@ -28,13 +28,18 @@ using namespace sup::epics;
 
 // Register PvAccessRPCClient:
 
-std::unique_ptr<sup::dto::AnyFunctor> PvAccessRPCClientFactoryFunction(
+std::unique_ptr<PvAccessRPCClientConfig> PvAccessRPCClientConfigDefaultFactoryFunction(
   const std::string& service_name)
 {
-  return std::unique_ptr<sup::dto::AnyFunctor>{
-    new PvAccessRPCClient{GetDefaultRPCClientConfig(service_name)}};
+  return std::unique_ptr<PvAccessRPCClientConfig>{
+    new PvAccessRPCClientConfig{GetDefaultRPCClientConfig(service_name)}};
 }
 
+const bool PvAccessRPCClientConfigDefault_Registered =
+  sup::di::GlobalObjectManager().RegisterFactoryFunction("PvAccessRPCClientConfigDefault",
+    PvAccessRPCClientConfigDefaultFactoryFunction);
+
 const bool PvAccessRPCClient_Registered =
-  sup::di::GlobalObjectManager().RegisterFactoryFunction(
-    "PvAccessRPCClient", PvAccessRPCClientFactoryFunction);
+  sup::di::GlobalObjectManager().RegisterFactoryFunction("PvAccessRPCClient",
+    sup::di::ForwardingInstanceFactoryFunction<sup::dto::AnyFunctor, PvAccessRPCClient,
+                                               const PvAccessRPCClientConfig&>);
