@@ -29,9 +29,14 @@ namespace sup
 namespace epics
 {
 
+// PvAccessRPCClient registered names:
 const std::string PV_ACCESS_RPC_CLIENT_CONFIG_DEFAULT = "PvAccessRPCClientConfigDefault";
 const std::string PV_ACCESS_RPC_CLIENT_CONFIG = "PvAccessRPCClientConfig";
 const std::string PV_ACCESS_RPC_CLIENT = "PvAccessRPCClient";
+
+// PvAccessRPCClient registered names:
+const std::string PV_ACCESS_RPC_SERVER_CONFIG = "PvAccessRPCServerConfig";
+const std::string PV_ACCESS_RPC_SERVER = "PvAccessRPCServer";
 
 }  // namespace epics
 

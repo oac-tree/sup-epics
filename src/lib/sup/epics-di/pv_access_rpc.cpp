@@ -56,3 +56,22 @@ const bool PvAccessRPCClient_Registered =
   sup::di::GlobalObjectManager().RegisterFactoryFunction(PV_ACCESS_RPC_CLIENT,
     sup::di::ForwardingInstanceFactoryFunction<sup::dto::AnyFunctor, PvAccessRPCClient,
                                                const PvAccessRPCClientConfig&>);
+
+// Register PvAccessRPCServer:
+
+std::unique_ptr<PvAccessRPCServerConfig> PvAccessRPCServerConfigFactoryFunction(
+  const std::string& service_name)
+{
+  return std::unique_ptr<PvAccessRPCServerConfig>{
+    new PvAccessRPCServerConfig{GetDefaultRPCServerConfig(service_name)}};
+}
+
+const bool PvAccessRPCServerConfig_Registered =
+  sup::di::GlobalObjectManager().RegisterFactoryFunction(PV_ACCESS_RPC_SERVER_CONFIG,
+    PvAccessRPCServerConfigFactoryFunction);
+
+const bool PvAccessRPCServer_Registered =
+  sup::di::GlobalObjectManager().RegisterFactoryFunction(PV_ACCESS_RPC_SERVER,
+    sup::di::ForwardingInstanceFactoryFunction<PvAccessRPCServer, PvAccessRPCServer,
+                                               const PvAccessRPCServerConfig&,
+                                               sup::dto::AnyFunctor&>);
