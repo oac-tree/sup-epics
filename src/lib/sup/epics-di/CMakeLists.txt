@@ -13,6 +13,7 @@ set_target_properties(${library_name} PROPERTIES
 target_link_libraries(${library_name}
   PRIVATE
     sup-epics
+  PUBLIC
     sup-di::sup-di
 )
 
