@@ -131,6 +131,9 @@
                             <include type="file" source="include/sup/epics" target="include/sup/epics">
                                 <include>*.h</include>
                             </include>
+                            <include type="file" source="include/sup/epics-di" target="include/sup/epics-di">
+                                <include>*.h</include>
+                            </include>
                             <include type="file" source="include/sup/epics-test" target="include/sup/epics-test">
                                 <include>*.h</include>
                             </include>
