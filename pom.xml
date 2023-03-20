@@ -112,6 +112,7 @@
                         <requires version="current" buildOnly="true">cmake</requires>
                         <requires codac="true">sup-dto</requires>
                         <requires codac="true">sup-protocol</requires>
+                        <requires codac="true">sup-di</requires>
                         <requires codac="true">epics</requires>
                         <requires codac="true" buildOnly="true">sup-dto-devel</requires>
                         <requires codac="true" buildOnly="true">sup-protocol-devel</requires>
