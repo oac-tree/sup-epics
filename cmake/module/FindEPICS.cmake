@@ -38,7 +38,7 @@ endif()
 # finding compiler
 
 set(compiler_subdir compiler/gcc)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*")
     set(compiler_subdir compiler/clang)
 endif()
 
