@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(sup-epics-project VERSION 0.1.0 LANGUAGES CXX)
+project(sup-epics-project VERSION 1.0.0 LANGUAGES CXX)
 
 option(COVERAGE "Generate unit test coverage information" OFF)
 option(COA_EXPORT_BUILD_TREE "Export build tree in /home/user/.cmake registry" OFF)

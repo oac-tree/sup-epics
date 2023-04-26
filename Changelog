@@ -1,0 +1,4 @@
+Changes for 1.0.0:
+
+- First release version
+- Migration to sup-dto of EPICS support library for SUP
