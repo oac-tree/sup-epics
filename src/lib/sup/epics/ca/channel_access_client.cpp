@@ -19,15 +19,17 @@
 
 #include <sup/epics/channel_access_client.h>
 
+#include <stdexcept>
+
 namespace sup
 {
 namespace epics
 {
 
 ChannelAccessClient::ChannelAccessClient(VariableUpdatedCallback cb)
-  : pv_map{}
-  , var_updated_cb{std::move(cb)}
-{}
+    : pv_map{}, var_updated_cb{std::move(cb)}
+{
+}
 
 ChannelAccessClient::~ChannelAccessClient() = default;
 
@@ -40,11 +42,11 @@ bool ChannelAccessClient::AddVariable(const std::string& channel, const sup::dto
   std::unique_ptr<ChannelAccessPV> pv;
   try
   {
-    pv.reset(
-      new ChannelAccessPV(channel, type,
+    pv.reset(new ChannelAccessPV(
+        channel, type,
         std::bind(&ChannelAccessClient::OnVariableUpdated, this, channel, std::placeholders::_1)));
   }
-  catch(const std::runtime_error&)
+  catch (const std::runtime_error&)
   {
     return false;
   }
@@ -82,7 +84,8 @@ sup::dto::AnyValue ChannelAccessClient::GetValue(const std::string& channel) con
   return it->second->GetValue();
 }
 
-ChannelAccessPV::ExtendedValue ChannelAccessClient::GetExtendedValue(const std::string& channel) const
+ChannelAccessPV::ExtendedValue ChannelAccessClient::GetExtendedValue(
+    const std::string& channel) const
 {
   auto it = pv_map.find(channel);
   if (it == pv_map.end())
@@ -133,8 +136,8 @@ bool ChannelAccessClient::RemoveVariable(const std::string& channel)
   return true;
 }
 
-void ChannelAccessClient::OnVariableUpdated(
-  const std::string& channel, const ChannelAccessPV::ExtendedValue& value)
+void ChannelAccessClient::OnVariableUpdated(const std::string& channel,
+                                            const ChannelAccessPV::ExtendedValue& value)
 {
   if (var_updated_cb)
   {
