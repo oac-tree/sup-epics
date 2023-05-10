@@ -58,7 +58,7 @@ pvxs::Value BuildPVXSValue(const dto::AnyValue& any_value)
 dto::AnyValue BuildAnyValue(const pvxs::Value& pvxs_value)
 {
   AnyValueFromPVXSBuilder builder(pvxs_value);
-  return builder.MoveAnyType();
+  return builder.MoveAnyValue();
 }
 
 sup::dto::AnyValue ConvertScalarToStruct(const sup::dto::AnyValue& any_value)
