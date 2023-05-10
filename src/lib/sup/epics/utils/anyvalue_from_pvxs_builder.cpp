@@ -232,7 +232,7 @@ AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value)
 
 dto::AnyValue AnyValueFromPVXSBuilder::MoveAnyType() const
 {
-  return std::move(p_impl->m_composer.MoveAnyValue());
+  return p_impl->m_composer.MoveAnyValue();
 }
 
 AnyValueFromPVXSBuilder::~AnyValueFromPVXSBuilder() = default;
