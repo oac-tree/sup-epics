@@ -157,7 +157,7 @@ void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
       auto update = sub.pop();
       if (update)
       {
-        if (!sup::dto::TryConvert(result.value, sup::epics::BuildAnyValue(update)))
+        if (!sup::dto::TryAssign(result.value, sup::epics::BuildAnyValue(update)))
         {
           throw std::runtime_error("PvAccessClientPVImpl received incompatible value update.");
         }

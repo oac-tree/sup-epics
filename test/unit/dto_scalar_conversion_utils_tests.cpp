@@ -55,7 +55,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from Int8
     sup::dto::AnyValue any_value{sup::dto::SignedInteger8Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::Int8);
@@ -64,7 +64,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from UInt8
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::UInt8);
@@ -73,7 +73,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from Int16
     sup::dto::AnyValue any_value{sup::dto::SignedInteger16Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::Int16);
@@ -82,7 +82,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from UInt16
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger16Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::UInt16);
@@ -91,7 +91,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from Int32
     sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::Int32);
@@ -100,7 +100,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from UInt32
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger32Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::UInt32);
@@ -109,7 +109,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from Int64
     sup::dto::AnyValue any_value{sup::dto::SignedInteger64Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::Int64);
@@ -118,7 +118,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from UInt64
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger64Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::UInt64);
@@ -127,7 +127,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from Float32
     sup::dto::AnyValue any_value{sup::dto::Float32Type};
-    any_value = 42.1;
+    any_value.ConvertFrom(42.1);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::Float32);
@@ -136,7 +136,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
 
   {  // from Float64
     sup::dto::AnyValue any_value{sup::dto::Float64Type};
-    any_value = 42.1;
+    any_value.ConvertFrom(42.1);
     auto result = GetPVXSValueFromScalar(any_value);
     EXPECT_TRUE(result.valid());
     EXPECT_EQ(result.type(), ::pvxs::TypeCode::Float64);
@@ -190,7 +190,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from Int8
     sup::dto::AnyValue any_value{sup::dto::SignedInteger8Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int8).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<int8_t>(), 42);
@@ -198,7 +198,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from UInt8
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<uint8_t>(), 42);
@@ -206,7 +206,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from Int16
     sup::dto::AnyValue any_value{sup::dto::SignedInteger16Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int16).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<int16_t>(), 42);
@@ -214,7 +214,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from UInt16
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger16Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt16).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<uint16_t>(), 42);
@@ -222,7 +222,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from Int32
     sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<int32_t>(), 42);
@@ -230,7 +230,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from UInt32
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger32Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt32).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<uint32_t>(), 42);
@@ -238,7 +238,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from Int64
     sup::dto::AnyValue any_value{sup::dto::SignedInteger64Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<int64_t>(), 42);
@@ -246,7 +246,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from UInt64
     sup::dto::AnyValue any_value{sup::dto::UnsignedInteger64Type};
-    any_value = 42;
+    any_value.ConvertFrom(42);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt64).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_EQ(pvxs_value.as<uint64_t>(), 42);
@@ -254,7 +254,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from Float32
     sup::dto::AnyValue any_value{sup::dto::Float32Type};
-    any_value = 42.1;
+    any_value.ConvertFrom(42.1);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Float32).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_FLOAT_EQ(pvxs_value.as<float>(), 42.1);
@@ -262,7 +262,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // from Float64
     sup::dto::AnyValue any_value{sup::dto::Float64Type};
-    any_value = 42.1;
+    any_value.ConvertFrom(42.1);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Float64).create();
     AssignAnyValueToPVXSValueScalar(any_value, pvxs_value);
     EXPECT_DOUBLE_EQ(pvxs_value.as<double>(), 42.1);
@@ -293,7 +293,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
 
   {  // attempt to assign from similar but not coinciding types
     sup::dto::AnyValue any_value{sup::dto::Float32Type};
-    any_value = 42.1;
+    any_value.ConvertFrom(42.1);
     pvxs::Value pvxs_value =
         pvxs::TypeDef(pvxs::TypeCode::Float64).create();  // deliberately Float64, and not Float32
     EXPECT_THROW(AssignAnyValueToPVXSValueScalar(any_value, pvxs_value), std::runtime_error);
@@ -363,8 +363,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from Int8
-    sup::dto::AnyValue any_value{sup::dto::SignedInteger8Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger8Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int8).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -372,8 +371,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from UInt8
-    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger8Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt8).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -381,8 +379,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from Int16
-    sup::dto::AnyValue any_value{sup::dto::SignedInteger16Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger16Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int16).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -390,8 +387,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from UInt16
-    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger16Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger16Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt16).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -399,7 +395,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from Int32
-    sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 0};
     any_value = 0;
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
     pvxs_value = 42;
@@ -408,8 +404,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from UInt32
-    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger32Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger32Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt32).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -417,8 +412,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from Int64
-    sup::dto::AnyValue any_value{sup::dto::SignedInteger64Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::SignedInteger64Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -426,8 +420,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from UInt64
-    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger64Type};
-    any_value = 0;
+    sup::dto::AnyValue any_value{sup::dto::UnsignedInteger64Type, 0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::UInt64).create();
     pvxs_value = 42;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -435,8 +428,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from Float32
-    sup::dto::AnyValue any_value{sup::dto::Float32Type};
-    any_value = 0.0;
+    sup::dto::AnyValue any_value{sup::dto::Float32Type, 0.0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Float32).create();
     pvxs_value = 42.1;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -444,8 +436,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // from Float64
-    sup::dto::AnyValue any_value{sup::dto::Float64Type};
-    any_value = 0.0;
+    sup::dto::AnyValue any_value{sup::dto::Float64Type, 0.0};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Float64).create();
     pvxs_value = 42.1;
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -454,7 +445,6 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
 
   {  // from string
     sup::dto::AnyValue any_value{sup::dto::StringType};
-    any_value = std::string();
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
     pvxs_value = std::string("abc");
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -463,7 +453,6 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
 
   {  // from long string
     sup::dto::AnyValue any_value{sup::dto::StringType};
-    any_value = std::string();
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
     pvxs_value = std::string(1025, 'a');
     AssignPVXSValueToAnyValueScalar(pvxs_value, any_value);
@@ -478,8 +467,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   }
 
   {  // attempt to assign from similar but not coinciding types
-    sup::dto::AnyValue any_value{sup::dto::Float32Type};
-    any_value = 0.0;
+    sup::dto::AnyValue any_value{sup::dto::Float32Type, 0.0};
     pvxs::Value pvxs_value =
         pvxs::TypeDef(pvxs::TypeCode::Float64).create();  // deliberately Float64, and not Float32
     EXPECT_THROW(AssignPVXSValueToAnyValueScalar(pvxs_value, any_value), std::runtime_error);

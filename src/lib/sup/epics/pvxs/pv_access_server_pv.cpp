@@ -64,7 +64,14 @@ bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
   }
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_any_value = value;
+    if (sup::dto::IsEmptyValue(m_any_value))
+    {
+      m_any_value = value;
+    }
+    else
+    {
+      m_any_value.ConvertFrom(value);
+    }
   }
   // assigning value to shared variable
   if (m_shared_pv.isOpen())
