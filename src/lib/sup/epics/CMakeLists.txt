@@ -7,7 +7,13 @@ set_target_properties(sup-epics PROPERTIES
     VERSION ${SUP_EPICS_BUILDVERSION}
 )
 
+# cmake warns for the existence of ``<PackageName>_ROOT`` (EPICS_ROOT in this case) variables and ignores them
+# for compatibility reasons, we set the related policy to NEW behaviour to suppress warnings and enable desired behaviour
+cmake_policy(PUSH)
+cmake_policy(SET CMP0074 NEW)
 find_package(EPICS REQUIRED)
+cmake_policy(POP)
+
 target_link_directories(sup-epics PUBLIC ${EPICS_LINK_DIRECTORIES})
 
 target_link_libraries(sup-epics

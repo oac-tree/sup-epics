@@ -10,10 +10,12 @@ include(GNUInstallDirs)
 # -----------------------------------------------------------------------------
 
 if(NOT COA_NO_CODAC)
-  # cmake warns for the existance of ``<PackageName>_ROOT`` (CODAC_ROOT in this case) variables and ignores them
+  # cmake warns for the existence of ``<PackageName>_ROOT`` (CODAC_ROOT in this case) variables and ignores them
   # for compatibility reasons, we set the related policy to NEW behaviour to suppress warnings and enable desired behaviour
+  cmake_policy(PUSH)
   cmake_policy(SET CMP0074 NEW)
   find_package(CODAC OPTIONAL_COMPONENTS site-packages Python MODULE)
+  cmake_policy(POP)
 endif()
 if (CODAC_FOUND)
   # Append CODAC_CMAKE_PREFIXES to cmake seard directories, this helps cmake find packages installed in the CODAC enviorenment

@@ -8,7 +8,12 @@ find_dependency(sup-dto)
 
 # to find FindEPICS.cmake
 list(APPEND CMAKE_MODULE_PATH ${SUP_EPICS_CMAKE_DIR})
+# cmake warns for the existence of ``<PackageName>_ROOT`` (EPICS_ROOT in this case) variables and ignores them
+# for compatibility reasons, we set the related policy to NEW behaviour to suppress warnings
+cmake_policy(PUSH)
+cmake_policy(SET CMP0074 NEW)
 find_dependency(EPICS)
+cmake_policy(POP)
 list(REMOVE_AT CMAKE_MODULE_PATH -1)
 
 if(TARGET sup-epics::sup-epics OR TARGET sup-epics::sup-epics-di OR TARGET sup-epics::sup-epics-test)
