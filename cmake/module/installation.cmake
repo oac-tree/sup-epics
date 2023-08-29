@@ -34,9 +34,6 @@ configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/../config/sup-epics-conf
     INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
 )
 
-# to use from the build tree
-configure_file(${CMAKE_CURRENT_LIST_DIR}/FindEPICS.cmake ${CMAKE_CURRENT_BINARY_DIR}/FindEPICS.cmake COPYONLY)
-
 # to use in install tree
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config.cmake DESTINATION ${INSTALL_CONFIGDIR})
 
