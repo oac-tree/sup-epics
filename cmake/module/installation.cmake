@@ -45,6 +45,3 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config-ve
     ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config-version.cmake DESTINATION ${INSTALL_CONFIGDIR})
-
-# Installing custom FindEPICS.cmake too
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/FindEPICS.cmake DESTINATION ${INSTALL_CONFIGDIR})
