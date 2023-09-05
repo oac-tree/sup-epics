@@ -37,7 +37,7 @@ public:
   explicit AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value);
   ~AnyValueFromPVXSBuilder();
 
-  dto::AnyValue MoveAnyValue() const;
+  dto::AnyValue MoveAnyValue();
 
 private:
   struct AnyValueFromPVXSBuilderImpl;

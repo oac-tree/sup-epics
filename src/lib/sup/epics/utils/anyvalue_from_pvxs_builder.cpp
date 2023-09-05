@@ -230,7 +230,7 @@ AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value)
   p_impl->ProcessPvxsValue(pvxs_value);
 }
 
-dto::AnyValue AnyValueFromPVXSBuilder::MoveAnyValue() const
+dto::AnyValue AnyValueFromPVXSBuilder::MoveAnyValue()
 {
   return p_impl->m_composer.MoveAnyValue();
 }
