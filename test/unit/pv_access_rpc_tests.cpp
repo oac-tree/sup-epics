@@ -69,7 +69,8 @@ TEST_F(PvAccessRPCTests, SingleServerSingleClientSuccess)
 
   // Send simple scalar payload over RPC
   sup::dto::AnyValue payload{42};
-  auto request = sup::protocol::utils::CreateRPCRequest(payload);
+  auto request =
+    sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
   EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
@@ -104,7 +105,8 @@ TEST_F(PvAccessRPCTests, RPCClientWrongChannel)
   auto client = server.CreateClient({"DOESNOTEXIST", 0.1});
 
   sup::dto::AnyValue payload{42};
-  auto request = sup::protocol::utils::CreateRPCRequest(payload);
+  auto request =
+    sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
   ASSERT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   EXPECT_FALSE(static_cast<bool>(m_request));
@@ -124,7 +126,8 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
 
   // Send empty value
   sup::dto::AnyValue payload{42};
-  auto request = sup::protocol::utils::CreateRPCRequest(payload);
+  auto request =
+    sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   // Although the extra field is not defined by the usual transport protocol (see sup-protocol), our
   // custom handler at the server side will use it to return an empty value.
   request.AddMember(RETURN_EMPTY_FIELD, true);
@@ -147,7 +150,8 @@ TEST_F(PvAccessRPCTests, ClientServerFromEnv)
 
   // Send simple scalar payload over RPC
   sup::dto::AnyValue payload{42};
-  auto request = sup::protocol::utils::CreateRPCRequest(payload);
+  auto request =
+    sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
   EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
@@ -164,7 +168,8 @@ TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 
   // Send simple scalar payload over RPC
   sup::dto::AnyValue payload{42};
-  auto request = sup::protocol::utils::CreateRPCRequest(payload);
+  auto request =
+    sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
   EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   ASSERT_TRUE(static_cast<bool>(m_request));
