@@ -98,8 +98,8 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   const std::string channel_name("channel0");
 
   // setting up callback expectations
-  EXPECT_CALL(server_listener, OnServerValueChanged(_, _)).Times(0);
-  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(::testing::AtLeast(1));
+  EXPECT_CALL(server_listener, OnServerValueChanged(_, _)).Times(2);
+  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(4);
 
   // creating server with single variable
   PvAccessServer server(PvAccessServer::Isolated, server_listener.GetServerCallBack());
@@ -120,32 +120,16 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
 
-  // validating callbacks and clearing listeners
-  testing::Mock::VerifyAndClearExpectations(&server_listener);
-  testing::Mock::VerifyAndClearExpectations(&client_listener);
-
   // changing the value via the server and checking values on server and client sides
   any_value["value"] = 43;
-
-  // setting up callback expectations
-  EXPECT_CALL(server_listener, OnServerValueChanged(channel_name, _)).Times(1);
-  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(1);
 
   server.SetValue(channel_name, any_value);
 
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == any_value; }));
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
 
-  // validating callbacks and clearing listeners
-  testing::Mock::VerifyAndClearExpectations(&server_listener);
-  testing::Mock::VerifyAndClearExpectations(&client_listener);
-
   // changing the value via the client and checking values on server and client sides
   any_value["value"] = 44;
-
-  // setting up callback expectations
-  EXPECT_CALL(server_listener, OnServerValueChanged(channel_name, _)).Times(1);
-  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(1);
 
   client.SetValue(channel_name, any_value);
 
@@ -155,9 +139,6 @@ TEST_F(PvAccessClientServerIntegrationTests, ServerWithSingleVariableAndSingleCl
   // validating callbacks and clearing listeners
   testing::Mock::VerifyAndClearExpectations(&server_listener);
   testing::Mock::VerifyAndClearExpectations(&client_listener);
-
-  // ignore possible disconnect callback
-  EXPECT_CALL(client_listener, OnClientValueChanged(channel_name, _)).Times(::testing::AtLeast(0));
 }
 
 //! Test with non-isolated server/client. Server with single variable and single client.

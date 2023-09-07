@@ -210,9 +210,11 @@ TEST_F(PvAccessClientTest, TwoClients)
   m_shared_ntscalar_pv.open(m_pvxs_ntscalar_value);
   m_shared_string_pv.open(m_pvxs_string_value);
 
-  // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnClientValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnClientValueChanged(kIntChannelName, _)).Times(::testing::AtLeast(1));
+  // callback expectation on variable connection, first value and value change
+  // expectations are cleared before destruction to ensure that the disconnect callback is
+  // not triggered
+  EXPECT_CALL(listener1, OnClientValueChanged(kIntChannelName, _)).Times(3);
+  EXPECT_CALL(listener2, OnClientValueChanged(kIntChannelName, _)).Times(3);
 
   sup::epics::PvAccessClient client0(CreateClientImpl(listener1.GetClientCallBack()));
   client0.AddVariable(kIntChannelName);
@@ -224,20 +226,12 @@ TEST_F(PvAccessClientTest, TwoClients)
   EXPECT_TRUE(client0.WaitForValidValue(kIntChannelName, 1.0));
   EXPECT_TRUE(client1.WaitForValidValue(kIntChannelName, 1.0));
 
-  // validating callbacks and clearing listeners
-  testing::Mock::VerifyAndClearExpectations(&listener1);
-  testing::Mock::VerifyAndClearExpectations(&listener2);
-
   // retrieving value through first client
   auto any_value = client0.GetValue(kIntChannelName);
   EXPECT_EQ(any_value["value"], kInitialIntChannelValue);
 
   // setting the value through the first client
   any_value["value"] = 45;
-
-  // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnClientValueChanged(kIntChannelName, _)).Times(1);
-  EXPECT_CALL(listener2, OnClientValueChanged(kIntChannelName, _)).Times(1);
 
   EXPECT_TRUE(client0.SetValue(kIntChannelName, any_value));
 
@@ -248,4 +242,8 @@ TEST_F(PvAccessClientTest, TwoClients)
                             auto any_value_from_client1 = client1.GetValue(kIntChannelName);
                             return any_value_from_client1["value"] == 45;
                           }));
+
+  // validating callbacks and clearing listeners
+  testing::Mock::VerifyAndClearExpectations(&listener1);
+  testing::Mock::VerifyAndClearExpectations(&listener2);
 }

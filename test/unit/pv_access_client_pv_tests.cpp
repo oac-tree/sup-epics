@@ -318,9 +318,9 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  // callback expectation on variable connection
-  EXPECT_CALL(listener1, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
+  // callback expectation on variable connection, initial value and value update
+  EXPECT_CALL(listener1, OnClientPVValueChanged(_)).Times(3);
+  EXPECT_CALL(listener2, OnClientPVValueChanged(_)).Times(3);
 
   sup::epics::PvAccessClientPV variable1(
       CreateClientPVImpl(kChannelName, listener1.GetClientPVCallBack()));
@@ -329,9 +329,6 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
 
   EXPECT_TRUE(variable1.WaitForValidValue(1.0));
   EXPECT_TRUE(variable2.WaitForValidValue(1.0));
-
-  testing::Mock::VerifyAndClearExpectations(&listener1);
-  testing::Mock::VerifyAndClearExpectations(&listener2);
 
   // retrieving value through first variable
   auto any_value1 = variable1.GetValue();
@@ -343,10 +340,6 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
 
   // setting the value through the first variable
   any_value1["value"] = 45;
-
-  // callback expectation on setting the value through one of the client
-  EXPECT_CALL(listener1, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
-  EXPECT_CALL(listener2, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
 
   EXPECT_TRUE(variable1.SetValue(any_value1));
 
@@ -365,6 +358,9 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
                             auto shared_value = m_shared_pv.fetch();
                             return shared_value["value"].as<int>() == 45;
                           }));
+
+  testing::Mock::VerifyAndClearExpectations(&listener1);
+  testing::Mock::VerifyAndClearExpectations(&listener2);
 }
 
 //! Validating implicit struct-scalar conversion. A `struct-scalar` is a special structure
