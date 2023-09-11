@@ -20,6 +20,8 @@
 #ifndef SUP_EPICS_DTO_TYPES_FWD_H_
 #define SUP_EPICS_DTO_TYPES_FWD_H_
 
+#include <sup/dto/basic_scalar_types.h>
+
 //! @file dto_types_fwd.h
 //! Forward declaration of some external types related to the data transfer.
 
@@ -29,7 +31,7 @@ namespace dto
 {
 class AnyValue;
 class AnyType;
-enum class TypeCode;
+enum class TypeCode : sup::dto::uint32;
 }  // namespace dto
 }  // namespace sup
 
