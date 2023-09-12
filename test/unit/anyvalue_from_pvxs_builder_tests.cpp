@@ -17,13 +17,14 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include <sup/dto/anytype_helper.h>
+#include <sup/dto/anyvalue.h>
+#include <sup/epics/utils/dto_conversion_utils.h>
+
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 #include <pvxs/sharedArray.h>
-#include <sup/dto/anytype_helper.h>
-#include <sup/dto/anyvalue.h>
-#include <sup/epics/utils/dto_conversion_utils.h>
 
 #include <iostream>
 
@@ -429,9 +430,13 @@ TEST_F(AnyValueFromPVXSBuilderTests, EmptyNTEnum)
                                          {"userTag", {sup::dto::SignedInteger32Type}}},
                                         "time_t"};
 
-  sup::dto::AnyType expected_anytype{
-      {{"value", enum_struct}, {"alarm", alarm_struct}, {"timeStamp", timestamp_struct}},
-      "epics:nt/NTEnum:1.0"};
+  sup::dto::AnyType display_struct = {{{"description", {sup::dto::StringType}}}, ""};
+
+  sup::dto::AnyType expected_anytype{{{"value", enum_struct},
+                                      {"alarm", alarm_struct},
+                                      {"timeStamp", timestamp_struct},
+                                      {"display", display_struct}},
+                                     "epics:nt/NTEnum:1.0"};
 
   // validating AnyValue
   EXPECT_EQ(any_value.GetType(), expected_anytype);
@@ -490,9 +495,13 @@ TEST_F(AnyValueFromPVXSBuilderTests, InitialisedNTEnum)
                                          {"userTag", {sup::dto::SignedInteger32Type}}},
                                         "time_t"};
 
-  sup::dto::AnyType expected_anytype{
-      {{"value", enum_struct}, {"alarm", alarm_struct}, {"timeStamp", timestamp_struct}},
-      "epics:nt/NTEnum:1.0"};
+  sup::dto::AnyType display_struct = {{{"description", {sup::dto::StringType}}}, ""};
+
+  sup::dto::AnyType expected_anytype{{{"value", enum_struct},
+                                      {"alarm", alarm_struct},
+                                      {"timeStamp", timestamp_struct},
+                                      {"display", display_struct}},
+                                     "epics:nt/NTEnum:1.0"};
 
   // validating AnyValue
   EXPECT_EQ(any_value.GetType(), expected_anytype);
