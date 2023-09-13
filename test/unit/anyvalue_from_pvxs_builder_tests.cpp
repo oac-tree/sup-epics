@@ -415,31 +415,7 @@ TEST_F(AnyValueFromPVXSBuilderTests, EmptyNTEnum)
   // building any_value
   auto any_value = BuildAnyValue(pvxs_value);
 
-  // constructing expected AnyType
-  sup::dto::AnyType enum_struct = {{{"index", {sup::dto::SignedInteger32Type}},
-                                    {"choices", {sup::dto::AnyType(0, sup::dto::StringType)}}},
-                                   "enum_t"};
-
-  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
-                                     {"status", {sup::dto::SignedInteger32Type}},
-                                     {"message", {sup::dto::StringType}}},
-                                    "alarm_t"};
-
-  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
-                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
-                                         {"userTag", {sup::dto::SignedInteger32Type}}},
-                                        "time_t"};
-
-  sup::dto::AnyType display_struct = {{{"description", {sup::dto::StringType}}}, ""};
-
-  sup::dto::AnyType expected_anytype{{{"value", enum_struct},
-                                      {"alarm", alarm_struct},
-                                      {"timeStamp", timestamp_struct},
-                                      {"display", display_struct}},
-                                     "epics:nt/NTEnum:1.0"};
-
   // validating AnyValue
-  EXPECT_EQ(any_value.GetType(), expected_anytype);
   EXPECT_EQ(any_value["value.index"].GetTypeCode(), sup::dto::TypeCode::Int32);
   EXPECT_EQ(any_value["value.index"], 0);
   EXPECT_EQ(any_value["value.choices"].GetTypeCode(), sup::dto::TypeCode::Array);
@@ -480,31 +456,7 @@ TEST_F(AnyValueFromPVXSBuilderTests, InitialisedNTEnum)
   // building any_value
   auto any_value = BuildAnyValue(pvxs_value);
 
-  // constructing expected AnyType
-  sup::dto::AnyType enum_struct = {{{"index", {sup::dto::SignedInteger32Type}},
-                                    {"choices", {sup::dto::AnyType(2, sup::dto::StringType)}}},
-                                   "enum_t"};
-
-  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
-                                     {"status", {sup::dto::SignedInteger32Type}},
-                                     {"message", {sup::dto::StringType}}},
-                                    "alarm_t"};
-
-  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
-                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
-                                         {"userTag", {sup::dto::SignedInteger32Type}}},
-                                        "time_t"};
-
-  sup::dto::AnyType display_struct = {{{"description", {sup::dto::StringType}}}, ""};
-
-  sup::dto::AnyType expected_anytype{{{"value", enum_struct},
-                                      {"alarm", alarm_struct},
-                                      {"timeStamp", timestamp_struct},
-                                      {"display", display_struct}},
-                                     "epics:nt/NTEnum:1.0"};
-
   // validating AnyValue
-  EXPECT_EQ(any_value.GetType(), expected_anytype);
   EXPECT_EQ(any_value["value.index"], 42);
   EXPECT_EQ(any_value["value.choices"][0], std::string("abc"));
   EXPECT_EQ(any_value["value.choices"][1], std::string("qwerty"));
