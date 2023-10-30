@@ -1,3 +1,8 @@
+Changes for 1.2.0:
+
+- CMake files update
+- Do not propagate direct EPICS dependency to dependents of sup-epics
+
 Changes for 1.1.0:
 
 - Adapt to more relaxed assignment constrains of sup-dto's AnyValue
