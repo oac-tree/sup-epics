@@ -65,6 +65,13 @@ record (longout,"CA_TESTS:LONG")
     field(VAL,"0")
     field(PINI,"YES")
 }
+
+record (int64out,"CA_TESTS:INT64")
+{
+    field(DESC,"Some EPICSv3 record")
+    field(VAL,"0")
+    field(PINI,"YES")
+}
 )RAW";
 
 //! Returns string representing EPICS database file with several testing variables.

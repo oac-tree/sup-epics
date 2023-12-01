@@ -5,6 +5,13 @@
 Start with unit tests to verify what works and what not:
 
 * Create basic IOC records that cover the range of supported integers/floats.
+  * bo: boolean
+  * longout: int32
+  * int64out: int64
+  * ao: float64
+  * mbbo: uint16
+  * stringout: string (40)
+  * lso: long string (2^16-1)
 * Subscribe to those using different `AnyType` arguments.
 * Set values of yet another `AnyType` to verify automatic conversion during update.
 * Get values of the channel and verify these are correctly converted back.
