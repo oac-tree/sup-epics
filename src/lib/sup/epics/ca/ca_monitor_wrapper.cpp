@@ -32,14 +32,14 @@ namespace sup
 {
 namespace epics
 {
-CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype_, MonitorCallBack&& mon_cb_)
-  : anytype{std::move(anytype_)}
-  , size{0}
-  , mon_cb{std::move(mon_cb_)}
+CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& mon_cb)
+  : m_anytype{std::move(anytype)}
+  , m_size{0}
+  , m_mon_cb{std::move(mon_cb)}
 {
   sup::dto::AnyValue value(anytype);
   auto bytes = sup::dto::ToBytes(value);
-  size = bytes.size();
+  m_size = bytes.size();
 }
 
 void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
@@ -49,8 +49,11 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
   info.timestamp = timestamp;
   info.status = status;
   info.severity = severity;
-  info.value = AnyValueFromMonitorRef(anytype, ref, size);
-  return mon_cb(info);
+  if (ref)  // Only dereference ref during success
+  {
+    info.value = AnyValueFromMonitorRef(m_anytype, ref, m_size);
+  }
+  return m_mon_cb(info);
 }
 
 }  // namespace epics

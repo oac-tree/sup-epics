@@ -35,9 +35,9 @@ public:
   void operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
                   sup::dto::int16 severity, void* ref);
 private:
-  sup::dto::AnyType anytype;
-  std::size_t size;
-  MonitorCallBack mon_cb;
+  sup::dto::AnyType m_anytype;
+  std::size_t m_size;
+  MonitorCallBack m_mon_cb;
 };
 
 }  // namespace epics
