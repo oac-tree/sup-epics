@@ -25,6 +25,7 @@
 #include <cadef.h>
 
 #include <map>
+#include <vector>
 
 namespace
 {
@@ -136,11 +137,11 @@ chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
       {TypeCode::Bool, DBR_CHAR},
       {TypeCode::Char8, DBR_CHAR},
       {TypeCode::Int8, DBR_CHAR},
-      {TypeCode::UInt8, DBR_CHAR},
+      {TypeCode::UInt8, DBR_STRING},
       {TypeCode::Int16, DBR_SHORT},
       {TypeCode::UInt16, DBR_ENUM},
       {TypeCode::Int32, DBR_LONG},
-      {TypeCode::UInt32, DBR_LONG},
+      {TypeCode::UInt32, DBR_STRING},
       {TypeCode::Int64, DBR_STRING},
       {TypeCode::UInt64, DBR_STRING},
       {TypeCode::Float32, DBR_FLOAT},
@@ -162,7 +163,7 @@ sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* 
   {
     sup::dto::AnyValue result{anytype};
     sup::dto::AnyType el_type = anytype.ElementType();
-    const std::size_t kEpicsStringLength{40};
+    const std::size_t kEpicsStringLength = dbr_size[DBR_STRING];
     for (unsigned long idx = 0; idx < multiplicity; ++idx)
     {
       char* el_ref = ref + idx * kEpicsStringLength;
@@ -195,11 +196,11 @@ sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, cons
 
 std::string GetEPICSString(char* ref)
 {
-  const std::size_t kEpicsStringLength{40};
-  char buffer[kEpicsStringLength+1];
+  const std::size_t kEpicsStringLength = dbr_size[DBR_STRING];
+  auto buffer = std::vector<char>(kEpicsStringLength+1);
   buffer[kEpicsStringLength] = 0;
-  strncpy(buffer, ref, kEpicsStringLength);
-  return std::string(buffer);
+  strncpy(buffer.data(), ref, kEpicsStringLength);
+  return std::string(buffer.data());
 }
 
 }  // unnamed namespace

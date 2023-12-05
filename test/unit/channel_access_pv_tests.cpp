@@ -151,7 +151,7 @@ TEST_F(ChannelAccessPVTest, MultipleReadWrite)
 
   // waiting for connected clients
   EXPECT_TRUE(ca_float_writer.WaitForConnected(5.0));
-  EXPECT_TRUE(ca_float_reader.WaitForConnected(5.0));
+  EXPECT_TRUE(ca_float_reader.WaitForConnected(1.0));
 
   // set first value
   sup::dto::float32 value1 = 3.5F;
@@ -186,9 +186,9 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_bool.WaitForConnected(5.0));
-  EXPECT_TRUE(pv_as_uint16.WaitForConnected(5.0));
-  EXPECT_TRUE(pv_as_int32.WaitForConnected(5.0));
-  EXPECT_TRUE(pv_as_string.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_uint16.WaitForConnected(1.0));
+  EXPECT_TRUE(pv_as_int32.WaitForConnected(1.0));
+  EXPECT_TRUE(pv_as_string.WaitForConnected(1.0));
 
   // set first value
   sup::dto::boolean bool_v = true;
@@ -216,7 +216,7 @@ TEST_F(ChannelAccessPVTest, StringFormats)
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_string.WaitForConnected(5.0));
-  EXPECT_TRUE(pv_as_uint16.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_uint16.WaitForConnected(1.0));
 
   // set first value
   std::string string_v = "some_string";
@@ -237,7 +237,7 @@ TEST_F(ChannelAccessPVTest, IntFormats)
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_int32.WaitForConnected(5.0));
-  EXPECT_TRUE(pv_as_string.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_string.WaitForConnected(1.0));
 
   // set first value
   sup::dto::int32 int32_v = 42;
