@@ -5,7 +5,7 @@ This is a CMake project intended development and deployment on most Linux system
 
 ## Installation on CODAC development machines
 
-```
+```bash
 # install Epics
 yum install codac-core-7.1-epics-devel.x86_64
 
@@ -50,7 +50,7 @@ export PVXS_DIR=<pvxs>
 
 ### Install `sup-dto`
 
-```
+```bash
 git clone https://git.iter.org/scm/coa/sup-dto.git
 mkdir <build>; cd <build>
 cmake <source> && make -j4 && ctest
@@ -61,8 +61,12 @@ Without installation, libraries will be discoverable right from the build direct
 
 ### Finally, install `sup-epics`
 
-```
+```bash
 git clone https://git.iter.org/scm/coa/sup-epics.git
 mkdir <build>; cd <build>
 cmake <source> && make -j4 && ctest
 ```
+
+## Limitations of ChannelAccessPV
+
+Since the ChannelAccess C library does not support most unsigned types directly, those are supported here by requesting values in string format. This happens for `UInt8`, `UInt32`, `Int64`, `UInt64` and arrays thereof. This implies that if the supporting EPICS record consists of boolean input/output records, this will fail (since their string representation is `TRUE`/`FALSE` and cannot be parsed as a number). The same applies for using those types to write to boolean records.

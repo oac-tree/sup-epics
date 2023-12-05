@@ -31,6 +31,11 @@
 namespace
 {
 bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id);
+std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
+                                             const sup::dto::AnyType& dest_type);
+std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& value,
+                                                    unsigned long multiplicity);
+std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& value);
 }  // unnamed namespace
 
 namespace sup
@@ -41,6 +46,7 @@ struct CAChannelManager::ChannelInfo
 {
   ChannelInfo(const sup::dto::AnyType& anytype, ConnectionCallBack&& conn_cb,
               MonitorCallBack&& mon_cb);
+  sup::dto::AnyType m_anytype;
   chid channel_id;
   ConnectionCallBack connection_cb;
   CAMonitorWrapper monitor_cb;
@@ -110,16 +116,16 @@ bool CAChannelManager::UpdateChannel(ChannelID id, const sup::dto::AnyValue& val
   {
     return false;
   }
-  auto anytype = value.GetType();
-  auto type = cahelper::ChannelType(anytype);
+  auto dest_type = it->second.m_anytype;
+  auto type = cahelper::ChannelType(dest_type);
   if (type == -1)
   {
     return false;
   }
-  auto count = cahelper::ChannelMultiplicity(anytype);
+  auto count = cahelper::ChannelMultiplicity(dest_type);
   auto channel_id = it->second.channel_id;
-  auto byte_representation = sup::dto::ToBytes(value);
-  auto ref = byte_representation.data();
+  auto byte_rep = GetUpdateBuffer(value, dest_type);
+  auto ref = byte_rep.data();
   auto update_task = std::packaged_task<bool()>([type, count, channel_id, ref](){
     return channeltasks::UpdateChannelTask(type, count, channel_id, ref);
   });
@@ -158,7 +164,8 @@ CAChannelManager& SharedCAChannelManager()
 CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
                                            ConnectionCallBack&& conn_cb,
                                            MonitorCallBack&& mon_cb)
-  : channel_id{nullptr}
+  : m_anytype{anytype}
+  , channel_id{nullptr}
   , connection_cb{std::move(conn_cb)}
   , monitor_cb{anytype, std::move(mon_cb)}
 {}
@@ -176,4 +183,56 @@ bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id)
   });
   return context->HandleTask(std::move(remove_task));
 }
+
+std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
+                                             const sup::dto::AnyType& dest_type)
+{
+  using namespace sup::epics::cahelper;
+  sup::dto::AnyValue dest_val{dest_type};
+  if (!sup::dto::TryConvert(dest_val, value))
+  {
+    return {};
+  }
+  auto multiplicity = ChannelMultiplicity(dest_type);
+  auto ch_type = ChannelType(dest_type);
+  if (ch_type == DBR_STRING)
+  {
+    return GetStringsUpdateBuffer(dest_val, multiplicity);
+  }
+  return sup::dto::ToBytes(dest_val);
+}
+
+std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& value,
+                                                    unsigned long multiplicity)
+{
+  if (multiplicity > 1)
+  {
+    std::vector<sup::dto::uint8> result;
+    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    {
+      auto el_buffer = GetStringUpdateBuffer(value[idx]);
+      result.insert(result.end(), el_buffer.begin(), el_buffer.end());
+    }
+    return result;
+  }
+  return GetStringUpdateBuffer(value);
+}
+
+std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& value)
+{
+  const std::size_t kEpicsStringLength = dbr_size[DBR_STRING];
+  std::vector<sup::dto::uint8> result(kEpicsStringLength);
+  std::string str;
+  if (value.GetType() == sup::dto::StringType)
+  {
+    str = value.As<std::string>();
+  }
+  else
+  {
+    str = sup::dto::ValuesToJSONString(value);
+  }
+  strncpy((char*)result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
+  return result;
+}
+
 }  // unnamed namespace

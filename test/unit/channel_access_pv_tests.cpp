@@ -202,23 +202,20 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
   EXPECT_TRUE(pv_as_uint64.WaitForConnected(1.0));
   EXPECT_TRUE(pv_as_string.WaitForConnected(1.0));
 
+  // Boolean records cannot be read out by integer types that require string backends in CA:
+  EXPECT_FALSE(pv_as_uint8.WaitForValidValue(0.5));
+  EXPECT_FALSE(pv_as_uint64.WaitForValidValue(0.5));
   {
     // set true
     sup::dto::boolean bool_v = true;
     ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
 
     // reading variables through different clients
-    sup::dto::uint8 uint8_v = 1u;
-    EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
-
     sup::dto::uint16 uint16_v = 1u;
     EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
     sup::dto::int32 int32_v = 1;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
-
-    sup::dto::uint64 uint64_v = 1u;
-    EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
 
     std::string string_v = "TRUE";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
@@ -230,17 +227,11 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
     ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
 
     // reading variables through different clients
-    sup::dto::uint8 uint8_v = 0u;
-    EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
-
     sup::dto::uint16 uint16_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
     sup::dto::int32 int32_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
-
-    sup::dto::uint64 uint64_v = 0u;
-    EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
 
     std::string string_v = "FALSE";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
@@ -321,7 +312,7 @@ TEST_F(ChannelAccessPVTest, IntFormats)
   }
 }
 
-TEST_F(ChannelAccessPVTest, DISABLED_Int64Formats)
+TEST_F(ChannelAccessPVTest, Int64Formats)
 {
   using namespace sup::epics;
 
