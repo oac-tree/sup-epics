@@ -37,7 +37,7 @@ CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& 
   , m_size{0}
   , m_mon_cb{std::move(mon_cb)}
 {
-  sup::dto::AnyValue value(anytype);
+  sup::dto::AnyValue value(m_anytype);
   auto bytes = sup::dto::ToBytes(value);
   m_size = bytes.size();
 }
