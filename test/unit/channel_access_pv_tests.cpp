@@ -40,6 +40,14 @@ protected:
   ~ChannelAccessPVTest() = default;
 };
 
+inline void FillWithScalars(sup::dto::AnyValue& anyvalue, int val)
+{
+  for (size_t idx = 0; idx < anyvalue.NumberOfElements(); ++idx)
+  {
+    anyvalue[idx].ConvertFrom(val);
+  }
+}
+
 TEST_F(ChannelAccessPVTest, ConnectAndRead)
 {
   using namespace sup::epics;
@@ -362,6 +370,53 @@ TEST_F(ChannelAccessPVTest, DISABLED_Int64Formats)
 
     sup::dto::boolean bool_v = false;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
+  }
+}
+
+TEST_F(ChannelAccessPVTest, Waveform)
+{
+  using namespace sup::epics;
+
+  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
+  ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
+  sup::dto::AnyType bool_array_t(1024, sup::dto::BooleanType, "bool[]");
+  ChannelAccessPV ca_boolarray_var("CA-TESTS:CHARRAY", bool_array_t);
+  sup::dto::AnyType int32_array_t(1024, sup::dto::SignedInteger32Type, "int32[]");
+  ChannelAccessPV ca_int32array_var("CA-TESTS:CHARRAY", int32_array_t);
+
+  // waiting for connected clients
+  EXPECT_TRUE(ca_chararray_var.WaitForConnected(5.0));
+  EXPECT_TRUE(ca_boolarray_var.WaitForConnected(1.0));
+  EXPECT_TRUE(ca_int32array_var.WaitForConnected(1.0));
+
+  {
+    // set first value
+    sup::dto::AnyValue char_array_v{char_array_t};
+    ASSERT_TRUE(ca_chararray_var.SetValue(char_array_v));
+    EXPECT_TRUE(WaitForValue(ca_chararray_var, char_array_v, 5.0));
+
+    // reading variables through different clients
+    sup::dto::AnyValue bool_array_v{bool_array_t};
+    EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
+
+    sup::dto::AnyValue int32_array_v{int32_array_t};
+    EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
+  }
+  {
+    // set first value
+    sup::dto::AnyValue char_array_v{char_array_t};
+    FillWithScalars(char_array_v, 1);
+    ASSERT_TRUE(ca_chararray_var.SetValue(char_array_v));
+    EXPECT_TRUE(WaitForValue(ca_chararray_var, char_array_v, 5.0));
+
+    // reading variables through different clients
+    sup::dto::AnyValue bool_array_v{bool_array_t};
+    FillWithScalars(bool_array_v, 1);
+    EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
+
+    sup::dto::AnyValue int32_array_v{int32_array_t};
+    FillWithScalars(int32_array_v, 1);
+    EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
   }
 }
 
