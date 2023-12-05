@@ -222,12 +222,13 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
   }
   {
-    // set false
+    // set false through integer using bool channel
+    sup::dto::uint16 uint16_v = 0u;
+    ASSERT_TRUE(pv_as_bool.SetValue(uint16_v));
     sup::dto::boolean bool_v = false;
-    ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
+    EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::uint16 uint16_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
     sup::dto::int32 int32_v = 0;
@@ -294,13 +295,13 @@ TEST_F(ChannelAccessPVTest, IntFormats)
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
   }
   {
-    // set second value
+    // set second value using a 64bit int on a 32bit channel
+    sup::dto::int64 int64_v = 0;
     sup::dto::int32 int32_v = 0;
-    ASSERT_TRUE(pv_as_int32.SetValue(int32_v));
+    ASSERT_TRUE(pv_as_int32.SetValue(int64_v));
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::int64 int64_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
 
     std::string string_v = "0";
@@ -346,9 +347,10 @@ TEST_F(ChannelAccessPVTest, Int64Formats)
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
   }
   {
-    // set second value
+    // set second value using a boolean on the 64bit channel
+    sup::dto::boolean bool_v = false;
+    ASSERT_TRUE(pv_as_int64.SetValue(bool_v));
     sup::dto::int64 int64_v = 0;
-    ASSERT_TRUE(pv_as_int64.SetValue(int64_v));
     EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
 
     // reading variables through different clients
@@ -359,7 +361,6 @@ TEST_F(ChannelAccessPVTest, Int64Formats)
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
-    sup::dto::boolean bool_v = false;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
   }
 }
