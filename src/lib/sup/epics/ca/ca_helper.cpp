@@ -30,11 +30,11 @@ namespace
 {
 sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 nanoseconds);
 chtype TypeCodeToChannelType(sup::dto::TypeCode typecode);
-sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, void* ref,
+sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
                                         unsigned long multiplicity);
-sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, void* ref);
+sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* ref);
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str);
-std::string GetEPICSString(void* ref);
+std::string GetEPICSString(char* ref);
 
 }  // unnamed namespace
 
@@ -98,7 +98,7 @@ unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
   return result ? result : 1u;
 }
 
-sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, void* ref)
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, char* ref)
 {
   if (!ref)
   {
@@ -155,7 +155,7 @@ chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
   return it->second;
 }
 
-sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, void* ref,
+sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
                                         unsigned long multiplicity)
 {
   if (multiplicity > 1)
@@ -165,7 +165,7 @@ sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, void* 
     const std::size_t kEpicsStringLength{40};
     for (unsigned long idx = 0; idx < multiplicity; ++idx)
     {
-      void* el_ref = ref + idx * kEpicsStringLength;
+      char* el_ref = ref + idx * kEpicsStringLength;
       result[idx] = ParseFromStringType(el_type, el_ref);
     }
     return result;
@@ -173,7 +173,7 @@ sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, void* 
   return ParseFromStringType(anytype, ref);
 }
 
-sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, void* ref)
+sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* ref)
 {
   auto str = GetEPICSString(ref);
   if (anytype == sup::dto::StringType)
@@ -193,12 +193,12 @@ sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, cons
   return parser.MoveAnyValue();
 }
 
-std::string GetEPICSString(void* ref)
+std::string GetEPICSString(char* ref)
 {
   const std::size_t kEpicsStringLength{40};
   char buffer[kEpicsStringLength+1];
   buffer[kEpicsStringLength] = 0;
-  strncpy(buffer, (const char*)ref, kEpicsStringLength);
+  strncpy(buffer, ref, kEpicsStringLength);
   return std::string(buffer);
 }
 

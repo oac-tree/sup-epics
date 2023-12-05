@@ -29,27 +29,27 @@ namespace epics
 {
 CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& mon_cb)
   : m_anytype{std::move(anytype)}
-  , m_size{0}
   , m_mon_cb{std::move(mon_cb)}
-{
-  sup::dto::AnyValue value(m_anytype);
-  auto bytes = sup::dto::ToBytes(value);
-  m_size = bytes.size();
-}
+{}
 
 void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
-                                  sup::dto::int16 severity, void* ref)
+                                  sup::dto::int16 severity, long count, void* ref)
 {
   CAMonitorInfo info;
   info.timestamp = timestamp;
   info.status = status;
   info.severity = severity;
-  if (ref)  // Only dereference ref during success
+  if (ref && VerifyCount(count))  // Only dereference ref during success
   {
-    info.value = cahelper::ParseAnyValue(m_anytype, ref);
-    // info.value = AnyValueFromMonitorRef(m_anytype, ref, m_size);
+    info.value = cahelper::ParseAnyValue(m_anytype, (char*)ref);
   }
   return m_mon_cb(info);
+}
+
+bool CAMonitorWrapper::VerifyCount(long count)
+{
+  auto expected = sup::dto::IsArrayType(m_anytype) ? m_anytype.NumberOfElements() : 1;
+  return count > 0 && (size_t)count == expected;
 }
 
 }  // namespace epics

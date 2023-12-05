@@ -90,8 +90,9 @@ void Monitor_CB(event_handler_args args)
   auto status = GetStatusField(args);
   auto severity = GetSeverityField(args);
   auto ref = GetValueFieldReference(args);
+  auto count = args.count;
   auto func = static_cast<sup::epics::CAMonitorWrapper*>(args.usr);
-  return (*func)(timestamp, status, severity, ref);
+  return (*func)(timestamp, status, severity, count, ref);
 }
 
 void Connection_CB(connection_handler_args args)

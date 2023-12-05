@@ -22,6 +22,11 @@
 #include <sup/epics-test/softioc_runner.h>
 #include <sup/epics-test/softioc_utils.h>
 
+#include <sup/epics/channel_access_pv.h>
+
+#include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue.h>
+
 #include <gtest/gtest.h>
 
 namespace
@@ -36,6 +41,7 @@ record (bo,"CA-TESTS:BOOL")
     field(ZNAM,"FALSE")
     field(ZSV,"NO_ALARM")
     field(VAL,"0")
+    field(PINI,"YES")
 }
 
 record (ao,"CA-TESTS:FLOAT")
@@ -44,12 +50,14 @@ record (ao,"CA-TESTS:FLOAT")
     field(DRVH,"5.0")
     field(DRVL,"-5.0")
     field(VAL,"0")
+    field(PINI,"YES")
 }
 
 record (stringout,"CA-TESTS:STRING")
 {
     field(DESC,"Some EPICSv3 record")
     field(VAL,"undefined")
+    field(PINI,"YES")
 }
 
 record (waveform,"CA-TESTS:CHARRAY")
@@ -104,6 +112,12 @@ IOCEnvironment::~IOCEnvironment() = default;
 void IOCEnvironment::SetUp()
 {
   m_softioc_service.Start(GetEpicsDBContentString());
+  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
+  sup::dto::AnyValue char_array_v{char_array_t};
+  sup::epics::ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
+  ca_chararray_var.WaitForConnected(2.0);
+  ca_chararray_var.SetValue(char_array_v);
+  ca_chararray_var.WaitForValidValue(2.0);
 }
 
 void IOCEnvironment::TearDown()
