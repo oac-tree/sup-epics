@@ -20,6 +20,7 @@
 #include <sup/epics/ca/ca_helper.h>
 
 #include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue_exceptions.h>
 #include <sup/dto/json_value_parser.h>
 
 #include <cadef.h>
@@ -115,7 +116,14 @@ sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, char* ref)
   }
   sup::dto::AnyValue result{anytype};
   auto size = dbr_size[chtype] * multiplicity;
-  sup::dto::FromBytes(result, (const sup::dto::uint8*)ref, size);
+  try
+  {
+    sup::dto::FromBytes(result, (const sup::dto::uint8*)ref, size);
+  }
+  catch(const sup::dto::MessageException&)
+  {
+    return {};
+  }
   return result;
 }
 
