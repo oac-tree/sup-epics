@@ -46,7 +46,7 @@ struct CAChannelManager::ChannelInfo
 {
   ChannelInfo(const sup::dto::AnyType& anytype, ConnectionCallBack&& conn_cb,
               MonitorCallBack&& mon_cb);
-  sup::dto::AnyType m_anytype;
+  sup::dto::AnyType channel_anytype;
   chid channel_id;
   ConnectionCallBack connection_cb;
   CAMonitorWrapper monitor_cb;
@@ -116,7 +116,7 @@ bool CAChannelManager::UpdateChannel(ChannelID id, const sup::dto::AnyValue& val
   {
     return false;
   }
-  auto dest_type = it->second.m_anytype;
+  auto dest_type = it->second.channel_anytype;
   auto type = cahelper::ChannelType(dest_type);
   if (type == -1)
   {
@@ -164,7 +164,7 @@ CAChannelManager& SharedCAChannelManager()
 CAChannelManager::ChannelInfo::ChannelInfo(const sup::dto::AnyType& anytype,
                                            ConnectionCallBack&& conn_cb,
                                            MonitorCallBack&& mon_cb)
-  : m_anytype{anytype}
+  : channel_anytype{anytype}
   , channel_id{nullptr}
   , connection_cb{std::move(conn_cb)}
   , monitor_cb{anytype, std::move(mon_cb)}
