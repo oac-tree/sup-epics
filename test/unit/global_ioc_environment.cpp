@@ -67,14 +67,14 @@ record (waveform,"CA-TESTS:CHARRAY")
     field(NELM, "1024")
 }
 
-record (longout,"CA_TESTS:LONG")
+record (longout,"CA-TESTS:LONG")
 {
     field(DESC,"Some EPICSv3 record")
     field(VAL,"0")
     field(PINI,"YES")
 }
 
-record (int64out,"CA_TESTS:INT64")
+record (int64out,"CA-TESTS:INT64")
 {
     field(DESC,"Some EPICSv3 record")
     field(VAL,"0")

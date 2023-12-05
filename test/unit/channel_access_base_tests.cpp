@@ -34,7 +34,7 @@ void Connection_CB(connection_handler_args args);
 static std::atomic_int mon_count{0};
 static std::atomic_int conn_count{0};
 
-static const char* channel_name = "CA_TESTS:LONG";
+static const char* channel_name = "CA-TESTS:LONG";
 
 /**
  * Preconditions for this test:

@@ -38,6 +38,8 @@ sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* 
                                         unsigned long multiplicity);
 sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* ref);
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str);
+sup::dto::AnyValue ParseBooleans(char* ref, unsigned long multiplicity);
+sup::dto::AnyValue ParseBoolean(char* ref);
 std::string GetEPICSString(char* ref);
 
 }  // unnamed namespace
@@ -116,6 +118,10 @@ sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, char* ref)
   }
   sup::dto::AnyValue result{anytype};
   auto size = dbr_size[chtype] * multiplicity;
+  if (anytype == sup::dto::BooleanType)
+  {
+    return ParseBooleans(ref, multiplicity);
+  }
   try
   {
     sup::dto::FromBytes(result, (const sup::dto::uint8*)ref, size);
@@ -211,6 +217,28 @@ sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, cons
     return {};
   }
   return parser.MoveAnyValue();
+}
+
+sup::dto::AnyValue ParseBooleans(char* ref, unsigned long multiplicity)
+{
+  if (multiplicity > 1)
+  {
+    sup::dto::AnyValue result{multiplicity, sup::dto::BooleanType};
+    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    {
+      result[idx] = ParseBoolean(ref + idx);
+    }
+    return result;
+  }
+  return ParseBoolean(ref);
+}
+sup::dto::AnyValue ParseBoolean(char* ref)
+{
+  sup::dto::AnyValue tmp{sup::dto::Character8Type};
+  sup::dto::FromBytes(tmp, (const sup::dto::uint8*)ref, 1u);
+  sup::dto::AnyValue result{sup::dto::BooleanType};
+  result.ConvertFrom(tmp);
+  return result;
 }
 
 std::string GetEPICSString(char* ref)
