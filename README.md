@@ -69,4 +69,4 @@ cmake <source> && make -j4 && ctest
 
 ## Limitations of ChannelAccessPV
 
-Since the ChannelAccess C library does not support most unsigned types directly, those are supported here by requesting values in string format. This happens for `UInt8`, `UInt32`, `Int64`, `UInt64` and arrays thereof. This implies that if the supporting EPICS record consists of boolean input/output records, this will fail (since their string representation is `TRUE`/`FALSE` and cannot be parsed as a number). The same applies for using those types to write to boolean records.
+Since the ChannelAccess C library does not support most unsigned types directly (nor 64bit signed integeres), those are supported here by requesting values in string format. This happens for `UInt8`, `UInt32`, `Int64`, `UInt64` and arrays thereof. This implies that if the supporting EPICS record consists of boolean input/output records, this will fail (since their string representation is `TRUE`/`FALSE` and cannot be parsed as a number). The same applies for using those types to write to boolean records.

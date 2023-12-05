@@ -409,7 +409,7 @@ TEST_F(ChannelAccessPVTest, EnumFormats)
   }
 }
 
-TEST_F(ChannelAccessPVTest, Waveform)
+TEST_F(ChannelAccessPVTest, CharWaveform)
 {
   using namespace sup::epics;
 
@@ -444,6 +444,53 @@ TEST_F(ChannelAccessPVTest, Waveform)
     FillWithScalars(char_array_v, 1);
     ASSERT_TRUE(ca_chararray_var.SetValue(char_array_v));
     EXPECT_TRUE(WaitForValue(ca_chararray_var, char_array_v, 5.0));
+
+    // reading variables through different clients
+    sup::dto::AnyValue bool_array_v{bool_array_t};
+    FillWithScalars(bool_array_v, 1);
+    EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
+
+    sup::dto::AnyValue int32_array_v{int32_array_t};
+    FillWithScalars(int32_array_v, 1);
+    EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
+  }
+}
+
+TEST_F(ChannelAccessPVTest, UInt64Waveform)
+{
+  using namespace sup::epics;
+
+  sup::dto::AnyType uint64_array_t(10, sup::dto::UnsignedInteger64Type, "uint64[]");
+  ChannelAccessPV ca_uint64array_var("CA-TESTS:UINT64ARRAY", uint64_array_t);
+  sup::dto::AnyType bool_array_t(10, sup::dto::BooleanType, "bool[]");
+  ChannelAccessPV ca_boolarray_var("CA-TESTS:UINT64ARRAY", bool_array_t);
+  sup::dto::AnyType int32_array_t(10, sup::dto::SignedInteger32Type, "int32[]");
+  ChannelAccessPV ca_int32array_var("CA-TESTS:UINT64ARRAY", int32_array_t);
+
+  // waiting for connected clients
+  EXPECT_TRUE(ca_uint64array_var.WaitForConnected(5.0));
+  EXPECT_TRUE(ca_boolarray_var.WaitForConnected(1.0));
+  EXPECT_TRUE(ca_int32array_var.WaitForConnected(1.0));
+
+  {
+    // set first value
+    sup::dto::AnyValue uint64_array_v{uint64_array_t};
+    ASSERT_TRUE(ca_uint64array_var.SetValue(uint64_array_v));
+    EXPECT_TRUE(WaitForValue(ca_uint64array_var, uint64_array_v, 5.0));
+
+    // reading variables through different clients
+    sup::dto::AnyValue bool_array_v{bool_array_t};
+    EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
+
+    sup::dto::AnyValue int32_array_v{int32_array_t};
+    EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
+  }
+  {
+    // set first value
+    sup::dto::AnyValue uint64_array_v{uint64_array_t};
+    FillWithScalars(uint64_array_v, 1);
+    ASSERT_TRUE(ca_uint64array_var.SetValue(uint64_array_v));
+    EXPECT_TRUE(WaitForValue(ca_uint64array_var, uint64_array_v, 5.0));
 
     // reading variables through different clients
     sup::dto::AnyValue bool_array_v{bool_array_t};

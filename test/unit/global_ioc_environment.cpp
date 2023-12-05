@@ -97,6 +97,13 @@ record (mbbo, "CA-TESTS:ENUM")
     field(ZRSV, "MINOR")
     field(ZRVL, "0")
 }
+
+record (waveform,"CA-TESTS:UINT64ARRAY")
+{
+    field(DESC,"Some EPICSv3 record")
+    field(FTVL, "UINT64")
+    field(NELM, "10")
+}
 )RAW";
 
 //! Returns string representing EPICS database file with several testing variables.
@@ -129,12 +136,22 @@ IOCEnvironment::~IOCEnvironment() = default;
 void IOCEnvironment::SetUp()
 {
   m_softioc_service.Start(GetEpicsDBContentString());
+
+  // Initialize char array record:
   sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
   sup::dto::AnyValue char_array_v{char_array_t};
   sup::epics::ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
   ca_chararray_var.WaitForConnected(2.0);
   ca_chararray_var.SetValue(char_array_v);
   ca_chararray_var.WaitForValidValue(2.0);
+
+  // Initialize uint64 array record:
+  sup::dto::AnyType uint64_array_t(10, sup::dto::UnsignedInteger64Type, "uint64[]");
+  sup::dto::AnyValue uint64_array_v{uint64_array_t};
+  sup::epics::ChannelAccessPV ca_uint64array_var("CA-TESTS:UINT64ARRAY", uint64_array_t);
+  ca_uint64array_var.WaitForConnected(2.0);
+  ca_uint64array_var.SetValue(uint64_array_v);
+  ca_uint64array_var.WaitForValidValue(2.0);
 }
 
 void IOCEnvironment::TearDown()
