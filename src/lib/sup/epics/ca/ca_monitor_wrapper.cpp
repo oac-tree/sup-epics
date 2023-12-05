@@ -18,15 +18,10 @@
  *****************************************************************************/
 
 #include <sup/epics/ca/ca_monitor_wrapper.h>
+#include <sup/epics/ca/ca_helper.h>
 
 #include <sup/dto/anyvalue_helper.h>
 #include <string.h>
-
-namespace
-{
-sup::dto::AnyValue AnyValueFromMonitorRef(const sup::dto::AnyType& anytype, void* ref,
-                                          std::size_t size);
-}  // unnamed namespace
 
 namespace sup
 {
@@ -51,7 +46,8 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
   info.severity = severity;
   if (ref)  // Only dereference ref during success
   {
-    info.value = AnyValueFromMonitorRef(m_anytype, ref, m_size);
+    info.value = cahelper::ParseAnyValue(m_anytype, ref);
+    // info.value = AnyValueFromMonitorRef(m_anytype, ref, m_size);
   }
   return m_mon_cb(info);
 }
@@ -60,24 +56,3 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
 
 }  // namespace sup
 
-namespace
-{
-sup::dto::AnyValue AnyValueFromMonitorRef(const sup::dto::AnyType& anytype, void* ref,
-                                          std::size_t size)
-{
-  sup::dto::AnyValue result(anytype);
-  if (anytype.GetTypeCode() == sup::dto::TypeCode::String)
-  {
-    const std::size_t kEpicsStringLength{40};
-    char buffer[kEpicsStringLength+1];
-    buffer[kEpicsStringLength] = 0;
-    strncpy(buffer, (const char*)ref, kEpicsStringLength);
-    result = std::string(buffer);
-  }
-  else
-  {
-    sup::dto::FromBytes(result, (const sup::dto::uint8*)ref, size);
-  }
-  return result;
-}
-}  // unnamed namespace

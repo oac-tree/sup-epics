@@ -20,6 +20,8 @@ Start with unit tests to verify what works and what not:
 
 Handle the appropriate conversion in CAMonitorWrapper, which already knows about the underlying AnyType.
 
+Also perform a check on count and make sure to catch binary parsing exceptions.
+
 ## Update of CA channel value
 
 Store the AnyType argument passed in the constructor of ChannelInfo. Use this information in `CAChannelManager::UpdateChannel` to convert the passed `AnyValue` to the appropriate type first. From this value, that now has the correct `AnyType`, create the proper byte vector to pass to the update task.

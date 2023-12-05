@@ -21,6 +21,7 @@
 #define SUP_EPICS_CA_HELPER_H_
 
 #include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue.h>
 #include <sup/dto/basic_scalar_types.h>
 #include <cadef.h>
 
@@ -30,7 +31,6 @@ namespace epics
 {
 namespace cahelper
 {
-
 void* GetValueFieldReference(event_handler_args args);
 
 sup::dto::int16 GetStatusField(event_handler_args args);
@@ -42,6 +42,8 @@ sup::dto::uint64 GetTimestampField(event_handler_args args);
 chtype ChannelType(const sup::dto::AnyType& anytype);
 
 unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype);
+
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, void* ref);
 
 }  // namespace cahelper
 

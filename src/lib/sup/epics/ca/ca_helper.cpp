@@ -20,13 +20,22 @@
 #include <sup/epics/ca/ca_helper.h>
 
 #include <sup/dto/anytype.h>
+#include <sup/dto/json_value_parser.h>
+
 #include <cadef.h>
+
 #include <map>
 
 namespace
 {
 sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 nanoseconds);
 chtype TypeCodeToChannelType(sup::dto::TypeCode typecode);
+sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, void* ref,
+                                        unsigned long multiplicity);
+sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, void* ref);
+sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str);
+std::string GetEPICSString(void* ref);
+
 }  // unnamed namespace
 
 namespace sup
@@ -35,7 +44,6 @@ namespace epics
 {
 namespace cahelper
 {
-
 void* GetValueFieldReference(event_handler_args args)
 {
   if (args.status != ECA_NORMAL)
@@ -90,6 +98,24 @@ unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
   return result ? result : 1u;
 }
 
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, void* ref)
+{
+  if (!ref)
+  {
+    return {};
+  }
+  auto chtype = ChannelType(anytype);
+  auto multiplicity = ChannelMultiplicity(anytype);
+  if (chtype == DBR_STRING)
+  {
+    return ParseFromStringTypes(anytype, ref, multiplicity);
+  }
+  sup::dto::AnyValue result{anytype};
+  auto size = dbr_size[chtype] * multiplicity;
+  sup::dto::FromBytes(result, (const sup::dto::uint8*)ref, size);
+  return result;
+}
+
 }  // namespace cahelper
 
 }  // namespace epics
@@ -112,11 +138,11 @@ chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
       {TypeCode::Int8, DBR_CHAR},
       {TypeCode::UInt8, DBR_CHAR},
       {TypeCode::Int16, DBR_SHORT},
-      {TypeCode::UInt16, DBR_SHORT},
+      {TypeCode::UInt16, DBR_ENUM},
       {TypeCode::Int32, DBR_LONG},
       {TypeCode::UInt32, DBR_LONG},
-      // {TypeCode::Int64, DBR_LONG},
-      // {TypeCode::UInt64, DBR_LONG},
+      {TypeCode::Int64, DBR_STRING},
+      {TypeCode::UInt64, DBR_STRING},
       {TypeCode::Float32, DBR_FLOAT},
       {TypeCode::Float64, DBR_DOUBLE},
       {TypeCode::String, DBR_STRING}
@@ -127,6 +153,53 @@ chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
     return -1;
   }
   return it->second;
+}
+
+sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, void* ref,
+                                        unsigned long multiplicity)
+{
+  if (multiplicity > 1)
+  {
+    sup::dto::AnyValue result{anytype};
+    sup::dto::AnyType el_type = anytype.ElementType();
+    const std::size_t kEpicsStringLength{40};
+    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    {
+      void* el_ref = ref + idx * kEpicsStringLength;
+      result[idx] = ParseFromStringType(el_type, el_ref);
+    }
+    return result;
+  }
+  return ParseFromStringType(anytype, ref);
+}
+
+sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, void* ref)
+{
+  auto str = GetEPICSString(ref);
+  if (anytype == sup::dto::StringType)
+  {
+    return str;
+  }
+  return ParseNumericFromString(anytype, str);
+}
+
+sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str)
+{
+  sup::dto::JSONAnyValueParser parser;
+  if (!parser.TypedParseString(anytype, str))
+  {
+    return {};
+  }
+  return parser.MoveAnyValue();
+}
+
+std::string GetEPICSString(void* ref)
+{
+  const std::size_t kEpicsStringLength{40};
+  char buffer[kEpicsStringLength+1];
+  buffer[kEpicsStringLength] = 0;
+  strncpy(buffer, (const char*)ref, kEpicsStringLength);
+  return std::string(buffer);
 }
 
 }  // unnamed namespace
