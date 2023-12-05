@@ -180,30 +180,64 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
 
   // create variables
   ChannelAccessPV pv_as_bool("CA-TESTS:BOOL", sup::dto::BooleanType);
+  ChannelAccessPV pv_as_uint8("CA-TESTS:BOOL", sup::dto::UnsignedInteger8Type);
   ChannelAccessPV pv_as_uint16("CA-TESTS:BOOL", sup::dto::UnsignedInteger16Type);
   ChannelAccessPV pv_as_int32("CA-TESTS:BOOL", sup::dto::SignedInteger32Type);
+  ChannelAccessPV pv_as_uint64("CA-TESTS:BOOL", sup::dto::UnsignedInteger64Type);
   ChannelAccessPV pv_as_string("CA-TESTS:BOOL", sup::dto::StringType);
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_bool.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_uint8.WaitForConnected(1.0));
   EXPECT_TRUE(pv_as_uint16.WaitForConnected(1.0));
   EXPECT_TRUE(pv_as_int32.WaitForConnected(1.0));
+  EXPECT_TRUE(pv_as_uint64.WaitForConnected(1.0));
   EXPECT_TRUE(pv_as_string.WaitForConnected(1.0));
 
-  // set first value
-  sup::dto::boolean bool_v = true;
-  ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
+  {
+    // set true
+    sup::dto::boolean bool_v = true;
+    ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
 
-  // reading variables through different clients
-  sup::dto::uint16 uint16_v = 1u;
-  EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
+    // reading variables through different clients
+    sup::dto::uint8 uint8_v = 1u;
+    EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
 
-  sup::dto::int32 int32_v = 1;
-  EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
+    sup::dto::uint16 uint16_v = 1u;
+    EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
-  std::string string_v = "TRUE";
-  EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
-  EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+    sup::dto::int32 int32_v = 1;
+    EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
+
+    sup::dto::uint64 uint64_v = 1u;
+    EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
+
+    std::string string_v = "TRUE";
+    EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+    EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+  }
+  {
+    // set false
+    sup::dto::boolean bool_v = false;
+    ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
+
+    // reading variables through different clients
+    sup::dto::uint8 uint8_v = 0u;
+    EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
+
+    sup::dto::uint16 uint16_v = 0u;
+    EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
+
+    sup::dto::int32 int32_v = 0;
+    EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
+
+    sup::dto::uint64 uint64_v = 0u;
+    EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
+
+    std::string string_v = "FALSE";
+    EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+    EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+  }
 }
 
 TEST_F(ChannelAccessPVTest, StringFormats)

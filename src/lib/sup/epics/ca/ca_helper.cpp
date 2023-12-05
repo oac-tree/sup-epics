@@ -29,6 +29,8 @@
 
 namespace
 {
+const std::string kTrueString = "TRUE";
+const std::string kFalseString = "FALSE";
 sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 nanoseconds);
 chtype TypeCodeToChannelType(sup::dto::TypeCode typecode);
 sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
@@ -186,6 +188,15 @@ sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* r
 
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str)
 {
+  // Handle bool conversions (TRUE/FALSE) separately
+  if (str == kTrueString)
+  {
+    return sup::dto::AnyValue(anytype, 1);
+  }
+  if (str == kFalseString)
+  {
+    return sup::dto::AnyValue(anytype, 0);
+  }
   sup::dto::JSONAnyValueParser parser;
   if (!parser.TypedParseString(anytype, str))
   {
