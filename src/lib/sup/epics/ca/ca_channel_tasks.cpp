@@ -89,7 +89,7 @@ void Monitor_CB(event_handler_args args)
   auto timestamp = GetTimestampField(args);
   auto status = GetStatusField(args);
   auto severity = GetSeverityField(args);
-  auto ref = args.status == ECA_NORMAL ? GetValueFieldReference(args) : nullptr;
+  auto ref = GetValueFieldReference(args);
   auto func = static_cast<sup::epics::CAMonitorWrapper*>(args.usr);
   return (*func)(timestamp, status, severity, ref);
 }

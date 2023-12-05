@@ -191,19 +191,19 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
   EXPECT_TRUE(pv_as_string.WaitForConnected(5.0));
 
   // set first value
-  sup::dto::boolean bool_1 = true;
-  ASSERT_TRUE(pv_as_bool.SetValue(bool_1));
+  sup::dto::boolean bool_v = true;
+  ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
 
   // reading variables through different clients
-  sup::dto::uint16 uint16_1 = 1u;
-  EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_1, 5.0));
+  sup::dto::uint16 uint16_v = 1u;
+  EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
-  sup::dto::int32 int32_1 = 1;
-  EXPECT_TRUE(WaitForValue(pv_as_int32, int32_1, 5.0));
+  sup::dto::int32 int32_v = 1;
+  EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-  std::string string_1 = "TRUE";
-  EXPECT_TRUE(WaitForValue(pv_as_string, string_1, 5.0));
-  EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_1);
+  std::string string_v = "TRUE";
+  EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+  EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 }
 
 TEST_F(ChannelAccessPVTest, StringFormats)
@@ -219,12 +219,35 @@ TEST_F(ChannelAccessPVTest, StringFormats)
   EXPECT_TRUE(pv_as_uint16.WaitForConnected(5.0));
 
   // set first value
-  std::string string_1 = "some_string";
-  ASSERT_TRUE(pv_as_string.SetValue(string_1));
-  EXPECT_TRUE(WaitForValue(pv_as_string, string_1, 5.0));
+  std::string string_v = "some_string";
+  ASSERT_TRUE(pv_as_string.SetValue(string_v));
+  EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
 
   // Trying to connect a uint16 channel to a string record will never result in a valid value:
   EXPECT_FALSE(pv_as_uint16.WaitForValidValue(1.0));
+}
+
+TEST_F(ChannelAccessPVTest, IntFormats)
+{
+  using namespace sup::epics;
+
+  // create variables
+  ChannelAccessPV pv_as_int32("CA-TESTS:STRING", sup::dto::SignedInteger32Type);
+  ChannelAccessPV pv_as_string("CA-TESTS:STRING", sup::dto::StringType);
+
+  // waiting for connected clients
+  EXPECT_TRUE(pv_as_int32.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_string.WaitForConnected(5.0));
+
+  // set first value
+  sup::dto::int32 int32_v = 42;
+  ASSERT_TRUE(pv_as_int32.SetValue(int32_v));
+  EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
+
+  // reading variables through different clients
+  std::string string_v = "42";
+  EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+  EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 }
 
 TEST_F(ChannelAccessPVTest, DISABLED_ShortLivedPV)
