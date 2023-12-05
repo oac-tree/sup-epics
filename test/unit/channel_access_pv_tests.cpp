@@ -373,6 +373,50 @@ TEST_F(ChannelAccessPVTest, DISABLED_Int64Formats)
   }
 }
 
+TEST_F(ChannelAccessPVTest, EnumFormats)
+{
+  using namespace sup::epics;
+
+  // create variables
+  ChannelAccessPV pv_as_enum("CA-TESTS:ENUM", sup::dto::UnsignedInteger16Type);
+  ChannelAccessPV pv_as_string("CA-TESTS:ENUM", sup::dto::StringType);
+  ChannelAccessPV pv_as_bool("CA-TESTS:ENUM", sup::dto::BooleanType);
+
+  // waiting for connected clients
+  EXPECT_TRUE(pv_as_enum.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_string.WaitForConnected(1.0));
+  EXPECT_TRUE(pv_as_bool.WaitForConnected(1.0));
+
+  {
+    // set first value
+    sup::dto::uint16 uint16_v = 3;
+    ASSERT_TRUE(pv_as_enum.SetValue(uint16_v));
+    EXPECT_TRUE(WaitForValue(pv_as_enum, uint16_v, 5.0));
+
+    // reading variables through different clients
+    std::string string_v = "Ready";
+    EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+    EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+
+    sup::dto::boolean bool_v = true;
+    EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
+  }
+  {
+    // set second value
+    sup::dto::uint16 uint16_v = 0;
+    ASSERT_TRUE(pv_as_enum.SetValue(uint16_v));
+    EXPECT_TRUE(WaitForValue(pv_as_enum, uint16_v, 5.0));
+
+    // reading variables through different clients
+    std::string string_v = "Undefined";
+    EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+    EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+
+    sup::dto::boolean bool_v = false;
+    EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
+  }
+}
+
 TEST_F(ChannelAccessPVTest, Waveform)
 {
   using namespace sup::epics;

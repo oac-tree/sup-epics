@@ -80,6 +80,23 @@ record (int64out,"CA-TESTS:INT64")
     field(VAL,"0")
     field(PINI,"YES")
 }
+
+record (mbbo, "CA-TESTS:ENUM")
+{
+    field(DESC, "Some EPICSv3 record")
+    field(ONST, "Off")
+    field(ONVL, "1")
+    field(TWST, "On")
+    field(TWVL, "2")
+    field(THST, "Ready")
+    field(THVL, "3")
+    field(FRST, "Fault")
+    field(FRVL, "4")
+    field(VAL, "0")
+    field(ZRST, "Undefined")
+    field(ZRSV, "MINOR")
+    field(ZRVL, "0")
+}
 )RAW";
 
 //! Returns string representing EPICS database file with several testing variables.
