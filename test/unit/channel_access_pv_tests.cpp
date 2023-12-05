@@ -313,6 +313,58 @@ TEST_F(ChannelAccessPVTest, IntFormats)
   }
 }
 
+TEST_F(ChannelAccessPVTest, DISABLED_Int64Formats)
+{
+  using namespace sup::epics;
+
+  // create variables
+  ChannelAccessPV pv_as_int64("CA-TESTS:INT64", sup::dto::SignedInteger64Type);
+  ChannelAccessPV pv_as_int32("CA-TESTS:INT64", sup::dto::SignedInteger32Type);
+  ChannelAccessPV pv_as_string("CA-TESTS:INT64", sup::dto::StringType);
+  ChannelAccessPV pv_as_bool("CA-TESTS:INT64", sup::dto::BooleanType);
+
+  // waiting for connected clients
+  EXPECT_TRUE(pv_as_int64.WaitForConnected(1.0));
+  EXPECT_TRUE(pv_as_int32.WaitForConnected(5.0));
+  EXPECT_TRUE(pv_as_string.WaitForConnected(1.0));
+  EXPECT_TRUE(pv_as_bool.WaitForConnected(1.0));
+
+  {
+    // set first value
+    sup::dto::int64 int64_v = 42;
+    ASSERT_TRUE(pv_as_int64.SetValue(int64_v));
+    EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
+
+    // reading variables through different clients
+    sup::dto::int32 int32_v = 42;
+    EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
+
+    std::string string_v = "42";
+    EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+    EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+
+    sup::dto::boolean bool_v = true;
+    EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
+  }
+  {
+    // set second value
+    sup::dto::int64 int64_v = 0;
+    ASSERT_TRUE(pv_as_int64.SetValue(int64_v));
+    EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
+
+    // reading variables through different clients
+    sup::dto::int32 int32_v = 0;
+    EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
+
+    std::string string_v = "0";
+    EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
+    EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
+
+    sup::dto::boolean bool_v = false;
+    EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
+  }
+}
+
 TEST_F(ChannelAccessPVTest, DISABLED_ShortLivedPV)
 {
   using namespace sup::epics;
