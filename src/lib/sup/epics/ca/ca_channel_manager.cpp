@@ -125,6 +125,10 @@ bool CAChannelManager::UpdateChannel(ChannelID id, const sup::dto::AnyValue& val
   auto count = cahelper::ChannelMultiplicity(dest_type);
   auto channel_id = it->second.channel_id;
   auto byte_rep = GetUpdateBuffer(value, dest_type);
+  if (byte_rep.size() == 0)
+  {
+    return false;
+  }
   auto ref = byte_rep.data();
   auto update_task = std::packaged_task<bool()>([type, count, channel_id, ref](){
     return channeltasks::UpdateChannelTask(type, count, channel_id, ref);
