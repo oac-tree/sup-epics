@@ -24,6 +24,7 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/basic_scalar_types.h>
+#include <sup/epics/utils/dto_pvxs_t.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/dto_typecode_conversion_utils.h>
 #include <sup/epics/utils/pvxs_type_builder.h>
@@ -56,7 +57,7 @@ void AssignToAnyValueScalar(const pvxs::Value& pvxs_value, sup::dto::AnyValue& a
 template <typename T>
 void AssignToPVXSScalarArray(const sup::dto::AnyValue& any_value, pvxs::Value& pvxs_value)
 {
-  auto result = ::pvxs::shared_array<T>(any_value.NumberOfElements());
+  auto result = ::pvxs::shared_array<sup::epics::DTOToPVXSScalar_t<T>>(any_value.NumberOfElements());
   for (size_t i = 0; i < any_value.NumberOfElements(); ++i)
   {
     result[i] = any_value[i].As<T>();
@@ -68,7 +69,7 @@ void AssignToPVXSScalarArray(const sup::dto::AnyValue& any_value, pvxs::Value& p
 template <typename T>
 ::sup::dto::AnyValue CreateAnyValueScalarArray(const pvxs::Value& pvxs_value)
 {
-  auto data = pvxs_value.as<::pvxs::shared_array<const T>>();
+  auto data = pvxs_value.as<::pvxs::shared_array<const sup::epics::DTOToPVXSScalar_t<T>>>();
 
   auto type_code = ::sup::epics::GetAnyTypeCode(pvxs_value.type());
 
