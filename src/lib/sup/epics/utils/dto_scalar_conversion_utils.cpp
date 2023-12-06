@@ -77,7 +77,7 @@ template <typename T>
 
   for (size_t i = 0; i < data.size(); ++i)
   {
-    result[i] = data[i];
+    result[i] = static_cast<T>(data[i]);
   }
 
   return result;
