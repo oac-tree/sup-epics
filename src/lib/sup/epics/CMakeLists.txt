@@ -11,10 +11,11 @@ target_link_directories(sup-epics PUBLIC ${EPICS_LINK_DIRECTORIES})
 
 target_link_libraries(sup-epics
   PUBLIC
-    pthread
     sup-dto::sup-dto
     sup-protocol::sup-protocol
     ${EPICS_LIBRARIES}
+  PRIVATE
+    pthread
 )
 
 target_include_directories(sup-epics PUBLIC

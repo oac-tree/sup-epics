@@ -32,12 +32,12 @@ target_sources(${test}
 )
 
 if(GTest_VERSION VERSION_LESS_EQUAL "1.8")
-  target_link_libraries(${test} PRIVATE PUBLIC pthread gtest gmock)
+  target_link_libraries(${test} PRIVATE pthread gtest gmock)
 else()
-  target_link_libraries(${test} PRIVATE PUBLIC pthread GTest::gtest GTest::gmock)
+  target_link_libraries(${test} PRIVATE pthread GTest::gtest GTest::gmock)
 endif()
 
-target_link_libraries(${test} PUBLIC sup-epics sup-epics-di sup-epics-test)
+target_link_libraries(${test} PRIVATE sup-epics sup-epics-di sup-epics-test)
 
 set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 
