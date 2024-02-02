@@ -26,6 +26,7 @@ add_subdirectory(utils)
 add_subdirectory(ca)
 add_subdirectory(pvxs)
 add_subdirectory(rpc)
+add_subdirectory(factory)
 # -- Installation --
 
 install(TARGETS sup-epics EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -34,6 +35,7 @@ install(FILES
   ca_types.h
   channel_access_client.h
   channel_access_pv.h
+  epics_protocol_factory.h
   pv_access_client_pv.h
   pv_access_client.h
   pv_access_rpc_client_config.h
