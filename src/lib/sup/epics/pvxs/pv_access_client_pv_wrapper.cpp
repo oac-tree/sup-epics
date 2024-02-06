@@ -27,6 +27,7 @@ namespace epics
 {
 PVAccessClientPVWrapper::PVAccessClientPVWrapper(const std::string& channel)
   : m_callback{}
+  , m_cb_mtx{}
   , m_pv_impl{}
 {
   auto callback = [this](const PvAccessClientPV::ExtendedValue& val){
@@ -74,12 +75,14 @@ bool PVAccessClientPVWrapper::WaitForAvailable(double timeout_sec) const
 
 bool PVAccessClientPVWrapper::SetMonitorCallback(Callback func)
 {
+  std::lock_guard<std::mutex> lk{m_cb_mtx};
   m_callback = func;
   return true;
 }
 
 void PVAccessClientPVWrapper::OnUpdate(const PvAccessClientPV::ExtendedValue& val)
 {
+  std::lock_guard<std::mutex> lk{m_cb_mtx};
   if (m_callback)
   {
     m_callback(val.value, val.connected);

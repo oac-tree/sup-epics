@@ -17,10 +17,10 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_CHANNEL_ACCESS_PV_WRAPPER_H_
-#define SUP_EPICS_CHANNEL_ACCESS_PV_WRAPPER_H_
+#ifndef SUP_EPICS_PV_ACCESS_SERVER_PV_WRAPPER_H_
+#define SUP_EPICS_PV_ACCESS_SERVER_PV_WRAPPER_H_
 
-#include <sup/epics/channel_access_pv.h>
+#include <sup/epics/pv_access_server.h>
 
 #include <sup/protocol/process_variable.h>
 
@@ -31,11 +31,11 @@ namespace sup
 namespace epics
 {
 
-class ChannelAccessPVWrapper : public sup::protocol::ProcessVariable
+class PVAccessServerPVWrapper : public sup::protocol::ProcessVariable
 {
 public:
-  ChannelAccessPVWrapper(const std::string& channel, const sup::dto::AnyType& type);
-  ~ChannelAccessPVWrapper();
+  PVAccessServerPVWrapper(const std::string& channel, const sup::dto::AnyValue& value);
+  ~PVAccessServerPVWrapper();
 
   bool IsAvailable() const override;
   sup::dto::AnyValue GetValue(double timeout_sec) const override;
@@ -43,14 +43,15 @@ public:
   bool WaitForAvailable(double timeout_sec) const override;
   bool SetMonitorCallback(Callback func) override;
 private:
-  void OnUpdate(const ChannelAccessPV::ExtendedValue& val);
+  void OnUpdate(const sup::dto::AnyValue& val);
+  std::string m_channel;
   sup::protocol::ProcessVariable::Callback m_callback;
   std::mutex m_cb_mtx;
-  std::unique_ptr<ChannelAccessPV> m_pv_impl;
+  std::unique_ptr<PvAccessServer> m_server;
 };
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_CHANNEL_ACCESS_PV_WRAPPER_H_
+#endif  // SUP_EPICS_PV_ACCESS_SERVER_PV_WRAPPER_H_

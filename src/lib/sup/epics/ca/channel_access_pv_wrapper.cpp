@@ -28,6 +28,7 @@ namespace epics
 ChannelAccessPVWrapper::ChannelAccessPVWrapper(const std::string& channel,
                                                const sup::dto::AnyType& type)
   : m_callback{}
+  , m_cb_mtx{}
   , m_pv_impl{}
 {
   auto callback = [this](const ChannelAccessPV::ExtendedValue& val){
@@ -75,12 +76,14 @@ bool ChannelAccessPVWrapper::WaitForAvailable(double timeout_sec) const
 
 bool ChannelAccessPVWrapper::SetMonitorCallback(Callback func)
 {
+  std::lock_guard<std::mutex> lk{m_cb_mtx};
   m_callback = func;
   return true;
 }
 
 void ChannelAccessPVWrapper::OnUpdate(const ChannelAccessPV::ExtendedValue& val)
 {
+  std::lock_guard<std::mutex> lk{m_cb_mtx};
   if (m_callback)
   {
     m_callback(val.value, val.connected);

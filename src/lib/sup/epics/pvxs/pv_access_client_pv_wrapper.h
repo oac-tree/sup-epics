@@ -24,6 +24,8 @@
 
 #include <sup/protocol/process_variable.h>
 
+#include <mutex>
+
 namespace sup
 {
 namespace epics
@@ -43,6 +45,7 @@ public:
 private:
   void OnUpdate(const PvAccessClientPV::ExtendedValue& val);
   sup::protocol::ProcessVariable::Callback m_callback;
+  std::mutex m_cb_mtx;
   std::unique_ptr<PvAccessClientPV> m_pv_impl;
 };
 
