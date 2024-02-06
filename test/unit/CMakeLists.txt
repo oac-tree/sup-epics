@@ -13,6 +13,7 @@ target_sources(${test}
   dto_conversion_utils_tests.cpp
   dto_scalar_conversion_utils_tests.cpp
   dto_typecode_conversion_utils_tests.cpp
+  epics_protocol_factory_tests.cpp
   global_ioc_environment.cpp
   main.cpp
   pv_access_client_pv_tests.cpp
