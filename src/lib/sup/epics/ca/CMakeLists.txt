@@ -5,5 +5,6 @@ target_sources(sup-epics PRIVATE
     ca_helper.cpp
     ca_monitor_wrapper.cpp
     channel_access_client.cpp
+    channel_access_pv_wrapper.cpp
     channel_access_pv.cpp
 )
