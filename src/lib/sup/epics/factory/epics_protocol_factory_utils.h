@@ -37,6 +37,15 @@ PvAccessRPCServerConfig ParsePvAccessRPCServerConfig(const sup::dto::AnyValue& c
 
 PvAccessRPCClientConfig ParsePvAccessRPCClientConfig(const sup::dto::AnyValue& config);
 
+std::unique_ptr<sup::protocol::ProcessVariable> CreateChannelAccessClientVar(
+  const sup::dto::AnyValue& config);
+
+std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessClientVar(
+  const sup::dto::AnyValue& config);
+
+std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessServerVar(
+  const sup::dto::AnyValue& config);
+
 }  // namespace utils
 
 }  // namespace epics

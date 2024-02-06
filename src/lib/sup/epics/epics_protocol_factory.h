@@ -26,8 +26,20 @@ namespace sup
 {
 namespace epics
 {
+// Constants for RPC clients/servers:
 const std::string kServiceName = "ServiceName";
 const std::string kTimeout = "Timeout";
+
+// Constants for ProcessVariables:
+// Class of ProcessVariable
+const std::string kProcessVariableClass = "Class";
+const std::string kChannelAccessClientClass = "ChannelAccessClient";
+const std::string kPvAccessClientClass = "PvAccessClient";
+const std::string kPvAccessServerClass = "PvAccessServer";
+// Other fields for the supported ProcessVariables
+const std::string kChannelName = "ChannelName";
+const std::string kVariableType = "VarType";
+const std::string kVariableValue = "VarValue";
 
 class EPICSProtocolFactory : public sup::protocol::ProtocolFactory
 {

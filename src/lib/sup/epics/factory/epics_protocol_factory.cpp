@@ -25,6 +25,8 @@
 #include <sup/protocol/exceptions.h>
 #include <sup/protocol/protocol_factory_utils.h>
 
+#include <map>
+
 namespace sup
 {
 namespace epics
@@ -36,7 +38,23 @@ EPICSProtocolFactory::~EPICSProtocolFactory() = default;
 std::unique_ptr<sup::protocol::ProcessVariable> EPICSProtocolFactory::CreateProcessVariable(
   const sup::dto::AnyValue& var_definition) const
 {
-  return nullptr;
+  using PVFactoryFunction =
+    std::function<std::unique_ptr<sup::protocol::ProcessVariable>(const sup::dto::AnyValue&)>;
+  static const std::map<std::string, PVFactoryFunction> factory_map = {
+    { kChannelAccessClientClass, &utils::CreateChannelAccessClientVar },
+    { kPvAccessClientClass, &utils::CreatePvAccessClientVar },
+    { kPvAccessServerClass, &utils::CreatePvAccessServerVar }
+  };
+  sup::protocol::ValidateConfigurationField(var_definition, kProcessVariableClass,
+                                            sup::dto::StringType);
+  auto pv_class = var_definition[kProcessVariableClass].As<std::string>();
+  auto iter = factory_map.find(pv_class);
+  if (iter == factory_map.end())
+  {
+    const std::string error = "Cannot create ProcessVariable: unknown class";
+    throw sup::protocol::InvalidOperationException(error);
+  }
+  return iter->second(var_definition);
 }
 
 std::unique_ptr<sup::protocol::RPCServerInterface> EPICSProtocolFactory::CreateRPCServer(
