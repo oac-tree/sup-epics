@@ -25,6 +25,7 @@
 #include <sup/epics/pv_access_rpc_client.h>
 
 #include <sup/dto/any_functor.h>
+#include <sup/protocol/protocol_factory.h>
 
 #include <memory>
 
@@ -42,7 +43,7 @@ class PvAccessRPCServerImpl;
  * all error messages are implemented according to that protocol, meaning they contain a status
  * field, a timestamp and a reason field.
   */
-class PvAccessRPCServer
+class PvAccessRPCServer : public sup::protocol::RPCServerInterface
 {
 public:
   struct IsolatedTag {};

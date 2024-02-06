@@ -17,37 +17,30 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_EPICS_PROTOCOL_FACTORY_H_
-#define SUP_EPICS_EPICS_PROTOCOL_FACTORY_H_
+#ifndef SUP_EPICS_EPICS_PROTOCOL_FACTORY_UTILS_H_
+#define SUP_EPICS_EPICS_PROTOCOL_FACTORY_UTILS_H_
+
+#include <sup/epics/pv_access_rpc_client_config.h>
+#include <sup/epics/pv_access_rpc_server_config.h>
 
 #include <sup/protocol/protocol_factory.h>
+#include <sup/protocol/protocol_rpc.h>
+#include <sup/dto/any_functor.h>
 
 namespace sup
 {
 namespace epics
 {
-const std::string kServiceName = "ServiceName";
-const std::string kTimeout = "Timeout";
-
-class EPICSProtocolFactory : public sup::protocol::ProtocolFactory
+namespace utils
 {
-public:
-  EPICSProtocolFactory();
-  ~EPICSProtocolFactory();
+PvAccessRPCServerConfig ParsePvAccessRPCServerConfig(const sup::dto::AnyValue& config);
 
-  std::unique_ptr<sup::protocol::ProcessVariable> CreateProcessVariable(
-    const sup::dto::AnyValue& var_definition) const override;
+PvAccessRPCClientConfig ParsePvAccessRPCClientConfig(const sup::dto::AnyValue& config);
 
-  std::unique_ptr<sup::protocol::RPCServerInterface> CreateRPCServer(
-    sup::protocol::Protocol& protocol,
-    const sup::dto::AnyValue& server_definition) const override;
-
-  std::unique_ptr<sup::protocol::Protocol> CreateRPCClient(
-    const sup::dto::AnyValue& client_definition) const override;
-};
+}  // namespace utils
 
 }  // namespace epics
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_EPICS_PROTOCOL_FACTORY_H_
+#endif  // SUP_EPICS_EPICS_PROTOCOL_FACTORY_UTILS_H_
