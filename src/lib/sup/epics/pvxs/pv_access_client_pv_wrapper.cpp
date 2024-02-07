@@ -43,20 +43,14 @@ bool PVAccessClientPVWrapper::IsAvailable() const
   return m_pv_impl->WaitForValidValue(0.0);
 }
 
-sup::dto::AnyValue PVAccessClientPVWrapper::GetValue(double timeout_sec) const
+std::pair<bool, sup::dto::AnyValue> PVAccessClientPVWrapper::GetValue(double timeout_sec) const
 {
   if (!m_pv_impl->WaitForValidValue(timeout_sec))
   {
-    std::string error = "Variable could not be accessed within timeout";
-    throw sup::protocol::VariableUnavailableException(error);
+    return { false, {} };
   }
   auto ext_val = m_pv_impl->GetExtendedValue();
-  if (!ext_val.connected)
-  {
-    std::string error = "Variable disconnected while reading";
-    throw sup::protocol::VariableUnavailableException(error);
-  }
-  return ext_val.value;
+  return { ext_val.connected, ext_val.value };
 }
 
 bool PVAccessClientPVWrapper::SetValue(const sup::dto::AnyValue& value, double timeout_sec)

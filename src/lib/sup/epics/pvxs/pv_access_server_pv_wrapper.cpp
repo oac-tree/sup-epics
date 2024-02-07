@@ -47,10 +47,10 @@ bool PVAccessServerPVWrapper::IsAvailable() const
   return true;
 }
 
-sup::dto::AnyValue PVAccessServerPVWrapper::GetValue(double timeout_sec) const
+std::pair<bool, sup::dto::AnyValue> PVAccessServerPVWrapper::GetValue(double timeout_sec) const
 {
   (void)timeout_sec;
-  return m_server->GetValue(m_channel);
+  return { true, m_server->GetValue(m_channel) };
 }
 
 bool PVAccessServerPVWrapper::SetValue(const sup::dto::AnyValue& value, double timeout_sec)

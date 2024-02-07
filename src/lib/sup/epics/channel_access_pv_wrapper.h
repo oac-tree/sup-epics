@@ -38,7 +38,7 @@ public:
   ~ChannelAccessPVWrapper();
 
   bool IsAvailable() const override;
-  sup::dto::AnyValue GetValue(double timeout_sec) const override;
+  std::pair<bool, sup::dto::AnyValue> GetValue(double timeout_sec) const override;
   bool SetValue(const sup::dto::AnyValue& value, double timeout_sec) override;
   bool WaitForAvailable(double timeout_sec) const override;
   bool SetMonitorCallback(Callback func) override;

@@ -43,7 +43,7 @@ TEST_F(EPICSProtocolFactoryTest, ChannelAccessPVWrapper)
   }};
   auto var = m_factory.CreateProcessVariable(config);
   EXPECT_TRUE(var->WaitForAvailable(2.0));
-  sup::dto::AnyValue readback;
-  EXPECT_NO_THROW(readback = var->GetValue(0.0));
-  EXPECT_EQ(readback.GetType(), sup::dto::BooleanType);
+  auto info = var->GetValue(0.0);
+  EXPECT_TRUE(info.first);
+  EXPECT_EQ(info.second.GetType(), sup::dto::BooleanType);
 }
