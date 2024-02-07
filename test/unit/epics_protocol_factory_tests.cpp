@@ -19,6 +19,8 @@
 
 #include <sup/epics/epics_protocol_factory.h>
 
+#include <sup/dto/anyvalue.h>
+
 #include <gtest/gtest.h>
 
 using namespace sup::epics;
@@ -32,7 +34,16 @@ protected:
   EPICSProtocolFactory m_factory;
 };
 
-TEST_F(EPICSProtocolFactoryTest, dummy)
+TEST_F(EPICSProtocolFactoryTest, ChannelAccessPVWrapper)
 {
-  EXPECT_TRUE(2 > 0);
+  sup::dto::AnyValue config = {{
+    { kProcessVariableClass, kChannelAccessClientClass },
+    { kChannelName, "CA-TESTS:BOOL" },
+    { kVariableType, R"RAW({"type":"bool"})RAW" }
+  }};
+  auto var = m_factory.CreateProcessVariable(config);
+  EXPECT_TRUE(var->WaitForAvailable(2.0));
+  sup::dto::AnyValue readback;
+  EXPECT_NO_THROW(readback = var->GetValue(0.0));
+  EXPECT_EQ(readback.GetType(), sup::dto::BooleanType);
 }
