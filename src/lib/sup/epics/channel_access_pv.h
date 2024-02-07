@@ -49,6 +49,10 @@ public:
    * @param type Type to use for the connected channel.
    * @param cb Callback function to call when the variable's value or status changed.
    *
+   * @details The optional callback will be called while holding an internal lock that is also
+   * used for any read operation on the PV (IsConnected/GetValue/etc.) So be aware for deadlocks
+   * in callbacks that will acquire another lock!
+   *
    * @return True if the variable was connected within the timeout period.
    *
    * @throws std::runtime_error when the EPICS context or channel could not be created (not

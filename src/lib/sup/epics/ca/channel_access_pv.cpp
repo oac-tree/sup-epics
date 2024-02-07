@@ -98,20 +98,20 @@ bool ChannelAccessPV::SetValue(const sup::dto::AnyValue& value)
 bool ChannelAccessPV::WaitForConnected(double timeout_sec) const
 {
   auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
-  std::unique_lock<std::mutex> lk(m_mon_mtx);
   auto pred = [this]{
     return m_cache.connected;
   };
+  std::unique_lock<std::mutex> lk(m_mon_mtx);
   return m_monitor_cv.wait_for(lk, duration, pred);
 }
 
 bool ChannelAccessPV::WaitForValidValue(double timeout_sec) const
 {
   auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
-  std::unique_lock<std::mutex> lk(m_mon_mtx);
   auto pred = [this]{
     return m_cache.connected && !sup::dto::IsEmptyValue(m_cache.value);
   };
+  std::unique_lock<std::mutex> lk(m_mon_mtx);
   return m_monitor_cv.wait_for(lk, duration, pred);
 }
 
