@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "pv_access_server_pv_wrapper.h"
+#include <sup/epics/pv_access_server_pv_wrapper.h>
 
 #include <sup/protocol/exceptions.h>
 

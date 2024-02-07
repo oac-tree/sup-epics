@@ -34,14 +34,17 @@ install(TARGETS sup-epics EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_I
 install(FILES
   ca_types.h
   channel_access_client.h
+  channel_access_pv_wrapper.h
   channel_access_pv.h
   epics_protocol_factory.h
+  pv_access_client_pv_wrapper.h
   pv_access_client_pv.h
   pv_access_client.h
   pv_access_rpc_client_config.h
   pv_access_rpc_client.h
   pv_access_rpc_server_config.h
   pv_access_rpc_server.h
+  pv_access_server_pv_wrapper.h
   pv_access_server.h
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sup/epics
 )

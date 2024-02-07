@@ -22,9 +22,9 @@
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_server.h>
 
-#include <sup/epics/ca/channel_access_pv_wrapper.h>
-#include <sup/epics/pvxs/pv_access_client_pv_wrapper.h>
-#include <sup/epics/pvxs/pv_access_server_pv_wrapper.h>
+#include <sup/epics/channel_access_pv_wrapper.h>
+#include <sup/epics/pv_access_client_pv_wrapper.h>
+#include <sup/epics/pv_access_server_pv_wrapper.h>
 
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/json_type_parser.h>
