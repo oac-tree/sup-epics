@@ -51,7 +51,9 @@ public:
    *
    * @details The optional callback will be called while holding an internal lock that is also
    * used for any read operation on the PV (IsConnected/GetValue/etc.) So be aware for deadlocks
-   * in callbacks that will acquire another lock!
+   * in callbacks that will acquire another lock! While the EPICS CA library ensures that callbacks
+   * will be called serially, we need to hold this lock to prevent reordering of value updates with
+   * respect to their callbacks being called.
    *
    * @return True if the variable was connected within the timeout period.
    *

@@ -184,11 +184,11 @@ void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
     std::lock_guard<std::mutex> lk(m_mon_mtx);
     m_cache = result;
   }
-  m_cv.notify_one();
   if (m_changed_cb)
   {
     m_changed_cb(result);
   }
+  m_cv.notify_one();
 }
 
 }  // namespace epics
