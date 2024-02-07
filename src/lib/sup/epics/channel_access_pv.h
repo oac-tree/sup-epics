@@ -129,12 +129,12 @@ public:
 private:
   void OnConnectionChanged(bool connected);
   void OnMonitorCalled(const CAMonitorInfo& info);
-  const std::string channel_name;
-  ExtendedValue cache;
-  ChannelID id;
-  mutable std::mutex mon_mtx;
-  mutable std::condition_variable monitor_cv;
-  VariableChangedCallback var_changed_cb;
+  const std::string m_channel_name;
+  ExtendedValue m_cache;
+  ChannelID m_id;
+  mutable std::mutex m_mon_mtx;
+  mutable std::condition_variable m_monitor_cv;
+  VariableChangedCallback m_var_changed_cb;
 };
 }  // namespace epics
 

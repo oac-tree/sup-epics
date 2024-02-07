@@ -39,17 +39,17 @@ ChannelAccessPV::ExtendedValue::ExtendedValue()
 
 ChannelAccessPV::ChannelAccessPV(
   const std::string& channel, const sup::dto::AnyType& type, VariableChangedCallback cb)
-  : channel_name{channel}
-  , cache{}
-  , id{0}
-  , mon_mtx{}
-  , monitor_cv{}
-  , var_changed_cb{std::move(cb)}
+  : m_channel_name{channel}
+  , m_cache{}
+  , m_id{0}
+  , m_mon_mtx{}
+  , m_monitor_cv{}
+  , m_var_changed_cb{std::move(cb)}
 {
-  id = SharedCAChannelManager().AddChannel(channel, type,
+  m_id = SharedCAChannelManager().AddChannel(channel, type,
     std::bind(&ChannelAccessPV::OnConnectionChanged, this, std::placeholders::_1),
     std::bind(&ChannelAccessPV::OnMonitorCalled, this, std::placeholders::_1));
-  if (id == 0)
+  if (m_id == 0)
   {
     throw std::runtime_error("Could not construct ChannelAccessPV");
   }
@@ -57,102 +57,91 @@ ChannelAccessPV::ChannelAccessPV(
 
 ChannelAccessPV::~ChannelAccessPV()
 {
-  if (id > 0)
+  if (m_id > 0)
   {
-    SharedCAChannelManager().RemoveChannel(id);
+    SharedCAChannelManager().RemoveChannel(m_id);
   }
 }
 
 bool ChannelAccessPV::IsConnected() const
 {
-  std::lock_guard<std::mutex> lk(mon_mtx);
-  return cache.connected;
+  std::lock_guard<std::mutex> lk(m_mon_mtx);
+  return m_cache.connected;
 }
 
 std::string ChannelAccessPV::GetChannelName() const
 {
-  return channel_name;
+  return m_channel_name;
 }
 
 sup::dto::AnyValue ChannelAccessPV::GetValue() const
 {
-  std::lock_guard<std::mutex> lk(mon_mtx);
-  if(!cache.connected)
+  std::lock_guard<std::mutex> lk(m_mon_mtx);
+  if(!m_cache.connected)
   {
     return {};
   }
-  return cache.value;
+  return m_cache.value;
 }
 
 ChannelAccessPV::ExtendedValue ChannelAccessPV::GetExtendedValue() const
 {
-  std::lock_guard<std::mutex> lk(mon_mtx);
-  return cache;
+  std::lock_guard<std::mutex> lk(m_mon_mtx);
+  return m_cache;
 }
 
 bool ChannelAccessPV::SetValue(const sup::dto::AnyValue& value)
 {
-  ChannelID local_id;
-  {
-    std::lock_guard<std::mutex> lk(mon_mtx);
-    local_id = id;
-  }
-  return SharedCAChannelManager().UpdateChannel(local_id, value);
+  return SharedCAChannelManager().UpdateChannel(m_id, value);
 }
 
 bool ChannelAccessPV::WaitForConnected(double timeout_sec) const
 {
-  auto end_time = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
-  std::unique_lock<std::mutex> lk(mon_mtx);
+  auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  std::unique_lock<std::mutex> lk(m_mon_mtx);
   auto pred = [this]{
-    return cache.connected;
+    return m_cache.connected;
   };
-  return monitor_cv.wait_until(lk, end_time, pred);
+  return m_monitor_cv.wait_for(lk, duration, pred);
 }
 
 bool ChannelAccessPV::WaitForValidValue(double timeout_sec) const
 {
-  auto end_time = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
-  std::unique_lock<std::mutex> lk(mon_mtx);
+  auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  std::unique_lock<std::mutex> lk(m_mon_mtx);
   auto pred = [this]{
-    return cache.connected && !sup::dto::IsEmptyValue(cache.value);
+    return m_cache.connected && !sup::dto::IsEmptyValue(m_cache.value);
   };
-  return monitor_cv.wait_until(lk, end_time, pred);
+  return m_monitor_cv.wait_for(lk, duration, pred);
 }
 
 void ChannelAccessPV::OnConnectionChanged(bool connected)
 {
-  ExtendedValue result;
   {
-    std::lock_guard<std::mutex> lk(mon_mtx);
-    cache.connected = connected;
-    result = cache;
+    std::lock_guard<std::mutex> lk(m_mon_mtx);
+    m_cache.connected = connected;
+    if (m_var_changed_cb)
+    {
+      m_var_changed_cb(m_cache);
+    }
   }
-  monitor_cv.notify_one();
-  if (var_changed_cb)
-  {
-    var_changed_cb(result);
-  }
+  m_monitor_cv.notify_one();
 }
 
 void ChannelAccessPV::OnMonitorCalled(const CAMonitorInfo& info)
 {
-  ExtendedValue result;
   {
-    std::lock_guard<std::mutex> lk(mon_mtx);
-    cache.timestamp = info.timestamp;
-    cache.status = info.status;
-    cache.severity = info.severity;
-    cache.value = info.value;
-    result = cache;
+    std::lock_guard<std::mutex> lk(m_mon_mtx);
+    m_cache.timestamp = info.timestamp;
+    m_cache.status = info.status;
+    m_cache.severity = info.severity;
+    m_cache.value = info.value;
+    if (m_var_changed_cb)
+    {
+      m_var_changed_cb(m_cache);
+    }
   }
-  monitor_cv.notify_one();
-  if (var_changed_cb)
-  {
-    var_changed_cb(result);
-  }
+  m_monitor_cv.notify_one();
 }
 
 }  // namespace epics
