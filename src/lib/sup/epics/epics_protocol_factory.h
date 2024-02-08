@@ -47,13 +47,55 @@ public:
   EPICSProtocolFactory();
   ~EPICSProtocolFactory();
 
+  /**
+   * @brief Create EPICS RPC ProcessVariable.
+   *
+   * @param var_definition Configuration of the variable. This AnyValue structure contains the
+   * following field to indicate the type of ProcessVariable to create:
+   *   - Class: mandatory string providing the type of ProcessVariable. Supported types are:
+   *            'ChannelAccessClient', 'PvAccessClient' and 'PvAccessServer'.
+   * All class types require the following field:
+   *   - ChannelName: mandatory string providing the channel name of the network variable.
+   * Depending on the class type, extra fields can be defined:
+   *    - For 'ChannelAccessClient':
+   *      - VarType: mandatory string providing the JSON representation of its AnyType.
+   *    - For 'PvAccessClient': none.
+   *    - For 'PvAccessServer':
+   *      - VarValue: mandatory AnyValue providing the initial value of the network variable.
+   *
+   * @return EPICS ProcessVariable.
+   */
   std::unique_ptr<sup::protocol::ProcessVariable> CreateProcessVariable(
     const sup::dto::AnyValue& var_definition) const override;
 
+  /**
+   * @brief Create EPICS RPC server stack with the injected protocol.
+   *
+   * @param protocol Protocol to inject.
+   * @param server_definition Configuration for the server. This is an AnyValue structure with
+   * the following field:
+   *   - ServiceName: mandatory string providing the service name on the network.
+   *
+   * @return EPICS RPC server stack.
+   */
   std::unique_ptr<sup::protocol::RPCServerInterface> CreateRPCServer(
     sup::protocol::Protocol& protocol,
     const sup::dto::AnyValue& server_definition) const override;
 
+  /**
+   * @brief Create EPICS RPC client stack with a Procotol interface.
+   *
+   * @param client_definition Configuration for the client. This is an AnyValue structure with
+   * the following fields:
+   *   - ServiceName: mandatory string providing the service name on the network to connect to,
+   *   - Timeout: optional float64 field, providing the maximum timeout in seconds for requests
+   *              to the server. Default is 5 seconds.
+   *   - Encoding: optional string field providing the encoding used for the encapsulated
+   *               ProtocolRPCClient. Supported encodings are: 'None' and 'Base64'. Default is
+   *               'Base64'.
+   *
+   * @return EPICS RPC client stack.
+   */
   std::unique_ptr<sup::protocol::Protocol> CreateRPCClient(
     const sup::dto::AnyValue& client_definition) const override;
 };
