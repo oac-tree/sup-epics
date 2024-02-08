@@ -327,4 +327,21 @@ TEST_F(EPICSProtocolFactoryTest, RPC)
   EXPECT_EQ(client_1->Invoke(request, output), sup::protocol::Success);
   EXPECT_EQ(test_protocol.GetRequest(), request);
   EXPECT_EQ(output, reply);
+
+  // Send request through client 2 and validate
+  request["setpoint"] = 1.0;
+  request["enabled"] = true;
+  reply["counter"].ConvertFrom(42u);
+  reply["message"] = "hello";
+  test_protocol.SetReply(reply);
+  EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::Success);
+  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(output, reply);
+
+  // Send request through client 2 with non-success reply
+  test_protocol.SetReply(reply, sup::protocol::ServerProtocolDecodingError);
+  output = sup::dto::AnyValue{};
+  EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::ServerProtocolDecodingError);
+  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(output, reply);
 }
