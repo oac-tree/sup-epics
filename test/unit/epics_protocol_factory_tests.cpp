@@ -20,12 +20,47 @@
 #include <sup/epics/epics_protocol_factory.h>
 
 #include <sup/dto/anyvalue.h>
+#include <sup/protocol/protocol_factory_utils.h>
 
 #include <gtest/gtest.h>
 
 #include <future>
 
 using namespace sup::epics;
+
+class TestProtocol : public sup::protocol::Protocol
+{
+public:
+  TestProtocol() = default;
+  ~TestProtocol() = default;
+
+  void SetReply(const sup::dto::AnyValue& value,
+                sup::protocol::ProtocolResult result = sup::protocol::Success)
+  {
+    m_reply = value;
+    m_result = result;
+  }
+
+  sup::dto::AnyValue GetRequest() const { return m_request; }
+
+  sup::protocol::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output)
+  {
+    m_request = input;
+    output = m_reply;
+    return m_result;
+  }
+
+  sup::protocol::ProtocolResult Service(const sup::dto::AnyValue& input, sup::dto::AnyValue& output)
+  {
+    m_request = input;
+    output = m_reply;
+    return m_result;
+  }
+private:
+  sup::dto::AnyValue m_request;
+  sup::dto::AnyValue m_reply;
+  sup::protocol::ProtocolResult m_result;
+};
 
 class EPICSProtocolFactoryTest : public ::testing::Test
 {
@@ -250,4 +285,46 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
   EXPECT_TRUE(SetVariableValue(*server_var, val_init));
   client_future.wait();
   EXPECT_EQ(client_cache, val_init);
+}
+
+TEST_F(EPICSProtocolFactoryTest, RPC)
+{
+  EPICSProtocolFactory factory;
+  TestProtocol test_protocol;
+  const std::string service_name = "EPICSRPC::TestServer";
+
+  // Create RPC server stack
+  sup::dto::AnyValue server_def = {{
+    { kServiceName, service_name }
+  }};
+  auto server = factory.CreateRPCServer(test_protocol, server_def);
+
+  // Create corresponding RPC client without encoding
+  sup::dto::AnyValue client_def_1 = {{
+    { kServiceName, service_name },
+    { sup::protocol::kEncoding, sup::protocol::kEncoding_None }
+  }};
+  auto client_1 = factory.CreateRPCClient(client_def_1);
+
+  // Create corresponding RPC client with base64 encoding
+  sup::dto::AnyValue client_def_2 = {{
+    { kServiceName, service_name },
+    { sup::protocol::kEncoding, sup::protocol::kEncoding_Base64 }
+  }};
+  auto client_2 = factory.CreateRPCClient(client_def_2);
+
+  // Send request through client 1 and validate
+  sup::dto::AnyValue request = {{
+    { "setpoint", { sup::dto::Float64Type, 3.5 }},
+    { "enabled", false }
+  }};
+  sup::dto::AnyValue reply = {{
+    { "counter", { sup::dto::UnsignedInteger16Type, 2u }},
+    { "message", "ok" }
+  }};
+  test_protocol.SetReply(reply);
+  sup::dto::AnyValue output;
+  EXPECT_EQ(client_1->Invoke(request, output), sup::protocol::Success);
+  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(output, reply);
 }
