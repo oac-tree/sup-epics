@@ -20,7 +20,11 @@
 #ifndef SUP_EPICS_EPICS_PROTOCOL_FACTORY_H_
 #define SUP_EPICS_EPICS_PROTOCOL_FACTORY_H_
 
+#include <sup/epics/pv_access_rpc_client_config.h>
+#include <sup/epics/pv_access_rpc_server_config.h>
+
 #include <sup/protocol/protocol_factory.h>
+#include <sup/protocol/protocol_factory_utils.h>
 
 namespace sup
 {
@@ -99,6 +103,27 @@ public:
   std::unique_ptr<sup::protocol::Protocol> CreateRPCClient(
     const sup::dto::AnyValue& client_definition) const override;
 };
+
+/**
+ * @brief Helper function to create an EPICS RPC server stack with an injected Protocol.
+ *
+ * @param protocol Protocol to be injected.
+ * @param server_config Server configuration.
+ * @return EPICS RPC server stack.
+ */
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
+  sup::protocol::Protocol& protocol, const PvAccessRPCServerConfig& server_config);
+
+/**
+ * @brief Helper function to create an EPICS RPC client stack.
+ *
+ * @param client_config Client configuration.
+ * @param encoding Optional encoding to be used in the RPC communication.
+ * @return EPICS RPC client stack.
+ */
+std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
+  const PvAccessRPCClientConfig& client_config,
+  sup::protocol::PayloadEncoding encoding = sup::protocol::PayloadEncoding::kBase64);
 
 }  // namespace epics
 

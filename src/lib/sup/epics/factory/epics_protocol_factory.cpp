@@ -62,6 +62,20 @@ std::unique_ptr<sup::protocol::RPCServerInterface> EPICSProtocolFactory::CreateR
   const sup::dto::AnyValue& server_definition) const
 {
   auto server_config = utils::ParsePvAccessRPCServerConfig(server_definition);
+  return CreateEPICSRPCServerStack(protocol, server_config);
+}
+
+std::unique_ptr<sup::protocol::Protocol> EPICSProtocolFactory::CreateRPCClient(
+  const sup::dto::AnyValue& client_definition) const
+{
+  auto client_config = utils::ParsePvAccessRPCClientConfig(client_definition);
+  auto encoding = sup::protocol::ParsePayloadEncoding(client_definition);
+  return CreateEPICSRPCClientStack(client_config, encoding);
+}
+
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
+  sup::protocol::Protocol& protocol, const PvAccessRPCServerConfig& server_config)
+{
   auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
     return std::unique_ptr<sup::protocol::RPCServerInterface>(
       new PvAccessRPCServer(server_config, functor));
@@ -69,15 +83,13 @@ std::unique_ptr<sup::protocol::RPCServerInterface> EPICSProtocolFactory::CreateR
   return sup::protocol::CreateRPCServerStack(factory_funct, protocol);
 }
 
-std::unique_ptr<sup::protocol::Protocol> EPICSProtocolFactory::CreateRPCClient(
-  const sup::dto::AnyValue& client_definition) const
+std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
+  const PvAccessRPCClientConfig& client_config, sup::protocol::PayloadEncoding encoding)
 {
-  auto client_config = utils::ParsePvAccessRPCClientConfig(client_definition);
   auto factory_funct = [client_config](){
     return std::unique_ptr<sup::dto::AnyFunctor>(
       new PvAccessRPCClient(client_config));
   };
-  auto encoding = sup::protocol::ParsePayloadEncoding(client_definition);
   return sup::protocol::CreateRPCClientStack(factory_funct, encoding);
 }
 
