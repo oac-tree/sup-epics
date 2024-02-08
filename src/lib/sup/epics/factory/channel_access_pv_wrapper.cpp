@@ -17,7 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <sup/epics/channel_access_pv_wrapper.h>
+#include "channel_access_pv_wrapper.h"
 
 #include <sup/protocol/exceptions.h>
 

@@ -105,6 +105,35 @@ public:
 };
 
 /**
+ * @brief Helper function to create an EPICS ChannelAccess ProcessVariable.
+ *
+ * @param channel Channel name.
+ * @param var_type Variable AnyType.
+ * @return EPICS ProcessVariable.
+ */
+std::unique_ptr<sup::protocol::ProcessVariable> CreateCAClientProcessVariable(
+  const std::string& channel, const sup::dto::AnyType& var_type);
+
+/**
+ * @brief Helper function to create an EPICS PvAccess client ProcessVariable.
+ *
+ * @param channel Channel name.
+ * @return EPICS ProcessVariable.
+ */
+std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAClientProcessVariable(
+  const std::string& channel);
+
+/**
+ * @brief Helper function to create an EPICS PvAccess server ProcessVariable.
+ *
+ * @param channel Channel name.
+ * @param value Initial value.
+ * @return EPICS ProcessVariable.
+ */
+std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAServerProcessVariable(
+  const std::string& channel, const sup::dto::AnyValue& value);
+
+/**
  * @brief Helper function to create an EPICS RPC server stack with an injected Protocol.
  *
  * @param protocol Protocol to be injected.

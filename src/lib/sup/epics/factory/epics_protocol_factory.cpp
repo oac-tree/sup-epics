@@ -19,6 +19,10 @@
 
 #include "epics_protocol_factory_utils.h"
 
+#include "channel_access_pv_wrapper.h"
+#include "pv_access_client_pv_wrapper.h"
+#include "pv_access_server_pv_wrapper.h"
+
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_server.h>
 
@@ -71,6 +75,26 @@ std::unique_ptr<sup::protocol::Protocol> EPICSProtocolFactory::CreateRPCClient(
   auto client_config = utils::ParsePvAccessRPCClientConfig(client_definition);
   auto encoding = sup::protocol::ParsePayloadEncoding(client_definition);
   return CreateEPICSRPCClientStack(client_config, encoding);
+}
+
+std::unique_ptr<sup::protocol::ProcessVariable> CreateCAClientProcessVariable(
+  const std::string& channel, const sup::dto::AnyType& var_type)
+{
+  return std::unique_ptr<sup::protocol::ProcessVariable>(
+    new ChannelAccessPVWrapper(channel, var_type));
+}
+
+std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAClientProcessVariable(
+  const std::string& channel)
+{
+  return std::unique_ptr<sup::protocol::ProcessVariable>(new PVAccessClientPVWrapper(channel));
+}
+
+std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAServerProcessVariable(
+  const std::string& channel, const sup::dto::AnyValue& value)
+{
+  return std::unique_ptr<sup::protocol::ProcessVariable>(
+    new PVAccessServerPVWrapper(channel, value));
 }
 
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(

@@ -22,10 +22,6 @@
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_server.h>
 
-#include <sup/epics/channel_access_pv_wrapper.h>
-#include <sup/epics/pv_access_client_pv_wrapper.h>
-#include <sup/epics/pv_access_server_pv_wrapper.h>
-
 #include <sup/dto/anyvalue.h>
 #include <sup/dto/json_type_parser.h>
 #include <sup/protocol/exceptions.h>
@@ -75,8 +71,7 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreateChannelAccessClientVar(
     const std::string error = "Cannot parse type for ChannelAccessClient ProcessVariable";
     throw sup::protocol::InvalidOperationException(error);
   }
-  return std::unique_ptr<sup::protocol::ProcessVariable>(
-    new ChannelAccessPVWrapper(channel_name, parser.MoveAnyType()));
+  return CreateCAClientProcessVariable(channel_name, parser.MoveAnyType());
 }
 
 std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessClientVar(
@@ -84,7 +79,7 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessClientVar(
 {
   sup::protocol::ValidateConfigurationField(config, kChannelName, sup::dto::StringType);
   auto channel_name = config[kChannelName].As<std::string>();
-  return std::unique_ptr<sup::protocol::ProcessVariable>(new PVAccessClientPVWrapper(channel_name));
+  return CreatePVAClientProcessVariable(channel_name);
 }
 
 std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessServerVar(
@@ -97,8 +92,7 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessServerVar(
     const std::string error = "Cannot find value for PvAccessServer ProcessVariable";
     throw sup::protocol::InvalidOperationException(error);
   }
-  return std::unique_ptr<sup::protocol::ProcessVariable>(
-    new PVAccessServerPVWrapper(channel_name, config[kVariableValue]));
+  return CreatePVAServerProcessVariable(channel_name, config[kVariableValue]);
 }
 
 }  // namespace utils
