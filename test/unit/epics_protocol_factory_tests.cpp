@@ -141,3 +141,113 @@ TEST_F(EPICSProtocolFactoryTest, PvAccessPVWrappers)
   EXPECT_TRUE(WaitForVariableValue(*client_var_1, val_init, 2.0));
   EXPECT_TRUE(WaitForVariableValue(*client_var_2, val_init, 2.0));
 }
+
+TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperServerCallback)
+{
+  std::string channel_name = "PVWrapperTest::ServerCallback";
+
+  // Create server variable
+  sup::dto::AnyValue val_init = {{
+    { "setpoint", { sup::dto::Float64Type, 4.0 }},
+    { "enabled", { sup::dto::BooleanType, false }}
+  }};
+  sup::dto::AnyValue server_config = {{
+    { kProcessVariableClass, kPvAccessServerClass },
+    { kChannelName, channel_name },
+    { kVariableValue, val_init }
+  }};
+  auto server_var = m_factory.CreateProcessVariable(server_config);
+  EXPECT_TRUE(server_var->WaitForAvailable(2.0));
+  EXPECT_TRUE(server_var->IsAvailable());
+  auto info = server_var->GetValue(0.0);
+  EXPECT_TRUE(info.first);
+  EXPECT_EQ(info.second, val_init);
+
+  // Create client variable
+  sup::dto::AnyValue client_config = {{
+    { kProcessVariableClass, kPvAccessClientClass },
+    { kChannelName, channel_name }
+  }};
+  auto client_var = m_factory.CreateProcessVariable(client_config);
+  EXPECT_TRUE(WaitForVariableValue(*client_var, val_init, 2.0));
+  EXPECT_TRUE(client_var->IsAvailable());
+  info = client_var->GetValue(0.0);
+  EXPECT_TRUE(info.first);
+  EXPECT_EQ(info.second, val_init);
+
+  // Add callback to server variable
+  sup::dto::AnyValue server_cache = val_init;
+  std::promise<void> server_promise;
+  auto server_future = server_promise.get_future();
+  auto server_callback =
+    [&server_cache, &server_promise](const sup::dto::AnyValue& val, bool connected){
+      if (connected)
+      {
+        server_cache = val;
+        server_promise.set_value();
+      }
+    };
+  EXPECT_TRUE(server_var->SetMonitorCallback(server_callback));
+
+  // Update value through client and observe server callback
+  val_init["setpoint"] = 6.2;
+  val_init["enabled"] = true;
+  EXPECT_TRUE(SetVariableValue(*client_var, val_init));
+  server_future.wait();
+  EXPECT_EQ(server_cache, val_init);
+}
+
+TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
+{
+  std::string channel_name = "PVWrapperTest::ClientCallback";
+
+  // Create server variable
+  sup::dto::AnyValue val_init = {{
+    { "setpoint", { sup::dto::Float64Type, 4.0 }},
+    { "enabled", { sup::dto::BooleanType, false }}
+  }};
+  sup::dto::AnyValue server_config = {{
+    { kProcessVariableClass, kPvAccessServerClass },
+    { kChannelName, channel_name },
+    { kVariableValue, val_init }
+  }};
+  auto server_var = m_factory.CreateProcessVariable(server_config);
+  EXPECT_TRUE(server_var->WaitForAvailable(2.0));
+  EXPECT_TRUE(server_var->IsAvailable());
+  auto info = server_var->GetValue(0.0);
+  EXPECT_TRUE(info.first);
+  EXPECT_EQ(info.second, val_init);
+
+  // Create client variable
+  sup::dto::AnyValue client_config = {{
+    { kProcessVariableClass, kPvAccessClientClass },
+    { kChannelName, channel_name }
+  }};
+  auto client_var = m_factory.CreateProcessVariable(client_config);
+  EXPECT_TRUE(WaitForVariableValue(*client_var, val_init, 2.0));
+  EXPECT_TRUE(client_var->IsAvailable());
+  info = client_var->GetValue(0.0);
+  EXPECT_TRUE(info.first);
+  EXPECT_EQ(info.second, val_init);
+
+  // Add callback to client variable
+  sup::dto::AnyValue client_cache = val_init;
+  std::promise<void> client_promise;
+  auto client_future = client_promise.get_future();
+  auto client_callback =
+    [&client_cache, &client_promise](const sup::dto::AnyValue& val, bool connected){
+      if (connected)
+      {
+        client_cache = val;
+        client_promise.set_value();
+      }
+    };
+  EXPECT_TRUE(client_var->SetMonitorCallback(client_callback));
+
+  // Update value through client and observe server callback
+  val_init["setpoint"] = 6.2;
+  val_init["enabled"] = true;
+  EXPECT_TRUE(SetVariableValue(*server_var, val_init));
+  client_future.wait();
+  EXPECT_EQ(client_cache, val_init);
+}
