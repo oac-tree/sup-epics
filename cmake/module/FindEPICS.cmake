@@ -1,36 +1,36 @@
 # Simplified search for EPICS
 
-if (DEFINED ENV{EPICS_BASE} AND NOT EPICS_BASE)
+if(DEFINED ENV{EPICS_BASE} AND NOT EPICS_BASE)
   set(EPICS_BASE $ENV{EPICS_BASE})
 endif()
 
-if (EPICS_BASE)
-  message(STATUS "  EPICS_BASE: ${EPICS_BASE}")
+if(EPICS_BASE)
+  message(VERBOSE "\tEPICS_BASE: ${EPICS_BASE}")
 else()
   message(FATAL_ERROR "Environment variable EPICS_BASE doesn't exist")
 endif()
 
 # Finding PVXS
 
-if (DEFINED ENV{PVXS_DIR} AND NOT PVXS_DIR)
+if(DEFINED ENV{PVXS_DIR} AND NOT PVXS_DIR)
   set(PVXS_DIR $ENV{PVXS_DIR})
 endif()
 
-if (PVXS_DIR)
-  message(STATUS "  PVXS_DIR: ${PVXS_DIR}")
+if(PVXS_DIR)
+  message(VERBOSE "\tPVXS_DIR: ${PVXS_DIR}")
 else()
-  message(STATUS "  PVXS_DIR: no dedicated PVXS installation, expecting to find it in ${EPICS_BASE}")
+  message(VERBOSE "\tPVXS_DIR: no dedicated PVXS installation, expecting to find it in ${EPICS_BASE}")
   set(PVXS_DIR ${EPICS_BASE})
 endif()
 
 # finding architecture
 
-if (DEFINED ENV{EPICS_HOST_ARCH} AND NOT EPICS_HOST_ARCH)
+if(DEFINED ENV{EPICS_HOST_ARCH} AND NOT EPICS_HOST_ARCH)
   set(EPICS_HOST_ARCH $ENV{EPICS_HOST_ARCH})
 endif()
 
-if (EPICS_HOST_ARCH)
-  message(STATUS "  EPICS_HOST_ARCH: ${EPICS_HOST_ARCH}")
+if(EPICS_HOST_ARCH)
+  message(VERBOSE "\tEPICS_HOST_ARCH: ${EPICS_HOST_ARCH}")
 else()
   message(FATAL_ERROR "Environment variable EPICS_HOST_ARCH doesn't exist")
 endif()
@@ -39,7 +39,7 @@ endif()
 
 set(compiler_subdir compiler/gcc)
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*")
-    set(compiler_subdir compiler/clang)
+  set(compiler_subdir compiler/clang)
 endif()
 
 set(EPICS_LINK_DIRECTORIES ${EPICS_BASE}/lib/${EPICS_HOST_ARCH} ${PVXS_DIR}/lib/${EPICS_HOST_ARCH})
