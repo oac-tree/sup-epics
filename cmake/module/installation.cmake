@@ -4,44 +4,50 @@
 # https://gitlab.kitware.com/cmake/community/-/wikis/doc/tutorials/Exporting-and-Importing-Targets
 # -----------------------------------------------------------------------------
 
+include(PackageConfig)
+include(CMakePackageConfigHelpers)
+
+set(BUILD_CONFIGDIR ${CMAKE_BINARY_DIR})
 set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/sup-epics)
 
-# exporting targets to a script and installing it
-install(EXPORT sup-epics-targets FILE sup-epics-targets.cmake NAMESPACE sup-epics:: DESTINATION ${INSTALL_CONFIGDIR})
-
 # -----------------------------------------------------------------------------
-# Exporting
+# Exporting targets
 # -----------------------------------------------------------------------------
+set(PACKAGE_TARGETS_FILENAME sup-epics-targets.cmake)
+set(PACKAGE_TARGETS_FILE ${BUILD_CONFIGDIR}/${PACKAGE_TARGETS_FILENAME})
 
-# Add all targets to the build-tree export set
-export(TARGETS sup-epics sup-epics-di sup-epics-test NAMESPACE sup-epics:: FILE "${PROJECT_BINARY_DIR}/sup-epics-targets.cmake")
+# Install the export targets for installation usage, this does not relate to the build tree file
+install(EXPORT sup-epics-targets FILE ${PACKAGE_TARGETS_FILENAME} NAMESPACE sup-epics:: DESTINATION ${INSTALL_CONFIGDIR})
 
-# Export the package for use from the build-tree (goes to $HOME/.cmake)
+# Generate the export targets for the build tree usage
+export(TARGETS sup-epics sup-epics-di sup-epics-test NAMESPACE sup-epics:: FILE ${PACKAGE_TARGETS_FILE})
+
+# Export the package to CMake registry for build tree usage (goes to $HOME/.cmake)
 if(COA_EXPORT_BUILD_TREE)
   set(CMAKE_EXPORT_PACKAGE_REGISTRY ON)
   export(PACKAGE sup-epics)
 endif()
 
 # -----------------------------------------------------------------------------
-# Creating and installing sup-epics-config.cmake
+# Version configuration
 # -----------------------------------------------------------------------------
+set(PACKAGE_VERSION_FILE ${BUILD_CONFIGDIR}/sup-epics-config-version.cmake)
 
-include(CMakePackageConfigHelpers)
+# Generate the version config file, shared in both build tree and installation usage
+write_basic_package_version_file(${PACKAGE_VERSION_FILE} COMPATIBILITY AnyNewerVersion)
 
-# to use in the build tree
-configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/../config/sup-epics-config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config.cmake
-    INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-)
-
-# to use in install tree
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config.cmake DESTINATION ${INSTALL_CONFIGDIR})
+install(FILES ${PACKAGE_VERSION_FILE} DESTINATION ${INSTALL_CONFIGDIR})
 
 # -----------------------------------------------------------------------------
-# Create and install sup-epics-config-version.cmake file
+# Package configuration
 # -----------------------------------------------------------------------------
+set(PACKAGE_CONFIG_FILE ${BUILD_CONFIGDIR}/sup-epics-config.cmake)
 
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config-version.cmake VERSION
-    ${PROJECT_VERSION} COMPATIBILITY AnyNewerVersion)
+# Generate the package config file, shared in both build tree and installation usage
+write_package_config_file(
+  sup-epics
+  OUTPUT ${PACKAGE_CONFIG_FILE}
+  INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+  DEPENDENCIES sup-dto)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sup-epics-config-version.cmake DESTINATION ${INSTALL_CONFIGDIR})
+install(FILES ${PACKAGE_CONFIG_FILE} DESTINATION ${INSTALL_CONFIGDIR})
