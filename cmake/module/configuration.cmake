@@ -74,9 +74,9 @@ file(MAKE_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 # Dependencies
 # -----------------------------------------------------------------------------
 
-find_package(EPICS REQUIRED MODULE)
-
 find_package(Threads)
+
+find_package(EPICS REQUIRED MODULE)
 
 find_package(sup-dto REQUIRED)
 find_package(sup-protocol REQUIRED)
