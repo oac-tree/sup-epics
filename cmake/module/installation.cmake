@@ -48,6 +48,6 @@ write_package_config_file(
   sup-epics
   OUTPUT ${PACKAGE_CONFIG_FILE}
   INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
-  DEPENDENCIES sup-dto)
+  DEPENDENCIES sup-dto sup-protocol sup-di)
 
 install(FILES ${PACKAGE_CONFIG_FILE} DESTINATION ${INSTALL_CONFIGDIR})
