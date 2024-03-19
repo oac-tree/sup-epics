@@ -365,6 +365,50 @@ TEST_F(ChannelAccessPVTest, Int64Formats)
   }
 }
 
+TEST_F(ChannelAccessPVTest, Int64WithCallback)
+{
+  using namespace sup::epics;
+
+  // setup callback
+  std::mutex mtx;
+  std::condition_variable cv;
+  sup::dto::AnyValue read_back;
+  ChannelAccessPV::VariableChangedCallback callback =
+    [&](const ChannelAccessPV::ExtendedValue& ext_val) {
+      if (ext_val.connected) {
+        std::lock_guard<std::mutex> lk{mtx};
+        read_back = ext_val.value;
+        cv.notify_one();
+      }
+    };
+  // create variable and wait for connected
+  ChannelAccessPV pv_as_int64("CA-TESTS:INT64", sup::dto::SignedInteger64Type, callback);
+  EXPECT_TRUE(pv_as_int64.WaitForConnected(1.0));
+
+  {
+    // set first value
+    sup::dto::int64 int64_v = 42;
+    ASSERT_TRUE(pv_as_int64.SetValue(int64_v));
+    auto predicate = [&]() {
+      return read_back.GetType() == sup::dto::SignedInteger64Type &&
+             read_back.As<sup::dto::int64>() == int64_v;
+    };
+    std::unique_lock<std::mutex> lk{mtx};
+    EXPECT_TRUE(cv.wait_for(lk, std::chrono::seconds(2), predicate));
+  }
+  {
+    // set second value
+    sup::dto::int64 int64_v = 1729;
+    ASSERT_TRUE(pv_as_int64.SetValue(int64_v));
+    auto predicate = [&]() {
+      return read_back.GetType() == sup::dto::SignedInteger64Type &&
+             read_back.As<sup::dto::int64>() == int64_v;
+    };
+    std::unique_lock<std::mutex> lk{mtx};
+    EXPECT_TRUE(cv.wait_for(lk, std::chrono::seconds(2), predicate));
+  }
+}
+
 TEST_F(ChannelAccessPVTest, EnumFormats)
 {
   using namespace sup::epics;
