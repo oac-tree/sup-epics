@@ -1,6 +1,8 @@
 Changes for 1.3.0:
 
 - Properly handle different requested AnyTypes for ChannelAccessPVs
+- Implement factory interface for EPICS
+- Update cmake configuration
 
 Changes for 1.2.0:
 
