@@ -32,7 +32,12 @@ namespace
 void GenerateEpicDatabaseFile(const std::string& name, const std::string& db_file_content)
 {
   std::ofstream result(name);
-  result << db_file_content;
+  if (!(result << db_file_content))
+  {
+    const std::string error =
+      "Error in SoftIocRunner::GenerateEpicDatabaseFile(): db file not created";
+    throw std::runtime_error(error);
+  }
   result.close();
 }
 
