@@ -20,6 +20,7 @@
 #include <sup/epics/ca/ca_helper.h>
 
 #include <sup/dto/anytype.h>
+#include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/anyvalue_exceptions.h>
 #include <sup/dto/json_value_parser.h>
 
@@ -31,10 +32,14 @@
 namespace
 {
 sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 nanoseconds);
-chtype TypeCodeToChannelType(sup::dto::TypeCode typecode);
+chtype ScalarTypeCodeToChannelType(sup::dto::TypeCode typecode);
+chtype ArrayTypeCodeToChannelType(sup::dto::TypeCode typecode);
 sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
                                         unsigned long multiplicity);
 sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* ref);
+sup::dto::AnyValue ParseFromUnsignedEnumTypes(const sup::dto::AnyType& anytype, char* ref,
+                                          unsigned long multiplicity);
+sup::dto::AnyValue ParseFromUnsignedType(const sup::dto::AnyType& anytype, char* ref);
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str);
 sup::dto::AnyValue ParseBooleans(char* ref, unsigned long multiplicity);
 sup::dto::AnyValue ParseBoolean(char* ref);
@@ -90,10 +95,9 @@ sup::dto::uint64 GetTimestampField(event_handler_args args)
 
 chtype ChannelType(const sup::dto::AnyType& anytype)
 {
-  sup::dto::AnyType input_type = sup::dto::IsArrayType(anytype) ?
-                                 anytype.ElementType() :
-                                 anytype;
-  return TypeCodeToChannelType(input_type.GetTypeCode());
+  return sup::dto::IsArrayType(anytype) ?
+    ArrayTypeCodeToChannelType(anytype.ElementType().GetTypeCode()) :
+    ScalarTypeCodeToChannelType(anytype.GetTypeCode());
 }
 
 unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
@@ -113,6 +117,10 @@ sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, char* ref)
   if (chtype == DBR_STRING)
   {
     return ParseFromStringTypes(anytype, ref, multiplicity);
+  }
+  if (chtype == DBR_ENUM)
+  {
+    return ParseFromUnsignedEnumTypes(anytype, ref, multiplicity);
   }
   sup::dto::AnyValue result{anytype};
   auto size = dbr_size[chtype] * multiplicity;
@@ -143,7 +151,7 @@ sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 na
 {
   return seconds * 1000000000ul + nanoseconds;
 }
-chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
+chtype ScalarTypeCodeToChannelType(sup::dto::TypeCode typecode)
 {
   using namespace sup::dto;
   static std::map<TypeCode, chtype> channel_type_map =
@@ -151,7 +159,34 @@ chtype TypeCodeToChannelType(sup::dto::TypeCode typecode)
       {TypeCode::Bool, DBR_CHAR},
       {TypeCode::Char8, DBR_CHAR},
       {TypeCode::Int8, DBR_CHAR},
-      {TypeCode::UInt8, DBR_STRING},
+      {TypeCode::UInt8, DBR_ENUM},
+      {TypeCode::Int16, DBR_SHORT},
+      {TypeCode::UInt16, DBR_ENUM},
+      {TypeCode::Int32, DBR_LONG},
+      {TypeCode::UInt32, DBR_ENUM},
+      {TypeCode::Int64, DBR_STRING},
+      {TypeCode::UInt64, DBR_ENUM},
+      {TypeCode::Float32, DBR_FLOAT},
+      {TypeCode::Float64, DBR_DOUBLE},
+      {TypeCode::String, DBR_STRING}
+    };
+  auto it = channel_type_map.find(typecode);
+  if (it == channel_type_map.end())
+  {
+    return -1;
+  }
+  return it->second;
+}
+
+chtype ArrayTypeCodeToChannelType(sup::dto::TypeCode typecode)
+{
+  using namespace sup::dto;
+  static std::map<TypeCode, chtype> channel_type_map =
+    {
+      {TypeCode::Bool, DBR_CHAR},
+      {TypeCode::Char8, DBR_CHAR},
+      {TypeCode::Int8, DBR_CHAR},
+      {TypeCode::UInt8, DBR_ENUM},
       {TypeCode::Int16, DBR_SHORT},
       {TypeCode::UInt16, DBR_ENUM},
       {TypeCode::Int32, DBR_LONG},
@@ -196,6 +231,36 @@ sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* r
     return str;
   }
   return ParseNumericFromString(anytype, str);
+}
+
+sup::dto::AnyValue ParseFromUnsignedEnumTypes(const sup::dto::AnyType& anytype, char* ref,
+                                          unsigned long multiplicity)
+{
+  if (multiplicity > 1)
+  {
+    sup::dto::AnyValue result{anytype};
+    sup::dto::AnyType el_type = anytype.ElementType();
+    const std::size_t kEnumLength = dbr_size[DBR_ENUM];
+    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    {
+      char* el_ref = ref + idx * kEnumLength;
+      result[idx] = ParseFromUnsignedType(el_type, el_ref);
+    }
+    return result;
+  }
+  return ParseFromUnsignedType(anytype, ref);
+}
+
+sup::dto::AnyValue ParseFromUnsignedType(const sup::dto::AnyType& anytype, char* ref)
+{
+  sup::dto::AnyValue tmp{sup::dto::UnsignedInteger16Type};
+  sup::dto::FromBytes(tmp, (const sup::dto::uint8*)ref, 2u);
+  sup::dto::AnyValue result{anytype};
+  if (!sup::dto::TryConvert(result, tmp))
+  {
+    return {};
+  }
+  return result;
 }
 
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str)
