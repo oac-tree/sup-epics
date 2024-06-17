@@ -574,12 +574,18 @@ TEST_F(ChannelAccessPVTest, UInt64Waveform)
   ChannelAccessPV ca_uint64array_var("CA-TESTS:UINT64ARRAY", uint64_array_t);
   sup::dto::AnyType bool_array_t(10, sup::dto::BooleanType, "bool[]");
   ChannelAccessPV ca_boolarray_var("CA-TESTS:UINT64ARRAY", bool_array_t);
+  sup::dto::AnyType uint8_array_t(10, sup::dto::UnsignedInteger8Type, "uint8[]");
+  ChannelAccessPV ca_uint8array_var("CA-TESTS:UINT64ARRAY", uint8_array_t);
+  sup::dto::AnyType uint32_array_t(10, sup::dto::UnsignedInteger32Type, "uint32[]");
+  ChannelAccessPV ca_uint32array_var("CA-TESTS:UINT64ARRAY", uint32_array_t);
   sup::dto::AnyType int32_array_t(10, sup::dto::SignedInteger32Type, "int32[]");
   ChannelAccessPV ca_int32array_var("CA-TESTS:UINT64ARRAY", int32_array_t);
 
   // waiting for connected clients
   EXPECT_TRUE(ca_uint64array_var.WaitForConnected(5.0));
   EXPECT_TRUE(ca_boolarray_var.WaitForConnected(1.0));
+  EXPECT_TRUE(ca_uint8array_var.WaitForConnected(1.0));
+  EXPECT_TRUE(ca_uint32array_var.WaitForConnected(1.0));
   EXPECT_TRUE(ca_int32array_var.WaitForConnected(1.0));
 
   {
@@ -591,6 +597,12 @@ TEST_F(ChannelAccessPVTest, UInt64Waveform)
     // reading variables through different clients
     sup::dto::AnyValue bool_array_v{bool_array_t};
     EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
+
+    sup::dto::AnyValue uint8_array_v{uint8_array_t};
+    EXPECT_TRUE(WaitForValue(ca_uint8array_var, uint8_array_v, 5.0));
+
+    sup::dto::AnyValue uint32_array_v{uint32_array_t};
+    EXPECT_TRUE(WaitForValue(ca_uint32array_var, uint32_array_v, 5.0));
 
     sup::dto::AnyValue int32_array_v{int32_array_t};
     EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
@@ -606,6 +618,14 @@ TEST_F(ChannelAccessPVTest, UInt64Waveform)
     sup::dto::AnyValue bool_array_v{bool_array_t};
     FillWithScalars(bool_array_v, 1);
     EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
+
+    sup::dto::AnyValue uint8_array_v{uint8_array_t};
+    FillWithScalars(uint8_array_v, 1);
+    EXPECT_TRUE(WaitForValue(ca_uint8array_var, uint8_array_v, 5.0));
+
+    sup::dto::AnyValue uint32_array_v{uint32_array_t};
+    FillWithScalars(uint32_array_v, 1);
+    EXPECT_TRUE(WaitForValue(ca_uint32array_var, uint32_array_v, 5.0));
 
     sup::dto::AnyValue int32_array_v{int32_array_t};
     FillWithScalars(int32_array_v, 1);
