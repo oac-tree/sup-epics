@@ -57,7 +57,7 @@ public:
    * @param isolated Tag to request an isolated context for testing.
    * @param cb Callback function to call when the variable's value changed.
    */
-  explicit PvAccessServer(IsolatedTag isolated, VariableChangedCallback callback = {});
+  explicit PvAccessServer(IsolatedTag isolated, VariableChangedCallback cb = {});
 
   ~PvAccessServer();
 
@@ -120,6 +120,7 @@ public:
   /**
    * @brief Create a PvAccess client PV based on this server's context.
    *
+   * @param channel EPICS channel name.
    * @param cb Optional callback function to add to the client PV.
    *
    * @return A PvAccess client PV with a context associated to the server.

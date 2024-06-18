@@ -47,7 +47,7 @@ public:
    * @brief Constructor.
    *
    * @param channel EPICS channel name.
-   * @param type Type to use for the connected channel.
+   * @param context The PVXS client context to use.
    * @param cb Callback function to call when the variable's value or status changed.
    *
    * @return True if the variable was connected within the timeout period.
