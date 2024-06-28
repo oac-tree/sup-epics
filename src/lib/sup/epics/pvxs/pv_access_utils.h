@@ -21,6 +21,7 @@
 #define SUP_EPICS_PV_ACCESS_UTILS_H_
 
 #include <pvxs/client.h>
+#include <pvxs/server.h>
 
 #include <memory>
 
@@ -32,6 +33,10 @@ namespace utils
 {
 
 std::shared_ptr<pvxs::client::Context> GetSharedClientContext();
+
+std::unique_ptr<pvxs::server::Server> CreateIsolatedServer();
+
+std::unique_ptr<pvxs::server::Server> CreateServerFromEnv();
 
 }  // namespace utils
 

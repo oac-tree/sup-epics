@@ -19,6 +19,8 @@
 
 #include "pv_access_utils.h"
 
+#include <mutex>
+
 namespace sup
 {
 namespace epics
@@ -31,6 +33,22 @@ std::shared_ptr<pvxs::client::Context> GetSharedClientContext()
   static std::shared_ptr<pvxs::client::Context> context =
     std::make_shared<pvxs::client::Context>(pvxs::client::Context::fromEnv());
   return context;
+}
+
+std::mutex g_server_mtx;
+
+std::unique_ptr<pvxs::server::Server> CreateIsolatedServer()
+{
+  std::lock_guard<std::mutex> lk{g_server_mtx};
+  return std::unique_ptr<pvxs::server::Server>(
+    new pvxs::server::Server(pvxs::server::Config::isolated()));
+}
+
+std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
+{
+  std::lock_guard<std::mutex> lk{g_server_mtx};
+  return std::unique_ptr<pvxs::server::Server>(
+    new pvxs::server::Server(pvxs::server::Config::fromEnv()));
 }
 
 }  // namespace utils

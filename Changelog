@@ -1,6 +1,7 @@
 Changes for 1.4.0:
 
 - Distinguish between scalar and array types for ChannelAccessPVs to allow all unsigned types to be used for enumeration records
+- Enforce single-threaded creation of pvxs::server objects to avoid race conditions
 
 Changes for 1.3.0:
 

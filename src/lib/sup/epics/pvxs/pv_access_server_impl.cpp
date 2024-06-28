@@ -19,6 +19,8 @@
 
 #include "pv_access_server_impl.h"
 
+#include "pv_access_utils.h"
+
 #include <pvxs/client.h>
 #include <pvxs/server.h>
 
@@ -102,8 +104,7 @@ void PvAccessServerImpl::OnVariableChanged(const std::string& name,
 std::unique_ptr<PvAccessServerImpl> CreateIsolatedServerImpl(
   PvAccessServer::VariableChangedCallback cb)
 {
-  auto server = std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::isolated()));
+  auto server = utils::CreateIsolatedServer();
   return std::unique_ptr<PvAccessServerImpl>(
     new PvAccessServerImpl(std::move(server), std::move(cb)));
 }
@@ -111,8 +112,7 @@ std::unique_ptr<PvAccessServerImpl> CreateIsolatedServerImpl(
 std::unique_ptr<PvAccessServerImpl> CreateServerImplFromEnv(
   PvAccessServer::VariableChangedCallback cb)
 {
-  auto server = std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+  auto server = utils::CreateServerFromEnv();
   return std::unique_ptr<PvAccessServerImpl>(
     new PvAccessServerImpl(std::move(server), std::move(cb)));
 }
