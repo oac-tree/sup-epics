@@ -19,6 +19,7 @@
 
 #include "pv_access_rpc_server_impl.h"
 
+#include <sup/epics/pvxs/pv_access_utils.h>
 #include <sup/epics/rpc/pv_access_rpc_utils.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 
@@ -78,8 +79,7 @@ void PvAccessRPCServerImpl::Initialise()
 std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(
   const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler)
 {
-  auto server = std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::isolated()));
+  auto server = utils::CreateIsolatedServer();
   return std::unique_ptr<PvAccessRPCServerImpl>(
     new PvAccessRPCServerImpl(std::move(server), config, handler));
 }
@@ -87,8 +87,7 @@ std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(
 std::unique_ptr<PvAccessRPCServerImpl> CreateRPCServerImplFromEnv(
   const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler)
 {
-  auto server = std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+  auto server = utils::CreateServerFromEnv();
   return std::unique_ptr<PvAccessRPCServerImpl>(
     new PvAccessRPCServerImpl(std::move(server), config, handler));
 }

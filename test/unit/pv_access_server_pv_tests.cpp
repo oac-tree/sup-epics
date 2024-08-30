@@ -24,6 +24,7 @@
 #include <pvxs/sharedpv.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/pvxs/pv_access_server_pv.h>
+#include <sup/epics/pvxs/pv_access_utils.h>
 
 #include <sup/epics-test/softioc_runner.h>
 #include <sup/epics-test/softioc_utils.h>
@@ -34,11 +35,7 @@ using sup::epics::test::GetPvGetOutput;
 using sup::epics::test::PvPut;
 using ::testing::_;
 
-namespace
-{
-std::unique_ptr<pvxs::server::Server> CreateIsolatedServer();
-std::unique_ptr<pvxs::server::Server> CreateServerFromEnv();
-}  // unnamed namespace
+using namespace sup::epics;
 
 class PvAccessServerPVTests : public ::testing::Test
 {
@@ -56,7 +53,7 @@ TEST_F(PvAccessServerPVTests, InitialState)
 
   {  // variable is based on scalar AnyValue
     sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
-    EXPECT_THROW(sup::epics::PvAccessServerPV variable(variable_name, any_value, {}),
+    EXPECT_THROW(PvAccessServerPV variable(variable_name, any_value, {}),
                  std::runtime_error);
   }
 
@@ -64,7 +61,7 @@ TEST_F(PvAccessServerPVTests, InitialState)
     sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                     {"bool", {sup::dto::BooleanType, true}}};
 
-    sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
+    PvAccessServerPV variable(variable_name, any_value, {});
     EXPECT_EQ(variable.GetVariableName(), variable_name);
     EXPECT_EQ(variable.GetValue(), any_value);
   }
@@ -78,7 +75,7 @@ TEST_F(PvAccessServerPVTests, GetAndSet)
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
+  PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   // setting new value and checking result
@@ -95,13 +92,13 @@ TEST_F(PvAccessServerPVTests, GetAndSet)
 
 TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServer)
 {
-  auto server = CreateIsolatedServer();
+  auto server = utils::CreateIsolatedServer();
 
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
+  PvAccessServerPV variable(variable_name, any_value, {});
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
@@ -119,13 +116,13 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
 {
   MockListener listener;
 
-  auto server = CreateIsolatedServer();
+  auto server = utils::CreateIsolatedServer();
 
   const std::string variable_name{"variable_name"};
 
   // creating variable based on scalar
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
+  PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
   EXPECT_EQ(variable.GetValue(), any_value);
 
   variable.AddToServer(*server);
@@ -144,13 +141,13 @@ TEST_F(PvAccessServerPVTests, GetAndSetForIsolatedServerWithCallbacks)
 
 TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 {
-  auto server = CreateServerFromEnv();  // to make 'pvget` working
+  auto server = utils::CreateServerFromEnv();  // to make 'pvget` working
   server->start();
 
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
+  PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
 
@@ -171,12 +168,12 @@ TEST_F(PvAccessServerPVTests, AddToServerAfterServerStart)
 
 TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 {
-  auto server = CreateServerFromEnv();  // to make 'pvget` working
+  auto server = utils::CreateServerFromEnv();  // to make 'pvget` working
 
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
+  PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
 
@@ -200,12 +197,12 @@ TEST_F(PvAccessServerPVTests, AddToServerBeforeServerStart)
 
 TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 {
-  auto server = CreateServerFromEnv();  // to make 'pvget` working
+  auto server = utils::CreateServerFromEnv();  // to make 'pvget` working
 
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, {});
+  PvAccessServerPV variable(variable_name, any_value, {});
 
   variable.AddToServer(*server);
 
@@ -237,14 +234,14 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPut)
 
 TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
 {
-  auto server = CreateServerFromEnv();  // to make 'pvget` working
+  auto server = utils::CreateServerFromEnv();  // to make 'pvget` working
 
   MockListener listener;
 
   const std::string variable_name{"variable_name"};
 
   sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
-  sup::epics::PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
+  PvAccessServerPV variable(variable_name, any_value, listener.GetServerPvCallBack());
 
   variable.AddToServer(*server);
 
@@ -272,18 +269,3 @@ TEST_F(PvAccessServerPVTests, GetAfterPvPutWithCallback)
   // validating variable cache
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return variable.GetValue() == expected_any_value; }));
 }
-
-namespace
-{
-std::unique_ptr<pvxs::server::Server> CreateIsolatedServer()
-{
-  return std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::isolated()));
-}
-
-std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
-{
-  return std::unique_ptr<pvxs::server::Server>(
-      new pvxs::server::Server(pvxs::server::Config::fromEnv()));
-}
-}  // unnamed namespace
