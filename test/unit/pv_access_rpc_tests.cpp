@@ -181,24 +181,13 @@ TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 TEST_F(PvAccessRPCTests, ServerDestructionAndReconstruction)
 {
   std::string channel_name = "PvAccessRPCTests:channel";
+  // Run multiple times to ensure creation of RPC server with same name after destruction of
+  // another one works:
+  std::size_t n_times = 10;
+  for (std::size_t i=0; i<n_times; ++i)
   {
     PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
-    auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
-
-    // Send simple scalar payload over RPC
-    sup::dto::AnyValue payload{42};
-    auto request =
-      sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
-    auto reply = client(request);
-    EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
-    ASSERT_TRUE(static_cast<bool>(m_request));
-    ASSERT_TRUE(static_cast<bool>(m_reply));
-    EXPECT_EQ(request, *m_request);
-    EXPECT_EQ(reply, *m_reply);
-  }
-  {
-    PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
-    auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
+    PvAccessRPCClient client(PvAccessRPCClientConfig{channel_name, 10.0});
 
     // Send simple scalar payload over RPC
     sup::dto::AnyValue payload{42};
