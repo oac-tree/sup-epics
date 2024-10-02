@@ -208,7 +208,8 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
 
   // changing the value via the client with a conversion
   sup::dto::AnyValue update({{"value", {sup::dto::BooleanType, false}}});
+  sup::dto::AnyValue expected({{"value", {sup::dto::SignedInteger32Type, 0}}});
   EXPECT_TRUE(client.SetValue(channel_name, update));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == update; }));
-  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == update; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == expected; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
