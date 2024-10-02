@@ -89,23 +89,28 @@ PvAccessClientPV::ExtendedValue PvAccessClientPVImpl::GetExtendedValue() const
 
 bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
 {
+  sup::dto::AnyValue copy;
   {
     std::lock_guard<std::mutex> lk(m_mon_mtx);
     if (!m_cache.connected)
     {
       return false;
     }
+    copy = m_cache.value;
   }
   if (sup::dto::IsScalarValue(value))
   {
     throw std::runtime_error("Error in PvAccessClientPV: cannot set a scalar value");
   }
-  auto pvxs_value = sup::epics::BuildPVXSValue(value);
+  if (!sup::dto::TryAssignIfEmptyOrConvert(copy, value))
+  {
+    return false;
+  }
+  auto pvxs_value = sup::epics::BuildPVXSValue(copy);
 
   auto operation = m_context->put(m_channel_name)
                     .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
                     .exec();
-
   try
   {
     operation->wait(m_max_put_timeout);
