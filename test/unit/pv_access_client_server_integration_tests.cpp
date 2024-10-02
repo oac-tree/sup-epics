@@ -213,3 +213,35 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == expected; }));
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
+
+TEST_F(PvAccessClientServerIntegrationTests, ClientServerTypeEquality)
+{
+  const std::string channel_name("channel2");
+  const std::string choices_typename = "MyStringList";
+
+  // creating server with single variable
+  PvAccessServer server(PvAccessServer::Isolated);
+  sup::dto::AnyType server_type = {{
+    { "value", {{
+      { "index", sup::dto::SignedInteger32Type },
+      { "choices", sup::dto::AnyType{2, sup::dto::StringType, choices_typename} }
+    }, "MyEnum"} }
+  }, "MyEnumWrapper"};
+  sup::dto::AnyValue server_value(server_type);
+  server.AddVariable(channel_name, server_value);
+  server.Start();
+
+  // Checking variable on server side
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == server_value; }));
+
+  // creating a client with single variable
+  PvAccessClient client = server.CreateClient();
+  client.AddVariable(channel_name);
+
+  // checking connection and updated values on server and client sides
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == server_value; }));
+  auto client_type = client.GetValue(channel_name).GetType();
+  EXPECT_EQ(server_type["value.choices"].GetTypeName(), choices_typename);
+  EXPECT_EQ(client_type["value.choices"].GetTypeName(), choices_typename);
+}
