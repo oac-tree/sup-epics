@@ -1,3 +1,7 @@
+Changes for 1.5.0:
+
+- Allow basic conversion when setting value of PvAccessClientPV
+
 Changes for 1.4.0:
 
 - Distinguish between scalar and array types for ChannelAccessPVs to allow all unsigned types to be used for enumeration records
