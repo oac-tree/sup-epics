@@ -220,7 +220,8 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientServerTypeEquality)
   const std::string choices_typename = "MyStringList";
 
   // creating server with single variable
-  PvAccessServer server(PvAccessServer::Isolated);
+  // PvAccessServer server(PvAccessServer::Isolated);
+  PvAccessServer server{};
   sup::dto::AnyType server_type = {{
     { "value", {{
       { "index", sup::dto::SignedInteger32Type },

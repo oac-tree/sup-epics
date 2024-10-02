@@ -195,7 +195,7 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayOfIntegers)
   EXPECT_EQ(data[1], 0);
 }
 
-//! Build PVXS value from AnyValue representing an array of integers inside the struct.
+//! Build PVXS value from AnyValue representing an array of integers inside a struct.
 
 TEST_F(PvxsValueBuilderExtendedTests, ArrayInStruct)
 {
@@ -211,6 +211,30 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayInStruct)
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
+  auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
+  EXPECT_EQ(data.size(), 2);
+  EXPECT_EQ(data[0], 42);
+  EXPECT_EQ(data[1], 0);
+}
+
+//! Build PVXS value from AnyValue representing a array of integers with typename inside a struct.
+
+TEST_F(PvxsValueBuilderExtendedTests, NamedArrayInStruct)
+{
+  const std::string struct_name{"struct_name"};
+  const std::string array_name{"array_name"};
+
+  const int n_elements = 2;
+  sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type, array_name);
+  any_array[0] = 42;
+  sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
+
+  auto pvxs_value = BuildPVXSValue(any_value);
+  EXPECT_EQ(pvxs_value.id(), struct_name);
+
+  EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
+  EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
+  EXPECT_EQ(pvxs_value["array"].id(), array_name);
   auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
   EXPECT_EQ(data.size(), 2);
   EXPECT_EQ(data[0], 42);
