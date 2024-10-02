@@ -183,3 +183,32 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientServerFromEnv)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == any_value; }));
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
 }
+
+TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
+{
+  const std::string channel_name("channel1");
+
+  // creating server with single variable
+  PvAccessServer server(PvAccessServer::Isolated);
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
+  server.AddVariable(channel_name, any_value);
+
+  server.Start();
+
+  // Checking variable on server side
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == any_value; }));
+
+  // creating a client with single variable
+  PvAccessClient client = server.CreateClient();
+  client.AddVariable(channel_name);
+
+  // checking connection and updated values on server and client sides
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
+
+  // changing the value via the client with a conversion
+  sup::dto::AnyValue update({{"value", {sup::dto::BooleanType, false}}});
+  EXPECT_TRUE(client.SetValue(channel_name, update));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == update; }));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == update; }));
+}
