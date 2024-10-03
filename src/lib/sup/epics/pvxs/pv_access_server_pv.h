@@ -79,9 +79,6 @@ private:
   VariableChangedCallback m_callback;
   pvxs::server::SharedPV m_shared_pv;
   mutable std::mutex m_mutex;
-
-  struct PvAccessServerPVImpl;
-  PvAccessServerPVImpl* p_impl{nullptr};
 };
 
 }  // namespace epics

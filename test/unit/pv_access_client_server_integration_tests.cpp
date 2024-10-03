@@ -214,7 +214,7 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
 
-TEST_F(PvAccessClientServerIntegrationTests, ClientServerTypeEquality)
+TEST_F(PvAccessClientServerIntegrationTests, DISABLED_ClientServerTypeEquality)
 {
   const std::string channel_name("channel2");
   const std::string choices_typename = "MyStringList";

@@ -8,6 +8,7 @@ Welcome to sup-epics's documentation!
    :caption: Contents:
 
    channel_access_pv
+   pv_access_pv
 
 Indices and tables
 ==================

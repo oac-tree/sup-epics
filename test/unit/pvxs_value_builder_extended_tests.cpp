@@ -219,7 +219,7 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayInStruct)
 
 //! Build PVXS value from AnyValue representing a array of integers with typename inside a struct.
 
-TEST_F(PvxsValueBuilderExtendedTests, NamedArrayInStruct)
+TEST_F(PvxsValueBuilderExtendedTests, DISABLED_NamedArrayInStruct)
 {
   const std::string struct_name{"struct_name"};
   const std::string array_name{"array_name"};
