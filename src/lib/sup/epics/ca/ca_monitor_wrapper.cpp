@@ -41,7 +41,7 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
   info.severity = severity;
   if (ref && VerifyCount(count))  // Only dereference ref during success
   {
-    info.value = cahelper::ParseAnyValue(m_anytype, (char*)ref);
+    info.value = cahelper::ParseAnyValue(m_anytype, count, (char*)ref);
   }
   return m_mon_cb(info);
 }
@@ -49,7 +49,7 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
 bool CAMonitorWrapper::VerifyCount(long count)
 {
   auto expected = sup::dto::IsArrayType(m_anytype) ? m_anytype.NumberOfElements() : 1;
-  return count > 0 && (size_t)count == expected;
+  return count > 0 && (size_t)count <= expected;
 }
 
 }  // namespace epics

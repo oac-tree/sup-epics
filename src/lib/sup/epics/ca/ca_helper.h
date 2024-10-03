@@ -43,7 +43,7 @@ chtype ChannelType(const sup::dto::AnyType& anytype);
 
 unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype);
 
-sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, char* ref);
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, unsigned long count, char* ref);
 
 }  // namespace cahelper
 

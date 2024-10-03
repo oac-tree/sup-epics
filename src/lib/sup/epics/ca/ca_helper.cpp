@@ -41,8 +41,11 @@ sup::dto::AnyValue ParseFromUnsignedEnumTypes(const sup::dto::AnyType& anytype, 
                                           unsigned long multiplicity);
 sup::dto::AnyValue ParseFromUnsignedType(const sup::dto::AnyType& anytype, char* ref);
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str);
-sup::dto::AnyValue ParseBooleans(char* ref, unsigned long multiplicity);
+sup::dto::AnyValue ParseBooleans(const sup::dto::AnyType& anytype, char* ref,
+                                 unsigned long multiplicity);
 sup::dto::AnyValue ParseBoolean(char* ref);
+sup::dto::AnyValue ParseFromBytes(const sup::dto::AnyType& anytype, chtype channeltype, char* ref,
+                                  unsigned long multiplicity);
 std::string GetEPICSString(char* ref);
 
 }  // unnamed namespace
@@ -106,37 +109,35 @@ unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
   return result ? result : 1u;
 }
 
-sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, char* ref)
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, unsigned long count, char* ref)
 {
   if (!ref)
   {
     return {};
   }
   auto chtype = ChannelType(anytype);
-  auto multiplicity = ChannelMultiplicity(anytype);
   if (chtype == DBR_STRING)
   {
-    return ParseFromStringTypes(anytype, ref, multiplicity);
+    return ParseFromStringTypes(anytype, ref, count);
   }
   if (chtype == DBR_ENUM)
   {
-    return ParseFromUnsignedEnumTypes(anytype, ref, multiplicity);
+    return ParseFromUnsignedEnumTypes(anytype, ref, count);
   }
-  sup::dto::AnyValue result{anytype};
-  auto size = dbr_size[chtype] * multiplicity;
-  if (anytype == sup::dto::BooleanType)
+  if (anytype == sup::dto::BooleanType
+      || (sup::dto::IsArrayType(anytype) && anytype.ElementType() == sup::dto::BooleanType))
   {
-    return ParseBooleans(ref, multiplicity);
+    return ParseBooleans(anytype, ref, count);
   }
   try
   {
-    sup::dto::FromBytes(result, (const sup::dto::uint8*)ref, size);
+    return ParseFromBytes(anytype, chtype, ref, count);
   }
   catch(const sup::dto::MessageException&)
   {
     return {};
   }
-  return result;
+  return {};
 }
 
 }  // namespace cahelper
@@ -208,9 +209,9 @@ chtype ArrayTypeCodeToChannelType(sup::dto::TypeCode typecode)
 sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
                                         unsigned long multiplicity)
 {
-  if (multiplicity > 1)
+  sup::dto::AnyValue result{anytype};
+  if (result.NumberOfElements() > 0)
   {
-    sup::dto::AnyValue result{anytype};
     sup::dto::AnyType el_type = anytype.ElementType();
     const std::size_t kEpicsStringLength = dbr_size[DBR_STRING];
     for (unsigned long idx = 0; idx < multiplicity; ++idx)
@@ -234,11 +235,11 @@ sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* r
 }
 
 sup::dto::AnyValue ParseFromUnsignedEnumTypes(const sup::dto::AnyType& anytype, char* ref,
-                                          unsigned long multiplicity)
+                                              unsigned long multiplicity)
 {
-  if (multiplicity > 1)
+  sup::dto::AnyValue result{anytype};
+  if (result.NumberOfElements() > 0)
   {
-    sup::dto::AnyValue result{anytype};
     sup::dto::AnyType el_type = anytype.ElementType();
     const std::size_t kEnumLength = dbr_size[DBR_ENUM];
     for (unsigned long idx = 0; idx < multiplicity; ++idx)
@@ -273,11 +274,12 @@ sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, cons
   return parser.MoveAnyValue();
 }
 
-sup::dto::AnyValue ParseBooleans(char* ref, unsigned long multiplicity)
+sup::dto::AnyValue ParseBooleans(const sup::dto::AnyType& anytype, char* ref,
+                                 unsigned long multiplicity)
 {
-  if (multiplicity > 1)
+  sup::dto::AnyValue result{anytype};
+  if (result.NumberOfElements() > 0)
   {
-    sup::dto::AnyValue result{multiplicity, sup::dto::BooleanType};
     for (unsigned long idx = 0; idx < multiplicity; ++idx)
     {
       result[idx] = ParseBoolean(ref + idx);
@@ -293,6 +295,28 @@ sup::dto::AnyValue ParseBoolean(char* ref)
   sup::dto::AnyValue result{sup::dto::BooleanType};
   result.ConvertFrom(tmp);
   return result;
+}
+
+sup::dto::AnyValue ParseFromBytes(const sup::dto::AnyType& anytype, chtype channeltype, char* ref,
+                                  unsigned long multiplicity)
+{
+  sup::dto::AnyValue temp{anytype};
+  if (sup::dto::IsArrayType(anytype))
+  {
+    temp = sup::dto::AnyValue{multiplicity, anytype.ElementType(), anytype.GetTypeName()};
+  }
+  auto size = dbr_size[channeltype] * multiplicity;
+  sup::dto::FromBytes(temp, (const sup::dto::uint8*)ref, size);
+  if (sup::dto::IsArrayType(anytype))
+  {
+    sup::dto::AnyValue result{anytype};
+    for (size_t i=0; i<multiplicity; ++i)
+    {
+      result[i] = temp[i];
+    }
+    return result;
+  }
+  return temp;
 }
 
 std::string GetEPICSString(char* ref)
