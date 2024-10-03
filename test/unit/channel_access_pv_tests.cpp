@@ -633,6 +633,26 @@ TEST_F(ChannelAccessPVTest, UInt64Waveform)
   }
 }
 
+TEST_F(ChannelAccessPVTest, ShortenedWaveform)
+{
+  using namespace sup::epics;
+
+  sup::dto::AnyType float_array_t(6, sup::dto::Float32Type, "float32[]");
+  ChannelAccessPV ca_floatarray_var("CA-TESTS:SHORTFLOATARRAY", float_array_t);
+
+  // waiting for connected client and valid value
+  EXPECT_TRUE(ca_floatarray_var.WaitForConnected(5.0));
+  EXPECT_TRUE(ca_floatarray_var.WaitForValidValue(5.0));
+
+  sup::dto::AnyValue float_array_v{float_array_t};
+  float_array_v[0] = 1.0f;
+  float_array_v[1] = 2.0f;
+  float_array_v[2] = 3.0f;
+  float_array_v[3] = 4.0f;
+  float_array_v[4] = 5.0f;
+  EXPECT_TRUE(WaitForValue(ca_floatarray_var, float_array_v, 5.0));
+}
+
 TEST_F(ChannelAccessPVTest, DISABLED_ShortLivedPV)
 {
   using namespace sup::epics;

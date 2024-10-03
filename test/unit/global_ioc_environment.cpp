@@ -104,6 +104,18 @@ record (waveform,"CA-TESTS:UINT64ARRAY")
     field(FTVL, "UINT64")
     field(NELM, "10")
 }
+
+record(waveform,"CA-TESTS:SHORTFLOATARRAY") {
+    field(DESC,"distance")
+    field(DTYP,"Soft Channel")
+    field(INP,"[1,2,3,4,5]")
+    field(PINI,"YES")
+    field(EGU,"meters")
+    field(HOPR,"60")
+    field(LOPR,"0")
+    field(NELM,"6")
+    field(FTVL,"FLOAT")
+}
 )RAW";
 
 //! Returns string representing EPICS database file with several testing variables.
