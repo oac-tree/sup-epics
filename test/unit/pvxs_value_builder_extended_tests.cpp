@@ -219,6 +219,8 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayInStruct)
 
 //! Build PVXS value from AnyValue representing a array of integers with typename inside a struct.
 
+// This test is disabled as PVXS currently does not support named array types
+
 TEST_F(PvxsValueBuilderExtendedTests, DISABLED_NamedArrayInStruct)
 {
   const std::string struct_name{"struct_name"};

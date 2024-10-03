@@ -214,6 +214,8 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
 
+// This test is disabled as PVXS currently does not support named array types
+
 TEST_F(PvAccessClientServerIntegrationTests, DISABLED_ClientServerTypeEquality)
 {
   const std::string channel_name("channel2");
