@@ -345,7 +345,7 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactory)
   output = sup::dto::AnyValue{};
   EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::ServerProtocolDecodingError);
   EXPECT_EQ(test_protocol.GetRequest(), request);
-  EXPECT_EQ(output, reply);
+  EXPECT_TRUE(sup::dto::IsEmptyValue(output));
 }
 
 TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
@@ -395,5 +395,5 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
   output = sup::dto::AnyValue{};
   EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::ServerProtocolDecodingError);
   EXPECT_EQ(test_protocol.GetRequest(), request);
-  EXPECT_EQ(output, reply);
+  EXPECT_TRUE(sup::dto::IsEmptyValue(output));
 }
