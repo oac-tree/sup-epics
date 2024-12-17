@@ -55,8 +55,6 @@ public:
    * will be called serially, we need to hold this lock to prevent reordering of value updates with
    * respect to their callbacks being called.
    *
-   * @return True if the variable was connected within the timeout period.
-   *
    * @throws std::runtime_error when the EPICS context or channel could not be created (not
    * related to the fact that the specific PV might not be connected).
    */

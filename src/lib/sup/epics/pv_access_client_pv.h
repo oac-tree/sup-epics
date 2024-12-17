@@ -54,6 +54,10 @@ public:
    *
    * @param channel EPICS channel name.
    * @param cb Callback function to call when the variable's value or status changed.
+   *
+   * @details The optional callback will be called while holding an internal lock that is also
+   * used for any read/write operation on the PV (IsConnected/GetValue/etc.) So be aware for
+   * deadlocks in callbacks that will acquire another lock!
    */
   explicit PvAccessClientPV(const std::string& channel, VariableChangedCallback cb = {});
 

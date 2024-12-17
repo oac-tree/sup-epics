@@ -128,70 +128,64 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
 
 bool PvAccessClientPVImpl::WaitForConnected(double timeout_sec) const
 {
-  auto end_time = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
   auto pred = [this]{
     return m_cache.connected;
   };
   std::unique_lock<std::mutex> lk(m_mon_mtx);
-  return m_cv.wait_until(lk, end_time, pred);
+  return m_cv.wait_for(lk, duration, pred);
 }
 
 bool PvAccessClientPVImpl::WaitForValidValue(double timeout_sec) const
 {
-  auto end_time = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
   auto pred = [this]{
     return m_cache.connected && !sup::dto::IsEmptyValue(m_cache.value);
   };
   std::unique_lock<std::mutex> lk(m_mon_mtx);
-  return m_cv.wait_until(lk, end_time, pred);
+  return m_cv.wait_for(lk, duration, pred);
 }
 
 void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
 {
-  PvAccessClientPV::ExtendedValue result;
   {
     std::lock_guard<std::mutex> lk(m_mon_mtx);
-    result = m_cache;
-  }
-  while (true)
-  {
-    try
+    auto result = m_cache;
+    while (true)
     {
-      auto update = sub.pop();
-      if (update)
+      try
       {
-        if (!sup::dto::TryAssignIfEmptyOrConvert(result.value, sup::epics::BuildAnyValue(update)))
+        auto update = sub.pop();
+        if (update)
         {
-          throw std::runtime_error("PvAccessClientPVImpl received incompatible value update.");
+          if (!sup::dto::TryAssignIfEmptyOrConvert(result.value, sup::epics::BuildAnyValue(update)))
+          {
+            throw std::runtime_error("PvAccessClientPVImpl received incompatible value update.");
+          }
+        }
+        else
+        {
+          break;
         }
       }
-      else
+      catch (pvxs::client::Connected& ex)
       {
-        break;
+        result.connected = true;
+      }
+      catch (pvxs::client::Disconnect& ex)
+      {
+        result.connected = false;
+      }
+      catch (std::exception& ex)
+      {
+        throw ex;
       }
     }
-    catch (pvxs::client::Connected& ex)
-    {
-      result.connected = true;
-    }
-    catch (pvxs::client::Disconnect& ex)
-    {
-      result.connected = false;
-    }
-    catch (std::exception& ex)
-    {
-      throw ex;
-    }
-  }
-  {
-    std::lock_guard<std::mutex> lk(m_mon_mtx);
     m_cache = result;
-  }
-  if (m_changed_cb)
-  {
-    m_changed_cb(result);
+    if (m_changed_cb)
+    {
+      m_changed_cb(result);
+    }
   }
   m_cv.notify_one();
 }
