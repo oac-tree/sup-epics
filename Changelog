@@ -2,6 +2,7 @@ Changes for 1.5.0:
 
 - Allow basic conversion when setting value of PvAccessClientPV
 - Allow for ChannelAccess IOCs to report less elements than expected for a waveform
+- Changed C++ standard for C++17
 
 Changes for 1.4.0:
 
