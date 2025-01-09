@@ -19,6 +19,7 @@
 
 #include "unit_test_helper.h"
 
+#include <chrono>
 #include <cmath>
 #include <thread>
 
@@ -30,8 +31,8 @@ namespace test
 {
 bool BusyWaitFor(double timeout_sec, std::function<bool()> predicate)
 {
-  long timeout_ns = std::lround(timeout_sec * 1e9);
-  auto time_end = std::chrono::system_clock::now() + std::chrono::nanoseconds(timeout_ns);
+  auto timedelta = std::chrono::duration<double>(timeout_sec);
+  auto time_end = std::chrono::system_clock::now() + timedelta;
   while (!predicate() && std::chrono::system_clock::now() < time_end)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(20));

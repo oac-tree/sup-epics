@@ -128,7 +128,7 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
 
 bool PvAccessClientPVImpl::WaitForConnected(double timeout_sec) const
 {
-  auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  auto duration = std::chrono::duration<double>(timeout_sec);
   auto pred = [this]{
     return m_cache.connected;
   };
@@ -138,7 +138,7 @@ bool PvAccessClientPVImpl::WaitForConnected(double timeout_sec) const
 
 bool PvAccessClientPVImpl::WaitForValidValue(double timeout_sec) const
 {
-  auto duration = std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+  auto duration = std::chrono::duration<double>(timeout_sec);
   auto pred = [this]{
     return m_cache.connected && !sup::dto::IsEmptyValue(m_cache.value);
   };

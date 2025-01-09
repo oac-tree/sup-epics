@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <functional>
 #include <thread>
@@ -111,7 +112,7 @@ TEST(ChannelAccessBaseTest, DISABLED_MissedCallback)
 static bool WaitForValue(std::atomic_int& var, std::function<bool(int)> pred, double timeout_sec)
 {
   auto timeout = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+                 std::chrono::duration<double>(timeout_sec);
   int current = var.load();
   while (!pred(current))
   {

@@ -705,7 +705,7 @@ static bool WaitForValue(const sup::epics::ChannelAccessPV& variable,
                          const sup::dto::AnyValue& expected_value, double timeout_sec)
 {
   auto timeout =
-      std::chrono::system_clock::now() + std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+      std::chrono::system_clock::now() + std::chrono::duration<double>(timeout_sec);
   sup::dto::AnyValue value_read = variable.GetValue();
   while (value_read != expected_value)
   {

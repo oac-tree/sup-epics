@@ -225,7 +225,7 @@ static bool WaitForValue(const sup::epics::ChannelAccessClient& client,
                          double timeout_sec)
 {
   auto timeout = std::chrono::system_clock::now() +
-                 std::chrono::nanoseconds(std::lround(timeout_sec * 1e9));
+                 std::chrono::duration<double>(timeout_sec);
   sup::dto::AnyValue value_read = client.GetValue(name);
   while (value_read != expected_value)
   {
