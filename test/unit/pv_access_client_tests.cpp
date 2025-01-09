@@ -31,9 +31,7 @@
 #include <sup/epics/pvxs/pv_access_client_impl.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 
-#include <memory>
 #include <stdexcept>
-#include <thread>
 
 #include <sup/epics-test/unit_test_helper.h>
 

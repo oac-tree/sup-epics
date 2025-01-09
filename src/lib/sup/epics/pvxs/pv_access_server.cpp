@@ -26,8 +26,6 @@
 
 #include <pvxs/server.h>
 
-#include <map>
-#include <memory>
 #include <stdexcept>
 #include <sup/dto/anyvalue.h>
 

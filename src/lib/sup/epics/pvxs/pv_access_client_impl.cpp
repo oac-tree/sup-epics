@@ -20,7 +20,6 @@
 #include "pv_access_client_impl.h"
 
 #include "pv_access_client_pv_impl.h"
-#include <memory>
 
 namespace sup
 {

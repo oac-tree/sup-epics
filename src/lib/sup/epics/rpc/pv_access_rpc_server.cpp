@@ -21,7 +21,6 @@
 
 #include <sup/epics/rpc/pv_access_rpc_client_impl.h>
 #include <sup/epics/rpc/pv_access_rpc_server_impl.h>
-#include <memory>
 
 namespace sup
 {

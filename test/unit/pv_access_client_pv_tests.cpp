@@ -31,9 +31,6 @@
 #include <sup/epics/pvxs/pv_access_client_pv_impl.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 
-#include <memory>
-#include <thread>
-
 #include <sup/epics-test/unit_test_helper.h>
 
 using sup::epics::test::BusyWaitFor;

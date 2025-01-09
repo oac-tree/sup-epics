@@ -19,7 +19,6 @@
 
 #include <sup/epics/channel_access_client.h>
 
-#include <memory>
 #include <stdexcept>
 
 namespace sup

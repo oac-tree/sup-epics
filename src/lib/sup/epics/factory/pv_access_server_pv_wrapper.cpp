@@ -21,8 +21,6 @@
 
 #include <sup/protocol/exceptions.h>
 
-#include <memory>
-
 namespace sup
 {
 namespace epics

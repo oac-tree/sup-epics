@@ -24,7 +24,6 @@
 #include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
 
-#include <memory>
 #include <stack>
 #include <stdexcept>
 

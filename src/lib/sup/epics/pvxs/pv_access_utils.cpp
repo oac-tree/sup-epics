@@ -19,7 +19,6 @@
 
 #include "pv_access_utils.h"
 
-#include <memory>
 #include <mutex>
 
 namespace sup

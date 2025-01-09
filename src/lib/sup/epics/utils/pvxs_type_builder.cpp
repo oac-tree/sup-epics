@@ -24,9 +24,7 @@
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/dto_typecode_conversion_utils.h>
 
-#include <memory>
 #include <stack>
-#include <stdexcept>
 
 namespace sup
 {

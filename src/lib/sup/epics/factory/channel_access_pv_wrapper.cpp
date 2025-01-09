@@ -20,7 +20,6 @@
 #include "channel_access_pv_wrapper.h"
 
 #include <sup/protocol/exceptions.h>
-#include <memory>
 
 namespace sup
 {

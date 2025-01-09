@@ -26,7 +26,6 @@
 
 #include <sup/dto/anyvalue_helper.h>
 #include <cadef.h>
-#include <memory>
 #include <utility>
 
 namespace

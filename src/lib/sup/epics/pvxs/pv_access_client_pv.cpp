@@ -17,7 +17,6 @@
  * of the distribution package.
  *****************************************************************************/
 #include <sup/epics/pv_access_client_pv.h>
-#include <memory>
 
 #include "pv_access_client_pv_impl.h"
 #include "pv_access_utils.h"

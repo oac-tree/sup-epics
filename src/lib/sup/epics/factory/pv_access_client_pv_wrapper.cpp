@@ -20,7 +20,6 @@
 #include "pv_access_client_pv_wrapper.h"
 
 #include <sup/protocol/exceptions.h>
-#include <memory>
 
 namespace sup
 {

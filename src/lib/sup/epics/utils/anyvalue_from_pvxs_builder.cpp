@@ -27,8 +27,6 @@
 #include <sup/epics/utils/pvxs_utils.h>
 
 #include <cassert>
-#include <list>
-#include <memory>
 #include <sstream>
 #include <stack>
 #include <stdexcept>

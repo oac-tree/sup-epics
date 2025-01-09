@@ -24,7 +24,6 @@
 #include <pvxs/client.h>
 #include <pvxs/server.h>
 
-#include <memory>
 #include <stdexcept>
 
 namespace sup

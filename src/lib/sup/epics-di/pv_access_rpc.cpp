@@ -26,8 +26,6 @@
 
 #include <sup/di/object_manager.h>
 
-#include <memory>
-
 using namespace sup::epics;
 
 // Register PvAccessRPCClient:

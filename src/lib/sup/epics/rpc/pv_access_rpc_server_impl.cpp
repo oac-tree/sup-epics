@@ -27,8 +27,6 @@
 
 #include <pvxs/sharedpv.h>
 
-#include <memory>
-
 namespace sup
 {
 namespace epics

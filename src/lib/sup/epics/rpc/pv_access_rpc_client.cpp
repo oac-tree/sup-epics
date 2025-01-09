@@ -24,7 +24,6 @@
 
 #include <sup/dto/anyvalue.h>
 #include <sup/protocol/protocol_result.h>
-#include <memory>
 
 static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
