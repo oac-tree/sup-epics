@@ -89,7 +89,7 @@ pvxs::TypeCode FindTypeCode(const T& container, const sup::dto::AnyType& any_typ
 template <typename T>
 sup::dto::TypeCode FindAnyTypeCode(const T& container, const pvxs::TypeCode& type_code)
 {
-  auto on_element = [type_code](const typename T::value_type& pair)
+  auto on_element = [type_code](const auto& pair)
   { return pair.second == type_code; };
   auto it = std::find_if(container.begin(), container.end(), on_element);
   if (it == container.end())

@@ -68,7 +68,7 @@ std::vector<std::string> PvAccessServerImpl::GetVariableNames() const
 {
   std::vector<std::string> result;
   std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
-                 [](decltype(m_variables)::value_type const& pair) { return pair.first; });
+                 [](const auto& pair) { return pair.first; });
   return result;
 }
 

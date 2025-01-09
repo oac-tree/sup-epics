@@ -45,10 +45,10 @@ void PvAccessClientImpl::AddVariable(const std::string& channel)
     throw std::runtime_error("Error in PvAccessClientImpl: existing variable name '" + channel + "'.");
   }
 
-  auto pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(
-      channel, m_context, [this, &channel](const PvAccessClientPV::ExtendedValue& value) {
-        OnVariableChanged(channel, value);
-      });
+  auto cb = [this, &channel](const PvAccessClientPV::ExtendedValue& value) {
+      OnVariableChanged(channel, value);
+  };
+  auto pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(channel, m_context, cb);
   m_variables.emplace(channel, std::make_unique<sup::epics::PvAccessClientPV>(std::move(pv_impl)));
 }
 
@@ -56,7 +56,7 @@ std::vector<std::string> PvAccessClientImpl::GetVariableNames() const
 {
   std::vector<std::string> result;
   std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
-                 [](decltype(m_variables)::value_type const& pair) { return pair.first; });
+                 [](const auto& pair) { return pair.first; });
   return result;
 }
 
