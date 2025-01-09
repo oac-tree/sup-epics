@@ -79,9 +79,9 @@ bool PvAccessServer::SetValue(const std::string &name, const dto::AnyValue &valu
 
 void PvAccessServer::Start()
 {
-  for(const auto& entry : p_impl->GetVariables())
+  for(const auto& [_, variable] : p_impl->GetVariables())
   {
-    entry.second->AddToServer(*p_impl->GetContext());
+    variable->AddToServer(*p_impl->GetContext());
   }
 
   // starting PVXS server

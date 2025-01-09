@@ -58,9 +58,10 @@ bool ChannelAccessClient::AddVariable(const std::string& channel, const sup::dto
 std::vector<std::string> ChannelAccessClient::GetVariableNames() const
 {
   std::vector<std::string> result;
-  for (const auto& pv_entry : pv_map)
+  result.reserve(pv_map.size());
+  for (const auto& [name, _] : pv_map)
   {
-    result.push_back(pv_entry.first);
+    result.push_back(name);
   }
   return result;
 }

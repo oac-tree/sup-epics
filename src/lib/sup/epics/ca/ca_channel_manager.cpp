@@ -73,9 +73,9 @@ ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::
   std::lock_guard<std::mutex> lk(mtx);
   EnsureContext();
   auto id = GenerateID();
-  auto insert_result = callback_map.emplace(
-    std::make_pair(id, ChannelInfo(type, std::move(conn_cb), std::move(mon_cb))));
-  auto channel_info_it = &insert_result.first->second;
+  auto [it, _] =
+      callback_map.emplace(id, ChannelInfo(type, std::move(conn_cb), std::move(mon_cb)));
+  auto channel_info_it = &it->second;
   auto add_task = std::packaged_task<bool()>([&name, channel_type, channel_info_it](){
     return channeltasks::AddChannelTask(name, channel_type, &channel_info_it->channel_id,
                                         &channel_info_it->connection_cb,
@@ -87,7 +87,7 @@ ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::
     {
       DelegateRemoveChannel(context_handle.get(), channel_info_it->channel_id);
     }
-    callback_map.erase(insert_result.first);
+    callback_map.erase(it);
     id = 0;
   }
   ClearContextIfNotNeeded();
