@@ -98,7 +98,7 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAServerProcessVariable(
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   sup::protocol::Protocol& protocol, const PvAccessRPCServerConfig& server_config)
 {
-  auto factory_funct = [&server_config](sup::dto::AnyFunctor& functor){
+  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
     return std::make_unique<PvAccessRPCServer>(server_config, functor);
   };
   return sup::protocol::CreateRPCServerStack(factory_funct, protocol);

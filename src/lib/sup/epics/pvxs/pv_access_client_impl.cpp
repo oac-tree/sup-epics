@@ -44,7 +44,7 @@ void PvAccessClientImpl::AddVariable(const std::string& channel)
     throw std::runtime_error("Error in PvAccessClientImpl: existing variable name '" + channel + "'.");
   }
 
-  auto cb = [this, &channel](const PvAccessClientPV::ExtendedValue& value) {
+  auto cb = [this, channel](const PvAccessClientPV::ExtendedValue& value) {
       OnVariableChanged(channel, value);
   };
   auto pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(channel, m_context, cb);
