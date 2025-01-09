@@ -24,6 +24,7 @@
 
 #include <sup/dto/anyvalue.h>
 #include <sup/protocol/protocol_result.h>
+#include <memory>
 
 static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
@@ -33,7 +34,7 @@ namespace epics
 {
 
 PvAccessRPCClient::PvAccessRPCClient(const PvAccessRPCClientConfig& config)
-  : m_impl{new PvAccessRPCClientImpl(config, utils::GetSharedClientContext())}
+  : m_impl{std::make_unique<PvAccessRPCClientImpl>(config, utils::GetSharedClientContext())}
 {}
 
 PvAccessRPCClient::PvAccessRPCClient(std::unique_ptr<PvAccessRPCClientImpl>&& impl)

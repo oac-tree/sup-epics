@@ -17,6 +17,7 @@
  * of the distribution package.
  *****************************************************************************/
 #include <sup/epics/pv_access_client_pv.h>
+#include <memory>
 
 #include "pv_access_client_pv_impl.h"
 #include "pv_access_utils.h"
@@ -32,7 +33,7 @@ PvAccessClientPV::ExtendedValue::ExtendedValue()
 {}
 
 PvAccessClientPV::PvAccessClientPV(const std::string& channel, VariableChangedCallback cb)
-  : m_impl{new PvAccessClientPVImpl(channel, utils::GetSharedClientContext(), cb)}
+  : m_impl{std::make_unique<PvAccessClientPVImpl>(channel, utils::GetSharedClientContext(), cb)}
 {}
 
 PvAccessClientPV::PvAccessClientPV(std::unique_ptr<PvAccessClientPVImpl>&& impl)

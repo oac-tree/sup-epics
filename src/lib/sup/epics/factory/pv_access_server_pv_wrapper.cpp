@@ -21,6 +21,8 @@
 
 #include <sup/protocol/exceptions.h>
 
+#include <memory>
+
 namespace sup
 {
 namespace epics
@@ -35,7 +37,7 @@ PVAccessServerPVWrapper::PVAccessServerPVWrapper(const std::string& channel,
   auto callback = [this](const std::string&, const sup::dto::AnyValue& val){
     return OnUpdate(val);
   };
-  m_server.reset(new PvAccessServer(callback));
+  m_server = std::make_unique<PvAccessServer>(callback);
   m_server->AddVariable(m_channel, value);
   m_server->Start();
 }

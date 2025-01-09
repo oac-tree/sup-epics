@@ -26,7 +26,7 @@ namespace epics
 {
 
 PvAccessClient::PvAccessClient(VariableChangedCallback cb)
-  : m_impl{new PvAccessClientImpl(utils::GetSharedClientContext(), cb)}
+  : m_impl{std::make_unique<PvAccessClientImpl>(utils::GetSharedClientContext(), std::move(cb))}
 {}
 
 PvAccessClient::PvAccessClient(std::unique_ptr<PvAccessClientImpl>&& impl)

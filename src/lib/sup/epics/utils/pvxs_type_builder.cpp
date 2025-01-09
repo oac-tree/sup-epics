@@ -24,6 +24,7 @@
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 #include <sup/epics/utils/dto_typecode_conversion_utils.h>
 
+#include <memory>
 #include <stack>
 #include <stdexcept>
 
@@ -38,7 +39,7 @@ struct PvxsTypeBuilder::PvxsTypeBuilderImpl
   std::stack<::pvxs::TypeDef> m_struct_stack;
 };
 
-PvxsTypeBuilder::PvxsTypeBuilder() : p_impl(new PvxsTypeBuilderImpl) {}
+PvxsTypeBuilder::PvxsTypeBuilder() : p_impl(std::make_unique<PvxsTypeBuilderImpl>()) {}
 
 PvxsTypeBuilder::~PvxsTypeBuilder() = default;
 

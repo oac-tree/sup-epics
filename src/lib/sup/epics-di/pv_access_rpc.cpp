@@ -26,6 +26,8 @@
 
 #include <sup/di/object_manager.h>
 
+#include <memory>
+
 using namespace sup::epics;
 
 // Register PvAccessRPCClient:
@@ -33,15 +35,13 @@ using namespace sup::epics;
 std::unique_ptr<PvAccessRPCClientConfig> PvAccessRPCClientConfigDefaultFactoryFunction(
   const std::string& service_name)
 {
-  return std::unique_ptr<PvAccessRPCClientConfig>{
-    new PvAccessRPCClientConfig{GetDefaultRPCClientConfig(service_name)}};
+  return std::make_unique<PvAccessRPCClientConfig>(GetDefaultRPCClientConfig(service_name));
 }
 
 std::unique_ptr<PvAccessRPCClientConfig> PvAccessRPCClientConfigFactoryFunction(
   const std::string& service_name, double timeout)
 {
-  return std::unique_ptr<PvAccessRPCClientConfig>{
-    new PvAccessRPCClientConfig{service_name, timeout}};
+  return std::make_unique<PvAccessRPCClientConfig>(PvAccessRPCClientConfig{service_name, timeout});
 }
 
 const bool PvAccessRPCClientConfigDefault_Registered =
@@ -62,8 +62,7 @@ const bool PvAccessRPCClient_Registered =
 std::unique_ptr<PvAccessRPCServerConfig> PvAccessRPCServerConfigFactoryFunction(
   const std::string& service_name)
 {
-  return std::unique_ptr<PvAccessRPCServerConfig>{
-    new PvAccessRPCServerConfig{GetDefaultRPCServerConfig(service_name)}};
+  return std::make_unique<PvAccessRPCServerConfig>(GetDefaultRPCServerConfig(service_name));
 }
 
 const bool PvAccessRPCServerConfig_Registered =

@@ -27,6 +27,8 @@
 
 #include <pvxs/sharedpv.h>
 
+#include <memory>
+
 namespace sup
 {
 namespace epics
@@ -80,16 +82,14 @@ std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(
   const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler)
 {
   auto server = utils::CreateIsolatedServer();
-  return std::unique_ptr<PvAccessRPCServerImpl>(
-    new PvAccessRPCServerImpl(std::move(server), config, handler));
+  return std::make_unique<PvAccessRPCServerImpl>(std::move(server), config, handler);
 }
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateRPCServerImplFromEnv(
   const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler)
 {
   auto server = utils::CreateServerFromEnv();
-  return std::unique_ptr<PvAccessRPCServerImpl>(
-    new PvAccessRPCServerImpl(std::move(server), config, handler));
+  return std::make_unique<PvAccessRPCServerImpl>(std::move(server), config, handler);
 }
 
 }  // namespace epics

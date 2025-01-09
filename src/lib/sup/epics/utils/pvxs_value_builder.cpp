@@ -24,6 +24,7 @@
 #include <sup/epics/utils/pvxs_utils.h>
 #include <sup/epics/utils/pvxs_value_builder.h>
 
+#include <memory>
 #include <stack>
 #include <stdexcept>
 
@@ -78,7 +79,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   template <typename T, typename... Args>
   void ProcessComponent(Args &&...args)
   {
-    auto component = std::unique_ptr<T>(new T((args)...));
+    auto component = std::make_unique<T>((args)...);
     m_nodes.push(std::move(component));
   }
 
@@ -94,7 +95,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   }
 };
 
-PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(new PvxsValueBuilderImpl)
+PvxsValueBuilder::PvxsValueBuilder(::pvxs::TypeDef type_def) : p_impl(std::make_unique<PvxsValueBuilderImpl>())
 {
   p_impl->ProcessComponent<PvxsBuilderNode>(CreateValueFromType(type_def));
 }

@@ -80,29 +80,26 @@ std::unique_ptr<sup::protocol::Protocol> EPICSProtocolFactory::CreateRPCClient(
 std::unique_ptr<sup::protocol::ProcessVariable> CreateCAClientProcessVariable(
   const std::string& channel, const sup::dto::AnyType& var_type)
 {
-  return std::unique_ptr<sup::protocol::ProcessVariable>(
-    new ChannelAccessPVWrapper(channel, var_type));
+  return std::make_unique<ChannelAccessPVWrapper>(channel, var_type);
 }
 
 std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAClientProcessVariable(
   const std::string& channel)
 {
-  return std::unique_ptr<sup::protocol::ProcessVariable>(new PVAccessClientPVWrapper(channel));
+  return std::make_unique<PVAccessClientPVWrapper>(channel);
 }
 
 std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAServerProcessVariable(
   const std::string& channel, const sup::dto::AnyValue& value)
 {
-  return std::unique_ptr<sup::protocol::ProcessVariable>(
-    new PVAccessServerPVWrapper(channel, value));
+  return std::make_unique<PVAccessServerPVWrapper>(channel, value);
 }
 
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   sup::protocol::Protocol& protocol, const PvAccessRPCServerConfig& server_config)
 {
-  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
-    return std::unique_ptr<sup::protocol::RPCServerInterface>(
-      new PvAccessRPCServer(server_config, functor));
+  auto factory_funct = [&server_config](sup::dto::AnyFunctor& functor){
+    return std::make_unique<PvAccessRPCServer>(server_config, functor);
   };
   return sup::protocol::CreateRPCServerStack(factory_funct, protocol);
 }
@@ -111,8 +108,7 @@ std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config, sup::protocol::PayloadEncoding encoding)
 {
   auto factory_funct = [client_config](){
-    return std::unique_ptr<sup::dto::AnyFunctor>(
-      new PvAccessRPCClient(client_config));
+    return std::make_unique<PvAccessRPCClient>(client_config);
   };
   return sup::protocol::CreateRPCClientStack(factory_funct, encoding);
 }

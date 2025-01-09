@@ -26,6 +26,7 @@
 
 #include <sup/dto/anyvalue_helper.h>
 #include <cadef.h>
+#include <memory>
 #include <utility>
 
 namespace
@@ -147,7 +148,7 @@ void CAChannelManager::EnsureContext()
 {
   if (!context_handle)
   {
-    context_handle.reset(new CAContextHandle());
+    context_handle = std::make_unique<CAContextHandle>();
   }
 }
 

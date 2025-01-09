@@ -19,6 +19,7 @@
 
 #include <sup/epics/channel_access_client.h>
 
+#include <memory>
 #include <stdexcept>
 
 namespace sup
@@ -42,9 +43,9 @@ bool ChannelAccessClient::AddVariable(const std::string& channel, const sup::dto
   std::unique_ptr<ChannelAccessPV> pv;
   try
   {
-    pv.reset(new ChannelAccessPV(
-        channel, type,
-        std::bind(&ChannelAccessClient::OnVariableUpdated, this, channel, std::placeholders::_1)));
+    pv = std::make_unique<ChannelAccessPV>(
+        channel, type, [this, &channel](auto&& PH1)
+        { OnVariableUpdated(channel, std::forward<decltype(PH1)>(PH1)); });
   }
   catch (const std::runtime_error&)
   {

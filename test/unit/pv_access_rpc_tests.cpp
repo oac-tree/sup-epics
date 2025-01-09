@@ -206,8 +206,8 @@ PvAccessRPCTests::PvAccessRPCTests()
   : m_request{}
   , m_reply{}
   , m_handler{[this](const sup::dto::AnyValue& request, const sup::dto::AnyValue& reply){
-      m_request.reset(new sup::dto::AnyValue(request));
-      m_reply.reset(new sup::dto::AnyValue(reply));
+      m_request = std::make_unique<sup::dto::AnyValue>(request);
+      m_reply = std::make_unique<sup::dto::AnyValue>(reply);
     }}
 {}
 

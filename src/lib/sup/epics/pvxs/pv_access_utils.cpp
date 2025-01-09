@@ -19,6 +19,7 @@
 
 #include "pv_access_utils.h"
 
+#include <memory>
 #include <mutex>
 
 namespace sup
@@ -40,15 +41,13 @@ std::mutex g_server_mtx;
 std::unique_ptr<pvxs::server::Server> CreateIsolatedServer()
 {
   std::lock_guard<std::mutex> lk{g_server_mtx};
-  return std::unique_ptr<pvxs::server::Server>(
-    new pvxs::server::Server(pvxs::server::Config::isolated()));
+  return std::make_unique<pvxs::server::Server>(pvxs::server::Config::isolated());
 }
 
 std::unique_ptr<pvxs::server::Server> CreateServerFromEnv()
 {
   std::lock_guard<std::mutex> lk{g_server_mtx};
-  return std::unique_ptr<pvxs::server::Server>(
-    new pvxs::server::Server(pvxs::server::Config::fromEnv()));
+  return std::make_unique<pvxs::server::Server>(pvxs::server::Config::fromEnv());
 }
 
 }  // namespace utils

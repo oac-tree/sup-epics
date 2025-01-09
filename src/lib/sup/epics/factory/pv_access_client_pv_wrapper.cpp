@@ -20,6 +20,7 @@
 #include "pv_access_client_pv_wrapper.h"
 
 #include <sup/protocol/exceptions.h>
+#include <memory>
 
 namespace sup
 {
@@ -33,7 +34,7 @@ PVAccessClientPVWrapper::PVAccessClientPVWrapper(const std::string& channel)
   auto callback = [this](const PvAccessClientPV::ExtendedValue& val){
     return OnUpdate(val);
   };
-  m_pv_impl.reset(new PvAccessClientPV(channel, callback));
+  m_pv_impl = std::make_unique<PvAccessClientPV>(channel, callback);
 }
 
 PVAccessClientPVWrapper::~PVAccessClientPVWrapper() = default;

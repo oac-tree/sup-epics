@@ -24,6 +24,7 @@
 #include <pvxs/client.h>
 #include <pvxs/server.h>
 
+#include <memory>
 #include <stdexcept>
 
 namespace sup
@@ -59,8 +60,7 @@ void PvAccessServerImpl::AddVariable(const std::string& name, const dto::AnyValu
     { OnVariableChanged(name, any_value); };
   }
 
-  std::unique_ptr<PvAccessServerPV> variable(
-      new PvAccessServerPV(name, any_value, variable_callback));
+  auto variable = std::make_unique<PvAccessServerPV>(name, any_value, variable_callback);
   m_variables.emplace(name, std::move(variable));
 }
 
@@ -105,16 +105,14 @@ std::unique_ptr<PvAccessServerImpl> CreateIsolatedServerImpl(
   PvAccessServer::VariableChangedCallback cb)
 {
   auto server = utils::CreateIsolatedServer();
-  return std::unique_ptr<PvAccessServerImpl>(
-    new PvAccessServerImpl(std::move(server), std::move(cb)));
+  return std::make_unique<PvAccessServerImpl>(std::move(server), std::move(cb));
 }
 
 std::unique_ptr<PvAccessServerImpl> CreateServerImplFromEnv(
   PvAccessServer::VariableChangedCallback cb)
 {
   auto server = utils::CreateServerFromEnv();
-  return std::unique_ptr<PvAccessServerImpl>(
-    new PvAccessServerImpl(std::move(server), std::move(cb)));
+  return std::make_unique<PvAccessServerImpl>(std::move(server), std::move(cb));
 }
 
 }  // namespace epics

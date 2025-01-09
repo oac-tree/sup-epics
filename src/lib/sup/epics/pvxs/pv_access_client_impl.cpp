@@ -20,6 +20,7 @@
 #include "pv_access_client_impl.h"
 
 #include "pv_access_client_pv_impl.h"
+#include <memory>
 
 namespace sup
 {
@@ -44,12 +45,11 @@ void PvAccessClientImpl::AddVariable(const std::string& channel)
     throw std::runtime_error("Error in PvAccessClientImpl: existing variable name '" + channel + "'.");
   }
 
-  std::unique_ptr<sup::epics::PvAccessClientPVImpl> pv_impl{
-      new sup::epics::PvAccessClientPVImpl(channel, m_context,
-        [this, channel](const PvAccessClientPV::ExtendedValue& value) {
-          OnVariableChanged(channel, value);
-        })};
-  m_variables.emplace(channel, new sup::epics::PvAccessClientPV(std::move(pv_impl)));
+  auto pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(
+      channel, m_context, [this, &channel](const PvAccessClientPV::ExtendedValue& value) {
+        OnVariableChanged(channel, value);
+      });
+  m_variables.emplace(channel, std::make_unique<sup::epics::PvAccessClientPV>(std::move(pv_impl)));
 }
 
 std::vector<std::string> PvAccessClientImpl::GetVariableNames() const

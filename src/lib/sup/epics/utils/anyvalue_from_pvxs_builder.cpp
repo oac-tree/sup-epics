@@ -28,6 +28,7 @@
 
 #include <cassert>
 #include <list>
+#include <memory>
 #include <sstream>
 #include <stack>
 #include <stdexcept>
@@ -225,7 +226,7 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
 };
 
 AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value)
-    : p_impl(new AnyValueFromPVXSBuilderImpl)
+  : p_impl(std::make_unique<AnyValueFromPVXSBuilderImpl>())
 {
   p_impl->ProcessPvxsValue(pvxs_value);
 }

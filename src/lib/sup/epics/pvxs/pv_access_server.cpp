@@ -27,6 +27,7 @@
 #include <pvxs/server.h>
 
 #include <map>
+#include <memory>
 #include <stdexcept>
 #include <sup/dto/anyvalue.h>
 
@@ -89,16 +90,14 @@ void PvAccessServer::Start()
 
 PvAccessClient PvAccessServer::CreateClient(PvAccessClient::VariableChangedCallback cb)
 {
-  auto client_impl = std::unique_ptr<sup::epics::PvAccessClientImpl>{
-      new sup::epics::PvAccessClientImpl(p_impl->GetClientContext(), cb)};
+  auto client_impl = std::make_unique<sup::epics::PvAccessClientImpl>(p_impl->GetClientContext(), cb);
   return PvAccessClient{std::move(client_impl)};
 }
 
 PvAccessClientPV PvAccessServer::CreateClientPV(const std::string& channel,
                                                 PvAccessClientPV::VariableChangedCallback cb)
 {
-  auto client_pv_impl = std::unique_ptr<sup::epics::PvAccessClientPVImpl>{
-      new sup::epics::PvAccessClientPVImpl(channel, p_impl->GetClientContext(), cb)};
+  auto client_pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(channel, p_impl->GetClientContext(), cb);
   return PvAccessClientPV{std::move(client_pv_impl)};
 }
 

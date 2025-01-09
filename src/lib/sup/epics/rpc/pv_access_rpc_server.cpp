@@ -21,6 +21,7 @@
 
 #include <sup/epics/rpc/pv_access_rpc_client_impl.h>
 #include <sup/epics/rpc/pv_access_rpc_server_impl.h>
+#include <memory>
 
 namespace sup
 {
@@ -44,7 +45,7 @@ PvAccessRPCServer::~PvAccessRPCServer() = default;
 PvAccessRPCClient PvAccessRPCServer::CreateClient(const PvAccessRPCClientConfig& config)
 {
   auto context = m_impl->GetClientContext();
-  std::unique_ptr<PvAccessRPCClientImpl> client_impl{new PvAccessRPCClientImpl(config, context)};
+  auto client_impl = std::make_unique<PvAccessRPCClientImpl>(config, context);
   return PvAccessRPCClient{std::move(client_impl)};
 }
 

@@ -79,10 +79,8 @@ public:
   std::unique_ptr<sup::epics::PvAccessClientImpl> CreateClientImpl(
       sup::epics::PvAccessClient::VariableChangedCallback cb = {})
   {
-    std::shared_ptr<pvxs::client::Context> context =
-        std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
-    std::unique_ptr<sup::epics::PvAccessClientImpl> result{
-        new sup::epics::PvAccessClientImpl(context, cb)};
+    auto context = std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
+    auto result = std::make_unique<sup::epics::PvAccessClientImpl>(context, cb);
     return result;
   }
 
