@@ -28,9 +28,9 @@ namespace epics
 
 PvAccessClientImpl::PvAccessClientImpl(std::shared_ptr<pvxs::client::Context> context,
                                        PvAccessClient::VariableChangedCallback cb)
-  : m_variables{}
+  : m_cb{cb}
   , m_context{context}
-  , m_cb{cb}
+  , m_variables{}
 {}
 
 PvAccessClientImpl::~PvAccessClientImpl() = default;
