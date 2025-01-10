@@ -144,8 +144,8 @@ public:
 
 private:
   void OnVariableUpdated(const std::string& channel, const ChannelAccessPV::ExtendedValue& value);
+  VariableUpdatedCallback var_updated_cb;  // Order matters: the callback has to outlive the PVs
   std::map<std::string, std::unique_ptr<ChannelAccessPV>> pv_map;
-  VariableUpdatedCallback var_updated_cb;
 };
 }  // namespace epics
 

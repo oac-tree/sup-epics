@@ -27,9 +27,9 @@ namespace epics
 {
 
 ChannelAccessClient::ChannelAccessClient(VariableUpdatedCallback cb)
-    : pv_map{}, var_updated_cb{std::move(cb)}
-{
-}
+    : var_updated_cb{std::move(cb)}
+    , pv_map{}
+{}
 
 ChannelAccessClient::~ChannelAccessClient() = default;
 
@@ -43,7 +43,7 @@ bool ChannelAccessClient::AddVariable(const std::string& channel, const sup::dto
   try
   {
     pv = std::make_unique<ChannelAccessPV>(
-        channel, type, [this, &channel](auto&& PH1)
+        channel, type, [this, channel](auto&& PH1)
         { OnVariableUpdated(channel, std::forward<decltype(PH1)>(PH1)); });
   }
   catch (const std::runtime_error&)
