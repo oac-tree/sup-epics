@@ -51,7 +51,7 @@ public:
 
 private:
   void OnVariableChanged(const std::string& channel, const PvAccessClientPV::ExtendedValue& value);
-  PvAccessClient::VariableChangedCallback m_cb;
+  PvAccessClient::VariableChangedCallback m_cb;  // Order matters: callback should survive PVs
   std::shared_ptr<pvxs::client::Context> m_context;
   std::map<std::string, std::unique_ptr<PvAccessClientPV>> m_variables;
 };
