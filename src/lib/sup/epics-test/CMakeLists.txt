@@ -6,9 +6,9 @@ add_library(sup-epics::${export_name} ALIAS ${library_name}) # alias for build-t
 
 set_target_properties(${library_name} PROPERTIES
     EXPORT_NAME ${export_name}
-    SOVERSION ${SUP_EPICS_SOVERSION}
-    VERSION ${SUP_EPICS_BUILDVERSION}
-)
+    SOVERSION ${LIBSOVERSION}
+    VERSION ${LIBVERSION}
+  )
 
 target_include_directories(${library_name} PUBLIC
     $<INSTALL_INTERFACE:include>

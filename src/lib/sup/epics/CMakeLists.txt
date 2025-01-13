@@ -3,9 +3,9 @@ add_library(sup-epics::sup-epics ALIAS sup-epics) # alias for build-tree usage
 
 set_target_properties(sup-epics PROPERTIES
     EXPORT_NAME sup-epics
-    SOVERSION ${SUP_EPICS_SOVERSION}
-    VERSION ${SUP_EPICS_BUILDVERSION}
-)
+    SOVERSION ${LIBSOVERSION}
+    VERSION ${LIBVERSION}
+  )
 
 target_link_directories(sup-epics PUBLIC ${EPICS_LINK_DIRECTORIES})
 
