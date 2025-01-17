@@ -30,9 +30,11 @@ namespace sup
 namespace epics
 {
 
-//! Visitor to construct pvxs::Value from sup::dto::AnyValue.
-//! Requires propery constructed ::pvxs::TypeDef in the constructor.
-
+/**
+ * @brief Visitor that constructs a pvxs::Value object from an AnyValue. It requires a
+ * consistent pvxs::TypeDef in the constructor.
+ *
+ */
 class PvxsValueBuilder : public sup::dto::IAnyVisitor<const sup::dto::AnyValue>
 {
 public:
