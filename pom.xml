@@ -26,7 +26,7 @@
     <artifactId>sup-epics</artifactId>
     <packaging>codac</packaging>
     <!-- See ChangeLog file for details -->
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <name>Supervision and automation system EPICS interface</name>
     <description>Library of SUP components for EPICS network protocol</description>
     <url>http://www.iter.org/</url>
@@ -63,21 +63,12 @@
             </roles>
         </developer>
         <developer>
-              <id>pospelg</id>
-              <name>Gennady Pospelov</name>
-              <organization>ITER Organisation</organization>
-              <email>gennady.pospelov@iter.org</email>
-              <roles>
-                  <role>unit owner</role>
-                  <role>developer</role>
-              </roles>
-          </developer>
-        <developer>
-            <id>gracasr</id>
-            <name>Rafael Silva</name>
-            <organization>CSW</organization>
-            <email>rg-silva@criticalsoftware.com</email>
+            <id>pospelg</id>
+            <name>Gennady Pospelov</name>
+            <organization>ITER Organisation</organization>
+            <email>gennady.pospelov@iter.org</email>
             <roles>
+                <role>unit owner</role>
                 <role>developer</role>
             </roles>
         </developer>
