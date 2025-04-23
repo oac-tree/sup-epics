@@ -1,8 +1,11 @@
-set(test unit-tests)
+set(test sup-epics-unit-tests)
 
 file(GLOB include_files "*.h")
 
 add_executable(${test} ${include_files})
+
+set_target_properties(${test} PROPERTIES OUTPUT_NAME "unit-tests")
+set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 
 target_sources(${test}
   PRIVATE
