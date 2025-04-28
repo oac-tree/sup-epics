@@ -45,4 +45,4 @@ target_link_libraries(${test} PRIVATE sup-epics sup-epics-di sup-epics-test)
 
 set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 
-gtest_discover_tests(${test})
+gtest_discover_tests(${test} DISCOVERY_MODE PRE_TEST)
