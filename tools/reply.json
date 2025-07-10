@@ -1,0 +1,22 @@
+[
+  {
+    "encoding": "sup-dto/v1.0/JSON"
+  },
+  {
+    "datatype": {
+      "type": "struct",
+      "attributes": [
+        {
+          "result": {
+            "type": "uint32"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "instance": {
+      "result": 0
+    }
+  }
+]

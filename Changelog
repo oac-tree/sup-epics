@@ -1,3 +1,7 @@
+Changes for 1.9.0:
+
+- Add test server to inspect RPC packets
+
 Changes for 1.8.0:
 
 - Update version for updated dependencies
