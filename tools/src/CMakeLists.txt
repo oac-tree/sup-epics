@@ -1,5 +1,6 @@
 target_sources(rpc-sniff-server
     PRIVATE
+    log_utils.cpp
     registration.cpp
     rpc_sniff_server.cpp
 )
