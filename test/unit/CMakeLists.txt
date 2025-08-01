@@ -22,6 +22,7 @@ target_sources(${test}
   pv_access_client_pv_tests.cpp
   pv_access_client_server_integration_tests.cpp
   pv_access_client_tests.cpp
+  pv_access_logging_client_server_tests.cpp
   pv_access_rpc_tests.cpp
   pv_access_server_pv_tests.cpp
   pv_access_server_tests.cpp
