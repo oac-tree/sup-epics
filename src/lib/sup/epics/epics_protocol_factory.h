@@ -24,6 +24,7 @@
 #include <sup/epics/pv_access_rpc_client_config.h>
 #include <sup/epics/pv_access_rpc_server_config.h>
 
+#include <sup/protocol/log_any_functor_decorator.h>
 #include <sup/protocol/protocol_factory.h>
 #include <sup/protocol/protocol_factory_utils.h>
 
@@ -154,6 +155,19 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
   sup::protocol::PayloadEncoding encoding = sup::protocol::PayloadEncoding::kBase64);
+
+/**
+ * @brief Helper function to create an EPICS RPC server with an injected logging function
+ * and AnyFunctor.
+ *
+ * @param server_config Server configuration.
+ * @param functor AnyFunctor that serves as the backend of the server.
+ * @param log_function Function to log the input and output of the AnyFunctor.
+ * @return EPICS RPC server stack.
+ */
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateLoggingEPICSRPCServer(
+  const PvAccessRPCServerConfig& server_config, sup::dto::AnyFunctor& functor,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
 
 }  // namespace epics
 

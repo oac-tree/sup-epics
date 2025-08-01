@@ -23,6 +23,7 @@
 #include "channel_access_pv_wrapper.h"
 #include "pv_access_client_pv_wrapper.h"
 #include "pv_access_server_pv_wrapper.h"
+#include "pv_access_logging_server.h"
 
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_server.h>
@@ -112,6 +113,13 @@ std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
     return std::make_unique<PvAccessRPCClient>(client_config);
   };
   return sup::protocol::CreateRPCClientStack(factory_funct, encoding);
+}
+
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateLoggingEPICSRPCServer(
+  const PvAccessRPCServerConfig& server_config, sup::dto::AnyFunctor& functor,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
+{
+  return std::make_unique<PVAccessLoggingServer>(server_config, functor, log_function);
 }
 
 }  // namespace epics
