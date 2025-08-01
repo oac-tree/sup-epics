@@ -122,6 +122,13 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateLoggingEPICSRPCServer(
   return std::make_unique<PVAccessLoggingServer>(server_config, functor, log_function);
 }
 
+std::unique_ptr<sup::dto::AnyFunctor> CreateLoggingEPICSRPCClient(
+  const PvAccessRPCClientConfig& client_config,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
+{
+  return std::make_unique<utils::LoggingEPICSRPCClient>(client_config, log_function);
+}
+
 }  // namespace epics
 
 }  // namespace sup

@@ -169,6 +169,17 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateLoggingEPICSRPCServer(
   const PvAccessRPCServerConfig& server_config, sup::dto::AnyFunctor& functor,
   sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
 
+/**
+ * @brief Helper function to create an EPICS RPC client with an injected logging function.
+ *
+ * @param client_config Client configuration.
+ * @param log_function Function to log the input and output of the AnyFunctor.
+ * @return EPICS RPC client stack.
+ */
+std::unique_ptr<sup::dto::AnyFunctor> CreateLoggingEPICSRPCClient(
+  const PvAccessRPCClientConfig& client_config,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
+
 }  // namespace epics
 
 }  // namespace sup

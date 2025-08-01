@@ -96,6 +96,18 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessServerVar(
   return CreatePVAServerProcessVariable(channel_name, config[kVariableValue]);
 }
 
+LoggingEPICSRPCClient::LoggingEPICSRPCClient(
+  const PvAccessRPCClientConfig& config,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
+  : m_epics_client{std::make_unique<PvAccessRPCClient>(config)}
+  , m_log_decorator{*m_epics_client, log_function}
+{}
+
+sup::dto::AnyValue LoggingEPICSRPCClient::operator()(const sup::dto::AnyValue& request)
+{
+  return m_log_decorator(request);
+}
+
 }  // namespace utils
 
 }  // namespace epics

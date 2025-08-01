@@ -21,6 +21,8 @@
 
 #include "utils.h"
 
+#include <sup/epics/pv_access_rpc_client.h>
+
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/json_value_parser.h>
 
@@ -35,34 +37,32 @@ namespace utils
 {
 namespace
 {
-const std::string kInputPacketTitle = "Server received network packet";
-const std::string kOutputPacketTitle = "Server replied with network packet";
+const std::string kInputPacketTitle = "Client sent network packet";
+const std::string kOutputPacketTitle = "Client received network packet";
 
-class FixedReplyFunctor : public sup::dto::AnyFunctor
-{
-public:
-  explicit FixedReplyFunctor(sup::dto::AnyValue fixed_reply)
-      : m_fixed_reply(std::move(fixed_reply))
-  {}
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue&) override
-  {
-    return m_fixed_reply;
-  }
-private:
-  sup::dto::AnyValue m_fixed_reply;
-};
-
-sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser);
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply);
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value);
-
 }  // unnamed namespace
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser)
+sup::dto::AnyValue GetRequest(sup::cli::CommandLineParser& parser)
 {
-  auto fixed_reply = GetFixedReply(parser);
-  return GetFixedReplyFunctor(fixed_reply);
+  auto filename = parser.GetValue<std::string>("--file");
+  sup::dto::JSONAnyValueParser av_parser{};
+  if (!av_parser.ParseFile(filename))
+  {
+    throw std::runtime_error("Failed to parse JSON file: " + filename);
+  }
+  return av_parser.MoveAnyValue();
+}
+
+PvAccessRPCClientConfig GetRPCClientConfiguration(sup::cli::CommandLineParser& parser)
+{
+  auto service_name = parser.GetValue<std::string>("--service");
+  auto config = GetDefaultRPCClientConfig(service_name);
+  if (parser.IsSet("--timeout"))
+  {
+    config.timeout = parser.GetValue<double>("--timeout");
+  }
+  return config;
 }
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
@@ -84,22 +84,6 @@ void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
 
 namespace
 {
-sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser)
-{
-  auto filename = parser.GetValue<std::string>("--file");
-  sup::dto::JSONAnyValueParser av_parser{};
-  if (!av_parser.ParseFile(filename))
-  {
-    throw std::runtime_error("Failed to parse JSON file: " + filename);
-  }
-  return av_parser.MoveAnyValue();
-}
-
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply)
-{
-  return std::make_unique<FixedReplyFunctor>(fixed_reply);
-}
-
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value)
 {
   std::cout << title << std::endl;

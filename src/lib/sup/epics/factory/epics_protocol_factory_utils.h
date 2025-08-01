@@ -24,6 +24,7 @@
 #include <sup/epics/pv_access_rpc_client_config.h>
 #include <sup/epics/pv_access_rpc_server_config.h>
 
+#include <sup/protocol/log_any_functor_decorator.h>
 #include <sup/protocol/protocol_factory.h>
 #include <sup/protocol/protocol_rpc.h>
 #include <sup/dto/any_functor.h>
@@ -46,6 +47,19 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessClientVar(
 
 std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessServerVar(
   const sup::dto::AnyValue& config);
+
+class LoggingEPICSRPCClient : public sup::dto::AnyFunctor
+{
+public:
+  LoggingEPICSRPCClient(const PvAccessRPCClientConfig& config,
+                        sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
+
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override;
+
+private:
+  std::unique_ptr<sup::dto::AnyFunctor> m_epics_client;
+  sup::protocol::LogAnyFunctorDecorator m_log_decorator;
+};
 
 }  // namespace utils
 

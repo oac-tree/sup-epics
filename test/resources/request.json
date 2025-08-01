@@ -1,0 +1,28 @@
+[
+  {
+    "encoding": "sup-dto/v1.0/JSON"
+  },
+  {
+    "datatype": {
+      "type": "Test::Request",
+      "attributes": [
+        {
+          "ok_flag": {
+            "type": "bool"
+          }
+        },
+        {
+          "number": {
+            "type": "uint32"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "instance": {
+      "ok_flag": false,
+      "number": 0
+    }
+  }
+]
