@@ -1,0 +1,1 @@
+add_subdirectory(epics-rpc-logging-server)

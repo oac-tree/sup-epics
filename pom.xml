@@ -20,8 +20,7 @@
  of the distribution package.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.iter.codac.units</groupId>
     <artifactId>sup-epics</artifactId>
@@ -96,31 +95,37 @@
                     <!-- Configure packaging and dependencies -->
                     <packaging>
                         <package>
-                        <!-- Libraries  -->
-                        <include type="file" source="lib" target="lib">
-                            <include>*.so.*</include>
-                        </include>
-                        <!-- Package dependencies -->
-                        <requires version="current" buildOnly="true">cmake</requires>
-                        <requires codac="true">sup-dto</requires>
-                        <requires codac="true">sup-protocol</requires>
-                        <requires codac="true">sup-di</requires>
-                        <requires codac="true">epics</requires>
-                        <requires codac="true" buildOnly="true">sup-dto-devel</requires>
-                        <requires codac="true" buildOnly="true">sup-protocol-devel</requires>
-                        <requires codac="true" buildOnly="true">sup-di-devel</requires>
-                        <requires codac="true" buildOnly="true">epics-devel</requires>
-                        <requires codac="true" buildOnly="true">gtest-1.12.1-devel</requires>
-                    </package>
-                    <package name="devel">
-                        <!-- CMAKE -->
-                        <include type="file" source="lib/cmake/sup-epics" target="lib/cmake/sup-epics">
-                            <include>*.cmake</include>
-                        </include>
-                        <!--  Libraries  -->
-                        <include type="file" source="lib" target="lib">
-                            <include>*.so</include>
-                        </include>
+                            <!-- Libraries  -->
+                            <include type="file" source="lib" target="lib">
+                                <include>*.so.*</include>
+                            </include>
+                            <!-- Programs -->
+                            <include type="file" source="bin" target="bin">
+                                <include>*</include>
+                            </include>
+                            <!-- Package dependencies -->
+                            <requires version="current" buildOnly="true">cmake</requires>
+                            <requires codac="true">sup-dto</requires>
+                            <requires codac="true">sup-protocol</requires>
+                            <requires codac="true">sup-di</requires>
+                            <requires codac="true">sup-utils</requires>
+                            <requires codac="true">epics</requires>
+                            <requires codac="true" buildOnly="true">sup-dto-devel</requires>
+                            <requires codac="true" buildOnly="true">sup-protocol-devel</requires>
+                            <requires codac="true" buildOnly="true">sup-di-devel</requires>
+                            <requires codac="true" buildOnly="true">sup-utils-devel</requires>
+                            <requires codac="true" buildOnly="true">epics-devel</requires>
+                            <requires codac="true" buildOnly="true">gtest-1.12.1-devel</requires>
+                        </package>
+                        <package name="devel">
+                            <!-- CMAKE -->
+                            <include type="file" source="lib/cmake/sup-epics" target="lib/cmake/sup-epics">
+                                <include>*.cmake</include>
+                            </include>
+                            <!--  Libraries  -->
+                            <include type="file" source="lib" target="lib">
+                                <include>*.so</include>
+                            </include>
                             <!-- Public API headers -->
                             <include type="file" source="include/sup/epics" target="include/sup/epics">
                                 <include>*.h</include>
@@ -131,17 +136,17 @@
                             <include type="file" source="include/sup/epics-test" target="include/sup/epics-test">
                                 <include>*.h</include>
                             </include>
-                        <!-- Package dependencies -->
-                        <requires version="current">%{codac_rpm_prefix}-${project.artifactId}</requires>
-                    </package>
-                    <package name="docs">
-                        <!--  Public API headers  -->
-                        <include type="file" source="doc/${project.artifactId}" target="doc/${project.artifactId}"/>
-                        <!-- Package dependencies -->
-                        <requires version="current">%{codac_rpm_prefix}-${project.artifactId}</requires>
-                        <requires version="current" buildOnly="true">doxygen</requires>
-                        <requires codac="true" buildOnly="true">python-sphinx</requires>
-                    </package>
+                            <!-- Package dependencies -->
+                            <requires version="current">%{codac_rpm_prefix}-${project.artifactId}</requires>
+                        </package>
+                        <package name="docs">
+                            <!--  Public API headers  -->
+                            <include type="file" source="doc/${project.artifactId}" target="doc/${project.artifactId}"/>
+                            <!-- Package dependencies -->
+                            <requires version="current">%{codac_rpm_prefix}-${project.artifactId}</requires>
+                            <requires version="current" buildOnly="true">doxygen</requires>
+                            <requires codac="true" buildOnly="true">python-sphinx</requires>
+                        </package>
                     </packaging>
                 </configuration>
             </plugin>

@@ -4,10 +4,15 @@
   },
   {
     "datatype": {
-      "type": "struct",
+      "type": "Test::Reply",
       "attributes": [
         {
-          "result": {
+          "ok_flag": {
+            "type": "bool"
+          }
+        },
+        {
+          "number": {
             "type": "uint32"
           }
         }
@@ -16,7 +21,8 @@
   },
   {
     "instance": {
-      "result": 0
+      "ok_flag": true,
+      "number": 46
     }
   }
 ]
