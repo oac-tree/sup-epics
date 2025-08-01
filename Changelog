@@ -1,6 +1,6 @@
 Changes for 1.9.0:
 
-- Add test server to inspect RPC packets
+- Add EPICS RPC server that logs incoming/outgoing network packets
 
 Changes for 1.8.0:
 
