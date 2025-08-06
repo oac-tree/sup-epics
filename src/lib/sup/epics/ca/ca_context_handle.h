@@ -21,7 +21,6 @@
 #ifndef SUP_EPICS_CA_CONTEXT_HANDLE_H_
 #define SUP_EPICS_CA_CONTEXT_HANDLE_H_
 
-#include <atomic>
 #include <condition_variable>
 #include <future>
 #include <mutex>
@@ -53,7 +52,7 @@ private:
   std::queue<std::packaged_task<bool()>> tasks;
   std::mutex task_mtx;
   std::condition_variable cond;
-  std::atomic_bool halt;
+  bool halt;
   std::future<void> context_future;
 };
 

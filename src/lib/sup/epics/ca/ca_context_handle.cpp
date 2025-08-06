@@ -48,9 +48,12 @@ CAContextHandle::~CAContextHandle()
 
 bool CAContextHandle::HandleTask(std::packaged_task<bool()>&& task)
 {
-  if (halt)
   {
-    return false;
+    std::lock_guard<std::mutex> lk(task_mtx);
+    if (halt)
+    {
+      return false;
+    }
   }
   auto result = task.get_future();
   {
@@ -82,7 +85,7 @@ void CAContextHandle::HaltContext()
   }
   {
     std::lock_guard<std::mutex> lk(task_mtx);
-    halt.store(true);
+    halt = true;
   }
   cond.notify_one();
   context_future.get();
@@ -100,13 +103,13 @@ void CAContextHandle::ContextThread(std::promise<bool>& context_promise)
   std::unique_lock<std::mutex> lk(task_mtx);
   // Cache the halt state to ensure that queue tasks pushed before halting are always handled
   // by this thread
-  bool halt_cache = halt.load();
+  bool halt_cache = halt;
   while(!halt_cache)
   {
     cond.wait(lk, [this](){ return halt || !tasks.empty(); });
     std::queue<std::packaged_task<bool()>> task_queue;
     tasks.swap(task_queue);
-    halt_cache = halt.load();
+    halt_cache = halt;
     lk.unlock();
     while (!task_queue.empty())
     {
