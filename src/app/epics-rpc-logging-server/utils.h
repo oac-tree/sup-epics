@@ -24,6 +24,7 @@
 
 #include <sup/cli/command_line_parser.h>
 #include <sup/protocol/log_any_functor_decorator.h>
+#include <sup/protocol/log_protocol_decorator.h>
 
 #include <string>
 
@@ -38,6 +39,14 @@ std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLine
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
                                sup::protocol::LogAnyFunctorDecorator::PacketDirection direction);
+
+void LogInputProtocolPacketToStdOut(const sup::dto::AnyValue& packet,
+                                    sup::protocol::LogProtocolDecorator::PacketType type);
+
+void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
+                                     const sup::dto::AnyValue& packet,
+                                     sup::protocol::LogProtocolDecorator::PacketType type);
+
 }  // namespace utils
 
 }  // namespace epics
