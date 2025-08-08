@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
       .SetParameter(true)
       .SetValueName("service_name")
       .SetRequired(true);
-  parser.AddOption({"-f", "--file"}, "JSON file containing the fixed AnyValue to return")
+  parser.AddOption({"-f", "--file"}, "JSON file containing the fixed AnyValue to send as a request")
       .SetParameter(true)
       .SetValueName("filename")
       .SetRequired(true);
