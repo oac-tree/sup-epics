@@ -24,6 +24,8 @@
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/json_value_parser.h>
 
+#include <sup/protocol/protocol.h>
+
 #include <iostream>
 #include <stdexcept>
 
@@ -37,6 +39,40 @@ namespace
 {
 const std::string kInputPacketTitle = "Server received network packet";
 const std::string kOutputPacketTitle = "Server replied with network packet";
+
+class FixedOutputProtocol : public sup::protocol::Protocol
+{
+public:
+  FixedOutputProtocol(sup::dto::AnyValue reply, sup::protocol::ProtocolResult result)
+      : m_output(std::move(reply)), m_result(result)
+  {}
+
+  sup::protocol::ProtocolResult Invoke(
+    const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override
+  {
+    (void)input;
+    if (!sup::dto::TryAssign(output, m_output))
+    {
+      return sup::protocol::ServerProtocolEncodingError;
+    }
+    return m_result;
+  }
+
+  sup::protocol::ProtocolResult Service(
+    const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override
+  {
+    (void)input;
+    if (!sup::dto::TryAssign(output, m_output))
+    {
+      return sup::protocol::ServerProtocolEncodingError;
+    }
+    return m_result;
+  }
+
+private:
+  sup::dto::AnyValue m_output;
+  sup::protocol::ProtocolResult m_result;
+};
 
 class FixedReplyFunctor : public sup::dto::AnyFunctor
 {
