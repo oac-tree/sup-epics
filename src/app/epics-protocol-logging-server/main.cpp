@@ -22,6 +22,8 @@
 #include "utils.h"
 
 #include <sup/epics/epics_protocol_factory.h>
+#include <sup/protocol/log_protocol_decorator.h>
+#include <sup/protocol/protocol_rpc_server.h>
 
 #include <sup/cli/command_line_parser.h>
 
@@ -63,11 +65,16 @@ int main(int argc, char* argv[])
     std::cout << parser.GetUsageString();
     return 0;
   }
-  auto fixed_reply_functor = utils::GetFixedProtocolOutputFunctor(parser);
+  auto fixed_output_protocol = utils::GetFixedOutputProtocol(parser);
+
+  sup::protocol::LogProtocolDecorator protocol_decorator{
+    *fixed_output_protocol, utils::LogInputProtocolPacketToStdOut,
+    utils::LogOutputProtocolPacketToStdOut};
+  sup::protocol::ProtocolRPCServer protocol_server{protocol_decorator};
 
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};
-  auto server = CreateLoggingEPICSRPCServer(server_config, *fixed_reply_functor,
+  auto server = CreateLoggingEPICSRPCServer(server_config, protocol_server,
                                             utils::LogNetworkPacketsToStdOut);
   while (true)
   {

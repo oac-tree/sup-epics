@@ -25,7 +25,6 @@
 #include <sup/dto/json_value_parser.h>
 
 #include <sup/protocol/protocol.h>
-#include <sup/protocol/protocol_rpc_server.h>
 
 #include <chrono>
 #include <iostream>
@@ -90,34 +89,15 @@ private:
   double m_delay;
 };
 
-class FixedProtocolOutputFunctor : public sup::dto::AnyFunctor
-{
-public:
-  FixedProtocolOutputFunctor(
-    sup::dto::AnyValue fixed_output, sup::protocol::ProtocolResult result,
-    double delay)
-      : m_protocol{fixed_output, result, delay}
-      , m_protocol_server{m_protocol}
-
-  {}
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& input) override
-  {
-    return m_protocol_server(input);
-  }
-private:
-  FixedOutputProtocol m_protocol;
-  sup::protocol::ProtocolRPCServer m_protocol_server;
-};
-
 sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser);
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay);
+std::unique_ptr<sup::protocol::Protocol> GetFixedProtocolOutputFunctor(
+  const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay);
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result);
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value);
 
 }  // unnamed namespace
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(
+std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   sup::cli::CommandLineParser& parser)
 {
   auto fixed_reply = GetFixedOutput(parser);
@@ -204,9 +184,10 @@ sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser)
   return av_parser.MoveAnyValue();
 }
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay)
+std::unique_ptr<sup::protocol::Protocol> GetFixedProtocolOutputFunctor(
+  const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay)
 {
-  return std::make_unique<FixedProtocolOutputFunctor>(fixed_reply, result, delay);
+  return std::make_unique<FixedOutputProtocol>(fixed_reply, result, delay);
 }
 
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result)

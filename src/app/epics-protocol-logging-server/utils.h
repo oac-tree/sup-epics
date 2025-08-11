@@ -25,6 +25,7 @@
 #include <sup/cli/command_line_parser.h>
 #include <sup/protocol/log_any_functor_decorator.h>
 #include <sup/protocol/log_protocol_decorator.h>
+#include <sup/protocol/protocol.h>
 
 #include <string>
 
@@ -35,7 +36,7 @@ namespace epics
 namespace utils
 {
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(
+std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   sup::cli::CommandLineParser& parser);
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
