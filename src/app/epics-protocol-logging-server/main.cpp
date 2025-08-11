@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
   sup::cli::CommandLineParser parser;
   parser.SetDescription(
       /*header*/ "",
-      "The program launches an EPICS RPC server that will reply with a fixed AnyValue and logs\n"
-      "all incoming/outgoing network packets to standard output.");
+      "The program launches an EPICS RPC protocol server that will reply with a fixed AnyValue\n"
+      "and logs incoming/outgoing protocol and network packets to standard output.");
   parser.AddHelpOption();
 
   parser.AddOption({"-s", "--service"}, "Name of the RPC server")
@@ -48,6 +48,11 @@ int main(int argc, char* argv[])
       .SetParameter(true)
       .SetValueName("filename")
       .SetRequired(true);
+  parser.AddOption({"-r", "--result"},
+                    "Optional ProtocolResult code to return (default is 0 for success)")
+      .SetParameter(true)
+      .SetValueName("result")
+      .SetDefaultValue("0");
   parser.AddOption({"-d", "--delay"}, "Optional delay in seconds to respond")
       .SetParameter(true)
       .SetValueName("sec")
@@ -58,7 +63,7 @@ int main(int argc, char* argv[])
     std::cout << parser.GetUsageString();
     return 0;
   }
-  auto fixed_reply_functor = utils::GetFixedReplyFunctor(parser);
+  auto fixed_reply_functor = utils::GetFixedProtocolOutputFunctor(parser);
 
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};

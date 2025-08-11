@@ -45,7 +45,7 @@ const std::string kOutputPacketTitle = "Server replied with network packet";
 class FixedReplyFunctor : public sup::dto::AnyFunctor
 {
 public:
-  explicit FixedReplyFunctor(sup::dto::AnyValue fixed_reply, double delay)
+  FixedReplyFunctor(sup::dto::AnyValue fixed_reply, double delay)
       : m_fixed_reply(std::move(fixed_reply))
       , m_delay{delay}
   {}

@@ -1,0 +1,37 @@
+[
+  {
+    "encoding": "sup-dto/v1.0/JSON"
+  },
+  {
+    "datatype": {
+      "type": "sup::protocolRequest/v2.1",
+      "attributes": [
+        {
+          "query": {
+            "type": "struct",
+            "attributes": [
+              {
+                "name": {
+                  "type": "string"
+                }
+              },
+              {
+                "id": {
+                  "type": "uint64"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "instance": {
+      "query": {
+        "name": "Hello, world!",
+        "id": 0
+      }
+    }
+  }
+]

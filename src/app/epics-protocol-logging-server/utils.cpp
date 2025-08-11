@@ -25,6 +25,7 @@
 #include <sup/dto/json_value_parser.h>
 
 #include <sup/protocol/protocol.h>
+#include <sup/protocol/protocol_rpc_server.h>
 
 #include <chrono>
 #include <iostream>
@@ -52,14 +53,17 @@ const std::string kProtocolOutputServiceTitle = "Server replied with service pro
 class FixedOutputProtocol : public sup::protocol::Protocol
 {
 public:
-  FixedOutputProtocol(sup::dto::AnyValue reply, sup::protocol::ProtocolResult result)
-      : m_output(std::move(reply)), m_result(result)
+  FixedOutputProtocol(sup::dto::AnyValue reply, sup::protocol::ProtocolResult result,
+                      double delay)
+      : m_output(std::move(reply)), m_result(result), m_delay{delay}
   {}
 
   sup::protocol::ProtocolResult Invoke(
     const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override
   {
     (void)input;
+    auto delay = std::chrono::duration<double>(m_delay);
+    std::this_thread::sleep_for(delay);
     if (!sup::dto::TryAssign(output, m_output))
     {
       return sup::protocol::ServerProtocolEncodingError;
@@ -71,6 +75,8 @@ public:
     const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override
   {
     (void)input;
+    auto delay = std::chrono::duration<double>(m_delay);
+    std::this_thread::sleep_for(delay);
     if (!sup::dto::TryAssign(output, m_output))
     {
       return sup::protocol::ServerProtocolEncodingError;
@@ -81,37 +87,40 @@ public:
 private:
   sup::dto::AnyValue m_output;
   sup::protocol::ProtocolResult m_result;
-};
-
-class FixedReplyFunctor : public sup::dto::AnyFunctor
-{
-public:
-  explicit FixedReplyFunctor(sup::dto::AnyValue fixed_reply, double delay)
-      : m_fixed_reply(std::move(fixed_reply))
-      , m_delay{delay}
-  {}
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue&) override
-  {
-    auto delay = std::chrono::duration<double>(m_delay);
-    std::this_thread::sleep_for(delay);
-    return m_fixed_reply;
-  }
-private:
-  sup::dto::AnyValue m_fixed_reply;
   double m_delay;
 };
 
-sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser);
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay);
+class FixedProtocolOutputFunctor : public sup::dto::AnyFunctor
+{
+public:
+  FixedProtocolOutputFunctor(
+    sup::dto::AnyValue fixed_output, sup::protocol::ProtocolResult result,
+    double delay)
+      : m_protocol{fixed_output, result, delay}
+      , m_protocol_server{m_protocol}
+
+  {}
+
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue& input) override
+  {
+    return m_protocol_server(input);
+  }
+private:
+  FixedOutputProtocol m_protocol;
+  sup::protocol::ProtocolRPCServer m_protocol_server;
+};
+
+sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser);
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay);
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result);
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value);
 
 }  // unnamed namespace
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser)
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(
+  sup::cli::CommandLineParser& parser)
 {
-  auto fixed_reply = GetFixedReply(parser);
+  auto fixed_reply = GetFixedOutput(parser);
   double delay{0.0};
   if (parser.IsSet("--delay"))
   {
@@ -121,7 +130,13 @@ std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLine
       delay = parsed_delay;
     }
   }
-  return GetFixedReplyFunctor(fixed_reply, delay);
+  sup::protocol::ProtocolResult result{sup::protocol::Success};
+  if (parser.IsSet("--result"))
+  {
+    auto parser_result = parser.GetValue<unsigned int>("--result");
+    result = sup::protocol::ProtocolResult{parser_result};
+  }
+  return GetFixedProtocolOutputFunctor(fixed_reply, result, delay);
 }
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
@@ -178,7 +193,7 @@ void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
 
 namespace
 {
-sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser)
+sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser)
 {
   auto filename = parser.GetValue<std::string>("--file");
   sup::dto::JSONAnyValueParser av_parser{};
@@ -189,9 +204,9 @@ sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser)
   return av_parser.MoveAnyValue();
 }
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay)
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay)
 {
-  return std::make_unique<FixedReplyFunctor>(fixed_reply, delay);
+  return std::make_unique<FixedProtocolOutputFunctor>(fixed_reply, result, delay);
 }
 
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result)

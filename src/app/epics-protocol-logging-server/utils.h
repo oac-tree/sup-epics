@@ -35,7 +35,8 @@ namespace epics
 namespace utils
 {
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser);
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedProtocolOutputFunctor(
+  sup::cli::CommandLineParser& parser);
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
                                sup::protocol::LogAnyFunctorDecorator::PacketDirection direction);
