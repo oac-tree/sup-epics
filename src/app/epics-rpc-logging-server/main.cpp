@@ -48,6 +48,10 @@ int main(int argc, char* argv[])
       .SetParameter(true)
       .SetValueName("filename")
       .SetRequired(true);
+  parser.AddOption({"-d", "--delay"}, "Optional delay in seconds to respond")
+      .SetParameter(true)
+      .SetValueName("sec")
+      .SetDefaultValue("0.0");
 
   if (!parser.Parse(argc, argv))
   {

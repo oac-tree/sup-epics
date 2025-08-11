@@ -26,8 +26,10 @@
 
 #include <sup/protocol/protocol.h>
 
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 
 namespace sup
 {
@@ -84,20 +86,24 @@ private:
 class FixedReplyFunctor : public sup::dto::AnyFunctor
 {
 public:
-  explicit FixedReplyFunctor(sup::dto::AnyValue fixed_reply)
+  explicit FixedReplyFunctor(sup::dto::AnyValue fixed_reply, double delay)
       : m_fixed_reply(std::move(fixed_reply))
+      , m_delay{delay}
   {}
 
   sup::dto::AnyValue operator()(const sup::dto::AnyValue&) override
   {
+    auto delay = std::chrono::duration<double>(m_delay);
+    std::this_thread::sleep_for(delay);
     return m_fixed_reply;
   }
 private:
   sup::dto::AnyValue m_fixed_reply;
+  double m_delay;
 };
 
 sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser);
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply);
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay);
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result);
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value);
 
@@ -106,7 +112,16 @@ void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& val
 std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser)
 {
   auto fixed_reply = GetFixedReply(parser);
-  return GetFixedReplyFunctor(fixed_reply);
+  double delay{0.0};
+  if (parser.IsSet("--delay"))
+  {
+    auto parsed_delay = parser.GetValue<double>("--delay");
+    if (parsed_delay > 0.0)
+    {
+      delay = parsed_delay;
+    }
+  }
+  return GetFixedReplyFunctor(fixed_reply, delay);
 }
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
@@ -174,9 +189,9 @@ sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser)
   return av_parser.MoveAnyValue();
 }
 
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply)
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay)
 {
-  return std::make_unique<FixedReplyFunctor>(fixed_reply);
+  return std::make_unique<FixedReplyFunctor>(fixed_reply, delay);
 }
 
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result)
