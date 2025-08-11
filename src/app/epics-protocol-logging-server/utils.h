@@ -40,6 +40,13 @@ std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLine
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
                                sup::protocol::LogAnyFunctorDecorator::PacketDirection direction);
 
+void LogInputProtocolPacketToStdOut(const sup::dto::AnyValue& packet,
+                                    sup::protocol::LogProtocolDecorator::PacketType type);
+
+void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
+                                     const sup::dto::AnyValue& packet,
+                                     sup::protocol::LogProtocolDecorator::PacketType type);
+
 }  // namespace utils
 
 }  // namespace epics
