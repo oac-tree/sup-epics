@@ -1,10 +1,8 @@
 /******************************************************************************
- * $HeadURL: $
- * $Id: $
  *
- * Project       : Supervision and Automation - Configuration
+ * Project       : Supervision and automation system EPICS interface
  *
- * Description   : Configuration and CVVF libraries for the Supervision and Automation System.
+ * Description   : Library of SUP components for EPICS network protocol
  *
  * Author        : Walter Van Herck (IO)
  *
@@ -12,19 +10,20 @@
  *                 CS 90 046
  *                 13067 St. Paul-lez-Durance Cedex
  *                 France
+ * SPDX-License-Identifier: MIT
  *
  * This file is part of ITER CODAC software.
  * For the terms and conditions of redistribution or use of this software
- * refer to the file ITER-LICENSE.TXT located in the top level directory
+ * refer to the file LICENSE located in the top level directory
  * of the distribution package.
- ******************************************************************************/
+ *****************************************************************************/
 
-#include "utils.h"
+#include "app_utils.h"
+
+#include <sup/epics/pv_access_rpc_client.h>
 
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/json_value_parser.h>
-
-#include <sup/protocol/protocol.h>
 
 #include <chrono>
 #include <iostream>
@@ -48,6 +47,24 @@ const std::string kProtocolInputServiceTitle = "Server received service protocol
 const std::string kProtocolOutputNormalTitle = "Server replied with standard protocol packet";
 const std::string kProtocolOutputServiceTitle = "Server replied with service protocol packet";
 
+class FixedReplyFunctor : public sup::dto::AnyFunctor
+{
+public:
+  FixedReplyFunctor(sup::dto::AnyValue fixed_reply, double delay)
+      : m_fixed_reply(std::move(fixed_reply))
+      , m_delay{delay}
+  {}
+
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue&) override
+  {
+    auto delay = std::chrono::duration<double>(m_delay);
+    std::this_thread::sleep_for(delay);
+    return m_fixed_reply;
+  }
+private:
+  sup::dto::AnyValue m_fixed_reply;
+  double m_delay;
+};
 
 class FixedOutputProtocol : public sup::protocol::Protocol
 {
@@ -89,6 +106,8 @@ private:
   double m_delay;
 };
 
+sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser);
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay);
 sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser);
 std::unique_ptr<sup::protocol::Protocol> GetFixedProtocolOutputFunctor(
   const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay);
@@ -96,6 +115,43 @@ std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::Pr
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value);
 
 }  // unnamed namespace
+
+sup::dto::AnyValue GetRequest(sup::cli::CommandLineParser& parser)
+{
+  auto filename = parser.GetValue<std::string>("--file");
+  sup::dto::JSONAnyValueParser av_parser{};
+  if (!av_parser.ParseFile(filename))
+  {
+    throw std::runtime_error("Failed to parse JSON file: " + filename);
+  }
+  return av_parser.MoveAnyValue();
+}
+
+PvAccessRPCClientConfig GetRPCClientConfiguration(sup::cli::CommandLineParser& parser)
+{
+  auto service_name = parser.GetValue<std::string>("--service");
+  auto config = GetDefaultRPCClientConfig(service_name);
+  if (parser.IsSet("--timeout"))
+  {
+    config.timeout = parser.GetValue<double>("--timeout");
+  }
+  return config;
+}
+
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser)
+{
+  auto fixed_reply = GetFixedReply(parser);
+  double delay{0.0};
+  if (parser.IsSet("--delay"))
+  {
+    auto parsed_delay = parser.GetValue<double>("--delay");
+    if (parsed_delay > 0.0)
+    {
+      delay = parsed_delay;
+    }
+  }
+  return GetFixedReplyFunctor(fixed_reply, delay);
+}
 
 std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   sup::cli::CommandLineParser& parser)
@@ -173,6 +229,22 @@ void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
 
 namespace
 {
+sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser)
+{
+  auto filename = parser.GetValue<std::string>("--file");
+  sup::dto::JSONAnyValueParser av_parser{};
+  if (!av_parser.ParseFile(filename))
+  {
+    throw std::runtime_error("Failed to parse JSON file: " + filename);
+  }
+  return av_parser.MoveAnyValue();
+}
+
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay)
+{
+  return std::make_unique<FixedReplyFunctor>(fixed_reply, delay);
+}
+
 sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser)
 {
   auto filename = parser.GetValue<std::string>("--file");

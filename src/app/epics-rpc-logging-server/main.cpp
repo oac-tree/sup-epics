@@ -19,7 +19,7 @@
  * of the distribution package.
  ******************************************************************************/
 
-#include "utils.h"
+#include "app_utils.h"
 
 #include <sup/epics/epics_protocol_factory.h>
 

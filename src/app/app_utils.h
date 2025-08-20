@@ -1,10 +1,8 @@
 /******************************************************************************
- * $HeadURL: $
- * $Id: $
  *
- * Project       : Supervision and Automation - Configuration
+ * Project       : Supervision and automation system EPICS interface
  *
- * Description   : Configuration and CVVF libraries for the Supervision and Automation System.
+ * Description   : Library of SUP components for EPICS network protocol
  *
  * Author        : Walter Van Herck (IO)
  *
@@ -12,22 +10,22 @@
  *                 CS 90 046
  *                 13067 St. Paul-lez-Durance Cedex
  *                 France
+ * SPDX-License-Identifier: MIT
  *
  * This file is part of ITER CODAC software.
  * For the terms and conditions of redistribution or use of this software
- * refer to the file ITER-LICENSE.TXT located in the top level directory
+ * refer to the file LICENSE located in the top level directory
  * of the distribution package.
- ******************************************************************************/
+ *****************************************************************************/
 
-#ifndef SUP_EPICS_EPICS_RPC_LOGGING_SERVER_UTILS_H_
-#define SUP_EPICS_EPICS_RPC_LOGGING_SERVER_UTILS_H_
+#ifndef SUP_EPICS_APP_UTILS_H_
+#define SUP_EPICS_APP_UTILS_H_
+
+#include <sup/epics/pv_access_rpc_client_config.h>
 
 #include <sup/cli/command_line_parser.h>
 #include <sup/protocol/log_any_functor_decorator.h>
 #include <sup/protocol/log_protocol_decorator.h>
-#include <sup/protocol/protocol.h>
-
-#include <string>
 
 namespace sup
 {
@@ -35,6 +33,12 @@ namespace epics
 {
 namespace utils
 {
+
+sup::dto::AnyValue GetRequest(sup::cli::CommandLineParser& parser);
+
+PvAccessRPCClientConfig GetRPCClientConfiguration(sup::cli::CommandLineParser& parser);
+
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser);
 
 std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   sup::cli::CommandLineParser& parser);
@@ -55,4 +59,4 @@ void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
 
 }  // namespace sup
 
-#endif  // SUP_EPICS_EPICS_RPC_LOGGING_SERVER_UTILS_H_
+#endif  // SUP_EPICS_APP_UTILS_H_

@@ -1,16 +1,17 @@
 add_executable(epics-rpc-logging-client)
 
+target_include_directories(epics-rpc-logging-client PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/..>
+)
+
 target_link_libraries(epics-rpc-logging-client
   PRIVATE
-  sup-epics::sup-epics
-  sup-protocol::sup-protocol
-  sup-utils::sup-cli
+  sup-epics::sup-epics-app-utils
 )
 
 target_sources(epics-rpc-logging-client
   PRIVATE
   main.cpp
-  utils.cpp
 )
 
 # -- Installation --
