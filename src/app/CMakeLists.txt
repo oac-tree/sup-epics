@@ -24,6 +24,7 @@ target_sources(sup-epics-app-utils
 
 add_subdirectory(epics-rpc-logging-client)
 add_subdirectory(epics-rpc-logging-server)
+add_subdirectory(epics-protocol-logging-client)
 add_subdirectory(epics-protocol-logging-server)
 
 install(TARGETS sup-epics-app-utils EXPORT sup-epics-targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

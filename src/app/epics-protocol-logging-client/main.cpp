@@ -24,6 +24,7 @@
 #include <sup/epics/epics_protocol_factory.h>
 
 #include <sup/cli/command_line_parser.h>
+#include <sup/protocol/protocol_rpc_client.h>
 
 #include <iostream>
 
@@ -42,10 +43,17 @@ int main(int argc, char* argv[])
       .SetParameter(true)
       .SetValueName("service_name")
       .SetRequired(true);
-  parser.AddOption({"-f", "--file"}, "JSON file containing the fixed AnyValue to send as a request")
+  parser.AddOption({"-f", "--file"}, "JSON file containing the fixed AnyValue to send as input")
       .SetParameter(true)
       .SetValueName("filename")
       .SetRequired(true);
+  parser.AddOption({"-e", "--encoding"}, "Optional encoding to use (None/Base64)")
+      .SetParameter(true)
+      .SetValueName("encoding")
+      .SetDefaultValue("Base64");
+  parser.AddOption({"-p", "--polling_interval"}, "Polling interval in seconds (implies asynchronous communication)")
+      .SetParameter(true)
+      .SetValueName("interval");
   parser.AddOption({"-t", "--timeout"}, "Optional timeout in seconds for the RPC call")
       .SetParameter(true)
       .SetValueName("sec")
@@ -56,10 +64,18 @@ int main(int argc, char* argv[])
     std::cout << parser.GetUsageString();
     return 0;
   }
-  auto request = utils::GetFromJSONFile(parser);
-  auto client_config = utils::GetRPCClientConfiguration(parser);
+  auto input = utils::GetFromJSONFile(parser);
 
+  auto client_config = utils::GetRPCClientConfiguration(parser);
   auto client = CreateLoggingEPICSRPCClient(client_config, utils::LogNetworkPacketsToStdOut);
-  auto response = (*client)(request);
+
+  auto protocol_client_config = utils::GetProtocolRPCClientConfiguration(parser);
+  sup::protocol::ProtocolRPCClient protocol_client{*client, protocol_client_config};
+  sup::protocol::LogProtocolDecorator protocol_decorator{
+    protocol_client, utils::LogInputProtocolPacketToStdOut,
+    utils::LogOutputProtocolPacketToStdOut};
+
+  sup::dto::AnyValue output{};
+  auto response = protocol_decorator.Invoke(input, output);
   return 0;
 }

@@ -26,6 +26,7 @@
 #include <sup/cli/command_line_parser.h>
 #include <sup/protocol/log_any_functor_decorator.h>
 #include <sup/protocol/log_protocol_decorator.h>
+#include <sup/protocol/protocol_rpc_client_config.h>
 
 namespace sup
 {
@@ -34,9 +35,12 @@ namespace epics
 namespace utils
 {
 
-sup::dto::AnyValue GetRequest(sup::cli::CommandLineParser& parser);
+sup::dto::AnyValue GetFromJSONFile(sup::cli::CommandLineParser& parser);
 
 PvAccessRPCClientConfig GetRPCClientConfiguration(sup::cli::CommandLineParser& parser);
+
+sup::protocol::ProtocolRPCClientConfig GetProtocolRPCClientConfiguration(
+  sup::cli::CommandLineParser& parser);
 
 std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser);
 

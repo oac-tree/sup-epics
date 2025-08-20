@@ -24,6 +24,7 @@
 
 #include <sup/dto/anyvalue_helper.h>
 #include <sup/dto/json_value_parser.h>
+#include <sup/protocol/protocol_factory_utils.h>
 
 #include <chrono>
 #include <iostream>
@@ -106,17 +107,17 @@ private:
   double m_delay;
 };
 
-sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser);
-std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay);
-sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser);
+std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply,
+                                                           double delay);
 std::unique_ptr<sup::protocol::Protocol> GetFixedProtocolOutputFunctor(
   const sup::dto::AnyValue& fixed_reply, sup::protocol::ProtocolResult result, double delay);
+
 std::string CreateProtocolOutputTitle(const std::string& base, sup::protocol::ProtocolResult result);
 void PrintAnyvaluePacket(const std::string& title, const sup::dto::AnyValue& value);
 
 }  // unnamed namespace
 
-sup::dto::AnyValue GetRequest(sup::cli::CommandLineParser& parser)
+sup::dto::AnyValue GetFromJSONFile(sup::cli::CommandLineParser& parser)
 {
   auto filename = parser.GetValue<std::string>("--file");
   sup::dto::JSONAnyValueParser av_parser{};
@@ -138,9 +139,31 @@ PvAccessRPCClientConfig GetRPCClientConfiguration(sup::cli::CommandLineParser& p
   return config;
 }
 
+sup::protocol::ProtocolRPCClientConfig GetProtocolRPCClientConfiguration(
+  sup::cli::CommandLineParser& parser)
+{
+  sup::protocol::ProtocolRPCClientConfig config{};
+  auto encoding_str = parser.GetValue<std::string>("--encoding");
+  if (encoding_str == sup::protocol::kEncoding_None)
+  {
+    config.m_encoding = sup::protocol::PayloadEncoding::kNone;
+  }
+  else if (encoding_str != sup::protocol::kEncoding_Base64)
+  {
+    throw std::runtime_error("Unknown encoding: " + encoding_str);
+  }
+  if (parser.IsSet("--polling_interval"))
+  {
+    config.m_polling_interval_sec = parser.GetValue<double>("--polling_interval");
+    config.m_async = true;
+  }
+  config.m_timeout_sec = parser.GetValue<double>("--timeout");
+  return config;
+}
+
 std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLineParser& parser)
 {
-  auto fixed_reply = GetFixedReply(parser);
+  auto fixed_reply = GetFromJSONFile(parser);
   double delay{0.0};
   if (parser.IsSet("--delay"))
   {
@@ -156,7 +179,7 @@ std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLine
 std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   sup::cli::CommandLineParser& parser)
 {
-  auto fixed_reply = GetFixedOutput(parser);
+  auto fixed_reply = GetFromJSONFile(parser);
   double delay{0.0};
   if (parser.IsSet("--delay"))
   {
@@ -229,31 +252,9 @@ void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
 
 namespace
 {
-sup::dto::AnyValue GetFixedReply(sup::cli::CommandLineParser& parser)
-{
-  auto filename = parser.GetValue<std::string>("--file");
-  sup::dto::JSONAnyValueParser av_parser{};
-  if (!av_parser.ParseFile(filename))
-  {
-    throw std::runtime_error("Failed to parse JSON file: " + filename);
-  }
-  return av_parser.MoveAnyValue();
-}
-
 std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay)
 {
   return std::make_unique<FixedReplyFunctor>(fixed_reply, delay);
-}
-
-sup::dto::AnyValue GetFixedOutput(sup::cli::CommandLineParser& parser)
-{
-  auto filename = parser.GetValue<std::string>("--file");
-  sup::dto::JSONAnyValueParser av_parser{};
-  if (!av_parser.ParseFile(filename))
-  {
-    throw std::runtime_error("Failed to parse JSON file: " + filename);
-  }
-  return av_parser.MoveAnyValue();
 }
 
 std::unique_ptr<sup::protocol::Protocol> GetFixedProtocolOutputFunctor(
