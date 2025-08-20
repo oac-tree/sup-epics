@@ -34,6 +34,24 @@ namespace epics
 {
 namespace utils
 {
+const std::string kServerInputPacketTitle = "Server received network packet";
+const std::string kServerOutputPacketTitle = "Server replied with network packet";
+
+const std::string kClientInputPacketTitle = "Client sent network packet";
+const std::string kClientOutputPacketTitle = "Client received network packet";
+
+const std::string kServerProtocolInputNormalTitle = "Server received standard protocol packet";
+const std::string kServerProtocolInputServiceTitle = "Server received service protocol packet";
+
+const std::string kServerProtocolOutputNormalTitle = "Server replied with standard protocol packet";
+const std::string kServerProtocolOutputServiceTitle = "Server replied with service protocol packet";
+
+const std::string kClientProtocolInputNormalTitle = "Client sent standard protocol packet";
+const std::string kClientProtocolInputServiceTitle = "Client sent service protocol packet";
+
+const std::string kClientProtocolOutputNormalTitle = "Client received standard protocol packet";
+const std::string kClientProtocolOutputServiceTitle = "Client received service protocol packet";
+
 
 sup::dto::AnyValue GetFromJSONFile(sup::cli::CommandLineParser& parser);
 
@@ -48,14 +66,19 @@ std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   sup::cli::CommandLineParser& parser);
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
-                               sup::protocol::LogAnyFunctorDecorator::PacketDirection direction);
+                               sup::protocol::LogAnyFunctorDecorator::PacketDirection direction,
+                               const std::string& input_title, const std::string& output_title);
 
 void LogInputProtocolPacketToStdOut(const sup::dto::AnyValue& packet,
-                                    sup::protocol::LogProtocolDecorator::PacketType type);
+                                    sup::protocol::LogProtocolDecorator::PacketType type,
+                                    const std::string& normal_title,
+                                    const std::string& service_title);
 
 void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
                                      const sup::dto::AnyValue& packet,
-                                     sup::protocol::LogProtocolDecorator::PacketType type);
+                                     sup::protocol::LogProtocolDecorator::PacketType type,
+                                     const std::string& normal_title,
+                                     const std::string& service_title);
 
 }  // namespace utils
 

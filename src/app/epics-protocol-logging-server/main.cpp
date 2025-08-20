@@ -28,6 +28,7 @@
 #include <sup/cli/command_line_parser.h>
 
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <thread>
 
@@ -35,6 +36,7 @@ using namespace sup::epics;
 
 int main(int argc, char* argv[])
 {
+  using namespace std::placeholders;
   sup::cli::CommandLineParser parser;
   parser.SetDescription(
       /*header*/ "",
@@ -67,15 +69,21 @@ int main(int argc, char* argv[])
   }
   auto fixed_output_protocol = utils::GetFixedOutputProtocol(parser);
 
+  auto input_protocol_logger = std::bind(utils::LogInputProtocolPacketToStdOut, _1, _2,
+                                         utils::kServerProtocolInputNormalTitle,
+                                         utils::kServerProtocolInputServiceTitle);
+  auto output_protocol_logger = std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
+                                          utils::kServerProtocolOutputNormalTitle,
+                                          utils::kServerProtocolOutputServiceTitle);
   sup::protocol::LogProtocolDecorator protocol_decorator{
-    *fixed_output_protocol, utils::LogInputProtocolPacketToStdOut,
-    utils::LogOutputProtocolPacketToStdOut};
+    *fixed_output_protocol, input_protocol_logger, output_protocol_logger};
   sup::protocol::ProtocolRPCServer protocol_server{protocol_decorator};
 
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};
-  auto server = CreateLoggingEPICSRPCServer(server_config, protocol_server,
-                                            utils::LogNetworkPacketsToStdOut);
+  auto rpc_logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2,
+                              utils::kServerInputPacketTitle, utils::kServerOutputPacketTitle);
+  auto server = CreateLoggingEPICSRPCServer(server_config, protocol_server, rpc_logger);
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));

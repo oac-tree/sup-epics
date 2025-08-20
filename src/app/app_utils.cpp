@@ -39,15 +39,6 @@ namespace utils
 {
 namespace
 {
-const std::string kInputPacketTitle = "Server received network packet";
-const std::string kOutputPacketTitle = "Server replied with network packet";
-
-const std::string kProtocolInputNormalTitle = "Server received standard protocol packet";
-const std::string kProtocolInputServiceTitle = "Server received service protocol packet";
-
-const std::string kProtocolOutputNormalTitle = "Server replied with standard protocol packet";
-const std::string kProtocolOutputServiceTitle = "Server replied with service protocol packet";
-
 class FixedReplyFunctor : public sup::dto::AnyFunctor
 {
 public:
@@ -199,16 +190,17 @@ std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
 }
 
 void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
-                               sup::protocol::LogAnyFunctorDecorator::PacketDirection direction)
+                               sup::protocol::LogAnyFunctorDecorator::PacketDirection direction,
+                               const std::string& input_title, const std::string& output_title)
 {
   using PacketDirection = sup::protocol::LogAnyFunctorDecorator::PacketDirection;
   switch (direction)
   {
   case PacketDirection::kInput:
-    PrintAnyvaluePacket(kInputPacketTitle, packet);
+    PrintAnyvaluePacket(input_title, packet);
     break;
   case PacketDirection::kOutput:
-    PrintAnyvaluePacket(kOutputPacketTitle, packet);
+    PrintAnyvaluePacket(output_title, packet);
     break;
   default:
     break;
@@ -216,16 +208,18 @@ void LogNetworkPacketsToStdOut(const sup::dto::AnyValue& packet,
 }
 
 void LogInputProtocolPacketToStdOut(const sup::dto::AnyValue& packet,
-                                    sup::protocol::LogProtocolDecorator::PacketType type)
+                                    sup::protocol::LogProtocolDecorator::PacketType type,
+                                    const std::string& normal_title,
+                                    const std::string& service_title)
 {
   using PacketType = sup::protocol::LogProtocolDecorator::PacketType;
   switch (type)
   {
   case PacketType::kNormal:
-    PrintAnyvaluePacket(kProtocolInputNormalTitle, packet);
+    PrintAnyvaluePacket(normal_title, packet);
     break;
   case PacketType::kService:
-    PrintAnyvaluePacket(kProtocolInputServiceTitle, packet);
+    PrintAnyvaluePacket(service_title, packet);
     break;
   default:
     break;
@@ -234,16 +228,18 @@ void LogInputProtocolPacketToStdOut(const sup::dto::AnyValue& packet,
 
 void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
                                      const sup::dto::AnyValue& packet,
-                                     sup::protocol::LogProtocolDecorator::PacketType type)
+                                     sup::protocol::LogProtocolDecorator::PacketType type,
+                                     const std::string& normal_title,
+                                     const std::string& service_title)
 {
   using PacketType = sup::protocol::LogProtocolDecorator::PacketType;
   switch (type)
   {
   case PacketType::kNormal:
-    PrintAnyvaluePacket(CreateProtocolOutputTitle(kProtocolOutputNormalTitle, result), packet);
+    PrintAnyvaluePacket(CreateProtocolOutputTitle(normal_title, result), packet);
     break;
   case PacketType::kService:
-    PrintAnyvaluePacket(CreateProtocolOutputTitle(kProtocolOutputServiceTitle, result), packet);
+    PrintAnyvaluePacket(CreateProtocolOutputTitle(service_title, result), packet);
     break;
   default:
     break;

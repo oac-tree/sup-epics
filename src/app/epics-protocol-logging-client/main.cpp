@@ -26,12 +26,14 @@
 #include <sup/cli/command_line_parser.h>
 #include <sup/protocol/protocol_rpc_client.h>
 
+#include <functional>
 #include <iostream>
 
 using namespace sup::epics;
 
 int main(int argc, char* argv[])
 {
+  using namespace std::placeholders;
   sup::cli::CommandLineParser parser;
   parser.SetDescription(
       /*header*/ "",
@@ -67,13 +69,20 @@ int main(int argc, char* argv[])
   auto input = utils::GetFromJSONFile(parser);
 
   auto client_config = utils::GetRPCClientConfiguration(parser);
-  auto client = CreateLoggingEPICSRPCClient(client_config, utils::LogNetworkPacketsToStdOut);
+  auto rpc_logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kClientInputPacketTitle,
+                              utils::kClientOutputPacketTitle);
+  auto client = CreateLoggingEPICSRPCClient(client_config, rpc_logger);
 
   auto protocol_client_config = utils::GetProtocolRPCClientConfiguration(parser);
   sup::protocol::ProtocolRPCClient protocol_client{*client, protocol_client_config};
+  auto input_protocol_logger = std::bind(utils::LogInputProtocolPacketToStdOut, _1, _2,
+                                         utils::kClientProtocolInputNormalTitle,
+                                         utils::kClientProtocolInputServiceTitle);
+  auto output_protocol_logger = std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
+                                          utils::kClientProtocolOutputNormalTitle,
+                                          utils::kClientProtocolOutputServiceTitle);
   sup::protocol::LogProtocolDecorator protocol_decorator{
-    protocol_client, utils::LogInputProtocolPacketToStdOut,
-    utils::LogOutputProtocolPacketToStdOut};
+    protocol_client, input_protocol_logger, output_protocol_logger};
 
   sup::dto::AnyValue output{};
   auto response = protocol_decorator.Invoke(input, output);

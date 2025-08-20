@@ -26,6 +26,7 @@
 #include <sup/cli/command_line_parser.h>
 
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <thread>
 
@@ -33,6 +34,7 @@ using namespace sup::epics;
 
 int main(int argc, char* argv[])
 {
+  using namespace std::placeholders;
   sup::cli::CommandLineParser parser;
   parser.SetDescription(
       /*header*/ "",
@@ -62,8 +64,9 @@ int main(int argc, char* argv[])
 
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};
-  auto server = CreateLoggingEPICSRPCServer(server_config, *fixed_reply_functor,
-                                            utils::LogNetworkPacketsToStdOut);
+  auto logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kServerInputPacketTitle,
+                         utils::kServerOutputPacketTitle);
+  auto server = CreateLoggingEPICSRPCServer(server_config, *fixed_reply_functor, logger);
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));

@@ -26,11 +26,13 @@
 #include <sup/cli/command_line_parser.h>
 
 #include <iostream>
+#include <functional>
 
 using namespace sup::epics;
 
 int main(int argc, char* argv[])
 {
+  using namespace std::placeholders;
   sup::cli::CommandLineParser parser;
   parser.SetDescription(
       /*header*/ "",
@@ -58,8 +60,9 @@ int main(int argc, char* argv[])
   }
   auto request = utils::GetFromJSONFile(parser);
   auto client_config = utils::GetRPCClientConfiguration(parser);
-
-  auto client = CreateLoggingEPICSRPCClient(client_config, utils::LogNetworkPacketsToStdOut);
+  auto logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kClientInputPacketTitle,
+                         utils::kClientOutputPacketTitle);
+  auto client = CreateLoggingEPICSRPCClient(client_config, logger);
   auto response = (*client)(request);
   return 0;
 }
