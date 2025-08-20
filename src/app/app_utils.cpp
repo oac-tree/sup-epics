@@ -98,6 +98,8 @@ private:
   double m_delay;
 };
 
+double ParsePositiveParameter(sup::cli::CommandLineParser& parser, const std::string& option_name);
+
 std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply,
                                                            double delay);
 std::unique_ptr<sup::protocol::Protocol> GetFixedProtocolOutputFunctor(
@@ -123,10 +125,7 @@ PvAccessRPCClientConfig GetRPCClientConfiguration(sup::cli::CommandLineParser& p
 {
   auto service_name = parser.GetValue<std::string>("--service");
   auto config = GetDefaultRPCClientConfig(service_name);
-  if (parser.IsSet("--timeout"))
-  {
-    config.timeout = parser.GetValue<double>("--timeout");
-  }
+  config.timeout = ParsePositiveParameter(parser, "--timeout");
   return config;
 }
 
@@ -145,10 +144,10 @@ sup::protocol::ProtocolRPCClientConfig GetProtocolRPCClientConfiguration(
   }
   if (parser.IsSet("--polling_interval"))
   {
-    config.m_polling_interval_sec = parser.GetValue<double>("--polling_interval");
+    config.m_polling_interval_sec = ParsePositiveParameter(parser, "--polling_interval");
     config.m_async = true;
   }
-  config.m_timeout_sec = parser.GetValue<double>("--timeout");
+  config.m_timeout_sec = ParsePositiveParameter(parser, "--timeout");
   return config;
 }
 
@@ -158,11 +157,7 @@ std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(sup::cli::CommandLine
   double delay{0.0};
   if (parser.IsSet("--delay"))
   {
-    auto parsed_delay = parser.GetValue<double>("--delay");
-    if (parsed_delay > 0.0)
-    {
-      delay = parsed_delay;
-    }
+    delay = ParsePositiveParameter(parser, "--delay");
   }
   return GetFixedReplyFunctor(fixed_reply, delay);
 }
@@ -174,11 +169,7 @@ std::unique_ptr<sup::protocol::Protocol> GetFixedOutputProtocol(
   double delay{0.0};
   if (parser.IsSet("--delay"))
   {
-    auto parsed_delay = parser.GetValue<double>("--delay");
-    if (parsed_delay > 0.0)
-    {
-      delay = parsed_delay;
-    }
+    delay = ParsePositiveParameter(parser, "--delay");
   }
   sup::protocol::ProtocolResult result{sup::protocol::Success};
   if (parser.IsSet("--result"))
@@ -248,6 +239,18 @@ void LogOutputProtocolPacketToStdOut(sup::protocol::ProtocolResult result,
 
 namespace
 {
+
+double ParsePositiveParameter(sup::cli::CommandLineParser& parser, const std::string& option_name)
+{
+  auto val = parser.GetValue<double>(option_name);
+  if (val < 0.0)
+  {
+    const std::string error = "Option " + option_name + " must be positive";
+    throw std::runtime_error(error);
+  }
+  return val;
+}
+
 std::unique_ptr<sup::dto::AnyFunctor> GetFixedReplyFunctor(const sup::dto::AnyValue& fixed_reply, double delay)
 {
   return std::make_unique<FixedReplyFunctor>(fixed_reply, delay);
