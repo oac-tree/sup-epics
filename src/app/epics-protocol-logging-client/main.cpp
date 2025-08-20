@@ -53,13 +53,14 @@ int main(int argc, char* argv[])
       .SetParameter(true)
       .SetValueName("encoding")
       .SetDefaultValue("Base64");
-  parser.AddOption({"-p", "--polling_interval"}, "Polling interval in seconds (implies asynchronous communication)")
+  parser.AddOption({"-p", "--polling-interval"}, "Polling interval in seconds (implies asynchronous communication)")
       .SetParameter(true)
       .SetValueName("interval");
   parser.AddOption({"-t", "--timeout"}, "Optional timeout in seconds for the RPC call")
       .SetParameter(true)
       .SetValueName("sec")
       .SetDefaultValue("5.0");
+  parser.AddOption({"--service-packet"}, "Send a protocol service packet instead of a standard one");
 
   if (!parser.Parse(argc, argv))
   {
@@ -85,6 +86,13 @@ int main(int argc, char* argv[])
     protocol_client, input_protocol_logger, output_protocol_logger};
 
   sup::dto::AnyValue output{};
-  auto response = protocol_decorator.Invoke(input, output);
+  if (parser.IsSet("--service-packet"))
+  {
+    auto response = protocol_decorator.Service(input, output);
+  }
+  else
+  {
+    auto response = protocol_decorator.Invoke(input, output);
+  }
   return 0;
 }

@@ -142,9 +142,9 @@ sup::protocol::ProtocolRPCClientConfig GetProtocolRPCClientConfiguration(
   {
     throw std::runtime_error("Unknown encoding: " + encoding_str);
   }
-  if (parser.IsSet("--polling_interval"))
+  if (parser.IsSet("--polling-interval"))
   {
-    config.m_polling_interval_sec = ParsePositiveParameter(parser, "--polling_interval");
+    config.m_polling_interval_sec = ParsePositiveParameter(parser, "--polling-interval");
     config.m_async = true;
   }
   config.m_timeout_sec = ParsePositiveParameter(parser, "--timeout");
