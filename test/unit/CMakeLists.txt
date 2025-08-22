@@ -1,13 +1,11 @@
-set(test sup-epics-unit-tests)
+set(unit-tests sup-epics-unit-tests)
 
-file(GLOB include_files "*.h")
+add_executable(${unit-tests})
 
-add_executable(${test} ${include_files})
+set_target_properties(${unit-tests} PROPERTIES OUTPUT_NAME "unit-tests")
+set_target_properties(${unit-tests} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
 
-set_target_properties(${test} PROPERTIES OUTPUT_NAME "unit-tests")
-set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
-
-target_sources(${test}
+target_sources(${unit-tests}
   PRIVATE
   anyvalue_from_pvxs_builder_tests.cpp
   channel_access_base_tests.cpp
@@ -36,14 +34,18 @@ target_sources(${test}
   sup_epics_di_tests.cpp
 )
 
+target_link_libraries(${unit-tests}
+  PRIVATE
+    sup-epics
+    sup-epics-di
+    sup-epics-test
+    pthread
+)
+
 if(GTest_VERSION VERSION_LESS_EQUAL "1.8")
-  target_link_libraries(${test} PRIVATE pthread gtest gmock)
+  target_link_libraries(${unit-tests} PRIVATE gtest gtest_main gmock)
 else()
-  target_link_libraries(${test} PRIVATE pthread GTest::gtest GTest::gmock)
+  target_link_libraries(${unit-tests} PRIVATE GTest::gtest GTest::gtest_main GTest::gmock)
 endif()
 
-target_link_libraries(${test} PRIVATE sup-epics sup-epics-di sup-epics-test)
-
-set_target_properties(${test} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_OUTPUT_DIRECTORY})
-
-gtest_discover_tests(${test} DISCOVERY_MODE PRE_TEST)
+gtest_discover_tests(${unit-tests} DISCOVERY_MODE PRE_TEST)
