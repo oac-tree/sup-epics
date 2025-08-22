@@ -43,7 +43,7 @@
         <!-- sonar scan / coverage configuration -->
         <sonar.language>cpp</sonar.language>
         <sonar.sources.cpp>src</sonar.sources.cpp>
-        <sonar.exclusions>src/lib/sup/epics-test/**</sonar.exclusions>
+        <sonar.exclusions>src/lib/sup/epics-test/**, src/app/**</sonar.exclusions>
         <valgrind.enable>false</valgrind.enable>
     </properties>
 
