@@ -80,6 +80,41 @@ TEST_F(PvAccessRPCTests, SingleServerSingleClientSuccess)
   EXPECT_EQ(reply, *m_reply);
 }
 
+//! Standard scenario with moved client.
+
+TEST_F(PvAccessRPCTests, MovedClientSuccess)
+{
+  std::string channel_name = "PvAccessRPCTests:channel";
+  PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
+                           GetHandler());
+  auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
+
+  // Move ctor
+  PvAccessRPCClient moved_client{std::move(client)};
+
+  // Send simple scalar payload over RPC with moved client
+  sup::dto::AnyValue payload{42};
+  auto request =
+    sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
+  auto reply = moved_client(request);
+  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
+  ASSERT_TRUE(static_cast<bool>(m_request));
+  ASSERT_TRUE(static_cast<bool>(m_reply));
+  EXPECT_EQ(request, *m_request);
+  EXPECT_EQ(reply, *m_reply);
+
+  // Move assignment
+  client = std::move(moved_client);
+
+  // Send simple scalar payload over RPC with moved client
+  reply = client(request);
+  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
+  ASSERT_TRUE(static_cast<bool>(m_request));
+  ASSERT_TRUE(static_cast<bool>(m_reply));
+  EXPECT_EQ(request, *m_request);
+  EXPECT_EQ(reply, *m_reply);
+}
+
 //! Fail at client side. Message should not arrive at server.
 
 TEST_F(PvAccessRPCTests, RPCClientEmptyRequest)
