@@ -14,6 +14,7 @@ target_sources(${unit-tests}
   dto_conversion_utils_tests.cpp
   dto_scalar_conversion_utils_tests.cpp
   dto_typecode_conversion_utils_tests.cpp
+  epics_protocol_factory_utils_tests.cpp
   epics_protocol_factory_tests.cpp
   global_ioc_environment.cpp
   main.cpp
