@@ -105,8 +105,11 @@ TEST_F(PvAccessClientTest, InitialState)
 
   // getters and setters should throw for non-existing variables
   EXPECT_THROW(client.GetValue("non-existing-channel"), std::runtime_error);
+  EXPECT_THROW(client.GetExtendedValue("non-existing-channel"), std::runtime_error);
   sup::dto::AnyValue any_value;
   EXPECT_THROW(client.SetValue("non-existing-channel", any_value), std::runtime_error);
+  EXPECT_THROW(client.WaitForConnected("non-existing-channel", 1.0), std::runtime_error);
+  EXPECT_THROW(client.WaitForValidValue("non-existing-channel", 1.0), std::runtime_error);
 }
 
 //! Check AddVariable when no server is running. Server was created before the client.
@@ -191,6 +194,34 @@ TEST_F(PvAccessClientTest, TwoDifferentChannels)
                             return shared_string_value["value"].as<std::string>()
                                    == std::string("abc2");
                           }));
+}
+
+TEST_F(PvAccessClientTest, Move)
+{
+  // starting a server with two variables
+  m_server.start();
+  m_shared_ntscalar_pv.open(m_pvxs_ntscalar_value);
+  m_shared_string_pv.open(m_pvxs_string_value);
+
+  // creating a client with two variables
+  sup::epics::PvAccessClient client(CreateClientImpl());
+  client.AddVariable(kIntChannelName);
+  client.AddVariable(kStringChannelName);
+
+  // Move ctor and check connection status
+  sup::epics::PvAccessClient client2{std::move(client)};
+  EXPECT_TRUE(client2.WaitForValidValue(kIntChannelName, 1.0));
+  EXPECT_TRUE(client2.WaitForValidValue(kStringChannelName, 1.0));
+
+  // checking updated values
+  auto any_value0 = client2.GetValue(kIntChannelName);
+  ASSERT_TRUE(any_value0.HasField("value"));
+  EXPECT_EQ(any_value0["value"], kInitialIntChannelValue);
+
+  // move back using assignment and check connection status
+  client = std::move(client2);
+  EXPECT_TRUE(client.WaitForValidValue(kIntChannelName, 1.0));
+  EXPECT_TRUE(client.WaitForValidValue(kStringChannelName, 1.0));
 }
 
 //! Standard scenario. Server with two different variables was created and started before
