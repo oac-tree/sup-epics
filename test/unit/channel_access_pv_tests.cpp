@@ -67,6 +67,12 @@ TEST_F(ChannelAccessPVTest, ConnectAndRead)
   EXPECT_TRUE(ca_string_var.WaitForValidValue(1.0));
   EXPECT_TRUE(ca_chararray_var.WaitForValidValue(1.0));
 
+  // Check channel name
+  EXPECT_EQ(ca_bool_var.GetChannelName(), "CA-TESTS:BOOL");
+  EXPECT_EQ(ca_float_var.GetChannelName(), "CA-TESTS:FLOAT");
+  EXPECT_EQ(ca_string_var.GetChannelName(), "CA-TESTS:STRING");
+  EXPECT_EQ(ca_chararray_var.GetChannelName(), "CA-TESTS:CHARRAY");
+
   // check bool
   auto bool_val = ca_bool_var.GetValue();
   EXPECT_FALSE(sup::dto::IsEmptyValue(bool_val));
@@ -86,6 +92,18 @@ TEST_F(ChannelAccessPVTest, ConnectAndRead)
   auto chararray_val = ca_chararray_var.GetValue();
   EXPECT_FALSE(sup::dto::IsEmptyValue(chararray_val));
   EXPECT_EQ(chararray_val.GetType(), char_array_t);
+}
+
+TEST_F(ChannelAccessPVTest, NonExistentChannel)
+{
+  using namespace sup::epics;
+
+  ChannelAccessPV ca_nonexist_var("NON_EXISTING:INT", sup::dto::SignedInteger32Type);
+
+  EXPECT_FALSE(ca_nonexist_var.IsConnected());
+  EXPECT_TRUE(sup::dto::IsEmptyValue(ca_nonexist_var.GetValue()));
+  EXPECT_FALSE(ca_nonexist_var.WaitForConnected(0.02));
+  EXPECT_FALSE(ca_nonexist_var.WaitForValidValue(0.02));
 }
 
 TEST_F(ChannelAccessPVTest, SingleReadWrite)
