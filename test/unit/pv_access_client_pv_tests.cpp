@@ -34,7 +34,8 @@
 
 #include <sup/epics-test/unit_test_helper.h>
 
-using sup::epics::test::BusyWaitFor;
+using namespace sup::epics;
+using test::BusyWaitFor;
 using ::testing::_;
 
 namespace
@@ -59,11 +60,11 @@ public:
     m_pvxs_value["alarm.status"] = kInitialStatus;
   }
 
-  std::unique_ptr<sup::epics::PvAccessClientPVImpl> CreateClientPVImpl(
-      const std::string& channel, sup::epics::PvAccessClientPV::VariableChangedCallback cb = {})
+  std::unique_ptr<PvAccessClientPVImpl> CreateClientPVImpl(
+      const std::string& channel, PvAccessClientPV::VariableChangedCallback cb = {})
   {
     auto context = std::make_shared<pvxs::client::Context>(m_server.clientConfig().build());
-    auto result = std::make_unique<sup::epics::PvAccessClientPVImpl>(channel, context, cb);
+    auto result = std::make_unique<PvAccessClientPVImpl>(channel, context, cb);
     return result;
   }
 
@@ -72,12 +73,49 @@ public:
   pvxs::server::Server m_server;
 };
 
+TEST_F(PvAccessClientPVTests, ExtendedValues)
+{
+  sup::dto::AnyValue val1{ sup::dto::UnsignedInteger32Type, 42 };
+  sup::dto::AnyValue val2{ sup::dto::UnsignedInteger32Type, 43 };
+
+  {
+    // If connected is different, extended values are different
+    PvAccessClientPV::ExtendedValue ext_1{};
+    ext_1.connected = true;
+    ext_1.value = val1;
+    PvAccessClientPV::ExtendedValue ext_2{};
+    ext_2.connected = false;
+    ext_2.value = val1;
+    EXPECT_NE(ext_1, ext_2);
+  }
+  {
+    // If values are different, extended values are different
+    PvAccessClientPV::ExtendedValue ext_1{};
+    ext_1.connected = false;
+    ext_1.value = val1;
+    PvAccessClientPV::ExtendedValue ext_2{};
+    ext_2.connected = false;
+    ext_2.value = val2;
+    EXPECT_NE(ext_1, ext_2);
+  }
+  {
+    // If values and connected are the same, extended values are equal
+    PvAccessClientPV::ExtendedValue ext_1{};
+    ext_1.connected = true;
+    ext_1.value = val2;
+    PvAccessClientPV::ExtendedValue ext_2{};
+    ext_2.connected = true;
+    ext_2.value = val2;
+    EXPECT_EQ(ext_1, ext_2);
+  }
+}
+
 //! Initial state of PvAccessClientPV when no server exists.
 
 TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 {
   const std::string expected_name("NON_EXISTING:INT");
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(expected_name));
+  PvAccessClientPV variable(CreateClientPVImpl(expected_name));
 
   EXPECT_EQ(variable.GetChannelName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());
@@ -90,7 +128,7 @@ TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 
 TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 {
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   // seting the value
   sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type};
@@ -105,7 +143,7 @@ TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 
 TEST_F(PvAccessClientPVTests, WaitForConnected)
 {
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   // Server is not started, waiting will fail.
   EXPECT_FALSE(variable.WaitForConnected(0.01));
@@ -116,6 +154,29 @@ TEST_F(PvAccessClientPVTests, WaitForConnected)
 }
 
 //! A server with a single variable is created before the client.
+//! Checks moved client status.
+
+TEST_F(PvAccessClientPVTests, Move)
+{
+  m_server.start();
+  m_shared_pv.open(m_pvxs_value);
+
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  EXPECT_TRUE(variable.WaitForConnected(1.0));
+
+  // Move ctor
+  PvAccessClientPV moved{std::move(variable)};
+  EXPECT_TRUE(moved.WaitForConnected(1.0));
+
+  // Move assignment
+  variable = std::move(moved);
+  EXPECT_TRUE(variable.WaitForConnected(1.0));
+
+  // stopping server
+  m_server.stop();
+}
+
+//! A server with a single variable is created before the client.
 //! Checks client connected/disconnected status.
 
 TEST_F(PvAccessClientPVTests, DisconnectionOnServerStop)
@@ -123,7 +184,7 @@ TEST_F(PvAccessClientPVTests, DisconnectionOnServerStop)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForConnected(1.0));
 
@@ -140,7 +201,7 @@ TEST_F(PvAccessClientPVTests, ConnectionOnServerStart)
 {
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
   EXPECT_FALSE(variable.IsConnected());
 
   // starting the server
@@ -158,7 +219,7 @@ TEST_F(PvAccessClientPVTests, GetValueAfterConnection)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -180,14 +241,14 @@ TEST_F(PvAccessClientPVTests, CallbackAfterConnection)
   // setting up callback expectations
   EXPECT_CALL(listener, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
 
-  sup::epics::PvAccessClientPV variable(
+  PvAccessClientPV variable(
       CreateClientPVImpl(kChannelName, listener.GetClientPVCallBack()));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
   auto result = variable.GetValue();
   EXPECT_EQ(result["value"], kInitialValue);
-  EXPECT_EQ(result, sup::epics::BuildAnyValue(m_pvxs_value));
+  EXPECT_EQ(result, BuildAnyValue(m_pvxs_value));
 }
 
 //! Server with variable and initial value created before the client.
@@ -199,7 +260,7 @@ TEST_F(PvAccessClientPVTests, SetFromClient)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -231,7 +292,7 @@ TEST_F(PvAccessClientPVTests, MultipleSetFromClient)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -267,8 +328,8 @@ TEST_F(PvAccessClientPVTests, TwoClients)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  sup::epics::PvAccessClientPV variable1(CreateClientPVImpl(kChannelName));
-  sup::epics::PvAccessClientPV variable2(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable1(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable2(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable1.WaitForValidValue(1.0));
   EXPECT_TRUE(variable2.WaitForValidValue(1.0));
@@ -318,9 +379,9 @@ TEST_F(PvAccessClientPVTests, TwoClientsCallbacks)
   EXPECT_CALL(listener1, OnClientPVValueChanged(_)).Times(3);
   EXPECT_CALL(listener2, OnClientPVValueChanged(_)).Times(3);
 
-  sup::epics::PvAccessClientPV variable1(
+  PvAccessClientPV variable1(
       CreateClientPVImpl(kChannelName, listener1.GetClientPVCallBack()));
-  sup::epics::PvAccessClientPV variable2(
+  PvAccessClientPV variable2(
       CreateClientPVImpl(kChannelName, listener2.GetClientPVCallBack()));
 
   EXPECT_TRUE(variable1.WaitForValidValue(1.0));
@@ -376,7 +437,7 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
   m_server.start();
   m_shared_pv.open(pvxs_struct_scalar_value);
 
-  sup::epics::PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 

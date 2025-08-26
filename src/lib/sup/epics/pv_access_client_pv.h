@@ -139,6 +139,8 @@ private:
 
 bool operator==(const PvAccessClientPV::ExtendedValue& lhs, const PvAccessClientPV::ExtendedValue& rhs);
 
+bool operator!=(const PvAccessClientPV::ExtendedValue& lhs, const PvAccessClientPV::ExtendedValue& rhs);
+
 }  // namespace epics
 
 }  // namespace sup

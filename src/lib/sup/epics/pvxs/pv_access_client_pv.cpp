@@ -95,6 +95,11 @@ bool operator==(const PvAccessClientPV::ExtendedValue& lhs, const PvAccessClient
   return lhs.connected == rhs.connected && lhs.value == rhs.value;
 }
 
+bool operator!=(const PvAccessClientPV::ExtendedValue& lhs, const PvAccessClientPV::ExtendedValue& rhs)
+{
+  return !(lhs == rhs);
+}
+
 }  // namespace epics
 
 }  // namespace sup
