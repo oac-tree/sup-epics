@@ -215,6 +215,35 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
 
+TEST_F(PvAccessClientServerIntegrationTests, FromEnv)
+{
+  const std::string channel_name("channel2");
+
+  // creating server with single variable
+  PvAccessServer server{};
+  sup::dto::AnyValue any_value({{"value", {sup::dto::SignedInteger32Type, 42}}});
+  server.AddVariable(channel_name, any_value);
+
+  server.Start();
+
+  // Checking variable on server side
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == any_value; }));
+
+  // creating a client with a callback
+  auto cb = [](const std::string& name, const PvAccessClientPV::ExtendedValue& value) {
+    return;
+  };
+  PvAccessClient client{cb};
+  client.AddVariable(channel_name);
+
+  // checking connection and updated values on server and client sides
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
+  auto extended_val = client.GetExtendedValue(channel_name);
+  EXPECT_TRUE(extended_val.connected);
+  EXPECT_EQ(extended_val.value, any_value);
+}
+
 // This test is disabled as PVXS currently does not support named array types
 
 TEST_F(PvAccessClientServerIntegrationTests, DISABLED_ClientServerTypeEquality)
