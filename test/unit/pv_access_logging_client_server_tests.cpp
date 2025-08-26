@@ -22,25 +22,11 @@
 
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_client.h>
+#include <sup/epics-test/unit_test_helper.h>
 
 #include <sup/protocol/log_any_functor_decorator.h>
 
 using namespace sup::epics;
-
-class TestFunctor : public sup::dto::AnyFunctor
-{
-public:
-  explicit TestFunctor(sup::dto::AnyValue fixed_reply)
-      : m_fixed_reply(std::move(fixed_reply))
-  {}
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue&) override
-  {
-    return m_fixed_reply;
-  }
-private:
-  sup::dto::AnyValue m_fixed_reply;
-};
 
 class PvAccessLoggingClientServerTests : public ::testing::Test
 {
@@ -88,7 +74,7 @@ TEST_F(PvAccessLoggingClientServerTests, PacketLogging)
     { "counter", { sup::dto::UnsignedInteger16Type, 42u }},
     { "message", "ok" }
   }};
-  TestFunctor fixed_reply_functor(reply);
+  test::FixedReplyFunctor fixed_reply_functor(reply);
   std::string server_name = "LoggingClientServerTest::Server";
   sup::epics::PvAccessRPCServerConfig server_config{server_name};
   auto client_config = sup::epics::GetDefaultRPCClientConfig(server_name);

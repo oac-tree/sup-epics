@@ -21,6 +21,7 @@
 #include <sup/epics/pv_access_rpc_client.h>
 #include <sup/epics/pv_access_rpc_server.h>
 #include <sup/epics/rpc/pv_access_rpc_utils.h>
+#include <sup/epics-test/unit_test_helper.h>
 
 #include <sup/dto/anyvalue.h>
 #include <sup/protocol/protocol_rpc.h>
@@ -28,18 +29,6 @@
 #include <gtest/gtest.h>
 
 using namespace sup::epics;
-
-class EchoHandler : public sup::dto::AnyFunctor
-{
-public:
-  EchoHandler() = default;
-  ~EchoHandler() = default;
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override
-  {
-    return request;
-  }
-};
 
 class PvAccessRPCUtilsTests : public ::testing::Test
 {
@@ -52,10 +41,13 @@ protected:
 
 TEST_F(PvAccessRPCUtilsTests, ClientRPCCall)
 {
-  std::string channel_name = "PvAccessRPCUtilsTests";
-  EchoHandler echo_handler{};
+  std::string channel_name = "PvAccessRPCUtilsTests_1";
+  sup::dto::AnyValue fixed_reply = {{
+    {"result", { sup::dto::UnsignedInteger32Type, 42 } }
+  }};
+  test::FixedReplyFunctor handler{ fixed_reply };
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
-                           echo_handler);
+                           handler);
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Array of structures payload fails

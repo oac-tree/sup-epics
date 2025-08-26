@@ -10,6 +10,12 @@ set_target_properties(${library_name} PROPERTIES
     VERSION ${LIBVERSION}
   )
 
+target_link_libraries(${library_name}
+  PUBLIC
+    sup-dto::sup-dto
+    sup-protocol::sup-protocol
+)
+
 target_include_directories(${library_name} PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>)

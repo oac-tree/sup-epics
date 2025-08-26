@@ -20,6 +20,7 @@
 
 #include <sup/epics/pv_access_rpc_client.h>
 #include <sup/epics/pv_access_rpc_server.h>
+#include <sup/epics-test/unit_test_helper.h>
 
 #include <sup/dto/anyvalue.h>
 #include <sup/protocol/protocol_rpc.h>
@@ -34,17 +35,6 @@ using namespace sup::epics;
 
 //! Testing PvAccessRPCServer and PvAccessRPCClient together.
 
-class TestHandler : public sup::dto::AnyFunctor
-{
-public:
-  TestHandler(std::function<void(const sup::dto::AnyValue&,const sup::dto::AnyValue&)> func);
-  ~TestHandler();
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override;
-private:
-  std::function<void(const sup::dto::AnyValue&,const sup::dto::AnyValue&)> m_func;
-};
-
 class PvAccessRPCTests : public ::testing::Test
 {
 protected:
@@ -56,7 +46,7 @@ protected:
   std::unique_ptr<sup::dto::AnyValue> m_request;
   std::unique_ptr<sup::dto::AnyValue> m_reply;
 private:
-  TestHandler m_handler;
+  test::FunctionFunctor m_handler;
 };
 
 //! Standard scenario. Single server and single client.
@@ -252,21 +242,4 @@ PvAccessRPCTests::~PvAccessRPCTests() = default;
 sup::dto::AnyFunctor& PvAccessRPCTests::GetHandler()
 {
   return m_handler;
-}
-
-TestHandler::TestHandler(std::function<void(const sup::dto::AnyValue&,const sup::dto::AnyValue&)> func)
-  : m_func{std::move(func)}
-{}
-
-TestHandler::~TestHandler() = default;
-
-sup::dto::AnyValue TestHandler::operator()(const sup::dto::AnyValue& request)
-{
-  sup::dto::AnyValue reply;
-  if (!request.HasField(RETURN_EMPTY_FIELD) || request[RETURN_EMPTY_FIELD].As<bool>() == false)
-  {
-    reply = sup::protocol::utils::CreateRPCReply(sup::protocol::Success);
-  }
-  m_func(request, reply);
-  return reply;
 }

@@ -19,6 +19,7 @@
  *****************************************************************************/
 
 #include <sup/epics-di/registered_names.h>
+#include <sup/epics-test/unit_test_helper.h>
 
 #include <sup/di/error_codes.h>
 #include <sup/di/object_manager.h>
@@ -36,21 +37,14 @@ protected:
   ~SupEpicsDiTests();
 };
 
-class TestFunctor : public sup::dto::AnyFunctor
-{
-public:
-  TestFunctor() = default;
-  ~TestFunctor() = default;
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& input) override { return input; }
-};
-
 // Register service name, timeout and test functor
 const bool ServiceName_Registered = sup::di::GlobalObjectManager().RegisterInstance(
   std::unique_ptr<std::string>{new std::string{"SUP-EPICS-DI:RPC-TEST-SERVICE"}}, "service_name");
 const bool Timeout_Registered = sup::di::GlobalObjectManager().RegisterInstance(
   std::unique_ptr<double>{new double(10.0)}, "timeout");
 const bool TestFunctor_Registered = sup::di::GlobalObjectManager().RegisterInstance(
-  std::unique_ptr<sup::dto::AnyFunctor>{new TestFunctor{}}, "test_functor");
+  std::unique_ptr<sup::dto::AnyFunctor>{
+    new test::FunctionFunctor{test::EchoFunction}}, "test_functor");
 
 TEST_F(SupEpicsDiTests, PvAccessRPCClient)
 {
