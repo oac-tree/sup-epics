@@ -177,10 +177,6 @@ void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
       {
         result.connected = false;
       }
-      catch (std::exception& ex)
-      {
-        throw;
-      }
     }
     m_cache = result;
     if (m_changed_cb)
