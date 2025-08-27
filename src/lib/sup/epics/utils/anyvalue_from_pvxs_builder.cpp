@@ -70,158 +70,27 @@ struct AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl
   sup::dto::AnyValueComposer m_composer;
   std::stack<Node> m_stack;
 
-  void ProcessPvxsValue(const pvxs::Value& pvxs_value)
-  {
-    if (IsEmptyValue(pvxs_value))
-    {
-      return;  // by default AnyValueBuildAdapter will generate empty AnyValue
-    }
+  AnyValueFromPVXSBuilderImpl();
 
-    m_stack.push({pvxs_value});
-    ProcessStack();
-  }
+  void ProcessPvxsValue(const pvxs::Value& pvxs_value);
+  void ProcessStack();
 
-  void ProcessStack()
-  {
-    while (!m_stack.empty())
-    {
-      auto& node = m_stack.top();
+  void ProcessStructNode(Node& node);
+  void ProcessArrayNode(Node& node);
 
-      if (IsStruct(node.m_value))
-      {
-        ProcessStructNode(node);
-      }
-      else if (IsScalar(node.m_value))
-      {
-        ProcessScalarNode(node);
-      }
-      else if (IsScalarArray(node.m_value))
-      {
-        ProcessScalarArrayNode(node);
-      }
-      else if (IsStructArray(node.m_value))
-      {
-        ProcessArrayNode(node);
-      }
-      else
-      {
-        std::ostringstream ostr;
-        ostr << "AnyValueFromPVXSBuilder: unsupported PVXS value \n" << node.m_value;
-        throw std::runtime_error(ostr.str());
-      }
-    }
-  }
+  void ProcessNewStructNode(Node& node);
+  void ProcessVisitedStructNode(Node& node);
 
-  void ProcessStructNode(Node& node)
-  {
-    if (node.m_is_visited)
-    {
-      ProcessVisitedStructNode(node);
-    }
-    else
-    {
-      ProcessNewStructNode(node);
-    }
-  }
+  void ProcessNewArrayNode(Node& node);
+  void ProcessVisitedArrayNode(Node& node);
 
-  void ProcessArrayNode(Node& node)
-  {
-    if (node.m_is_visited)
-    {
-      ProcessVisitedArrayNode(node);
-    }
-    else
-    {
-      ProcessNewArrayNode(node);
-    }
-  }
+  void StartComposite(Node& node);
+  void EndComposite(Node& node);
 
-  void ProcessNewStructNode(Node& node)
-  {
-    StartComposite(node);
-    m_composer.StartStruct(node.m_value.id());
-    AddChildren(node, NodeContext::kStructField);
-  }
+  void AddChildren(Node& node, NodeContext context);
 
-  void ProcessVisitedStructNode(Node& node)
-  {
-    m_composer.EndStruct();
-    EndComposite(node);
-  }
-
-  void ProcessNewArrayNode(Node& node)
-  {
-    StartComposite(node);
-    m_composer.StartArray(node.m_value.id());
-    AddChildren(node, NodeContext::kArrayElement);
-  }
-
-  void ProcessVisitedArrayNode(Node& node)
-  {
-    m_composer.EndArray();
-    EndComposite(node);
-  }
-
-  void StartComposite(Node& node)
-  {
-    assert(node.m_is_visited == false);
-    node.m_is_visited = true;
-
-    if (node.IsStructContext())
-    {
-      m_composer.StartField(node.m_name);
-    }
-    else if (node.IsArrayContext())
-    {
-      m_composer.StartArrayElement();
-    }
-
-    // this is top level object
-  }
-
-  void EndComposite(Node& node)
-  {
-    assert(node.m_is_visited);
-    if (node.IsStructContext())
-    {
-      m_composer.EndField();
-    }
-    else if (node.IsArrayContext())
-    {
-      m_composer.EndArrayElement();
-    }
-    m_stack.pop();  // we don't need the node anymore
-  }
-
-  void AddChildren(Node& node, NodeContext context)
-  {
-    auto children = GetChildren(node.m_value);
-    // iteration in reverse order
-    for (auto it = children.rbegin(); it != children.rend(); ++it)
-    {
-      Node child_node{*it, context};
-      child_node.m_name = GetFieldNameOfChild(node.m_value, *it);
-      m_stack.push(child_node);
-    }
-  }
-
-  //! Process PVXS value representing a scalar.
-  void ProcessScalarNode(Node& node)
-  {
-    StartComposite(node);
-    m_composer.AddValue(GetAnyValueFromScalar(node.m_value));
-    EndComposite(node);
-  }
-
-  //! Process PVXS value representing a scalar array.
-  void ProcessScalarArrayNode(Node& node)
-  {
-    StartComposite(node);
-    m_composer.AddValue(GetAnyValueFromScalarArray(node.m_value));
-    EndComposite(node);
-  }
-
-  AnyValueFromPVXSBuilderImpl() = default;
+  void ProcessScalarNode(Node& node);
+  void ProcessScalarArrayNode(Node& node);
 };
 
 AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilder(const pvxs::Value& pvxs_value)
@@ -236,6 +105,158 @@ dto::AnyValue AnyValueFromPVXSBuilder::MoveAnyValue()
 }
 
 AnyValueFromPVXSBuilder::~AnyValueFromPVXSBuilder() = default;
+
+AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::AnyValueFromPVXSBuilderImpl() = default;
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessPvxsValue(
+  const pvxs::Value& pvxs_value)
+{
+  if (IsEmptyValue(pvxs_value))
+  {
+    return;  // by default AnyValueBuildAdapter will generate empty AnyValue
+  }
+
+  m_stack.push({pvxs_value});
+  ProcessStack();
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessStack()
+{
+  while (!m_stack.empty())
+  {
+    auto& node = m_stack.top();
+
+    if (IsStruct(node.m_value))
+    {
+      ProcessStructNode(node);
+    }
+    else if (IsScalar(node.m_value))
+    {
+      ProcessScalarNode(node);
+    }
+    else if (IsScalarArray(node.m_value))
+    {
+      ProcessScalarArrayNode(node);
+    }
+    else if (IsStructArray(node.m_value))
+    {
+      ProcessArrayNode(node);
+    }
+    else
+    {
+      std::ostringstream ostr;
+      ostr << "AnyValueFromPVXSBuilder: unsupported PVXS value \n" << node.m_value;
+      throw std::runtime_error(ostr.str());
+    }
+  }
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessStructNode(Node& node)
+{
+  if (node.m_is_visited)
+  {
+    ProcessVisitedStructNode(node);
+  }
+  else
+  {
+    ProcessNewStructNode(node);
+  }
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessArrayNode(Node& node)
+{
+  if (node.m_is_visited)
+  {
+    ProcessVisitedArrayNode(node);
+  }
+  else
+  {
+    ProcessNewArrayNode(node);
+  }
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessNewStructNode(Node& node)
+{
+  StartComposite(node);
+  m_composer.StartStruct(node.m_value.id());
+  AddChildren(node, NodeContext::kStructField);
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessVisitedStructNode(Node& node)
+{
+  m_composer.EndStruct();
+  EndComposite(node);
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessNewArrayNode(Node& node)
+{
+  StartComposite(node);
+  m_composer.StartArray(node.m_value.id());
+  AddChildren(node, NodeContext::kArrayElement);
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessVisitedArrayNode(Node& node)
+{
+  m_composer.EndArray();
+  EndComposite(node);
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::StartComposite(Node& node)
+{
+  assert(node.m_is_visited == false);
+  node.m_is_visited = true;
+
+  if (node.IsStructContext())
+  {
+    m_composer.StartField(node.m_name);
+  }
+  else if (node.IsArrayContext())
+  {
+    m_composer.StartArrayElement();
+  }
+
+  // this is top level object
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::EndComposite(Node& node)
+{
+  assert(node.m_is_visited);
+  if (node.IsStructContext())
+  {
+    m_composer.EndField();
+  }
+  else if (node.IsArrayContext())
+  {
+    m_composer.EndArrayElement();
+  }
+  m_stack.pop();  // we don't need the node anymore
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::AddChildren(Node& node, NodeContext context)
+{
+  auto children = GetChildren(node.m_value);
+  // iteration in reverse order
+  for (auto it = children.rbegin(); it != children.rend(); ++it)
+  {
+    Node child_node{*it, context};
+    child_node.m_name = GetFieldNameOfChild(node.m_value, *it);
+    m_stack.push(child_node);
+  }
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessScalarNode(Node& node)
+{
+  StartComposite(node);
+  m_composer.AddValue(GetAnyValueFromScalar(node.m_value));
+  EndComposite(node);
+}
+
+void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessScalarArrayNode(Node& node)
+{
+  StartComposite(node);
+  m_composer.AddValue(GetAnyValueFromScalarArray(node.m_value));
+  EndComposite(node);
+}
 
 }  // namespace epics
 }  // namespace sup
