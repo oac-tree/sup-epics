@@ -2,6 +2,7 @@ Changes for 1.9.0:
 
 - Add EPICS RPC server executable that logs incoming/outgoing network packets
 - Add EPICS RPC client executable that logs outgoing/incoming network packets
+- Bugfix (COA-1670): correctly handle updates of unitialized CA arrays
 
 Changes for 1.8.0:
 
