@@ -117,6 +117,14 @@ record(waveform,"CA-TESTS:SHORTFLOATARRAY") {
     field(NELM,"6")
     field(FTVL,"FLOAT")
 }
+
+record (aai,"CA-TESTS:UNINITARRAY")
+{
+    field(DESC, "Uninitialized array")
+    field(DTYP, "Soft Channel")
+    field(FTVL, "USHORT")
+    field(NELM, "5")
+}
 )RAW";
 
 //! Returns string representing EPICS database file with several testing variables.

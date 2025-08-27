@@ -49,8 +49,11 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
 
 bool CAMonitorWrapper::VerifyCount(long count)
 {
-  auto expected = sup::dto::IsArrayType(m_anytype) ? m_anytype.NumberOfElements() : 1;
-  return count > 0 && (size_t)count <= expected;
+  if (sup::dto::IsArrayType(m_anytype))
+  {
+    return (size_t)count <= m_anytype.NumberOfElements();
+  }
+  return count == 1;
 }
 
 }  // namespace epics

@@ -106,6 +106,24 @@ TEST_F(ChannelAccessPVTest, NonExistentChannel)
   EXPECT_FALSE(ca_nonexist_var.WaitForValidValue(0.02));
 }
 
+// See COA-1670:
+TEST_F(ChannelAccessPVTest, NonInitializedArray)
+{
+  using namespace sup::epics;
+
+  sup::dto::AnyType array_type(5, sup::dto::UnsignedInteger16Type, "uint16[]");
+  ChannelAccessPV non_init_array("CA-TESTS:UNINITARRAY", array_type);
+
+  EXPECT_TRUE(non_init_array.WaitForValidValue(5.0));
+  auto val = non_init_array.GetValue();
+  EXPECT_EQ(val.NumberOfElements(), 5);
+  for (size_t i=0; i<val.NumberOfElements(); ++i)
+  {
+    ASSERT_EQ(val[i].GetType(), sup::dto::UnsignedInteger16Type);
+    EXPECT_EQ(val[i].As<sup::dto::uint16>(), 0);
+  }
+}
+
 TEST_F(ChannelAccessPVTest, SingleReadWrite)
 {
   using namespace sup::epics;
