@@ -51,7 +51,7 @@ bool CAMonitorWrapper::VerifyCount(long count)
 {
   if (sup::dto::IsArrayType(m_anytype))
   {
-    return (size_t)count <= m_anytype.NumberOfElements();
+    return count >= 0 && (size_t)count <= m_anytype.NumberOfElements();
   }
   return count == 1;
 }
