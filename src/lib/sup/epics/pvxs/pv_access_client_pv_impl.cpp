@@ -179,7 +179,7 @@ void PvAccessClientPVImpl::ProcessMonitor(pvxs::client::Subscription& sub)
       }
       catch (std::exception& ex)
       {
-        throw ex;
+        throw;
       }
     }
     m_cache = result;
