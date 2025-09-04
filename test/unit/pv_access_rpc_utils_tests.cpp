@@ -40,22 +40,22 @@ protected:
 TEST_F(PvAccessRPCUtilsTests, ClientRPCCall)
 {
   const std::string channel_name = "PvAccessRPCUtilsTests_1";
-  const sup::dto::AnyValue fixed_reply = {{{"result", {sup::dto::UnsignedInteger32Type, 42}}}};
+  const sup::dto::AnyValue fixed_reply = {{{"result", {sup::dto::UnsignedInteger32Type, 41}}}};
   test::FixedReplyFunctor handler{fixed_reply};
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
                            handler);
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
-  // Array of structures payload fails
-  // building any value
   const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
                                             "struct_name"};
   const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
                                             "struct_name"};
   auto payload = sup::dto::ArrayValue({struct_value1, struct_value2});
+
+  // reply contains fixed value
   auto reply = client(payload);
   EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
-  EXPECT_EQ(reply[sup::protocol::constants::REPLY_RESULT].As<sup::dto::uint32>(), 2);
+  EXPECT_EQ(reply[sup::protocol::constants::REPLY_RESULT].As<sup::dto::uint32>(), 41);
 }
 
 TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
@@ -68,6 +68,7 @@ TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
   const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
                                             "struct_name"};
   auto fixed_reply = sup::dto::ArrayValue({struct_value1, struct_value2});
+
   test::FixedReplyFunctor handler{fixed_reply};
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
                            handler);
@@ -75,8 +76,7 @@ TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
 
   const sup::dto::AnyValue payload = {{{"result", {sup::dto::UnsignedInteger32Type, 42}}}};
   auto reply = client(payload);
-  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
-  EXPECT_EQ(reply[sup::protocol::constants::REPLY_RESULT].As<sup::dto::uint32>(), 3);
+  EXPECT_FALSE(sup::protocol::utils::CheckReplyFormat(reply));
 }
 
 PvAccessRPCUtilsTests::PvAccessRPCUtilsTests() = default;
