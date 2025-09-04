@@ -18,10 +18,11 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include <sup/epics/utils/pvxs_utils.h>
+
 #include <gtest/gtest.h>
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
-#include <sup/epics/utils/pvxs_utils.h>
 
 //! Tests to understand how to construct PVXS values.
 
@@ -34,11 +35,11 @@ class PvxsValueBasicsTests : public ::testing::Test
 TEST_F(PvxsValueBasicsTests, PVXSValueBasics)
 {
   // default constructed
-  pvxs::Value pvxs_default1;
+  const pvxs::Value pvxs_default1;
   EXPECT_FALSE(pvxs_default1.valid());
   EXPECT_EQ(pvxs_default1.type(), ::pvxs::TypeCode::Null);
 
-  pvxs::Value pvxs_default2;
+  const pvxs::Value pvxs_default2;
   EXPECT_TRUE(pvxs_default1.equalType(pvxs_default2));
   EXPECT_TRUE(pvxs_default1.equalInst(pvxs_default2));  // Shouldn't be false?
 
@@ -48,7 +49,7 @@ TEST_F(PvxsValueBasicsTests, PVXSValueBasics)
   EXPECT_TRUE(pvxs_int1.valid());
   EXPECT_EQ(pvxs_int1.as<int>(), 42);
 
-  pvxs::Value pvxs_int2 = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
+  const pvxs::Value pvxs_int2 = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
   EXPECT_TRUE(pvxs_int1.equalType(pvxs_int2));
   EXPECT_FALSE(pvxs_int1.equalInst(pvxs_int2));
 }
@@ -62,7 +63,7 @@ TEST_F(PvxsValueBasicsTests, PVXSValueBasicsAssignToScalar)
   EXPECT_TRUE(pvxs_int1.valid());
   EXPECT_EQ(pvxs_int1.as<int>(), 42);
 
-  pvxs::Value pvxs_int2 = pvxs_int1;
+  const pvxs::Value pvxs_int2 = pvxs_int1;
   EXPECT_EQ(pvxs_int2.as<int>(), 42);
 
   pvxs::Value pvxs_int3;
@@ -77,10 +78,11 @@ TEST_F(PvxsValueBasicsTests, PVXSValueBasicsAssignToScalar)
 
 TEST_F(PvxsValueBasicsTests, PVXSValueBasicsAssignToStruct)
 {
-  pvxs::TypeDef type_def(pvxs::TypeCode::Struct, "simple_t",
-                         {pvxs::Member(pvxs::TypeCode::Int32, "field")});
+  const pvxs::TypeDef type_def(pvxs::TypeCode::Struct, "simple_t",
+                               {pvxs::Member(pvxs::TypeCode::Int32, "field")});
 
   auto value = type_def.create();
+  EXPECT_EQ(value.id(), "simple_t");
   value["field"] = 42;
 
   EXPECT_EQ(value["field"].as<int32_t>(), 42);
@@ -161,13 +163,46 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForStruct)
 
 TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
 {
-  auto pvxs_type_struct =
-      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "struct_name",
-                      {pvxs::members::Int8("first"), pvxs::members::UInt8("second")});
+  auto pvxs_type_array = ::pvxs::TypeDef(::pvxs::TypeCode::StructA);
 
-  auto pvxs_type_array =
-      ::pvxs::TypeDef(::pvxs::TypeCode::StructA);
+  // adding fields that will become fields of underlying structure
+  const pvxs::TypeDef field_type1 = ::pvxs::TypeDef(::pvxs::TypeCode::Int8);
+  const pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
+  pvxs_type_array += {field_type1.as("first")};
+  pvxs_type_array += {field_type1.as("second")};
 
-  // for the moment it is not clear how to construct type for StructA in step-wise manner
-  // TODO continue
+  // Not clear, how to define the name of a struct on board of array of structs (NOTE?).
+
+  // validating via value creation
+  auto pvxs_value = pvxs_type_array.create();
+
+  // allocating space, populating with values
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+  arr[0] = array_field.allocMember();
+  arr[0]["first"] = -42;
+  arr[0]["second"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["first"] = -43;
+  arr[1]["second"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  // reading it back back
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+
+  // arrays doesn't have names in PVXS (NOTE?)
+  EXPECT_TRUE(pvxs_value.id().empty());
+
+  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+  EXPECT_EQ(array_data.size(), 2);
+
+  // names of structs remains undefined
+  EXPECT_TRUE(array_data[0].id().empty());
+  EXPECT_TRUE(array_data[1].id().empty());
+
+  EXPECT_EQ(array_data[0]["first"].as<int32_t>(), -42);
+  EXPECT_EQ(array_data[0]["second"].as<uint32_t>(), 42);
+  EXPECT_EQ(array_data[1]["first"].as<int32_t>(), -43);
+  EXPECT_EQ(array_data[1]["second"].as<uint32_t>(), 43);
 }
