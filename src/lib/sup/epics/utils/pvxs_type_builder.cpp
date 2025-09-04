@@ -39,6 +39,7 @@ namespace
 struct Node
 {
   ::pvxs::TypeDef pvxs_typedef;
+  ::pvxs::TypeCode pvxs_typecode;
 };
 
 }  // namespace
@@ -75,8 +76,8 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
   (void)anytype;
 
   // std::cout << "StructProlog() value:" << anytype << std::endl;
-  p_impl->m_struct_stack.push(
-      {::pvxs::TypeDef(GetPVXSTypeCode(*anytype), anytype->GetTypeName(), {})});
+  const auto type_code = GetPVXSTypeCode(*anytype);
+  p_impl->m_struct_stack.push({::pvxs::TypeDef(type_code, anytype->GetTypeName(), {}), type_code});
 }
 
 void PvxsTypeBuilder::StructMemberSeparator()
@@ -112,7 +113,8 @@ void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
 {
   // std::cout << "ArrayProlog() value:" << anytype << " " << GetPVXSTypeCode(*anytype) << " "
   //           << std::endl;
-  p_impl->m_struct_stack.push({GetPVXSTypeCode(*anytype)});
+  const auto type_code = GetPVXSTypeCode(*anytype);
+  p_impl->m_struct_stack.push({::pvxs::TypeDef(type_code), type_code});
 }
 
 void PvxsTypeBuilder::ArrayElementSeparator()
