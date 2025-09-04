@@ -160,7 +160,6 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForStruct)
 }
 
 //! Studying how to create TypeDef for the array of structures programmatically.
-
 TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
 {
   auto pvxs_type_array = ::pvxs::TypeDef(::pvxs::TypeCode::StructA);
@@ -170,8 +169,6 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
   const pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
   pvxs_type_array += {field_type1.as("first")};
   pvxs_type_array += {field_type1.as("second")};
-
-  // Not clear, how to define the name of a struct on board of array of structs (NOTE?).
 
   // validating via value creation
   auto pvxs_value = pvxs_type_array.create();
@@ -191,15 +188,60 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
   // reading it back back
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
-  // arrays doesn't have names in PVXS (NOTE?)
   EXPECT_TRUE(pvxs_value.id().empty());
 
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
 
-  // names of structs remains undefined
-  EXPECT_TRUE(array_data[0].id().empty());
-  EXPECT_TRUE(array_data[1].id().empty());
+  EXPECT_EQ(array_data[0].id(), std::string());
+  EXPECT_EQ(array_data[1].id(), std::string());
+
+  EXPECT_EQ(array_data[0]["first"].as<int32_t>(), -42);
+  EXPECT_EQ(array_data[0]["second"].as<uint32_t>(), 42);
+  EXPECT_EQ(array_data[1]["first"].as<int32_t>(), -43);
+  EXPECT_EQ(array_data[1]["second"].as<uint32_t>(), 43);
+}
+
+//! Test almost like before with the attempt to pass a name. It shows that the name passed to the
+//! array appear as the name of struct.
+TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
+{
+  const std::string expected_array_name("array_of_struct");
+  auto pvxs_type_array = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, expected_array_name, {});
+
+  // adding fields that will become fields of underlying structure
+  const pvxs::TypeDef field_type1 = ::pvxs::TypeDef(::pvxs::TypeCode::Int8);
+  const pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
+  pvxs_type_array += {field_type1.as("first")};
+  pvxs_type_array += {field_type1.as("second")};
+
+  // validating via value creation
+  auto pvxs_value = pvxs_type_array.create();
+
+  // allocating space, populating with values
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+
+  arr[0] = array_field.allocMember();
+  arr[0]["first"] = -42;
+  arr[0]["second"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["first"] = -43;
+  arr[1]["second"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  // reading it back back
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+
+  // arrays doesn't have names in PVXS
+  EXPECT_TRUE(pvxs_value.id().empty());
+
+  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+  EXPECT_EQ(array_data.size(), 2);
+
+  // apparently the name of the array appeared as a name of a struct
+  EXPECT_EQ(array_data[0].id(), expected_array_name);
+  EXPECT_EQ(array_data[1].id(), expected_array_name);
 
   EXPECT_EQ(array_data[0]["first"].as<int32_t>(), -42);
   EXPECT_EQ(array_data[0]["second"].as<uint32_t>(), 42);
