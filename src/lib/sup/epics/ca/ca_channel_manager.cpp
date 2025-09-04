@@ -37,6 +37,9 @@ std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
 std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& value,
                                                     unsigned long multiplicity);
 std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& value);
+std::vector<sup::dto::uint8> GetUnsignedEnumsUpdateBuffer(const sup::dto::AnyValue& value,
+                                                          unsigned long multiplicity);
+std::vector<sup::dto::uint8> GetUnsignedEnumUpdateBuffer(const sup::dto::AnyValue& value);
 }  // unnamed namespace
 
 namespace sup
@@ -204,6 +207,11 @@ std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
   {
     return GetStringsUpdateBuffer(dest_val, multiplicity);
   }
+  if (ch_type == DBR_ENUM)
+  {
+    return GetUnsignedEnumsUpdateBuffer(dest_val, multiplicity);
+  }
+  // TODO: add special cases to ensure buffer has same size as expected by ch_type (and arrays)
   return sup::dto::ToBytes(dest_val);
 }
 
@@ -238,6 +246,36 @@ std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& val
   }
   strncpy((char*)result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
   return result;
+}
+
+std::vector<sup::dto::uint8> GetUnsignedEnumsUpdateBuffer(const sup::dto::AnyValue& value,
+                                                          unsigned long multiplicity)
+{
+  if (multiplicity > 1)
+  {
+    std::vector<sup::dto::uint8> result;
+    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    {
+      auto el_buffer = GetUnsignedEnumUpdateBuffer(value[idx]);
+      if (el_buffer.size() == 0)
+      {
+        return {};
+      }
+      result.insert(result.end(), el_buffer.begin(), el_buffer.end());
+    }
+    return result;
+  }
+  return GetUnsignedEnumUpdateBuffer(value);
+}
+
+std::vector<sup::dto::uint8> GetUnsignedEnumUpdateBuffer(const sup::dto::AnyValue& value)
+{
+  sup::dto::AnyValue tmp{sup::dto::UnsignedInteger16Type};
+  if (!sup::dto::TryConvert(tmp, value))
+  {
+    return {};
+  }
+  return sup::dto::ToBytes(tmp);
 }
 
 }  // unnamed namespace

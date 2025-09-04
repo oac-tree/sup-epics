@@ -124,6 +124,42 @@ TEST_F(ChannelAccessPVTest, NonInitializedArray)
   }
 }
 
+// See COA-1685:
+TEST_F(ChannelAccessPVTest, UpdateArrayElementSizeMismatch)
+{
+  using namespace sup::epics;
+  {
+    // Write uint16 record with uint8 array
+    sup::dto::AnyType array_type(4, sup::dto::UnsignedInteger8Type);
+    ChannelAccessPV array_pv("CA-ARRAY-TEST:USHORT", array_type);
+    EXPECT_TRUE(array_pv.WaitForConnected(5.0));
+    sup::dto::AnyValue update = sup::dto::ArrayValue({
+      {sup::dto::UnsignedInteger8Type, 1}, 2, 3, 4});
+    EXPECT_TRUE(array_pv.SetValue(update));
+    EXPECT_TRUE(WaitForValue(array_pv, update, 5.0));
+  }
+  {
+    // Write uint16 record with uint16 array
+    sup::dto::AnyType array_type(4, sup::dto::UnsignedInteger16Type);
+    ChannelAccessPV array_pv("CA-ARRAY-TEST:USHORT", array_type);
+    EXPECT_TRUE(array_pv.WaitForConnected(5.0));
+    sup::dto::AnyValue update = sup::dto::ArrayValue({
+      {sup::dto::UnsignedInteger16Type, 1}, 2, 3, 4});
+    EXPECT_TRUE(array_pv.SetValue(update));
+    EXPECT_TRUE(WaitForValue(array_pv, update, 5.0));
+  }
+  {
+    // Write uint16 record with bool array
+    sup::dto::AnyType array_type(4, sup::dto::BooleanType);
+    ChannelAccessPV array_pv("CA-ARRAY-TEST:USHORT", array_type);
+    EXPECT_TRUE(array_pv.WaitForConnected(5.0));
+    sup::dto::AnyValue update = sup::dto::ArrayValue({
+      {sup::dto::BooleanType, true}, false, true, false});
+    EXPECT_TRUE(array_pv.SetValue(update));
+    EXPECT_TRUE(WaitForValue(array_pv, update, 5.0));
+  }
+}
+
 TEST_F(ChannelAccessPVTest, SingleReadWrite)
 {
   using namespace sup::epics;

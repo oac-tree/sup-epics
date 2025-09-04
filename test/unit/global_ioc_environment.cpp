@@ -125,6 +125,14 @@ record (aai,"CA-TESTS:UNINITARRAY")
     field(FTVL, "USHORT")
     field(NELM, "5")
 }
+
+record (aai,"CA-ARRAY-TEST:USHORT")
+{
+    field(DESC, "Uint16 array")
+    field(DTYP, "Soft Channel")
+    field(FTVL, "USHORT")
+    field(NELM, "4")
+}
 )RAW";
 
 //! Returns string representing EPICS database file with several testing variables.
