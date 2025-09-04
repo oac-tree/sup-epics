@@ -211,7 +211,6 @@ std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
   {
     return GetUnsignedEnumsUpdateBuffer(dest_val, multiplicity);
   }
-  // TODO: add special cases to ensure buffer has same size as expected by ch_type (and arrays)
   return sup::dto::ToBytes(dest_val);
 }
 
