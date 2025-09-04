@@ -18,20 +18,18 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <gtest/gtest.h>
-
+#include <sup/epics-test/unit_test_helper.h>
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_client.h>
-#include <sup/epics-test/unit_test_helper.h>
-
 #include <sup/protocol/log_any_functor_decorator.h>
+
+#include <gtest/gtest.h>
 
 using namespace sup::epics;
 
 class PvAccessLoggingClientServerTests : public ::testing::Test
 {
 protected:
-
   PvAccessLoggingClientServerTests() = default;
   ~PvAccessLoggingClientServerTests() override = default;
 
@@ -66,19 +64,16 @@ TEST_F(PvAccessLoggingClientServerTests, PacketLogging)
       m_server_packages_sent.push_back(packet);
     }
   };
-  sup::dto::AnyValue request = {{
-    { "setpoint", { sup::dto::Float64Type, 3.14 }},
-    { "enabled", false }
-  }};
-  sup::dto::AnyValue reply = {{
-    { "counter", { sup::dto::UnsignedInteger16Type, 42u }},
-    { "message", "ok" }
-  }};
+  const sup::dto::AnyValue request = {
+      {{"setpoint", {sup::dto::Float64Type, 3.14}}, {"enabled", false}}};
+  const sup::dto::AnyValue reply = {
+      {{"counter", {sup::dto::UnsignedInteger16Type, 42u}}, {"message", "ok"}}};
   test::FixedReplyFunctor fixed_reply_functor(reply);
-  std::string server_name = "LoggingClientServerTest::Server";
-  sup::epics::PvAccessRPCServerConfig server_config{server_name};
+  const std::string server_name = "LoggingClientServerTest::Server";
+  const sup::epics::PvAccessRPCServerConfig server_config{server_name};
   auto client_config = sup::epics::GetDefaultRPCClientConfig(server_name);
-  auto server = CreateLoggingEPICSRPCServer(server_config, fixed_reply_functor, server_log_function);
+  auto server =
+      CreateLoggingEPICSRPCServer(server_config, fixed_reply_functor, server_log_function);
   auto client = CreateLoggingEPICSRPCClient(client_config, client_log_function);
   client->operator()(request);
   EXPECT_EQ(m_client_packages_sent.size(), 1);
@@ -90,4 +85,3 @@ TEST_F(PvAccessLoggingClientServerTests, PacketLogging)
   EXPECT_EQ(m_server_packages_received[0], request);
   EXPECT_EQ(m_server_packages_sent[0], reply);
 }
-

@@ -18,12 +18,13 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <gtest/gtest.h>
-#include <pvxs/data.h>
-#include <pvxs/nt.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
+
+#include <gtest/gtest.h>
+#include <pvxs/data.h>
+#include <pvxs/nt.h>
 
 using namespace ::sup::epics;
 
@@ -138,11 +139,11 @@ TEST_F(PvxsValueBuilderExtendedTests, TwoNestedStructs)
   sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                     {"bool", {sup::dto::BooleanType, true}}};
 
-  sup::dto::AnyValue any_value{{{"struct1", two_scalars},
-                                {"struct2",
-                                 {{"first", {sup::dto::SignedInteger8Type, -43}},
-                                  {"second", {sup::dto::UnsignedInteger8Type, 44}}}}},
-                               struct_name};
+  const sup::dto::AnyValue any_value{{{"struct1", two_scalars},
+                                      {"struct2",
+                                       {{"first", {sup::dto::SignedInteger8Type, -43}},
+                                        {"second", {sup::dto::UnsignedInteger8Type, 44}}}}},
+                                     struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
 
@@ -311,7 +312,7 @@ TEST_F(PvxsValueBuilderExtendedTests, DISABLED_ArrayWithTwoStructureElements)
   auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
 
   auto expected_pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
-                                   {pvxs::members::Int32("field_name")});
+                                            {pvxs::members::Int32("field_name")});
 
   auto pvxs_value = BuildPVXSValue(anyvalue);
 

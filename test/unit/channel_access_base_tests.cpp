@@ -24,7 +24,6 @@
 
 #include <atomic>
 #include <chrono>
-#include <cmath>
 #include <functional>
 #include <thread>
 

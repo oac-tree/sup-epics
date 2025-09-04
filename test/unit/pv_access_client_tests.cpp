@@ -106,7 +106,7 @@ TEST_F(PvAccessClientTest, InitialState)
   // getters and setters should throw for non-existing variables
   EXPECT_THROW(client.GetValue("non-existing-channel"), std::runtime_error);
   EXPECT_THROW(client.GetExtendedValue("non-existing-channel"), std::runtime_error);
-  sup::dto::AnyValue any_value;
+  const sup::dto::AnyValue any_value;
   EXPECT_THROW(client.SetValue("non-existing-channel", any_value), std::runtime_error);
   EXPECT_THROW(client.WaitForConnected("non-existing-channel", 1.0), std::runtime_error);
   EXPECT_THROW(client.WaitForValidValue("non-existing-channel", 1.0), std::runtime_error);
@@ -132,7 +132,7 @@ TEST_F(PvAccessClientTest, AddVariableAndSetValueWhenUnconnected)
   EXPECT_TRUE(::sup::dto::IsEmptyValue(client.GetValue("channel1")));
 
   // it is not possible to set values for unconnected variables
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  const sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
   EXPECT_FALSE(client.SetValue("channel0", any_value));
 
   // we expect old values

@@ -27,8 +27,6 @@
 #include <pvxs/nt.h>
 #include <pvxs/sharedArray.h>
 
-#include <iostream>
-
 using namespace ::sup::epics;
 
 class AnyValueFromPVXSBuilderTests : public ::testing::Test
@@ -67,7 +65,7 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithSingleField)
 
   auto anyvalue = BuildAnyValue(pvxs_value);
 
-  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
+  const sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}}};
 
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
@@ -86,8 +84,8 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoFields)
 
   auto anyvalue = BuildAnyValue(pvxs_value);
 
-  sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
-                                        {"bool", {sup::dto::BooleanType}}};
+  const sup::dto::AnyType expected_anytype = {{"signed", {sup::dto::SignedInteger32Type}},
+                                              {"bool", {sup::dto::BooleanType}}};
 
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
@@ -111,9 +109,9 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithNestedStructWithField)
 
   auto anyvalue = BuildAnyValue(pvxs_value);
 
-  sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
-                                   {"bool", {sup::dto::BooleanType}}};
-  sup::dto::AnyType expected_anytype = {{"scalars", two_scalars}};
+  const sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
+                                         {"bool", {sup::dto::BooleanType}}};
+  const sup::dto::AnyType expected_anytype = {{"scalars", two_scalars}};
 
   EXPECT_EQ(anyvalue.GetType(), expected_anytype);
   EXPECT_TRUE(::sup::dto::IsStructValue(anyvalue));
@@ -141,11 +139,11 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructWithTwoNestedStructs)
 
   auto anyvalue = BuildAnyValue(pvxs_value);
 
-  sup::dto::AnyType two_scalars = {
+  const sup::dto::AnyType two_scalars = {
       {{"signed", {sup::dto::SignedInteger32Type}}, {"bool", {sup::dto::BooleanType}}},
       "struct1_name"};
 
-  sup::dto::AnyType expected_anytype{
+  const sup::dto::AnyType expected_anytype{
       {{"struct1", two_scalars},
        {"struct2",
         {{"first", {sup::dto::SignedInteger8Type}}, {"second", {sup::dto::UnsignedInteger8Type}}}}},
@@ -211,7 +209,7 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayInStruct)
   // validating result
   EXPECT_EQ(any_value.GetTypeName(), struct_name);
 
-  sup::dto::AnyType expected_anytype{
+  const sup::dto::AnyType expected_anytype{
       {{"array", ::sup::dto::AnyType(2, ::sup::dto::SignedInteger32Type)}}, struct_name};
 
   EXPECT_EQ(any_value.GetType(), expected_anytype);
@@ -269,20 +267,21 @@ TEST_F(AnyValueFromPVXSBuilderTests, PlainDefaultConstructedNTScalar)
   auto any_value = BuildAnyValue(pvxs_value);
 
   // constructing expected AnyType
-  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
-                                     {"status", {sup::dto::SignedInteger32Type}},
-                                     {"message", {sup::dto::StringType}}},
-                                    "alarm_t"};
+  const sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
+                                           {"status", {sup::dto::SignedInteger32Type}},
+                                           {"message", {sup::dto::StringType}}},
+                                          "alarm_t"};
 
-  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
-                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
-                                         {"userTag", {sup::dto::SignedInteger32Type}}},
-                                        "time_t"};
+  const sup::dto::AnyType timestamp_struct = {
+      {{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
+       {"nanoseconds", {sup::dto::SignedInteger32Type}},
+       {"userTag", {sup::dto::SignedInteger32Type}}},
+      "time_t"};
 
-  sup::dto::AnyType expected_anytype{{{"value", {sup::dto::SignedInteger32Type}},
-                                      {"alarm", alarm_struct},
-                                      {"timeStamp", timestamp_struct}},
-                                     "epics:nt/NTScalar:1.0"};
+  const sup::dto::AnyType expected_anytype{{{"value", {sup::dto::SignedInteger32Type}},
+                                            {"alarm", alarm_struct},
+                                            {"timeStamp", timestamp_struct}},
+                                           "epics:nt/NTScalar:1.0"};
 
   // validating AnyValue
   EXPECT_EQ(any_value.GetType(), expected_anytype);
@@ -332,20 +331,21 @@ TEST_F(AnyValueFromPVXSBuilderTests, PlainNTScalar)
   auto any_value = BuildAnyValue(pvxs_value);
 
   // constructing expected AnyType
-  sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
-                                     {"status", {sup::dto::SignedInteger32Type}},
-                                     {"message", {sup::dto::StringType}}},
-                                    "alarm_t"};
+  const sup::dto::AnyType alarm_struct = {{{"severity", {sup::dto::SignedInteger32Type}},
+                                           {"status", {sup::dto::SignedInteger32Type}},
+                                           {"message", {sup::dto::StringType}}},
+                                          "alarm_t"};
 
-  sup::dto::AnyType timestamp_struct = {{{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
-                                         {"nanoseconds", {sup::dto::SignedInteger32Type}},
-                                         {"userTag", {sup::dto::SignedInteger32Type}}},
-                                        "time_t"};
+  const sup::dto::AnyType timestamp_struct = {
+      {{"secondsPastEpoch", {sup::dto::SignedInteger64Type}},
+       {"nanoseconds", {sup::dto::SignedInteger32Type}},
+       {"userTag", {sup::dto::SignedInteger32Type}}},
+      "time_t"};
 
-  sup::dto::AnyType expected_anytype{{{"value", {sup::dto::SignedInteger32Type}},
-                                      {"alarm", alarm_struct},
-                                      {"timeStamp", timestamp_struct}},
-                                     "epics:nt/NTScalar:1.0"};
+  const sup::dto::AnyType expected_anytype{{{"value", {sup::dto::SignedInteger32Type}},
+                                            {"alarm", alarm_struct},
+                                            {"timeStamp", timestamp_struct}},
+                                           "epics:nt/NTScalar:1.0"};
 
   // validating AnyValue
   EXPECT_EQ(any_value.GetType(), expected_anytype);
@@ -498,10 +498,10 @@ TEST_F(AnyValueFromPVXSBuilderTests, ArrayWithTwoStructureElements)
   auto any_value = BuildAnyValue(pvxs_value);
 
   // expected any value
-  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                      "struct_name"};
-  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                      "struct_name"};
+  const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                            "struct_name"};
+  const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                            "struct_name"};
   auto expected_array_value = sup::dto::ArrayValue({{struct_value1}, struct_value2});
 
   EXPECT_EQ(any_value, expected_array_value);
@@ -532,16 +532,16 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructureWithArrayWithStructure)
 
   // constructing expected any value
   // Setting empty names for internal structs and for external struct
-  sup::dto::AnyValue struct_value1 = {{{"first", {sup::dto::SignedInteger8Type, -43}},
-                                       {"second", {sup::dto::UnsignedInteger8Type, 44}}},
-                                      ""};
-  sup::dto::AnyValue struct_value2 = {{{"first", {sup::dto::SignedInteger8Type, 42}},
-                                       {"second", {sup::dto::UnsignedInteger8Type, 43}}},
-                                      ""};
+  const sup::dto::AnyValue struct_value1 = {{{"first", {sup::dto::SignedInteger8Type, -43}},
+                                             {"second", {sup::dto::UnsignedInteger8Type, 44}}},
+                                            ""};
+  const sup::dto::AnyValue struct_value2 = {{{"first", {sup::dto::SignedInteger8Type, 42}},
+                                             {"second", {sup::dto::UnsignedInteger8Type, 43}}},
+                                            ""};
 
   auto array_value = sup::dto::ArrayValue({struct_value1, struct_value2}, "");
 
-  sup::dto::AnyValue expected_struct_value = {{{"array_field", array_value}}, ""};
+  const sup::dto::AnyValue expected_struct_value = {{{"array_field", array_value}}, ""};
 
   // building any_value
   auto any_value = BuildAnyValue(pvxs_value);

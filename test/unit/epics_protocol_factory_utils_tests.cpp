@@ -32,14 +32,14 @@ class EPICSProtocolFactoryUtilsTest : public ::testing::Test
 {
 protected:
   EPICSProtocolFactoryUtilsTest() = default;
-  ~EPICSProtocolFactoryUtilsTest() = default;
+  ~EPICSProtocolFactoryUtilsTest() override = default;
 };
 
 TEST_F(EPICSProtocolFactoryUtilsTest, ParsePvAccessRPCClientConfig)
 {
   {
     // No service field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kTimeout, 2.0 }
     }};
     EXPECT_THROW(utils::ParsePvAccessRPCClientConfig(config),
@@ -47,7 +47,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, ParsePvAccessRPCClientConfig)
   }
   {
     // Wrong type of service field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kServiceName, 42 },
       { kTimeout, 2.0 }
     }};
@@ -56,7 +56,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, ParsePvAccessRPCClientConfig)
   }
   {
     // Only service field
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kServiceName, { sup::dto::StringType, "MyServiceName"} }
     }};
     auto client_config = utils::ParsePvAccessRPCClientConfig(config);
@@ -65,7 +65,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, ParsePvAccessRPCClientConfig)
   }
   {
     // Wrong type of timeout field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kServiceName, { sup::dto::StringType, "MyServiceName"} },
       { kTimeout, 42 }
     }};
@@ -74,7 +74,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, ParsePvAccessRPCClientConfig)
   }
   {
     // Negative timeout field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kServiceName, { sup::dto::StringType, "MyServiceName"} },
       { kTimeout, { sup::dto::Float64Type, -3.14 } }
     }};
@@ -83,7 +83,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, ParsePvAccessRPCClientConfig)
   }
   {
     // Correct timeout field is taken into account
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kServiceName, { sup::dto::StringType, "MyServiceName"} },
       { kTimeout, { sup::dto::Float64Type, 2.0 } }
     }};
@@ -97,7 +97,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreateChannelAccessClientVar)
 {
   {
     // No channel field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kVariableType, "DoesntMatter" }
     }};
     EXPECT_THROW(utils::CreateChannelAccessClientVar(config),
@@ -105,7 +105,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreateChannelAccessClientVar)
   }
   {
     // Wrong channel field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, 42 },
       { kVariableType, "DoesntMatter" }
     }};
@@ -114,7 +114,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreateChannelAccessClientVar)
   }
   {
     // No variable type field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" }
     }};
     EXPECT_THROW(utils::CreateChannelAccessClientVar(config),
@@ -122,7 +122,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreateChannelAccessClientVar)
   }
   {
     // Wrong variable type field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" },
       { kVariableType, 42 }
     }};
@@ -131,7 +131,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreateChannelAccessClientVar)
   }
   {
     // Variable type field that cannot be parsed throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" },
       { kVariableType, "NotParseable" }
     }};
@@ -140,7 +140,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreateChannelAccessClientVar)
   }
   {
     // Correct configuration
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" },
       { kVariableType, R"RAW({"type":"float64"})RAW" }
     }};
@@ -152,13 +152,13 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreatePvAccessClientVar)
 {
   {
     // No channel field throws
-    sup::dto::AnyValue config = sup::dto::EmptyStruct();
+    const sup::dto::AnyValue config = sup::dto::EmptyStruct();
     EXPECT_THROW(utils::CreatePvAccessClientVar(config),
                  sup::protocol::InvalidOperationException);
   }
   {
     // Wrong channel field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, 42 }
     }};
     EXPECT_THROW(utils::CreatePvAccessClientVar(config),
@@ -166,7 +166,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreatePvAccessClientVar)
   }
   {
     // Correct configuration
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" }
     }};
     EXPECT_NO_THROW(utils::CreatePvAccessClientVar(config));
@@ -177,7 +177,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreatePvAccessServerVar)
 {
   {
     // No channel field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kVariableValue, {{
         { "ID", 42 }
       }}}
@@ -187,7 +187,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreatePvAccessServerVar)
   }
   {
     // Wrong channel field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, 42 },
       { kVariableValue, {{
         { "ID", 42 }
@@ -198,7 +198,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreatePvAccessServerVar)
   }
   {
     // No variable value field throws
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" }
     }};
     EXPECT_THROW(utils::CreatePvAccessServerVar(config),
@@ -206,7 +206,7 @@ TEST_F(EPICSProtocolFactoryUtilsTest, CreatePvAccessServerVar)
   }
   {
     // Correct configuration
-    sup::dto::AnyValue config = {{
+    const sup::dto::AnyValue config = {{
       { kChannelName, "MyChannel" },
       { kVariableValue, {{
         { "ID", 42 }

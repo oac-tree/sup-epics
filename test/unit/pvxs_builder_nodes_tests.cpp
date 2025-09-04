@@ -20,14 +20,13 @@
 
 #include "sup/epics/utils/pvxs_builder_nodes.h"
 
-#include <gtest/gtest.h>
-#include <pvxs/data.h>
-#include <pvxs/nt.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
 
-#include <iostream>
+#include <gtest/gtest.h>
+#include <pvxs/data.h>
+#include <pvxs/nt.h>
 
 using namespace ::sup::epics;
 
@@ -39,7 +38,7 @@ class PvxsBuilderNodesTests : public ::testing::Test
 
 TEST_F(PvxsBuilderNodesTests, ScalarArrayBuilderNodeInitialState)
 {
-  sup::dto::AnyValue any_value =
+  const sup::dto::AnyValue any_value =
       sup::dto::ArrayValue({{sup::dto::SignedInteger32Type, 1}, 2}, "my_array_t");
 
   auto pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32A).create();
@@ -61,15 +60,13 @@ TEST_F(PvxsBuilderNodesTests, ScalarArrayBuilderNodeInitialState)
       std::runtime_error);
 }
 
-//! Testing class StructArrayBuilderNode in the
-
 TEST_F(PvxsBuilderNodesTests, StructArrayBuilderNodeAddElement)
 {
   // preparing any_value
-  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                      "struct_name"};
-  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                      "struct_name"};
+  const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                            "struct_name"};
+  const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                            "struct_name"};
   auto any_value = sup::dto::ArrayValue({{struct_value1}, struct_value2});
 
   // defining pvxs_value (no values assignedm structs are unallocated)

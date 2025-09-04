@@ -24,8 +24,6 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_typecode_conversion_utils.h>
 
-#include <iostream>
-
 using namespace ::sup::epics;
 
 class DtoTypeCodeConversionUtilsTests : public ::testing::Test
@@ -52,12 +50,12 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetPVXSBaseTypeCode)
   EXPECT_EQ(GetPVXSBaseTypeCode(sup::dto::StringType), ::pvxs::TypeCode::String);
 
   {  // AnyType based on struct
-    ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8Type}}};
+    const ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8Type}}};
     EXPECT_EQ(GetPVXSBaseTypeCode(any_type), ::pvxs::TypeCode::Struct);
   }
 
   {  // attempt to get unknown type code
-    sup::dto::AnyType any_type(64, sup::dto::UnsignedInteger32Type);
+    const sup::dto::AnyType any_type(64, sup::dto::UnsignedInteger32Type);
     EXPECT_THROW(GetPVXSBaseTypeCode(any_type), std::runtime_error);
   }
 }
@@ -81,7 +79,7 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetPVXSArrayTypeCode)
   EXPECT_EQ(GetPVXSArrayTypeCode(sup::dto::StringType), ::pvxs::TypeCode::StringA);
 
   {  // AnyType based on struct
-    ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8Type}}};
+    const ::sup::dto::AnyType any_type{{{"signed", ::sup::dto::SignedInteger8Type}}};
     EXPECT_EQ(GetPVXSArrayTypeCode(any_type), ::pvxs::TypeCode::StructA);
   }
 }
@@ -145,7 +143,7 @@ TEST_F(DtoTypeCodeConversionUtilsTests, GetPVXSTypeCode)
   EXPECT_EQ(GetPVXSTypeCode(AnyType(TypeCode::String)), ::pvxs::TypeCode::String);
   EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, sup::dto::StringType)), ::pvxs::TypeCode::StringA);
 
-  AnyType my_struct({{"signed", ::sup::dto::SignedInteger8Type}});
+  const AnyType my_struct({{"signed", ::sup::dto::SignedInteger8Type}});
   EXPECT_EQ(GetPVXSTypeCode(my_struct), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(GetPVXSTypeCode(AnyType(n_elements, my_struct)), ::pvxs::TypeCode::StructA);
 }

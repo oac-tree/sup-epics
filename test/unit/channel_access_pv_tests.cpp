@@ -25,7 +25,6 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/channel_access_pv.h>
 
-#include <cmath>
 #include <thread>
 
 #include <sup/epics-test/softioc_runner.h>
@@ -169,7 +168,7 @@ TEST_F(ChannelAccessPVTest, SingleReadWrite)
   ChannelAccessPV ca_float_var("CA-TESTS:FLOAT", sup::dto::Float32Type);
   ChannelAccessPV ca_string_var("CA-TESTS:STRING", sup::dto::StringType);
 
-  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
+  const sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
   ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
 
   // waiting for variables to connect
@@ -179,15 +178,15 @@ TEST_F(ChannelAccessPVTest, SingleReadWrite)
   EXPECT_TRUE(ca_chararray_var.WaitForConnected(1.0));
 
   // set bool
-  sup::dto::boolean bool_val = true;
+  const sup::dto::boolean bool_val = true;
   EXPECT_TRUE(ca_bool_var.SetValue(bool_val));
 
   // set float
-  sup::dto::float32 float_val = 0.25F;
+  const sup::dto::float32 float_val = 0.25F;
   EXPECT_TRUE(ca_float_var.SetValue(float_val));
 
   // set string
-  std::string string_val = "some value";
+  const std::string string_val = "some value";
   EXPECT_TRUE(ca_string_var.SetValue(string_val));
 
   // reading bool
@@ -201,7 +200,7 @@ TEST_F(ChannelAccessPVTest, SingleReadWrite)
 
   // writing long string
   sup::dto::AnyValue chararray_val(1024, sup::dto::Character8Type, "char8[]");
-  sup::dto::char8 char_data[1024] =
+  const sup::dto::char8 char_data[1024] =
       "Some very long string which is longer than the maximum length of EPICSv3 string and "
       "should be serialised on a waveform record";
   sup::dto::AssignFromCType(chararray_val, char_data);
@@ -228,14 +227,14 @@ TEST_F(ChannelAccessPVTest, MultipleReadWrite)
 
   // create variables
   ChannelAccessPV ca_float_writer("CA-TESTS:FLOAT", sup::dto::Float32Type);
-  ChannelAccessPV ca_float_reader("CA-TESTS:FLOAT", sup::dto::Float32Type);
+  const ChannelAccessPV ca_float_reader("CA-TESTS:FLOAT", sup::dto::Float32Type);
 
   // waiting for connected clients
   EXPECT_TRUE(ca_float_writer.WaitForConnected(5.0));
   EXPECT_TRUE(ca_float_reader.WaitForConnected(1.0));
 
   // set first value
-  sup::dto::float32 value1 = 3.5F;
+  const sup::dto::float32 value1 = 3.5F;
   ASSERT_TRUE(ca_float_writer.SetValue(value1));
 
   // reading variable through first client
@@ -245,7 +244,7 @@ TEST_F(ChannelAccessPVTest, MultipleReadWrite)
   EXPECT_TRUE(WaitForValue(ca_float_reader, value1, 5.0));
 
   // set second value
-  sup::dto::float32 value2 = -1.5F;
+  const sup::dto::float32 value2 = -1.5F;
   ASSERT_TRUE(ca_float_writer.SetValue(value2));
 
   // reading variable through first client
@@ -261,13 +260,13 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
 
   // create variables
   ChannelAccessPV pv_as_bool("CA-TESTS:BOOL", sup::dto::BooleanType);
-  ChannelAccessPV pv_as_uint8("CA-TESTS:BOOL", sup::dto::UnsignedInteger8Type);
-  ChannelAccessPV pv_as_uint16("CA-TESTS:BOOL", sup::dto::UnsignedInteger16Type);
-  ChannelAccessPV pv_as_uint32("CA-TESTS:BOOL", sup::dto::UnsignedInteger32Type);
-  ChannelAccessPV pv_as_int32("CA-TESTS:BOOL", sup::dto::SignedInteger32Type);
-  ChannelAccessPV pv_as_uint64("CA-TESTS:BOOL", sup::dto::UnsignedInteger64Type);
-  ChannelAccessPV pv_as_int64("CA-TESTS:BOOL", sup::dto::SignedInteger64Type);
-  ChannelAccessPV pv_as_string("CA-TESTS:BOOL", sup::dto::StringType);
+  const ChannelAccessPV pv_as_uint8("CA-TESTS:BOOL", sup::dto::UnsignedInteger8Type);
+  const ChannelAccessPV pv_as_uint16("CA-TESTS:BOOL", sup::dto::UnsignedInteger16Type);
+  const ChannelAccessPV pv_as_uint32("CA-TESTS:BOOL", sup::dto::UnsignedInteger32Type);
+  const ChannelAccessPV pv_as_int32("CA-TESTS:BOOL", sup::dto::SignedInteger32Type);
+  const ChannelAccessPV pv_as_uint64("CA-TESTS:BOOL", sup::dto::UnsignedInteger64Type);
+  const ChannelAccessPV pv_as_int64("CA-TESTS:BOOL", sup::dto::SignedInteger64Type);
+  const ChannelAccessPV pv_as_string("CA-TESTS:BOOL", sup::dto::StringType);
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_bool.WaitForConnected(5.0));
@@ -282,52 +281,52 @@ TEST_F(ChannelAccessPVTest, BoolFormats)
   EXPECT_FALSE(pv_as_int64.WaitForValidValue(0.5));
   {
     // set true
-    sup::dto::boolean bool_v = true;
+    const sup::dto::boolean bool_v = true;
     ASSERT_TRUE(pv_as_bool.SetValue(bool_v));
 
     // reading variables through different clients
-    sup::dto::uint8 uint8_v = 1u;
+    const sup::dto::uint8 uint8_v = 1u;
     EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
 
-    sup::dto::uint16 uint16_v = 1u;
+    const sup::dto::uint16 uint16_v = 1u;
     EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
-    sup::dto::uint32 uint32_v = 1u;
+    const sup::dto::uint32 uint32_v = 1u;
     EXPECT_TRUE(WaitForValue(pv_as_uint32, uint32_v, 5.0));
 
-    sup::dto::int32 int32_v = 1;
+    const sup::dto::int32 int32_v = 1;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-    sup::dto::uint64 uint64_v = 1u;
+    const sup::dto::uint64 uint64_v = 1u;
     EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
 
-    std::string string_v = "TRUE";
+    const std::string string_v = "TRUE";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
   }
   {
     // set false through integer using bool channel
-    sup::dto::uint16 uint16_v = 0u;
+    const sup::dto::uint16 uint16_v = 0u;
     ASSERT_TRUE(pv_as_bool.SetValue(uint16_v));
-    sup::dto::boolean bool_v = false;
+    const sup::dto::boolean bool_v = false;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
 
     // reading variables through different clients
     EXPECT_TRUE(WaitForValue(pv_as_uint16, uint16_v, 5.0));
 
-    sup::dto::uint8 uint8_v = 0u;
+    const sup::dto::uint8 uint8_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
 
-    sup::dto::uint32 uint32_v = 0u;
+    const sup::dto::uint32 uint32_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint32, uint32_v, 5.0));
 
-    sup::dto::int32 int32_v = 0;
+    const sup::dto::int32 int32_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-    sup::dto::uint64 uint64_v = 0u;
+    const sup::dto::uint64 uint64_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
 
-    std::string string_v = "FALSE";
+    const std::string string_v = "FALSE";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
   }
@@ -339,14 +338,14 @@ TEST_F(ChannelAccessPVTest, StringFormats)
 
   // create variables
   ChannelAccessPV pv_as_string("CA-TESTS:STRING", sup::dto::StringType);
-  ChannelAccessPV pv_as_uint16("CA-TESTS:STRING", sup::dto::UnsignedInteger16Type);
+  const ChannelAccessPV pv_as_uint16("CA-TESTS:STRING", sup::dto::UnsignedInteger16Type);
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_string.WaitForConnected(5.0));
   EXPECT_TRUE(pv_as_uint16.WaitForConnected(1.0));
 
   // set first value
-  std::string string_v = "some_string";
+  const std::string string_v = "some_string";
   ASSERT_TRUE(pv_as_string.SetValue(string_v));
   EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
 
@@ -360,9 +359,9 @@ TEST_F(ChannelAccessPVTest, IntFormats)
 
   // create variables
   ChannelAccessPV pv_as_int32("CA-TESTS:LONG", sup::dto::SignedInteger32Type);
-  ChannelAccessPV pv_as_int64("CA-TESTS:LONG", sup::dto::SignedInteger64Type);
-  ChannelAccessPV pv_as_string("CA-TESTS:LONG", sup::dto::StringType);
-  ChannelAccessPV pv_as_bool("CA-TESTS:LONG", sup::dto::BooleanType);
+  const ChannelAccessPV pv_as_int64("CA-TESTS:LONG", sup::dto::SignedInteger64Type);
+  const ChannelAccessPV pv_as_string("CA-TESTS:LONG", sup::dto::StringType);
+  const ChannelAccessPV pv_as_bool("CA-TESTS:LONG", sup::dto::BooleanType);
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_int32.WaitForConnected(5.0));
@@ -372,36 +371,36 @@ TEST_F(ChannelAccessPVTest, IntFormats)
 
   {
     // set first value
-    sup::dto::int32 int32_v = 42;
+    const sup::dto::int32 int32_v = 42;
     ASSERT_TRUE(pv_as_int32.SetValue(int32_v));
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::int64 int64_v = 42;
+    const sup::dto::int64 int64_v = 42;
     EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
 
-    std::string string_v = "42";
+    const std::string string_v = "42";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
-    sup::dto::boolean bool_v = true;
+    const sup::dto::boolean bool_v = true;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
   }
   {
     // set second value using a 64bit int on a 32bit channel
-    sup::dto::int64 int64_v = 0;
-    sup::dto::int32 int32_v = 0;
+    const sup::dto::int64 int64_v = 0;
+    const sup::dto::int32 int32_v = 0;
     ASSERT_TRUE(pv_as_int32.SetValue(int64_v));
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
     // reading variables through different clients
     EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
 
-    std::string string_v = "0";
+    const std::string string_v = "0";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
-    sup::dto::boolean bool_v = false;
+    const sup::dto::boolean bool_v = false;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
   }
 }
@@ -412,9 +411,9 @@ TEST_F(ChannelAccessPVTest, Int64Formats)
 
   // create variables
   ChannelAccessPV pv_as_int64("CA-TESTS:INT64", sup::dto::SignedInteger64Type);
-  ChannelAccessPV pv_as_int32("CA-TESTS:INT64", sup::dto::SignedInteger32Type);
-  ChannelAccessPV pv_as_string("CA-TESTS:INT64", sup::dto::StringType);
-  ChannelAccessPV pv_as_bool("CA-TESTS:INT64", sup::dto::BooleanType);
+  const ChannelAccessPV pv_as_int32("CA-TESTS:INT64", sup::dto::SignedInteger32Type);
+  const ChannelAccessPV pv_as_string("CA-TESTS:INT64", sup::dto::StringType);
+  const ChannelAccessPV pv_as_bool("CA-TESTS:INT64", sup::dto::BooleanType);
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_int64.WaitForConnected(1.0));
@@ -424,33 +423,33 @@ TEST_F(ChannelAccessPVTest, Int64Formats)
 
   {
     // set first value
-    sup::dto::int64 int64_v = 42;
+    const sup::dto::int64 int64_v = 42;
     ASSERT_TRUE(pv_as_int64.SetValue(int64_v));
     EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::int32 int32_v = 42;
+    const sup::dto::int32 int32_v = 42;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-    std::string string_v = "42";
+    const std::string string_v = "42";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
-    sup::dto::boolean bool_v = true;
+    const sup::dto::boolean bool_v = true;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
   }
   {
     // set second value using a boolean on the 64bit channel
-    sup::dto::boolean bool_v = false;
+    const sup::dto::boolean bool_v = false;
     ASSERT_TRUE(pv_as_int64.SetValue(bool_v));
-    sup::dto::int64 int64_v = 0;
+    const sup::dto::int64 int64_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_int64, int64_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::int32 int32_v = 0;
+    const sup::dto::int32 int32_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-    std::string string_v = "0";
+    const std::string string_v = "0";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
@@ -509,12 +508,12 @@ TEST_F(ChannelAccessPVTest, EnumFormats)
   // create variables
   ChannelAccessPV pv_as_enum("CA-TESTS:ENUM", sup::dto::UnsignedInteger16Type);
   ChannelAccessPV pv_as_string("CA-TESTS:ENUM", sup::dto::StringType);
-  ChannelAccessPV pv_as_bool("CA-TESTS:ENUM", sup::dto::BooleanType);
-  ChannelAccessPV pv_as_uint8("CA-TESTS:ENUM", sup::dto::UnsignedInteger8Type);
-  ChannelAccessPV pv_as_int32("CA-TESTS:ENUM", sup::dto::SignedInteger32Type);
-  ChannelAccessPV pv_as_uint32("CA-TESTS:ENUM", sup::dto::UnsignedInteger32Type);
-  ChannelAccessPV pv_as_int64("CA-TESTS:ENUM", sup::dto::SignedInteger64Type);
-  ChannelAccessPV pv_as_uint64("CA-TESTS:ENUM", sup::dto::UnsignedInteger64Type);
+  const ChannelAccessPV pv_as_bool("CA-TESTS:ENUM", sup::dto::BooleanType);
+  const ChannelAccessPV pv_as_uint8("CA-TESTS:ENUM", sup::dto::UnsignedInteger8Type);
+  const ChannelAccessPV pv_as_int32("CA-TESTS:ENUM", sup::dto::SignedInteger32Type);
+  const ChannelAccessPV pv_as_uint32("CA-TESTS:ENUM", sup::dto::UnsignedInteger32Type);
+  const ChannelAccessPV pv_as_int64("CA-TESTS:ENUM", sup::dto::SignedInteger64Type);
+  const ChannelAccessPV pv_as_uint64("CA-TESTS:ENUM", sup::dto::UnsignedInteger64Type);
 
   // waiting for connected clients
   EXPECT_TRUE(pv_as_enum.WaitForConnected(5.0));
@@ -530,28 +529,28 @@ TEST_F(ChannelAccessPVTest, EnumFormats)
 
   {
     // set first value
-    sup::dto::uint16 uint16_v = 3;
+    const sup::dto::uint16 uint16_v = 3;
     ASSERT_TRUE(pv_as_enum.SetValue(uint16_v));
     EXPECT_TRUE(WaitForValue(pv_as_enum, uint16_v, 5.0));
 
     // reading variables through different clients
-    std::string string_v = "Ready";
+    const std::string string_v = "Ready";
     EXPECT_TRUE(WaitForValue(pv_as_string, string_v, 5.0));
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
-    sup::dto::boolean bool_v = true;
+    const sup::dto::boolean bool_v = true;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
 
-    sup::dto::uint8 uint8_v = 3u;
+    const sup::dto::uint8 uint8_v = 3u;
     EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
 
-    sup::dto::int32 int32_v = 3;
+    const sup::dto::int32 int32_v = 3;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-    sup::dto::uint32 uint32_v = 3u;
+    const sup::dto::uint32 uint32_v = 3u;
     EXPECT_TRUE(WaitForValue(pv_as_uint32, uint32_v, 5.0));
 
-    sup::dto::uint64 uint64_v = 3u;
+    const sup::dto::uint64 uint64_v = 3u;
     EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
   }
   {
@@ -562,22 +561,22 @@ TEST_F(ChannelAccessPVTest, EnumFormats)
     EXPECT_EQ(pv_as_string.GetValue().As<std::string>(), string_v);
 
     // reading variables through different clients
-    sup::dto::uint16 uint16_v = 0;
+    const sup::dto::uint16 uint16_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_enum, uint16_v, 5.0));
 
-    sup::dto::boolean bool_v = false;
+    const sup::dto::boolean bool_v = false;
     EXPECT_TRUE(WaitForValue(pv_as_bool, bool_v, 5.0));
 
-    sup::dto::uint8 uint8_v = 0u;
+    const sup::dto::uint8 uint8_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint8, uint8_v, 5.0));
 
-    sup::dto::int32 int32_v = 0;
+    const sup::dto::int32 int32_v = 0;
     EXPECT_TRUE(WaitForValue(pv_as_int32, int32_v, 5.0));
 
-    sup::dto::uint32 uint32_v = 0u;
+    const sup::dto::uint32 uint32_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint32, uint32_v, 5.0));
 
-    sup::dto::uint64 uint64_v = 0u;
+    const sup::dto::uint64 uint64_v = 0u;
     EXPECT_TRUE(WaitForValue(pv_as_uint64, uint64_v, 5.0));
   }
 }
@@ -586,14 +585,14 @@ TEST_F(ChannelAccessPVTest, CharWaveform)
 {
   using namespace sup::epics;
 
-  sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
+  const sup::dto::AnyType char_array_t(1024, sup::dto::Character8Type, "char8[]");
   ChannelAccessPV ca_chararray_var("CA-TESTS:CHARRAY", char_array_t);
-  sup::dto::AnyType bool_array_t(1024, sup::dto::BooleanType, "bool[]");
-  ChannelAccessPV ca_boolarray_var("CA-TESTS:CHARRAY", bool_array_t);
-  sup::dto::AnyType int32_array_t(1024, sup::dto::SignedInteger32Type, "int32[]");
-  ChannelAccessPV ca_int32array_var("CA-TESTS:CHARRAY", int32_array_t);
-  sup::dto::AnyType uint64_array_t(1024, sup::dto::UnsignedInteger64Type, "uint64[]");
-  ChannelAccessPV ca_uint64array_var("CA-TESTS:CHARRAY", uint64_array_t);
+  const sup::dto::AnyType bool_array_t(1024, sup::dto::BooleanType, "bool[]");
+  const ChannelAccessPV ca_boolarray_var("CA-TESTS:CHARRAY", bool_array_t);
+  const sup::dto::AnyType int32_array_t(1024, sup::dto::SignedInteger32Type, "int32[]");
+  const ChannelAccessPV ca_int32array_var("CA-TESTS:CHARRAY", int32_array_t);
+  const sup::dto::AnyType uint64_array_t(1024, sup::dto::UnsignedInteger64Type, "uint64[]");
+  const ChannelAccessPV ca_uint64array_var("CA-TESTS:CHARRAY", uint64_array_t);
 
   // waiting for connected clients
   EXPECT_TRUE(ca_chararray_var.WaitForConnected(5.0));
@@ -603,18 +602,18 @@ TEST_F(ChannelAccessPVTest, CharWaveform)
 
   {
     // set first value
-    sup::dto::AnyValue char_array_v{char_array_t};
+    const sup::dto::AnyValue char_array_v{char_array_t};
     ASSERT_TRUE(ca_chararray_var.SetValue(char_array_v));
     EXPECT_TRUE(WaitForValue(ca_chararray_var, char_array_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::AnyValue bool_array_v{bool_array_t};
+    const sup::dto::AnyValue bool_array_v{bool_array_t};
     EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
 
-    sup::dto::AnyValue int32_array_v{int32_array_t};
+    const sup::dto::AnyValue int32_array_v{int32_array_t};
     EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
 
-    sup::dto::AnyValue uint64_array_v{uint64_array_t};
+    const sup::dto::AnyValue uint64_array_v{uint64_array_t};
     EXPECT_TRUE(WaitForValue(ca_uint64array_var, uint64_array_v, 5.0));
   }
   {
@@ -643,16 +642,16 @@ TEST_F(ChannelAccessPVTest, UInt64Waveform)
 {
   using namespace sup::epics;
 
-  sup::dto::AnyType uint64_array_t(10, sup::dto::UnsignedInteger64Type, "uint64[]");
+  const sup::dto::AnyType uint64_array_t(10, sup::dto::UnsignedInteger64Type, "uint64[]");
   ChannelAccessPV ca_uint64array_var("CA-TESTS:UINT64ARRAY", uint64_array_t);
-  sup::dto::AnyType bool_array_t(10, sup::dto::BooleanType, "bool[]");
-  ChannelAccessPV ca_boolarray_var("CA-TESTS:UINT64ARRAY", bool_array_t);
-  sup::dto::AnyType uint8_array_t(10, sup::dto::UnsignedInteger8Type, "uint8[]");
-  ChannelAccessPV ca_uint8array_var("CA-TESTS:UINT64ARRAY", uint8_array_t);
-  sup::dto::AnyType uint32_array_t(10, sup::dto::UnsignedInteger32Type, "uint32[]");
-  ChannelAccessPV ca_uint32array_var("CA-TESTS:UINT64ARRAY", uint32_array_t);
-  sup::dto::AnyType int32_array_t(10, sup::dto::SignedInteger32Type, "int32[]");
-  ChannelAccessPV ca_int32array_var("CA-TESTS:UINT64ARRAY", int32_array_t);
+  const sup::dto::AnyType bool_array_t(10, sup::dto::BooleanType, "bool[]");
+  const ChannelAccessPV ca_boolarray_var("CA-TESTS:UINT64ARRAY", bool_array_t);
+  const sup::dto::AnyType uint8_array_t(10, sup::dto::UnsignedInteger8Type, "uint8[]");
+  const ChannelAccessPV ca_uint8array_var("CA-TESTS:UINT64ARRAY", uint8_array_t);
+  const sup::dto::AnyType uint32_array_t(10, sup::dto::UnsignedInteger32Type, "uint32[]");
+  const ChannelAccessPV ca_uint32array_var("CA-TESTS:UINT64ARRAY", uint32_array_t);
+  const sup::dto::AnyType int32_array_t(10, sup::dto::SignedInteger32Type, "int32[]");
+  const ChannelAccessPV ca_int32array_var("CA-TESTS:UINT64ARRAY", int32_array_t);
 
   // waiting for connected clients
   EXPECT_TRUE(ca_uint64array_var.WaitForConnected(5.0));
@@ -663,21 +662,21 @@ TEST_F(ChannelAccessPVTest, UInt64Waveform)
 
   {
     // set first value
-    sup::dto::AnyValue uint64_array_v{uint64_array_t};
+    const sup::dto::AnyValue uint64_array_v{uint64_array_t};
     ASSERT_TRUE(ca_uint64array_var.SetValue(uint64_array_v));
     EXPECT_TRUE(WaitForValue(ca_uint64array_var, uint64_array_v, 5.0));
 
     // reading variables through different clients
-    sup::dto::AnyValue bool_array_v{bool_array_t};
+    const sup::dto::AnyValue bool_array_v{bool_array_t};
     EXPECT_TRUE(WaitForValue(ca_boolarray_var, bool_array_v, 5.0));
 
-    sup::dto::AnyValue uint8_array_v{uint8_array_t};
+    const sup::dto::AnyValue uint8_array_v{uint8_array_t};
     EXPECT_TRUE(WaitForValue(ca_uint8array_var, uint8_array_v, 5.0));
 
-    sup::dto::AnyValue uint32_array_v{uint32_array_t};
+    const sup::dto::AnyValue uint32_array_v{uint32_array_t};
     EXPECT_TRUE(WaitForValue(ca_uint32array_var, uint32_array_v, 5.0));
 
-    sup::dto::AnyValue int32_array_v{int32_array_t};
+    const sup::dto::AnyValue int32_array_v{int32_array_t};
     EXPECT_TRUE(WaitForValue(ca_int32array_var, int32_array_v, 5.0));
   }
   {
@@ -710,8 +709,8 @@ TEST_F(ChannelAccessPVTest, ShortenedWaveform)
 {
   using namespace sup::epics;
 
-  sup::dto::AnyType float_array_t(6, sup::dto::Float32Type, "float32[]");
-  ChannelAccessPV ca_floatarray_var("CA-TESTS:SHORTFLOATARRAY", float_array_t);
+  const sup::dto::AnyType float_array_t(6, sup::dto::Float32Type, "float32[]");
+  const ChannelAccessPV ca_floatarray_var("CA-TESTS:SHORTFLOATARRAY", float_array_t);
 
   // waiting for connected client and valid value
   EXPECT_TRUE(ca_floatarray_var.WaitForConnected(5.0));
@@ -732,7 +731,7 @@ TEST_F(ChannelAccessPVTest, DISABLED_ShortLivedPV)
   using sup::epics::test::CAPut;
 
   // create reader pv
-  ChannelAccessPV reader_pv("CA-TESTS:BOOL", sup::dto::BooleanType);
+  const ChannelAccessPV reader_pv("CA-TESTS:BOOL", sup::dto::BooleanType);
   EXPECT_TRUE(reader_pv.WaitForValidValue(5.0));
 
   // set first value through shortlived pv

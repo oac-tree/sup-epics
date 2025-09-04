@@ -109,13 +109,13 @@ TEST_F(PvAccessRPCTests, MovedClientSuccess)
 
 TEST_F(PvAccessRPCTests, RPCClientEmptyRequest)
 {
-  std::string channel_name = "PvAccessRPCTests:channel";
+  const std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
                            GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send empty value
-  sup::dto::AnyValue empty{};
+  const sup::dto::AnyValue empty{};
   auto reply = client(empty);
   EXPECT_FALSE(sup::protocol::utils::CheckReplyFormat(reply));
   EXPECT_TRUE(sup::dto::IsEmptyValue(reply));
@@ -125,12 +125,12 @@ TEST_F(PvAccessRPCTests, RPCClientEmptyRequest)
 
 TEST_F(PvAccessRPCTests, RPCClientWrongChannel)
 {
-  std::string channel_name = "PvAccessRPCTests:channel";
+  const std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
                            GetHandler());
   auto client = server.CreateClient({"DOESNOTEXIST", 0.1});
 
-  sup::dto::AnyValue payload{42};
+  const sup::dto::AnyValue payload{42};
   auto request =
     sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
@@ -145,13 +145,13 @@ TEST_F(PvAccessRPCTests, RPCClientWrongChannel)
 
 TEST_F(PvAccessRPCTests, RPCEmptyReply)
 {
-  std::string channel_name = "PvAccessRPCTests:channel";
+  const std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
                            GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send empty value
-  sup::dto::AnyValue payload{42};
+  const sup::dto::AnyValue payload{42};
   auto request =
     sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   // Although the extra field is not defined by the usual transport protocol (see sup-protocol), our
@@ -170,12 +170,12 @@ TEST_F(PvAccessRPCTests, RPCEmptyReply)
 
 TEST_F(PvAccessRPCTests, ClientServerFromEnv)
 {
-  std::string channel_name = "PvAccessRPCTests:channel";
+  const std::string channel_name = "PvAccessRPCTests:channel";
   PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
   auto client = server.CreateClient(GetDefaultRPCClientConfig(channel_name));
 
   // Send simple scalar payload over RPC
-  sup::dto::AnyValue payload{42};
+  const sup::dto::AnyValue payload{42};
   auto request =
     sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
@@ -188,12 +188,12 @@ TEST_F(PvAccessRPCTests, ClientServerFromEnv)
 
 TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 {
-  std::string channel_name = "PvAccessRPCTests:channel";
-  PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
+  const std::string channel_name = "PvAccessRPCTests:channel";
+  const PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
   PvAccessRPCClient client{GetDefaultRPCClientConfig(channel_name)};
 
   // Send simple scalar payload over RPC
-  sup::dto::AnyValue payload{42};
+  const sup::dto::AnyValue payload{42};
   auto request =
     sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
   auto reply = client(request);
@@ -206,17 +206,17 @@ TEST_F(PvAccessRPCTests, ClientDirectlyFromEnv)
 
 TEST_F(PvAccessRPCTests, ServerDestructionAndReconstruction)
 {
-  std::string channel_name = "PvAccessRPCTests:channel";
+  const std::string channel_name = "PvAccessRPCTests:channel";
   // Run multiple times to ensure creation of RPC server with same name after destruction of
   // another one works:
-  std::size_t n_times = 10;
+  const std::size_t n_times = 10;
   for (std::size_t i=0; i<n_times; ++i)
   {
     PvAccessRPCServer server(GetDefaultRPCServerConfig(channel_name), GetHandler());
     PvAccessRPCClient client(PvAccessRPCClientConfig{channel_name, 10.0});
 
     // Send simple scalar payload over RPC
-    sup::dto::AnyValue payload{42};
+    const sup::dto::AnyValue payload{42};
     auto request =
       sup::protocol::utils::CreateRPCRequest(payload, sup::protocol::PayloadEncoding::kNone);
     auto reply = client(request);

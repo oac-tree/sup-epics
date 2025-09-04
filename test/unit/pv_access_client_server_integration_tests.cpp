@@ -28,8 +28,6 @@
 #include <sup/epics/pv_access_server.h>
 #include <sup/epics/pvxs/pv_access_client_impl.h>
 
-#include <thread>
-
 #include <sup/epics-test/unit_test_helper.h>
 
 using sup::epics::test::BusyWaitFor;
@@ -208,7 +206,7 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientConversion)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
 
   // changing the value via the client with a conversion
-  sup::dto::AnyValue update({{"value", {sup::dto::BooleanType, false}}});
+  const sup::dto::AnyValue update({{"value", {sup::dto::BooleanType, false}}});
   sup::dto::AnyValue expected({{"value", {sup::dto::SignedInteger32Type, 0}}});
   EXPECT_TRUE(client.SetValue(channel_name, update));
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == expected; }));

@@ -24,8 +24,6 @@
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 
-#include <iostream>
-
 using namespace ::sup::epics;
 
 class PvxsUtilsTests : public ::testing::Test
@@ -268,7 +266,7 @@ TEST_F(PvxsUtilsTests, GetChildrenForArrayOfStructs)
 TEST_F(PvxsUtilsTests, GetMemberNames)
 {
   {  // empty value
-    pvxs::Value value;
+    const pvxs::Value value;
     EXPECT_TRUE(GetMemberNames(value).empty());
   }
 

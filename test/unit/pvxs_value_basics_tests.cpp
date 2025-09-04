@@ -147,8 +147,8 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForStruct)
   auto pvxs_type_struct = ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "struct_name", {});
 
   // adding fields
-  pvxs::TypeDef field_type1 = ::pvxs::TypeDef(::pvxs::TypeCode::Int8);
-  pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
+  const pvxs::TypeDef field_type1 = ::pvxs::TypeDef(::pvxs::TypeCode::Int8);
+  const pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
   pvxs_type_struct += {field_type1.as("first")};
   pvxs_type_struct += {field_type1.as("second")};
 

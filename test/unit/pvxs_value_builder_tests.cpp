@@ -20,12 +20,13 @@
 
 #include "sup/epics/utils/pvxs_value_builder.h"
 
-#include <gtest/gtest.h>
-#include <pvxs/data.h>
-#include <pvxs/nt.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/utils/pvxs_utils.h>
+
+#include <gtest/gtest.h>
+#include <pvxs/data.h>
+#include <pvxs/nt.h>
 
 using namespace ::sup::epics;
 
@@ -375,10 +376,10 @@ TEST_F(PvxsValueBuilderTests, ArrayInStruct)
 TEST_F(PvxsValueBuilderTests, ArrayWithTwoStructureElements)
 {
   // original AnyValue
-  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                      "struct_name"};
-  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                      "struct_name"};
+  const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                            "struct_name"};
+  const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                            "struct_name"};
   auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
 
   // initializing builder

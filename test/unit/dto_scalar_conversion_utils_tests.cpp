@@ -18,13 +18,12 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <gtest/gtest.h>
-#include <pvxs/data.h>
-#include <pvxs/nt.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics/utils/dto_scalar_conversion_utils.h>
 
-#include <iostream>
+#include <gtest/gtest.h>
+#include <pvxs/data.h>
+#include <pvxs/nt.h>
 
 using namespace ::sup::epics;
 
@@ -163,7 +162,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetPVXSValueFromScalar)
   }
 
   {  // attempt to construct from AnyValue based on structure
-    sup::dto::AnyValue any_value = {
+    const sup::dto::AnyValue any_value = {
         {{"signed", {sup::dto::SignedInteger32Type, 42}}, {"bool", {sup::dto::BooleanType, true}}}};
     EXPECT_THROW(GetPVXSValueFromScalar(any_value), std::runtime_error);
   }
@@ -286,7 +285,7 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalar)
   }
 
   {  // attempt to assign from AnyValue based on structure
-    sup::dto::AnyValue any_value = {
+    const sup::dto::AnyValue any_value = {
         {{"signed", {sup::dto::SignedInteger32Type, 42}}, {"bool", {sup::dto::BooleanType, true}}}};
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
     EXPECT_THROW(AssignAnyValueToPVXSValueScalar(any_value, pvxs_value), std::runtime_error);
@@ -337,14 +336,14 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignAnyValueToPVXSValueScalarArray)
 
   {  // attempt to assign to scalar
     const int n_elements = 2;
-    sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
+    const sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int32).create();
     EXPECT_THROW(AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value), std::runtime_error);
   }
 
   {  // attempt to assign to scalar array of wrong type
     const int n_elements = 2;
-    sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
+    const sup::dto::AnyValue any_value(n_elements, sup::dto::SignedInteger32Type);
     pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::Int64).create();
     EXPECT_THROW(AssignAnyValueToPVXSValueScalarArray(any_value, pvxs_value), std::runtime_error);
   }
@@ -463,13 +462,13 @@ TEST_F(AnyValueScalarConversionUtilsTests, AssignPVXSValueToAnyValueScalar)
   {  // attempt to assign from AnyValue based on structure
     sup::dto::AnyValue any_value = {
         {{"signed", {sup::dto::SignedInteger32Type, 42}}, {"bool", {sup::dto::BooleanType, true}}}};
-    pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
+    const pvxs::Value pvxs_value = pvxs::TypeDef(pvxs::TypeCode::String).create();
     EXPECT_THROW(AssignPVXSValueToAnyValueScalar(pvxs_value, any_value), std::runtime_error);
   }
 
   {  // attempt to assign from similar but not coinciding types
     sup::dto::AnyValue any_value{sup::dto::Float32Type, 0.0};
-    pvxs::Value pvxs_value =
+    const pvxs::Value pvxs_value =
         pvxs::TypeDef(pvxs::TypeCode::Float64).create();  // deliberately Float64, and not Float32
     EXPECT_THROW(AssignPVXSValueToAnyValueScalar(pvxs_value, any_value), std::runtime_error);
   }

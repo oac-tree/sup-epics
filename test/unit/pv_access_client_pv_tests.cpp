@@ -75,8 +75,8 @@ public:
 
 TEST_F(PvAccessClientPVTests, ExtendedValues)
 {
-  sup::dto::AnyValue val1{ sup::dto::UnsignedInteger32Type, 42 };
-  sup::dto::AnyValue val2{ sup::dto::UnsignedInteger32Type, 43 };
+  const sup::dto::AnyValue val1{ sup::dto::UnsignedInteger32Type, 42 };
+  const sup::dto::AnyValue val2{ sup::dto::UnsignedInteger32Type, 43 };
 
   {
     // If connected is different, extended values are different
@@ -115,7 +115,7 @@ TEST_F(PvAccessClientPVTests, ExtendedValues)
 TEST_F(PvAccessClientPVTests, InitialStateWhenNoServer)
 {
   const std::string expected_name("NON_EXISTING:INT");
-  PvAccessClientPV variable(CreateClientPVImpl(expected_name));
+  const PvAccessClientPV variable(CreateClientPVImpl(expected_name));
 
   EXPECT_EQ(variable.GetChannelName(), expected_name);
   EXPECT_FALSE(variable.IsConnected());
@@ -143,7 +143,7 @@ TEST_F(PvAccessClientPVTests, SetValueWhenUnconnected)
 
 TEST_F(PvAccessClientPVTests, WaitForConnected)
 {
-  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  const PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   // Server is not started, waiting will fail.
   EXPECT_FALSE(variable.WaitForConnected(0.01));
@@ -201,7 +201,7 @@ TEST_F(PvAccessClientPVTests, ConnectionOnServerStart)
 {
   m_shared_pv.open(m_pvxs_value);
 
-  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  const PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
   EXPECT_FALSE(variable.IsConnected());
 
   // starting the server
@@ -219,7 +219,7 @@ TEST_F(PvAccessClientPVTests, GetValueAfterConnection)
   m_server.start();
   m_shared_pv.open(m_pvxs_value);
 
-  PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
+  const PvAccessClientPV variable(CreateClientPVImpl(kChannelName));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
 
@@ -241,7 +241,7 @@ TEST_F(PvAccessClientPVTests, CallbackAfterConnection)
   // setting up callback expectations
   EXPECT_CALL(listener, OnClientPVValueChanged(_)).Times(::testing::AtLeast(1));
 
-  PvAccessClientPV variable(
+  const PvAccessClientPV variable(
       CreateClientPVImpl(kChannelName, listener.GetClientPVCallBack()));
 
   EXPECT_TRUE(variable.WaitForValidValue(1.0));
@@ -448,6 +448,6 @@ TEST_F(PvAccessClientPVTests, GetSetFromClientForScalarAwareCase)
   EXPECT_EQ(any_value["value"], kInitialValue);
 
   // modifying the field in retrieved value
-  sup::dto::AnyValue update = kInitialValue + 1;
+  const sup::dto::AnyValue update = kInitialValue + 1;
   EXPECT_THROW(variable.SetValue(update), std::runtime_error);
 }

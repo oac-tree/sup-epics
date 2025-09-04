@@ -35,7 +35,7 @@ class TestProtocol : public sup::protocol::Protocol
 {
 public:
   TestProtocol() = default;
-  ~TestProtocol() = default;
+  ~TestProtocol() override = default;
 
   void SetReply(const sup::dto::AnyValue& value,
                 sup::protocol::ProtocolResult result = sup::protocol::Success)
@@ -46,14 +46,14 @@ public:
 
   sup::dto::AnyValue GetRequest() const { return m_request; }
 
-  sup::protocol::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output)
+  sup::protocol::ProtocolResult Invoke(const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override
   {
     m_request = input;
     output = m_reply;
     return m_result;
   }
 
-  sup::protocol::ProtocolResult Service(const sup::dto::AnyValue& input, sup::dto::AnyValue& output)
+  sup::protocol::ProtocolResult Service(const sup::dto::AnyValue& input, sup::dto::AnyValue& output) override
   {
     m_request = input;
     output = m_reply;
@@ -76,7 +76,7 @@ protected:
 
 TEST_F(EPICSProtocolFactoryTest, ChannelAccessPVWrapper)
 {
-  sup::dto::AnyValue config = {{
+  const sup::dto::AnyValue config = {{
     { kProcessVariableClass, kChannelAccessClientClass },
     { kChannelName, "CA-TESTS:BOOL" },
     { kVariableType, R"RAW({"type":"bool"})RAW" }
@@ -90,7 +90,7 @@ TEST_F(EPICSProtocolFactoryTest, ChannelAccessPVWrapper)
 
 TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrappers)
 {
-  sup::dto::AnyValue config = {{
+  const sup::dto::AnyValue config = {{
     { kProcessVariableClass, kChannelAccessClientClass },
     { kChannelName, "CA-TESTS:FLOAT" },
     { kVariableType, R"RAW({"type":"float64"})RAW" }
@@ -101,7 +101,7 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrappers)
   EXPECT_TRUE(var_1->IsAvailable());
   EXPECT_TRUE(var_2->WaitForAvailable(2.0));
   EXPECT_TRUE(var_2->IsAvailable());
-  sup::dto::AnyValue update{ sup::dto::Float64Type, 1.1 };
+  const sup::dto::AnyValue update{ sup::dto::Float64Type, 1.1 };
   EXPECT_TRUE(SetVariableValue(*var_1, update));
   EXPECT_TRUE(WaitForVariableValue(*var_1, update, 1.0));
   EXPECT_TRUE(WaitForVariableValue(*var_2, update, 1.0));
@@ -118,7 +118,7 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrappers)
     }
   };
   EXPECT_TRUE(var_2->SetMonitorCallback(callback));
-  sup::dto::float64 float64_update = -2.0;
+  const sup::dto::float64 float64_update = -2.0;
   EXPECT_TRUE(SetVariableValue(*var_1, float64_update));
   EXPECT_TRUE(WaitForVariableValue(*var_1, float64_update, 1.0));
   future.wait();
@@ -134,7 +134,7 @@ TEST_F(EPICSProtocolFactoryTest, PvAccessPVWrappers)
     { "setpoint", { sup::dto::Float64Type, 4.0 }},
     { "enabled", { sup::dto::BooleanType, false }}
   }};
-  sup::dto::AnyValue server_config = {{
+  const sup::dto::AnyValue server_config = {{
     { kProcessVariableClass, kPvAccessServerClass },
     { kChannelName, channel_name },
     { kVariableValue, val_init }
@@ -147,7 +147,7 @@ TEST_F(EPICSProtocolFactoryTest, PvAccessPVWrappers)
   EXPECT_EQ(info.second, val_init);
 
   // Create two client variables
-  sup::dto::AnyValue client_config = {{
+  const sup::dto::AnyValue client_config = {{
     { kProcessVariableClass, kPvAccessClientClass },
     { kChannelName, channel_name }
   }};
@@ -189,7 +189,7 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperServerCallback)
     { "setpoint", { sup::dto::Float64Type, 4.0 }},
     { "enabled", { sup::dto::BooleanType, false }}
   }};
-  sup::dto::AnyValue server_config = {{
+  const sup::dto::AnyValue server_config = {{
     { kProcessVariableClass, kPvAccessServerClass },
     { kChannelName, channel_name },
     { kVariableValue, val_init }
@@ -202,7 +202,7 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperServerCallback)
   EXPECT_EQ(info.second, val_init);
 
   // Create client variable
-  sup::dto::AnyValue client_config = {{
+  const sup::dto::AnyValue client_config = {{
     { kProcessVariableClass, kPvAccessClientClass },
     { kChannelName, channel_name }
   }};
@@ -244,7 +244,7 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
     { "setpoint", { sup::dto::Float64Type, 4.0 }},
     { "enabled", { sup::dto::BooleanType, false }}
   }};
-  sup::dto::AnyValue server_config = {{
+  const sup::dto::AnyValue server_config = {{
     { kProcessVariableClass, kPvAccessServerClass },
     { kChannelName, channel_name },
     { kVariableValue, val_init }
@@ -257,7 +257,7 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
   EXPECT_EQ(info.second, val_init);
 
   // Create client variable
-  sup::dto::AnyValue client_config = {{
+  const sup::dto::AnyValue client_config = {{
     { kProcessVariableClass, kPvAccessClientClass },
     { kChannelName, channel_name }
   }};
@@ -292,25 +292,25 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
 
 TEST_F(EPICSProtocolFactoryTest, RPCFactory)
 {
-  EPICSProtocolFactory factory;
+  const EPICSProtocolFactory factory;
   TestProtocol test_protocol;
   const std::string service_name = "EPICSRPCFactory::TestServer";
 
   // Create RPC server stack
-  sup::dto::AnyValue server_def = {{
+  const sup::dto::AnyValue server_def = {{
     { kServiceName, service_name }
   }};
   auto server = factory.CreateRPCServer(test_protocol, server_def);
 
   // Create corresponding RPC client without encoding
-  sup::dto::AnyValue client_def_1 = {{
+  const sup::dto::AnyValue client_def_1 = {{
     { kServiceName, service_name },
     { sup::protocol::kEncoding, sup::protocol::kEncoding_None }
   }};
   auto client_1 = factory.CreateRPCClient(client_def_1);
 
   // Create corresponding RPC client with base64 encoding
-  sup::dto::AnyValue client_def_2 = {{
+  const sup::dto::AnyValue client_def_2 = {{
     { kServiceName, service_name },
     { sup::protocol::kEncoding, sup::protocol::kEncoding_Base64 }
   }};
@@ -351,7 +351,7 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactory)
 
 TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
 {
-  EPICSProtocolFactory factory;
+  const EPICSProtocolFactory factory;
   TestProtocol test_protocol;
   const std::string service_name = "EPICSRPCFactoryFunctions::TestServer";
 
