@@ -302,7 +302,7 @@ TEST_F(PvxsValueBuilderExtendedTests, NTEnum)
 
 //! Build PVXS value from AnyValue representing an array of two structures.
 
-TEST_F(PvxsValueBuilderExtendedTests, DISABLED_ArrayWithTwoStructureElements)
+TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
 {
   // building any value
   sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
@@ -316,5 +316,22 @@ TEST_F(PvxsValueBuilderExtendedTests, DISABLED_ArrayWithTwoStructureElements)
 
   auto pvxs_value = BuildPVXSValue(anyvalue);
 
-  // FIXME test is crashing, not clear how to create StructA programmatically
+  // arrays doesn't have names in PVXS
+  EXPECT_TRUE(pvxs_value.id().empty());
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
+
+  // This is the only known way to file the array
+  ::pvxs::Value array_field(pvxs_value);
+  ::pvxs::shared_array<::pvxs::Value> arr(2);
+  arr[0] = array_field.allocMember();
+  arr[0]["field_name"] = 42;
+  arr[1] = array_field.allocMember();
+  arr[1]["field_name"] = 43;
+  array_field = arr.freeze().castTo<const void>();
+
+  // reading the data back
+  auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
+  EXPECT_EQ(array_data.size(), 2);
+  EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
+  EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
 }
