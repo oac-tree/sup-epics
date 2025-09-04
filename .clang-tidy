@@ -19,6 +19,7 @@ cert-*,
 -cppcoreguidelines-owning-memory,
 -google-readability-todo,
 -cert-err58-cpp,
+-misc-include-cleaner
 '
 CheckOptions:
   - key:             misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
