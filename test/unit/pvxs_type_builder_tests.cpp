@@ -255,9 +255,7 @@ TEST_F(PvxsTypeBuilderTests, ArrayInStruct)
 //!  Build PVXS type from AnyType representing an array containing two structures. Each structure
 //!  has a single `field_name` field with a scalar.
 
-//! Test is failing since we don't know how build StructA types in step-wise manner.
-
-TEST_F(PvxsTypeBuilderTests, DISABLED_ArrayWithTwoStructureElements)
+TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
 {
   // building AnyType representing array of structs
   const sup::dto::AnyType struct_type = {{{"field_name", sup::dto::SignedInteger32Type}},

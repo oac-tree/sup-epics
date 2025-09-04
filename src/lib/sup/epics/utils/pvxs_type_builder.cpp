@@ -39,7 +39,7 @@ namespace
 struct Node
 {
   ::pvxs::TypeDef pvxs_typedef;
-  ::pvxs::TypeCode pvxs_typecode;
+  ::pvxs::TypeCode pvxs_typecode;  //!< saving TypeCode since TypeDef has no getter for TypeCode
 };
 
 }  // namespace
@@ -48,6 +48,12 @@ struct PvxsTypeBuilder::PvxsTypeBuilderImpl
 {
   ::pvxs::TypeDef m_last_processed;
   std::stack<Node> m_struct_stack;
+
+  bool IsInArrayOfStructMode() const
+  {
+    return !m_struct_stack.empty()
+           && (m_struct_stack.top().pvxs_typecode == ::pvxs::TypeCode::StructA);
+  }
 };
 
 PvxsTypeBuilder::PvxsTypeBuilder() : p_impl(std::make_unique<PvxsTypeBuilderImpl>()) {}
@@ -76,6 +82,13 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
   (void)anytype;
 
   // std::cout << "StructProlog() value:" << anytype << std::endl;
+
+  if (p_impl->IsInArrayOfStructMode())
+  {
+    // no need to start a Struct, StructA was already started on Array's prologue
+    return;
+  }
+
   const auto type_code = GetPVXSTypeCode(*anytype);
   p_impl->m_struct_stack.push({::pvxs::TypeDef(type_code, anytype->GetTypeName(), {}), type_code});
 }
@@ -88,6 +101,13 @@ void PvxsTypeBuilder::StructMemberSeparator()
 void PvxsTypeBuilder::StructEpilog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+
+  if (p_impl->IsInArrayOfStructMode())
+  {
+    // no need to finalize a struct, have to finalize array (StructA) on the next iteration
+    return;
+  }
+
   // std::cout << "StructEpilog() value:" << anytype << std::endl;
   p_impl->m_last_processed = p_impl->m_struct_stack.top().pvxs_typedef;
   p_impl->m_struct_stack.pop();
