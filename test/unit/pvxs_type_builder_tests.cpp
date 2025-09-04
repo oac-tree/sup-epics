@@ -257,10 +257,13 @@ TEST_F(PvxsTypeBuilderTests, ArrayInStruct)
 
 TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
 {
+  const std::string expected_struct_name("struct_name");
+  const std::string expected_array_name("array_name");
+
   // building AnyType representing array of structs
   const sup::dto::AnyType struct_type = {{{"field_name", sup::dto::SignedInteger32Type}},
-                                         "struct_name"};
-  const sup::dto::AnyType array(2, struct_type);
+                                         expected_struct_name};
+  const sup::dto::AnyType array(2, struct_type, expected_array_name);
 
   auto pvxs_type_result = BuildPVXSType(array);
 
@@ -283,6 +286,12 @@ TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
   // reading the data back
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
+
+  // NOTE this is a limitation of our PvxsTypeBuilder builder. It looses information about
+  // struct name, see also TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
+  EXPECT_EQ(array_data[0].id(), std::string());
+  EXPECT_EQ(array_data[1].id(), std::string());
+
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
 }

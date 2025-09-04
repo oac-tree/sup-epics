@@ -86,6 +86,10 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
   if (p_impl->IsInArrayOfStructMode())
   {
     // no need to start a Struct, StructA was already started on Array's prologue
+
+    // NOTE Please note that here we have a limitation of our builder. StructA was already created
+    // and we can't change its name,
+    // see also TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
     return;
   }
 

@@ -40,10 +40,10 @@ class PvxsValueBuilderExtendedTests : public ::testing::Test
 TEST_F(PvxsValueBuilderExtendedTests, FromEmpty)
 {
   // investigating default constructed PVXS
-  pvxs::Value pvxs_default;
+  const pvxs::Value pvxs_default;
 
   // constructing from empty AnyValue
-  sup::dto::AnyValue any_value;
+  const sup::dto::AnyValue any_value;
   auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_FALSE(pvxs_value.valid());
   EXPECT_TRUE(pvxs_value.equalType(pvxs_default));
@@ -68,7 +68,7 @@ TEST_F(PvxsValueBuilderExtendedTests, SignedInteger32)
 
 TEST_F(PvxsValueBuilderExtendedTests, StructWithSingleField)
 {
-  sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32Type, 42}}}};
+  const sup::dto::AnyValue any_value = {{{"signed", {sup::dto::SignedInteger32Type, 42}}}};
 
   auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
@@ -84,8 +84,8 @@ TEST_F(PvxsValueBuilderExtendedTests, StructWithSingleField)
 
 TEST_F(PvxsValueBuilderExtendedTests, StructWithTwoFields)
 {
-  sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
-                                  {"bool", {sup::dto::BooleanType, true}}};
+  const sup::dto::AnyValue any_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                        {"bool", {sup::dto::BooleanType, true}}};
 
   auto pvxs_value = BuildPVXSValue(any_value);
 
@@ -105,9 +105,9 @@ TEST_F(PvxsValueBuilderExtendedTests, StructWithTwoFields)
 
 TEST_F(PvxsValueBuilderExtendedTests, NestedStruct)
 {
-  sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
-                                    {"bool", {sup::dto::BooleanType, true}}};
-  sup::dto::AnyValue any_value = {{"scalars", two_scalars}};
+  const sup::dto::AnyValue two_scalars = {{"signed", {sup::dto::SignedInteger32Type, 42}},
+                                          {"bool", {sup::dto::BooleanType, true}}};
+  const sup::dto::AnyValue any_value = {{"scalars", two_scalars}};
 
   auto pvxs_value = BuildPVXSValue(any_value);
 
@@ -206,7 +206,7 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayInStruct)
   const int n_elements = 2;
   sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type);
   any_array[0] = 42;
-  sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
+  const sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_EQ(pvxs_value.id(), struct_name);
@@ -231,7 +231,7 @@ TEST_F(PvxsValueBuilderExtendedTests, DISABLED_NamedArrayInStruct)
   const int n_elements = 2;
   sup::dto::AnyValue any_array(n_elements, sup::dto::SignedInteger32Type, array_name);
   any_array[0] = 42;
-  sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
+  const sup::dto::AnyValue any_value = {{{"array", any_array}}, struct_name};
 
   auto pvxs_value = BuildPVXSValue(any_value);
   EXPECT_EQ(pvxs_value.id(), struct_name);
@@ -266,7 +266,7 @@ TEST_F(PvxsValueBuilderExtendedTests, NTEnum)
                                          {"userTag", {sup::dto::SignedInteger32Type, -3}}},
                                         "time_t"};
 
-  sup::dto::AnyValue any_value{
+  const sup::dto::AnyValue any_value{
       {{"value", enum_value}, {"alarm", alarm_value}, {"timeStamp", timestamp_value}},
       "epics:nt/NTEnum:1.0"};
 
@@ -304,19 +304,19 @@ TEST_F(PvxsValueBuilderExtendedTests, NTEnum)
 
 TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
 {
-  // building any value
-  sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                      "struct_name"};
-  sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                      "struct_name"};
-  auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
+  const std::string expected_struct_name("struct_name");
+  const std::string expected_array_name("array_name");
 
-  auto expected_pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
-                                            {pvxs::members::Int32("field_name")});
+  // building any value
+  const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                            expected_struct_name};
+  const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
+                                            expected_struct_name};
+  auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2}, expected_array_name);
 
   auto pvxs_value = BuildPVXSValue(anyvalue);
 
-  // arrays doesn't have names in PVXS
+  // NOTE arrays doesn't have names in PVXS
   EXPECT_TRUE(pvxs_value.id().empty());
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
@@ -332,6 +332,12 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
   // reading the data back
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
+
+  // NOTE this is a limitation of our PvxsTypeBuilder builder. It looses information about
+  // struct name, see also TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
+  EXPECT_EQ(array_data[0].id(), std::string());
+  EXPECT_EQ(array_data[1].id(), std::string());
+
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
 }

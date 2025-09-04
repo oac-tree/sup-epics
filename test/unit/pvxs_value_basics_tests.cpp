@@ -203,7 +203,7 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
 }
 
 //! Test almost like before with the attempt to pass a name. It shows that the name passed to the
-//! array appear as the name of struct.
+//! array appear as the name of struct. Arrays itself doesn't have a name in PVXS.
 TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
 {
   const std::string expected_array_name("array_of_struct");
@@ -233,13 +233,13 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
   // reading it back back
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
-  // arrays doesn't have names in PVXS
+  // NOTE arrays doesn't have names in PVXS
   EXPECT_TRUE(pvxs_value.id().empty());
 
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
 
-  // apparently the name of the array appeared as a name of a struct
+  // NOTE apparently the name of the array appeared as a name of a struct
   EXPECT_EQ(array_data[0].id(), expected_array_name);
   EXPECT_EQ(array_data[1].id(), expected_array_name);
 
