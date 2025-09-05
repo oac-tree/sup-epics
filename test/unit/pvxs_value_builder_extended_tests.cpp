@@ -316,7 +316,7 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
 
   auto pvxs_value = BuildPVXSValue(anyvalue);
 
-  // NOTE arrays doesn't have names in PVXS
+  // NOTE arrays don't have names in PVXS
   EXPECT_TRUE(pvxs_value.id().empty());
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
