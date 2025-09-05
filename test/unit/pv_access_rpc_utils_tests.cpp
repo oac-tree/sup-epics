@@ -61,13 +61,16 @@ TEST_F(PvAccessRPCUtilsTests, ClientRPCCall)
 TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
 {
   const std::string channel_name = "PvAccessRPCUtilsTests_2";
-  // Array of structures payload fails
-  // building any value
+  // for the moment the passing of names in the array structures is not supported
+  const std::string deliberately_empy_struct_name = "";
   const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                            "struct_name"};
+                                            deliberately_empy_struct_name};
   const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                            "struct_name"};
-  auto fixed_reply = sup::dto::ArrayValue({struct_value1, struct_value2});
+                                            deliberately_empy_struct_name};
+  auto array = sup::dto::ArrayValue({struct_value1, struct_value2});
+  const sup::dto::AnyValue fixed_reply = {
+      {{sup::protocol::constants::REPLY_RESULT, {sup::dto::UnsignedInteger32Type, 41}},
+       {sup::protocol::constants::REPLY_PAYLOAD, array}}};
 
   test::FixedReplyFunctor handler{fixed_reply};
   PvAccessRPCServer server(PvAccessRPCServer::Isolated, GetDefaultRPCServerConfig(channel_name),
@@ -76,7 +79,8 @@ TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
 
   const sup::dto::AnyValue payload = {{{"result", {sup::dto::UnsignedInteger32Type, 42}}}};
   auto reply = client(payload);
-  EXPECT_FALSE(sup::protocol::utils::CheckReplyFormat(reply));
+  EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
+  EXPECT_EQ(reply[sup::protocol::constants::REPLY_PAYLOAD], array);
 }
 
 PvAccessRPCUtilsTests::PvAccessRPCUtilsTests() = default;
