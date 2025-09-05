@@ -168,7 +168,7 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
   const pvxs::TypeDef field_type1 = ::pvxs::TypeDef(::pvxs::TypeCode::Int8);
   const pvxs::TypeDef field_type2 = ::pvxs::TypeDef(::pvxs::TypeCode::UInt8);
   pvxs_type_array += {field_type1.as("first")};
-  pvxs_type_array += {field_type1.as("second")};
+  pvxs_type_array += {field_type2.as("second")};
 
   // validating via value creation
   auto pvxs_value = pvxs_type_array.create();
@@ -196,10 +196,16 @@ TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructs)
   EXPECT_EQ(array_data[0].id(), std::string());
   EXPECT_EQ(array_data[1].id(), std::string());
 
-  EXPECT_EQ(array_data[0]["first"].as<int32_t>(), -42);
-  EXPECT_EQ(array_data[0]["second"].as<uint32_t>(), 42);
-  EXPECT_EQ(array_data[1]["first"].as<int32_t>(), -43);
-  EXPECT_EQ(array_data[1]["second"].as<uint32_t>(), 43);
+  EXPECT_EQ(array_data[0]["second"].as<uint8_t>(), 42);
+  EXPECT_EQ(array_data[0]["first"].as<int8_t>(), -42);
+  EXPECT_EQ(array_data[0]["second"].as<uint8_t>(), 42);
+  EXPECT_EQ(array_data[1]["first"].as<int8_t>(), -43);
+  EXPECT_EQ(array_data[1]["second"].as<uint8_t>(), 43);
+
+  EXPECT_EQ(array_data[0]["first"].type(), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(array_data[0]["second"].type(), ::pvxs::TypeCode::UInt8);
+  EXPECT_EQ(array_data[1]["first"].type(), ::pvxs::TypeCode::Int8);
+  EXPECT_EQ(array_data[1]["second"].type(), ::pvxs::TypeCode::UInt8);
 }
 
 //! Test almost like before with the attempt to pass a name. It shows that the name passed to the
