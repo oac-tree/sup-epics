@@ -274,7 +274,7 @@ TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
   EXPECT_TRUE(pvxs_value.id().empty());
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
-  // This is the only known way to file the array
+  // This is the only known way to fill the array
   ::pvxs::Value array_field(pvxs_value);
   ::pvxs::shared_array<::pvxs::Value> arr(2);
   arr[0] = array_field.allocMember();
