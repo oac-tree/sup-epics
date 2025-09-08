@@ -1,5 +1,7 @@
 # Simplified search for EPICS
 
+include(FindPackageHandleStandardArgs)
+
 if(DEFINED ENV{EPICS_BASE} AND NOT EPICS_BASE)
   set(EPICS_BASE $ENV{EPICS_BASE})
 endif()
