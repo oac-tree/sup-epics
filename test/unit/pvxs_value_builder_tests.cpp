@@ -41,9 +41,9 @@ class PvxsValueBuilderTests : public ::testing::Test
 
 TEST_F(PvxsValueBuilderTests, FromEmptyType)
 {
-  pvxs::TypeDef empty_type;
+  const pvxs::TypeDef empty_type;
 
-  PvxsValueBuilder builder(empty_type);
+  const PvxsValueBuilder builder(empty_type);
   auto pvxs_value = builder.GetPVXSValue();
 
   EXPECT_FALSE(pvxs_value.valid());
@@ -55,7 +55,7 @@ TEST_F(PvxsValueBuilderTests, FromEmptyType)
 TEST_F(PvxsValueBuilderTests, FromScalar)
 {
   // original any_value
-  sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
+  const sup::dto::AnyValue any_value{sup::dto::SignedInteger32Type, 42};
 
   // initializing builder
   auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::Int32);

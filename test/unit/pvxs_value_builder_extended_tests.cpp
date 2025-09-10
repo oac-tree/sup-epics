@@ -320,15 +320,6 @@ TEST_F(PvxsValueBuilderExtendedTests, ArrayWithTwoStructureElements)
   EXPECT_TRUE(pvxs_value.id().empty());
   EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::StructA);
 
-  // This is the only known way to fill the array
-  ::pvxs::Value array_field(pvxs_value);
-  ::pvxs::shared_array<::pvxs::Value> arr(2);
-  arr[0] = array_field.allocMember();
-  arr[0]["field_name"] = 42;
-  arr[1] = array_field.allocMember();
-  arr[1]["field_name"] = 43;
-  array_field = arr.freeze().castTo<const void>();
-
   // reading the data back
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
