@@ -26,6 +26,7 @@
 
 #include <pvxs/data.h>
 
+#include <iostream>
 #include <stack>
 
 namespace sup
@@ -68,16 +69,20 @@ pvxs::TypeDef PvxsTypeBuilder::GetPVXSType() const
 void PvxsTypeBuilder::EmptyProlog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+  std::cout << "EmptyProlog() value:" << GetPVXSTypeCode(*anytype) << "\n";
 }
 
 void PvxsTypeBuilder::EmptyEpilog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+  std::cout << "EmptyEpilog() value:" << GetPVXSTypeCode(*anytype) << "\n";
 }
 
 void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+
+  std::cout << "StructProlog() value:" << GetPVXSTypeCode(*anytype) << "\n";
 
   if (p_impl->IsInArrayOfStructMode())
   {
@@ -93,11 +98,16 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
   p_impl->m_struct_stack.push({::pvxs::TypeDef(type_code, anytype->GetTypeName(), {}), type_code});
 }
 
-void PvxsTypeBuilder::StructMemberSeparator() {}
+void PvxsTypeBuilder::StructMemberSeparator()
+{
+  std::cout << "StructMemberSeparator() value:" << "\n";
+}
 
 void PvxsTypeBuilder::StructEpilog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+
+  std::cout << "StructEpilog() value:" << GetPVXSTypeCode(*anytype) << "\n";
 
   if (p_impl->IsInArrayOfStructMode())
   {
@@ -113,6 +123,7 @@ void PvxsTypeBuilder::MemberProlog(const sup::dto::AnyType* anytype, const std::
 {
   (void)anytype;
   (void)member_name;
+  std::cout << "MemberProlog() value: " << GetPVXSTypeCode(*anytype) << " " << member_name << "\n";
 }
 
 void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::string& member_name)
@@ -121,19 +132,27 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
   (void)member_name;
   auto& top = p_impl->m_struct_stack.top();
   top.pvxs_typedef += {p_impl->m_last_processed.as(member_name)};
+  std::cout << "MemberEpilog() value: " << anytype << " " << member_name << "\n";
 }
 
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
 {
+  std::cout << "ArrayProlog() value:" << GetPVXSTypeCode(*anytype) << "\n";
   const auto type_code = GetPVXSTypeCode(*anytype);
   p_impl->m_struct_stack.push({::pvxs::TypeDef(type_code), type_code});
 }
 
-void PvxsTypeBuilder::ArrayElementSeparator() {}
+void PvxsTypeBuilder::ArrayElementSeparator()
+{
+  std::cout << "ArrayElementSeparator() value:" << "\n";
+}
 
 void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+
+  std::cout << "ArrayEpilog() value:" << GetPVXSTypeCode(*anytype) << "\n";
+
   p_impl->m_last_processed = p_impl->m_struct_stack.top().pvxs_typedef;
   p_impl->m_struct_stack.pop();
 }
@@ -141,11 +160,13 @@ void PvxsTypeBuilder::ArrayEpilog(const sup::dto::AnyType* anytype)
 void PvxsTypeBuilder::ScalarProlog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
+  std::cout << "ScalarProlog() value:" << GetPVXSTypeCode(*anytype) << "\n";
 }
 
 void PvxsTypeBuilder::ScalarEpilog(const sup::dto::AnyType* anytype)
 {
   p_impl->m_last_processed = GetPVXSTypeCode(*anytype);
+  std::cout << "ScalarEpilog() value:" << GetPVXSTypeCode(*anytype) << "\n";
 }
 
 }  // namespace epics
