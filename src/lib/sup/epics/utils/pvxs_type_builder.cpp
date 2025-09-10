@@ -86,11 +86,27 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 
   if (p_impl->IsInArrayOfStructMode())
   {
-    // no need to start a Struct, StructA was already started on Array's prologue
+    // We are here because sup-dto wants to create a struct inside an array.
 
-    // NOTE Please note that here we have a limitation of our builder. StructA was already created
-    // and we can't change its name,
-    // see also TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
+    // Just a reminder that PVXS doesn't have a "struct" inside an "array". It has StructA object
+    // and it was already created.
+
+    // Now we would like to set the name for the struct element. From PVXS point of view it is too
+    // late. PVXS has two following features:
+    // - arrays do not have names
+    // - the name used during PVXS StructA creation will be propagated down and become the name of
+    //   the Struct element.
+
+    // Let's recreate the array using that name.
+
+    // Remove old StructA which doens't have a proper name
+    p_impl->m_struct_stack.pop();
+
+    // Create StructA which will play the role of array + struct simultaneously
+    p_impl->m_struct_stack.push(
+        {::pvxs::TypeDef(::pvxs::TypeCode::StructA, anytype->GetTypeName(), {}),
+         ::pvxs::TypeCode::StructA});
+
     return;
   }
 

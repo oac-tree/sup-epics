@@ -287,10 +287,8 @@ TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
   auto array_data = pvxs_value.as<pvxs::shared_array<const pvxs::Value>>();
   EXPECT_EQ(array_data.size(), 2);
 
-  // NOTE this is a limitation of our PvxsTypeBuilder builder. It looses information about
-  // struct name, see also TEST_F(PvxsValueBasicsTests, CreateTypeDefForArrayOfStructsNamed)
-  EXPECT_EQ(array_data[0].id(), std::string());
-  EXPECT_EQ(array_data[1].id(), std::string());
+  EXPECT_EQ(array_data[0].id(), expected_struct_name);
+  EXPECT_EQ(array_data[1].id(), expected_struct_name);
 
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
