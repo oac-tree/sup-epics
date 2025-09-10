@@ -375,15 +375,17 @@ TEST_F(PvxsValueBuilderTests, ArrayInStruct)
 
 TEST_F(PvxsValueBuilderTests, ArrayWithTwoStructureElements)
 {
+  const std::string expected_struct_name("struct_name");
+
   // original AnyValue
   const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                            "struct_name"};
+                                            expected_struct_name};
   const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                            "struct_name"};
+                                            expected_struct_name};
   auto anyvalue = sup::dto::ArrayValue({struct_value1, struct_value2});
 
   // initializing builder
-  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, "struct_name",
+  auto pvxs_type = ::pvxs::TypeDef(::pvxs::TypeCode::StructA, expected_struct_name,
                                    {pvxs::members::Int32("field_name")});
   PvxsValueBuilder builder(pvxs_type);
 
@@ -415,4 +417,7 @@ TEST_F(PvxsValueBuilderTests, ArrayWithTwoStructureElements)
   EXPECT_EQ(array_data.size(), 2);
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
+
+  EXPECT_EQ(array_data[0].id(), expected_struct_name);
+  EXPECT_EQ(array_data[1].id(), expected_struct_name);
 }

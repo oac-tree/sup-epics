@@ -61,12 +61,11 @@ TEST_F(PvAccessRPCUtilsTests, ClientRPCCall)
 TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
 {
   const std::string channel_name = "PvAccessRPCUtilsTests_2";
-  // for the moment the passing of names in the array structures is not supported
-  const std::string deliberately_empy_struct_name = "";
+  const std::string struct_name = "struct_name";
   const sup::dto::AnyValue struct_value1 = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
-                                            deliberately_empy_struct_name};
+                                            struct_name};
   const sup::dto::AnyValue struct_value2 = {{{"field_name", {sup::dto::SignedInteger32Type, 43}}},
-                                            deliberately_empy_struct_name};
+                                            struct_name};
   auto array = sup::dto::ArrayValue({struct_value1, struct_value2});
   const sup::dto::AnyValue fixed_reply = {
       {{sup::protocol::constants::REPLY_RESULT, {sup::dto::UnsignedInteger32Type, 41}},
