@@ -41,7 +41,7 @@ PvAccessServerImpl::PvAccessServerImpl(std::unique_ptr<pvxs::server::Server>&& c
 
 PvAccessServerImpl::~PvAccessServerImpl()
 {
-  m_context->stop();
+  (void)m_context->stop();
 }
 
 //! Adds channel with given name to the map of channels.
@@ -61,14 +61,14 @@ void PvAccessServerImpl::AddVariable(const std::string& name, const dto::AnyValu
   }
 
   auto variable = std::make_unique<PvAccessServerPV>(name, any_value, variable_callback);
-  m_variables.emplace(name, std::move(variable));
+  (void)m_variables.emplace(name, std::move(variable));
 }
 
 std::vector<std::string> PvAccessServerImpl::GetVariableNames() const
 {
   std::vector<std::string> result;
-  std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
-                 [](const auto& pair) { return pair.first; });
+  (void)std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
+                       [](const auto& pair) { return pair.first; });
   return result;
 }
 

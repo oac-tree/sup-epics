@@ -60,7 +60,7 @@ ChannelAccessPV::~ChannelAccessPV()
 {
   if (m_id > 0)
   {
-    SharedCAChannelManager().RemoveChannel(m_id);
+    (void)SharedCAChannelManager().RemoveChannel(m_id);
   }
 }
 

@@ -49,7 +49,7 @@ PvAccessRPCServerImpl::PvAccessRPCServerImpl(std::unique_ptr<pvxs::server::Serve
 
 PvAccessRPCServerImpl::~PvAccessRPCServerImpl()
 {
-  m_server->stop();
+  (void)m_server->stop();
 }
 
 std::shared_ptr<pvxs::client::Context> PvAccessRPCServerImpl::GetClientContext()
@@ -64,7 +64,7 @@ std::shared_ptr<pvxs::client::Context> PvAccessRPCServerImpl::GetClientContext()
 void PvAccessRPCServerImpl::Initialise()
 {
   auto shared_pv = pvxs::server::SharedPV::buildMailbox();
-  m_server->addPV(m_config.service_name, shared_pv);
+  (void)m_server->addPV(m_config.service_name, shared_pv);
 
   shared_pv.onRPC(
     [this](pvxs::server::SharedPV&, std::unique_ptr<pvxs::server::ExecOp>&& op,
@@ -74,7 +74,7 @@ void PvAccessRPCServerImpl::Initialise()
       op->reply(pvxs_reply);
     }
   );
-  m_server->start();
+  (void)m_server->start();
 }
 
 std::unique_ptr<PvAccessRPCServerImpl> CreateIsolatedRPCServerImpl(

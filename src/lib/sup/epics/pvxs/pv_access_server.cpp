@@ -84,7 +84,7 @@ void PvAccessServer::Start()
   }
 
   // starting PVXS server
-  p_impl->GetContext()->start();
+  (void)p_impl->GetContext()->start();
 }
 
 PvAccessClient PvAccessServer::CreateClient(PvAccessClient::VariableChangedCallback cb)

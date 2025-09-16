@@ -49,13 +49,13 @@ void PvAccessClientImpl::AddVariable(const std::string& channel)
       OnVariableChanged(channel, value);
   };
   auto pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(channel, m_context, cb);
-  m_variables.emplace(channel, std::make_unique<sup::epics::PvAccessClientPV>(std::move(pv_impl)));
+  (void)m_variables.emplace(channel, std::make_unique<sup::epics::PvAccessClientPV>(std::move(pv_impl)));
 }
 
 std::vector<std::string> PvAccessClientImpl::GetVariableNames() const
 {
   std::vector<std::string> result;
-  std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
+  (void)std::transform(std::begin(m_variables), end(m_variables), back_inserter(result),
                  [](const auto& pair) { return pair.first; });
   return result;
 }

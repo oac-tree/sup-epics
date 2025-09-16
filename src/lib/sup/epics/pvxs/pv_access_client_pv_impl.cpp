@@ -114,7 +114,7 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
                     .exec();
   try
   {
-    operation->wait(m_max_put_timeout);
+    (void)operation->wait(m_max_put_timeout);
   }
   catch (const pvxs::client::Timeout& ex)
   {

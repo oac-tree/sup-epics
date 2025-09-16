@@ -51,7 +51,7 @@ bool ChannelAccessClient::AddVariable(const std::string& channel, const sup::dto
   {
     return false;
   }
-  pv_map.emplace(channel, std::move(pv));
+  (void)pv_map.emplace(channel, std::move(pv));
   return true;
 }
 
@@ -134,7 +134,7 @@ bool ChannelAccessClient::RemoveVariable(const std::string& channel)
   {
     return false;
   }
-  pv_map.erase(it);
+  (void)pv_map.erase(it);
   return true;
 }
 

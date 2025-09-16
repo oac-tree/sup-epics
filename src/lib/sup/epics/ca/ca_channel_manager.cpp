@@ -88,9 +88,9 @@ ChannelID CAChannelManager::AddChannel(const std::string& name, const sup::dto::
   {
     if (channel_info_it->channel_id != nullptr)
     {
-      DelegateRemoveChannel(context_handle.get(), channel_info_it->channel_id);
+      (void)DelegateRemoveChannel(context_handle.get(), channel_info_it->channel_id);
     }
-    callback_map.erase(it);
+    (void)callback_map.erase(it);
     id = 0;
   }
   ClearContextIfNotNeeded();
@@ -107,7 +107,7 @@ bool CAChannelManager::RemoveChannel(ChannelID id)
   }
   chid channel_id = it->second.channel_id;
   auto result = DelegateRemoveChannel(context_handle.get(), channel_id);
-  callback_map.erase(it);
+  (void)callback_map.erase(it);
   ClearContextIfNotNeeded();
   return result;
 }
@@ -223,7 +223,7 @@ std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& va
     for (unsigned long idx = 0; idx < multiplicity; ++idx)
     {
       auto el_buffer = GetStringUpdateBuffer(value[idx]);
-      result.insert(result.end(), el_buffer.begin(), el_buffer.end());
+      (void)result.insert(result.end(), el_buffer.begin(), el_buffer.end());
     }
     return result;
   }
@@ -243,7 +243,7 @@ std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& val
   {
     str = sup::dto::ValuesToJSONString(value);
   }
-  strncpy((char*)result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
+  (void)strncpy((char*)result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
   return result;
 }
 
@@ -260,7 +260,7 @@ std::vector<sup::dto::uint8> GetUnsignedEnumsUpdateBuffer(const sup::dto::AnyVal
       {
         return {};
       }
-      result.insert(result.end(), el_buffer.begin(), el_buffer.end());
+      (void)result.insert(result.end(), el_buffer.begin(), el_buffer.end());
     }
     return result;
   }

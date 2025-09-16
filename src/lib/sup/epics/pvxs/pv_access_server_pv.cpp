@@ -82,7 +82,7 @@ bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
     {
       std::lock_guard<std::mutex> lock(m_mutex);
       auto pvxs_value = BuildPVXSValue(m_any_value);
-      m_pvxs_cache.assign(pvxs_value);
+      (void)m_pvxs_cache.assign(pvxs_value);
     }
     m_shared_pv.post(m_pvxs_cache);
   }
@@ -99,7 +99,7 @@ void PvAccessServerPV::AddToServer(pvxs::server::Server& server)
   {
     throw std::runtime_error("Variable was already added to a server");
   }
-  server.addPV(m_variable_name, m_shared_pv);
+  (void)server.addPV(m_variable_name, m_shared_pv);
   m_shared_pv.open(m_pvxs_cache);
 }
 
@@ -113,7 +113,7 @@ void PvAccessServerPV::OnSharedValueChanged(pvxs::server::SharedPV& /*pv*/,
 
     // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer alive
     // since server::SharedPV relies on that.
-    m_pvxs_cache.assign(value);
+    (void)m_pvxs_cache.assign(value);
     m_shared_pv.post(m_pvxs_cache);
   }
   if (m_callback)
