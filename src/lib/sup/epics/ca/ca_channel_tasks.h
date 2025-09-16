@@ -38,7 +38,7 @@ bool AddChannelTask(const std::string& name, chtype type, chid* id,
 
 bool RemoveChannelTask(chid id);
 
-bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref);
+bool UpdateChannelTask(chtype type, sup::dto::uint64 count, chid id, void* ref);
 
 }  // namespace channeltasks
 

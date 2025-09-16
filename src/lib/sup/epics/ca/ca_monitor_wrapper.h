@@ -23,7 +23,6 @@
 
 #include <sup/epics/ca/ca_channel_manager.h>
 #include <sup/dto/anytype.h>
-#include <string>
 
 namespace sup
 {
@@ -34,9 +33,9 @@ class CAMonitorWrapper
 public:
   CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& mon_cb);
   void operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
-                  sup::dto::int16 severity, long count, void* ref);
+                  sup::dto::int16 severity, sup::dto::int64 count, void* ref);
 private:
-  bool VerifyCount(long count);
+  bool VerifyCount(sup::dto::int64 count);
   sup::dto::AnyType m_anytype;
   MonitorCallBack m_mon_cb;
 };

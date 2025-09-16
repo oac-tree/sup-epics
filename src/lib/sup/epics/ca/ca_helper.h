@@ -42,9 +42,9 @@ sup::dto::uint64 GetTimestampField(event_handler_args args);
 
 chtype ChannelType(const sup::dto::AnyType& anytype);
 
-unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype);
+sup::dto::uint64 ChannelMultiplicity(const sup::dto::AnyType& anytype);
 
-sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, unsigned long count, char* ref);
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, sup::dto::uint64 count, char* ref);
 
 }  // namespace cahelper
 

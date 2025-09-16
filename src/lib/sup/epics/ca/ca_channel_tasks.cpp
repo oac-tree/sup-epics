@@ -66,7 +66,7 @@ bool RemoveChannelTask(chid id)
   return true;
 }
 
-bool UpdateChannelTask(chtype type, unsigned long count, chid id, void* ref)
+bool UpdateChannelTask(chtype type, sup::dto::uint64 count, chid id, void* ref)
 {
   if (ca_array_put(type, count, id, ref) != ECA_NORMAL)
   {

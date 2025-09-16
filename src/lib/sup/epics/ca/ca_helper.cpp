@@ -36,17 +36,17 @@ sup::dto::uint64 ToAbsoluteTime_ns(sup::dto::uint64 seconds, sup::dto::uint64 na
 chtype ScalarTypeCodeToChannelType(sup::dto::TypeCode typecode);
 chtype ArrayTypeCodeToChannelType(sup::dto::TypeCode typecode);
 sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
-                                        unsigned long multiplicity);
+                                        sup::dto::uint64 multiplicity);
 sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* ref);
 sup::dto::AnyValue ParseFromUnsignedEnumTypes(const sup::dto::AnyType& anytype, char* ref,
-                                          unsigned long multiplicity);
+                                          sup::dto::uint64 multiplicity);
 sup::dto::AnyValue ParseFromUnsignedType(const sup::dto::AnyType& anytype, char* ref);
 sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, const std::string& str);
 sup::dto::AnyValue ParseBooleans(const sup::dto::AnyType& anytype, char* ref,
-                                 unsigned long multiplicity);
+                                 sup::dto::uint64 multiplicity);
 sup::dto::AnyValue ParseBoolean(char* ref);
 sup::dto::AnyValue ParseFromBytes(const sup::dto::AnyType& anytype, chtype channeltype, char* ref,
-                                  unsigned long multiplicity);
+                                  sup::dto::uint64 multiplicity);
 std::string GetEPICSString(char* ref);
 
 }  // unnamed namespace
@@ -104,13 +104,13 @@ chtype ChannelType(const sup::dto::AnyType& anytype)
     ScalarTypeCodeToChannelType(anytype.GetTypeCode());
 }
 
-unsigned long ChannelMultiplicity(const sup::dto::AnyType& anytype)
+sup::dto::uint64 ChannelMultiplicity(const sup::dto::AnyType& anytype)
 {
   auto result = anytype.NumberOfElements();
   return result ? result : 1u;
 }
 
-sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, unsigned long count, char* ref)
+sup::dto::AnyValue ParseAnyValue(const sup::dto::AnyType& anytype, sup::dto::uint64 count, char* ref)
 {
   if (!ref)
   {
@@ -208,14 +208,14 @@ chtype ArrayTypeCodeToChannelType(sup::dto::TypeCode typecode)
 }
 
 sup::dto::AnyValue ParseFromStringTypes(const sup::dto::AnyType& anytype, char* ref,
-                                        unsigned long multiplicity)
+                                        sup::dto::uint64 multiplicity)
 {
   sup::dto::AnyValue result{anytype};
   if (result.NumberOfElements() > 0)
   {
     sup::dto::AnyType el_type = anytype.ElementType();
     const std::size_t kEpicsStringLength = dbr_size[DBR_STRING];
-    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    for (sup::dto::uint64 idx = 0; idx < multiplicity; ++idx)
     {
       char* el_ref = ref + idx * kEpicsStringLength;
       result[idx] = ParseFromStringType(el_type, el_ref);
@@ -236,14 +236,14 @@ sup::dto::AnyValue ParseFromStringType(const sup::dto::AnyType& anytype, char* r
 }
 
 sup::dto::AnyValue ParseFromUnsignedEnumTypes(const sup::dto::AnyType& anytype, char* ref,
-                                              unsigned long multiplicity)
+                                              sup::dto::uint64 multiplicity)
 {
   sup::dto::AnyValue result{anytype};
   if (result.NumberOfElements() > 0)
   {
     sup::dto::AnyType el_type = anytype.ElementType();
     const std::size_t kEnumLength = dbr_size[DBR_ENUM];
-    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    for (sup::dto::uint64 idx = 0; idx < multiplicity; ++idx)
     {
       char* el_ref = ref + idx * kEnumLength;
       result[idx] = ParseFromUnsignedType(el_type, el_ref);
@@ -276,12 +276,12 @@ sup::dto::AnyValue ParseNumericFromString(const sup::dto::AnyType& anytype, cons
 }
 
 sup::dto::AnyValue ParseBooleans(const sup::dto::AnyType& anytype, char* ref,
-                                 unsigned long multiplicity)
+                                 sup::dto::uint64 multiplicity)
 {
   sup::dto::AnyValue result{anytype};
   if (result.NumberOfElements() > 0)
   {
-    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    for (sup::dto::uint64 idx = 0; idx < multiplicity; ++idx)
     {
       result[idx] = ParseBoolean(ref + idx);
     }
@@ -299,7 +299,7 @@ sup::dto::AnyValue ParseBoolean(char* ref)
 }
 
 sup::dto::AnyValue ParseFromBytes(const sup::dto::AnyType& anytype, chtype channeltype, char* ref,
-                                  unsigned long multiplicity)
+                                  sup::dto::uint64 multiplicity)
 {
   sup::dto::AnyValue temp{anytype};
   if (sup::dto::IsArrayType(anytype))

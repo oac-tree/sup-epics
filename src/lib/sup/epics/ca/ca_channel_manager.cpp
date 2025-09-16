@@ -18,6 +18,7 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include <sup/dto/basic_scalar_types.h>
 #include <sup/epics/ca/ca_channel_manager.h>
 
 #include <sup/epics/ca/ca_channel_tasks.h>
@@ -35,10 +36,10 @@ bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id);
 std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
                                              const sup::dto::AnyType& dest_type);
 std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& value,
-                                                    unsigned long multiplicity);
+                                                    sup::dto::uint64 multiplicity);
 std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& value);
 std::vector<sup::dto::uint8> GetUnsignedEnumsUpdateBuffer(const sup::dto::AnyValue& value,
-                                                          unsigned long multiplicity);
+                                                          sup::dto::uint64 multiplicity);
 std::vector<sup::dto::uint8> GetUnsignedEnumUpdateBuffer(const sup::dto::AnyValue& value);
 }  // unnamed namespace
 
@@ -215,12 +216,12 @@ std::vector<sup::dto::uint8> GetUpdateBuffer(const sup::dto::AnyValue& value,
 }
 
 std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& value,
-                                                    unsigned long multiplicity)
+                                                    sup::dto::uint64 multiplicity)
 {
   if (multiplicity > 1)
   {
     std::vector<sup::dto::uint8> result;
-    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    for (sup::dto::uint64 idx = 0; idx < multiplicity; ++idx)
     {
       auto el_buffer = GetStringUpdateBuffer(value[idx]);
       (void)result.insert(result.end(), el_buffer.begin(), el_buffer.end());
@@ -248,12 +249,12 @@ std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& val
 }
 
 std::vector<sup::dto::uint8> GetUnsignedEnumsUpdateBuffer(const sup::dto::AnyValue& value,
-                                                          unsigned long multiplicity)
+                                                          sup::dto::uint64 multiplicity)
 {
   if (multiplicity > 1)
   {
     std::vector<sup::dto::uint8> result;
-    for (unsigned long idx = 0; idx < multiplicity; ++idx)
+    for (sup::dto::uint64 idx = 0; idx < multiplicity; ++idx)
     {
       auto el_buffer = GetUnsignedEnumUpdateBuffer(value[idx]);
       if (el_buffer.size() == 0)

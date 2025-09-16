@@ -34,7 +34,7 @@ CAMonitorWrapper::CAMonitorWrapper(sup::dto::AnyType anytype, MonitorCallBack&& 
 {}
 
 void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 status,
-                                  sup::dto::int16 severity, long count, void* ref)
+                                  sup::dto::int16 severity, sup::dto::int64 count, void* ref)
 {
   CAMonitorInfo info;
   info.timestamp = timestamp;
@@ -47,7 +47,7 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
   return m_mon_cb(info);
 }
 
-bool CAMonitorWrapper::VerifyCount(long count)
+bool CAMonitorWrapper::VerifyCount(sup::dto::int64 count)
 {
   if (sup::dto::IsArrayType(m_anytype))
   {
