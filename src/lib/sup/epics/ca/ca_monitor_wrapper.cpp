@@ -42,7 +42,7 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
   info.severity = severity;
   if (ref && VerifyCount(count))  // Only dereference ref during success
   {
-    info.value = cahelper::ParseAnyValue(m_anytype, count, (char*)ref);
+    info.value = cahelper::ParseAnyValue(m_anytype, count, static_cast<char*>(ref));
   }
   return m_mon_cb(info);
 }

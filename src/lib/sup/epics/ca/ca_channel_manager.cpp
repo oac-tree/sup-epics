@@ -243,7 +243,7 @@ std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& val
   {
     str = sup::dto::ValuesToJSONString(value);
   }
-  (void)strncpy((char*)result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
+  std::memcpy(result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
   return result;
 }
 
