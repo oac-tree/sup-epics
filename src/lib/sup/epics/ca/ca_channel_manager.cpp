@@ -28,6 +28,7 @@
 
 #include <sup/dto/anyvalue_helper.h>
 #include <cadef.h>
+#include <algorithm>
 #include <utility>
 
 namespace
@@ -248,7 +249,8 @@ std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& val
   {
     str = sup::dto::ValuesToJSONString(value);
   }
-  std::memcpy(result.data(), str.c_str(), std::min(kEpicsStringLength, str.size()));
+  auto copy_size = std::min(kEpicsStringLength, str.size());
+  (void)std::copy_n(str.c_str(), copy_size, result.data());
   return result;
 }
 
