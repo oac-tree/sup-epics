@@ -58,7 +58,7 @@ struct Node
 
   NodeContext m_context;
 
-  Node(::pvxs::Value value, NodeContext context = kRoot) : m_value(value), m_context(context) {}
+  explicit Node(::pvxs::Value value, NodeContext context = kRoot) : m_value(value), m_context(context) {}
 
   bool IsArrayContext() const { return m_context == kArrayElement; }
 
@@ -116,7 +116,7 @@ void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessPvxsValue(
     return;  // by default AnyValueBuildAdapter will generate empty AnyValue
   }
 
-  m_stack.push({pvxs_value});
+  m_stack.emplace(pvxs_value);
   ProcessStack();
 }
 

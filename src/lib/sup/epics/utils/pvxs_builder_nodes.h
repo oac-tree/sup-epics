@@ -34,7 +34,7 @@ class PvxsBuilderNode
 public:
   explicit PvxsBuilderNode(pvxs::Value pvxs_value);
 
-  virtual ~PvxsBuilderNode() = default;
+  ~PvxsBuilderNode() = default;
 
   virtual pvxs::Value GetPvxsValue() const;
 
