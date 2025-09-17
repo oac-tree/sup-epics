@@ -190,6 +190,10 @@ bool DelegateRemoveChannel(sup::epics::CAContextHandle* context, chid id)
   auto remove_task = std::packaged_task<bool()>([id](){
     return sup::epics::channeltasks::RemoveChannelTask(id);
   });
+  if (context == nullptr)
+  {
+    return false;
+  }
   return context->HandleTask(std::move(remove_task));
 }
 
