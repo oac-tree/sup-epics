@@ -71,8 +71,8 @@ public:
 
   ~PvAccessClientPV();
 
-  PvAccessClientPV(PvAccessClientPV&& other);
-  PvAccessClientPV& operator=(PvAccessClientPV&& other);
+  PvAccessClientPV(PvAccessClientPV&& other) noexcept ;
+  PvAccessClientPV& operator=(PvAccessClientPV&& other) noexcept ;
 
   PvAccessClientPV(const PvAccessClientPV&) = delete;
   PvAccessClientPV& operator=(const PvAccessClientPV&) = delete;

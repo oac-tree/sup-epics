@@ -58,8 +58,8 @@ public:
 
   ~PvAccessClient();
 
-  PvAccessClient(PvAccessClient&& other);
-  PvAccessClient& operator=(PvAccessClient&& other);
+  PvAccessClient(PvAccessClient&& other) noexcept ;
+  PvAccessClient& operator=(PvAccessClient&& other) noexcept ;
 
   PvAccessClient(const PvAccessClient&) = delete;
   PvAccessClient& operator=(const PvAccessClient&) = delete;

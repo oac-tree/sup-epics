@@ -48,10 +48,10 @@ public:
 
   explicit PvAccessRPCClient(std::unique_ptr<PvAccessRPCClientImpl>&& impl);
 
-  ~PvAccessRPCClient();
+  ~PvAccessRPCClient() override;
 
-  PvAccessRPCClient(PvAccessRPCClient&& other);
-  PvAccessRPCClient& operator=(PvAccessRPCClient&& other);
+  PvAccessRPCClient(PvAccessRPCClient&& other) noexcept ;
+  PvAccessRPCClient& operator=(PvAccessRPCClient&& other) noexcept ;
 
   PvAccessRPCClient(const PvAccessRPCClient&) = delete;
   PvAccessRPCClient& operator=(const PvAccessRPCClient&) = delete;

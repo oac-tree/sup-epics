@@ -43,11 +43,11 @@ PvAccessRPCClient::PvAccessRPCClient(std::unique_ptr<PvAccessRPCClientImpl>&& im
 
 PvAccessRPCClient::~PvAccessRPCClient() = default;
 
-PvAccessRPCClient::PvAccessRPCClient(PvAccessRPCClient&& other)
+PvAccessRPCClient::PvAccessRPCClient(PvAccessRPCClient&& other) noexcept
   : m_impl{std::move(other.m_impl)}
 {}
 
-PvAccessRPCClient& PvAccessRPCClient::operator=(PvAccessRPCClient&& other)
+PvAccessRPCClient& PvAccessRPCClient::operator=(PvAccessRPCClient&& other) noexcept
 {
   if (this != &other)
   {
