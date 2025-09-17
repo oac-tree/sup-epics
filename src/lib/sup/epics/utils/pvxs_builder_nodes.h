@@ -32,7 +32,7 @@ namespace epics
 class PvxsBuilderNode
 {
 public:
-  PvxsBuilderNode(pvxs::Value pvxs_value);
+  explicit PvxsBuilderNode(pvxs::Value pvxs_value);
 
   virtual ~PvxsBuilderNode() = default;
 

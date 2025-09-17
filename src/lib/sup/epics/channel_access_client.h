@@ -42,7 +42,7 @@ public:
   /**
    * @brief Constructor.
    */
-  ChannelAccessClient(VariableUpdatedCallback cb = {});
+  explicit ChannelAccessClient(VariableUpdatedCallback cb = {});
 
     /**
    * @brief Destructor.
