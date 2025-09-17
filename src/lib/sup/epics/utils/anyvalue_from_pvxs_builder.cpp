@@ -214,7 +214,10 @@ void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::StartComposite(Node& 
   {
     m_composer.StartArrayElement();
   }
-
+  else
+  {
+    // No action required for top-level objects or other context types
+  }
   // this is top level object
 }
 
@@ -228,6 +231,10 @@ void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::EndComposite(Node& no
   else if (node.IsArrayContext())
   {
     m_composer.EndArrayElement();
+  }
+  else
+  {
+    // No action required for top-level objects or other context types
   }
   m_stack.pop();  // we don't need the node anymore
 }
