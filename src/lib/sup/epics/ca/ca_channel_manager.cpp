@@ -233,7 +233,7 @@ std::vector<sup::dto::uint8> GetStringsUpdateBuffer(const sup::dto::AnyValue& va
 
 std::vector<sup::dto::uint8> GetStringUpdateBuffer(const sup::dto::AnyValue& value)
 {
-  const std::size_t kEpicsStringLength = dbr_size[DBR_STRING];
+  const auto kEpicsStringLength = static_cast<std::size_t>(dbr_size[DBR_STRING]);
   std::vector<sup::dto::uint8> result(kEpicsStringLength);
   std::string str;
   if (value.GetType() == sup::dto::StringType)

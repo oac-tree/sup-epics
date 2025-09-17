@@ -18,6 +18,7 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include <sup/dto/basic_scalar_types.h>
 #include <sup/epics/ca/ca_monitor_wrapper.h>
 #include <sup/epics/ca/ca_helper.h>
 
@@ -42,7 +43,8 @@ void CAMonitorWrapper::operator()(sup::dto::uint64 timestamp, sup::dto::int16 st
   info.severity = severity;
   if (ref && VerifyCount(count))  // Only dereference ref during success
   {
-    info.value = cahelper::ParseAnyValue(m_anytype, count, static_cast<char*>(ref));
+    info.value = cahelper::ParseAnyValue(m_anytype, static_cast<dto::uint64>(count),
+                                         static_cast<char*>(ref));
   }
   return m_mon_cb(info);
 }
