@@ -20,15 +20,15 @@
 
 #include "sup/epics/pv_access_server.h"
 
-#include <sup/epics/pvxs/pv_access_client_impl.h>
-#include <sup/epics/pvxs/pv_access_client_pv_impl.h>
-#include <sup/epics/pvxs/pv_access_server_pv.h>
-#include <sup/epics/pvxs/pv_access_server_impl.h>
-
 #include <pvxs/server.h>
 
-#include <stdexcept>
 #include <sup/dto/anyvalue.h>
+#include <sup/epics/pvxs/pv_access_client_impl.h>
+#include <sup/epics/pvxs/pv_access_client_pv_impl.h>
+#include <sup/epics/pvxs/pv_access_server_impl.h>
+#include <sup/epics/pvxs/pv_access_server_pv.h>
+
+#include <stdexcept>
 
 namespace sup
 {
@@ -46,9 +46,9 @@ PvAccessServer::PvAccessServer(IsolatedTag, VariableChangedCallback callback)
 
 PvAccessServer::~PvAccessServer() = default;
 
-void PvAccessServer::AddVariable(const std::string& name, const dto::AnyValue& any_value)
+void PvAccessServer::AddVariable(const std::string& channel, const dto::AnyValue& any_value)
 {
-  p_impl->AddVariable(name, any_value);
+  p_impl->AddVariable(channel, any_value);
 }
 
 std::vector<std::string> PvAccessServer::GetVariableNames() const
@@ -56,29 +56,31 @@ std::vector<std::string> PvAccessServer::GetVariableNames() const
   return p_impl->GetVariableNames();
 }
 
-dto::AnyValue PvAccessServer::GetValue(const std::string &name) const
+dto::AnyValue PvAccessServer::GetValue(const std::string& channel) const
 {
-  auto iter = p_impl->GetVariables().find(name);
+  auto iter = p_impl->GetVariables().find(channel);
   if (iter == p_impl->GetVariables().end())
   {
-    throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + channel
+                             + "'.");
   }
   return iter->second->GetValue();
 }
 
-bool PvAccessServer::SetValue(const std::string &name, const dto::AnyValue &value)
+bool PvAccessServer::SetValue(const std::string& channel, const dto::AnyValue& value)
 {
-  auto iter = p_impl->GetVariables().find(name);
+  auto iter = p_impl->GetVariables().find(channel);
   if (iter == p_impl->GetVariables().end())
   {
-    throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + name + "'.");
+    throw std::runtime_error("Error in PvAccessServer: non-existing variable name '" + channel
+                             + "'.");
   }
   return iter->second->SetValue(value);
 }
 
 void PvAccessServer::Start()
 {
-  for(const auto& [_, variable] : p_impl->GetVariables())
+  for (const auto& [_, variable] : p_impl->GetVariables())
   {
     variable->AddToServer(*p_impl->GetContext());
   }
@@ -87,16 +89,18 @@ void PvAccessServer::Start()
   (void)p_impl->GetContext()->start();
 }
 
-PvAccessClient PvAccessServer::CreateClient(PvAccessClient::VariableChangedCallback cb)
+PvAccessClient PvAccessServer::CreateClient(PvAccessClient::VariableChangedCallback callback)
 {
-  auto client_impl = std::make_unique<sup::epics::PvAccessClientImpl>(p_impl->GetClientContext(), cb);
+  auto client_impl =
+      std::make_unique<sup::epics::PvAccessClientImpl>(p_impl->GetClientContext(), callback);
   return PvAccessClient{std::move(client_impl)};
 }
 
 PvAccessClientPV PvAccessServer::CreateClientPV(const std::string& channel,
-                                                PvAccessClientPV::VariableChangedCallback cb)
+                                                PvAccessClientPV::VariableChangedCallback callback)
 {
-  auto client_pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(channel, p_impl->GetClientContext(), cb);
+  auto client_pv_impl = std::make_unique<sup::epics::PvAccessClientPVImpl>(
+      channel, p_impl->GetClientContext(), callback);
   return PvAccessClientPV{std::move(client_pv_impl)};
 }
 

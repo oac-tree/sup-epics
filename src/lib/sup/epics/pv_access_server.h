@@ -21,9 +21,8 @@
 #ifndef SUP_EPICS_PV_ACCESS_SERVER_H_
 #define SUP_EPICS_PV_ACCESS_SERVER_H_
 
-#include <sup/epics/pv_access_client.h>
-
 #include <sup/dto/anyvalue.h>
+#include <sup/epics/pv_access_client.h>
 
 #include <functional>
 #include <memory>
@@ -40,25 +39,28 @@ class PvAccessServerImpl;
 class PvAccessServer
 {
 public:
-  using VariableChangedCallback = std::function<void(const std::string&, const sup::dto::AnyValue&)>;
+  using VariableChangedCallback =
+      std::function<void(const std::string&, const sup::dto::AnyValue&)>;
 
-  struct IsolatedTag {};
+  struct IsolatedTag
+  {
+  };
   static IsolatedTag Isolated;
 
   /**
    * @brief Constructor.
    *
-   * @param cb Callback function to call when the variable's value changed.
+   * @param callback Callback function to call when the variable's value changed.
    */
-  explicit PvAccessServer(VariableChangedCallback cb = {});
+  explicit PvAccessServer(VariableChangedCallback callback = {});
 
   /**
    * @brief Constructor.
    *
    * @param isolated Tag to request an isolated context for testing.
-   * @param cb Callback function to call when the variable's value changed.
+   * @param callback Callback function to call when the variable's value changed.
    */
-  explicit PvAccessServer(IsolatedTag isolated, VariableChangedCallback cb = {});
+  explicit PvAccessServer(IsolatedTag isolated, VariableChangedCallback callback = {});
 
   ~PvAccessServer();
 
@@ -112,22 +114,22 @@ public:
   /**
    * @brief Create a PvAccess client based on this server's context.
    *
-   * @param cb Optional callback function to add to the client.
+   * @param callback Optional callback function to add to the client.
    *
    * @return A PvAccess client with a context associated to the server.
    */
-  PvAccessClient CreateClient(PvAccessClient::VariableChangedCallback cb = {});
+  PvAccessClient CreateClient(PvAccessClient::VariableChangedCallback callback = {});
 
   /**
    * @brief Create a PvAccess client PV based on this server's context.
    *
    * @param channel EPICS channel name.
-   * @param cb Optional callback function to add to the client PV.
+   * @param callback Optional callback function to add to the client PV.
    *
    * @return A PvAccess client PV with a context associated to the server.
    */
   PvAccessClientPV CreateClientPV(const std::string& channel,
-                                  PvAccessClientPV::VariableChangedCallback cb = {});
+                                  PvAccessClientPV::VariableChangedCallback callback = {});
 
 private:
   std::unique_ptr<PvAccessServerImpl> p_impl;
