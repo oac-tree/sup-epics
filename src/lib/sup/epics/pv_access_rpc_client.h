@@ -56,7 +56,7 @@ public:
   PvAccessRPCClient(const PvAccessRPCClient&) = delete;
   PvAccessRPCClient& operator=(const PvAccessRPCClient&) = delete;
 
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override;
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue& input) override;
 private:
   std::unique_ptr<PvAccessRPCClientImpl> m_impl;
 };

@@ -103,9 +103,9 @@ LoggingEPICSRPCClient::LoggingEPICSRPCClient(
   , m_log_decorator{*m_epics_client, log_function}
 {}
 
-sup::dto::AnyValue LoggingEPICSRPCClient::operator()(const sup::dto::AnyValue& request)
+sup::dto::AnyValue LoggingEPICSRPCClient::operator()(const sup::dto::AnyValue& input)
 {
-  return m_log_decorator(request);
+  return m_log_decorator(input);
 }
 
 }  // namespace utils

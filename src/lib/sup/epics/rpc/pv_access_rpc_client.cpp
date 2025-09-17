@@ -56,9 +56,9 @@ PvAccessRPCClient& PvAccessRPCClient::operator=(PvAccessRPCClient&& other) noexc
   return *this;
 }
 
-sup::dto::AnyValue PvAccessRPCClient::operator()(const sup::dto::AnyValue& request)
+sup::dto::AnyValue PvAccessRPCClient::operator()(const sup::dto::AnyValue& input)
 {
-  return m_impl->operator()(request);
+  return m_impl->operator()(input);
 }
 
 PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)

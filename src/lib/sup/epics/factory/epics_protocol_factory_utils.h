@@ -54,7 +54,7 @@ public:
   LoggingEPICSRPCClient(const PvAccessRPCClientConfig& config,
                         sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
 
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& request) override;
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue& input) override;
 
 private:
   std::unique_ptr<sup::dto::AnyFunctor> m_epics_client;
