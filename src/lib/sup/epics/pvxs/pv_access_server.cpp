@@ -80,7 +80,8 @@ bool PvAccessServer::SetValue(const std::string& channel, const dto::AnyValue& v
 
 void PvAccessServer::Start()
 {
-  for (const auto& [_, variable] : p_impl->GetVariables())
+  auto& variables = p_impl->GetVariables();
+  for (const auto& [_, variable] : variables)
   {
     variable->AddToServer(*p_impl->GetContext());
   }
