@@ -36,7 +36,7 @@ class ChannelAccessPVWrapper : public sup::protocol::ProcessVariable
 {
 public:
   ChannelAccessPVWrapper(const std::string& channel, const sup::dto::AnyType& type);
-  ~ChannelAccessPVWrapper();
+  ~ChannelAccessPVWrapper() override;
 
   bool IsAvailable() const override;
   std::pair<bool, sup::dto::AnyValue> GetValue(double timeout_sec) const override;

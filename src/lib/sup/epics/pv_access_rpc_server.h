@@ -55,7 +55,7 @@ public:
   PvAccessRPCServer(IsolatedTag isolated, const PvAccessRPCServerConfig& config,
                     sup::dto::AnyFunctor& handler);
 
-  ~PvAccessRPCServer();
+  ~PvAccessRPCServer() override;
 
   PvAccessRPCClient CreateClient(const PvAccessRPCClientConfig& config);
 

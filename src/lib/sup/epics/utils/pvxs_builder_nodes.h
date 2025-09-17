@@ -67,7 +67,7 @@ class StructArrayBuilderNode : public PvxsBuilderNode
 public:
   StructArrayBuilderNode(pvxs::Value pvxs_value, const sup::dto::AnyValue *any_value);
 
-  virtual pvxs::Value &GetPvxsValueRef() override;
+  pvxs::Value &GetPvxsValueRef() override;
 
   void ArrayElementSeparator() override;
 

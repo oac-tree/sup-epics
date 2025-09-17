@@ -37,7 +37,7 @@ class PVAccessLoggingServer : public sup::protocol::RPCServerInterface
 public:
   PVAccessLoggingServer(const PvAccessRPCServerConfig& server_config, sup::dto::AnyFunctor& functor,
                         sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
-  ~PVAccessLoggingServer();
+  ~PVAccessLoggingServer() override;
 
 private:
   sup::protocol::LogAnyFunctorDecorator m_log_decorator;

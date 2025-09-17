@@ -51,7 +51,7 @@ class EPICSProtocolFactory : public sup::protocol::ProtocolFactory
 {
 public:
   EPICSProtocolFactory();
-  ~EPICSProtocolFactory();
+  ~EPICSProtocolFactory() override;
 
   /**
    * @brief Create EPICS RPC ProcessVariable.

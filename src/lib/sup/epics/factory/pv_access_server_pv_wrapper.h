@@ -36,7 +36,7 @@ class PVAccessServerPVWrapper : public sup::protocol::ProcessVariable
 {
 public:
   PVAccessServerPVWrapper(const std::string& channel, const sup::dto::AnyValue& value);
-  ~PVAccessServerPVWrapper();
+  ~PVAccessServerPVWrapper() override;
 
   bool IsAvailable() const override;
   std::pair<bool, sup::dto::AnyValue> GetValue(double timeout_sec) const override;

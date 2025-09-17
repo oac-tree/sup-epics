@@ -35,8 +35,8 @@ namespace epics
 class PVAccessClientPVWrapper : public sup::protocol::ProcessVariable
 {
 public:
-  PVAccessClientPVWrapper(const std::string& channel);
-  ~PVAccessClientPVWrapper();
+  explicit PVAccessClientPVWrapper(const std::string& channel);
+  ~PVAccessClientPVWrapper() override;
 
   bool IsAvailable() const override;
   std::pair<bool, sup::dto::AnyValue> GetValue(double timeout_sec) const override;
