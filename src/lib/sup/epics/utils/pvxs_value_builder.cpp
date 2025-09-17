@@ -79,7 +79,7 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
   template <typename T, typename... Args>
   void ProcessComponent(Args &&...args)
   {
-    auto component = std::make_unique<T>((args)...);
+    auto component = std::make_unique<T>(std::forward<Args>(args)...);
     m_nodes.push(std::move(component));
   }
 
