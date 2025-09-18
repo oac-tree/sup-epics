@@ -42,6 +42,11 @@ public:
   PvAccessClientImpl(std::shared_ptr<pvxs::client::Context> context,
                      PvAccessClient::VariableChangedCallback cb);
 
+  PvAccessClientImpl(const PvAccessClientImpl&) = delete;
+  PvAccessClientImpl(PvAccessClientImpl&&) = delete;
+  PvAccessClientImpl& operator=(const PvAccessClientImpl&) = delete;
+  PvAccessClientImpl& operator=(PvAccessClientImpl&&) = delete;
+
   ~PvAccessClientImpl();
 
   void AddVariable(const std::string& channel);

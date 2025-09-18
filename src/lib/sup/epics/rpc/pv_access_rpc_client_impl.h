@@ -39,6 +39,11 @@ public:
   PvAccessRPCClientImpl(const PvAccessRPCClientConfig& config,
                         std::shared_ptr<pvxs::client::Context> context);
 
+  PvAccessRPCClientImpl(const PvAccessRPCClientImpl&) = delete;
+  PvAccessRPCClientImpl(PvAccessRPCClientImpl&&) = delete;
+  PvAccessRPCClientImpl& operator=(const PvAccessRPCClientImpl&) = delete;
+  PvAccessRPCClientImpl& operator=(PvAccessRPCClientImpl&&) = delete;
+
   ~PvAccessRPCClientImpl();
 
   sup::dto::AnyValue operator()(const sup::dto::AnyValue& request);

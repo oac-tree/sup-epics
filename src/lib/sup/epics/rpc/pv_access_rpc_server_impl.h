@@ -38,8 +38,12 @@ class PvAccessRPCServerImpl
 {
 public:
   PvAccessRPCServerImpl(std::unique_ptr<pvxs::server::Server>&& server,
-                        const PvAccessRPCServerConfig& config,
-                        sup::dto::AnyFunctor& handler);
+                        const PvAccessRPCServerConfig& config, sup::dto::AnyFunctor& handler);
+
+  PvAccessRPCServerImpl(const PvAccessRPCServerImpl&) = delete;
+  PvAccessRPCServerImpl(PvAccessRPCServerImpl&&) = delete;
+  PvAccessRPCServerImpl& operator=(const PvAccessRPCServerImpl&) = delete;
+  PvAccessRPCServerImpl& operator=(PvAccessRPCServerImpl&&) = delete;
 
   ~PvAccessRPCServerImpl();
 

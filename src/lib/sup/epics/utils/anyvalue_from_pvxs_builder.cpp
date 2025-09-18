@@ -116,7 +116,7 @@ void AnyValueFromPVXSBuilder::AnyValueFromPVXSBuilderImpl::ProcessPvxsValue(
     return;  // by default AnyValueBuildAdapter will generate empty AnyValue
   }
 
-  m_stack.emplace(pvxs_value);
+  (void)m_stack.emplace(pvxs_value);
   ProcessStack();
 }
 
