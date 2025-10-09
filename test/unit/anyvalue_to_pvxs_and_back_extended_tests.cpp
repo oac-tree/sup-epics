@@ -19,6 +19,7 @@
  *****************************************************************************/
 
 #include <sup/dto/anyvalue.h>
+#include <sup/dto/anyvalue_helper.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 
 #include <gtest/gtest.h>
@@ -30,7 +31,6 @@ using namespace ::sup::epics;
 class AnyValueToPvxsAndBacExtendedTest : public ::testing::Test
 {
 };
-
 
 //! Copying array of structs (with array of struct) from AnyValue to PVXS and back.
 //! array
@@ -81,4 +81,52 @@ TEST_F(AnyValueToPvxsAndBacExtendedTest, ArrayWithStructContainingArrayOfStruct)
   auto from_pvxs_anyvalue = BuildAnyValue(pvxs_value);
 
   EXPECT_EQ(anyvalue, from_pvxs_anyvalue);
+}
+
+//! struct outside_struct_name
+//!  ExternalArrayField: array
+//!      0: struct internal_struct2
+//!          StructField: struct struct_with_array
+//!              ArrayField: array
+//!                  0: int32 42
+//!                  1: int32 43
+//!      1: struct internal_struct2
+//!          StructField: struct struct_with_array
+//!              ArrayField: array
+//!                  0: int32 42
+//!                  1: int32 43
+TEST_F(AnyValueToPvxsAndBacExtendedTest, StructWithArrayOfStructOfStructArrayOfScalar)
+{
+  const int n_elements = 2;
+  sup::dto::AnyValue array_of_scalars(n_elements, sup::dto::SignedInteger32Type);
+  array_of_scalars[0] = 42;
+  array_of_scalars[1] = 43;
+
+  const std::string internal_struct_name("struct_with_array");
+  const sup::dto::AnyValue struct_array_of_scalar = {{{"ArrayField", array_of_scalars}},
+                                                     internal_struct_name};
+
+  const std::string internal_struct_name2("internal_struct2");
+  const sup::dto::AnyValue struct_struct_array_of_scalar1 = {
+      {{"StructField", struct_array_of_scalar}}, internal_struct_name2};
+  const sup::dto::AnyValue struct_struct_array_of_scalar2 = {
+      {{"StructField", struct_array_of_scalar}}, internal_struct_name2};
+
+  // array names do not exist in PVXS, we should use empty name so the equality operator below works
+  const std::string deliberately_empty_array_name;
+  auto external_array =
+      sup::dto::ArrayValue({struct_struct_array_of_scalar1, struct_struct_array_of_scalar2},
+                           deliberately_empty_array_name);
+
+  const std::string outside_struct_name("outside_struct_name");
+  const sup::dto::AnyValue outside_struct = {{{"ExternalArrayField", external_array}},
+                                             outside_struct_name};
+
+  std::cout << sup::dto::PrintAnyValue(outside_struct) << "\n";
+
+  auto pvxs_value = BuildPVXSValue(outside_struct);
+
+  auto from_pvxs_anyvalue = BuildAnyValue(pvxs_value);
+
+  EXPECT_EQ(outside_struct, from_pvxs_anyvalue);
 }
