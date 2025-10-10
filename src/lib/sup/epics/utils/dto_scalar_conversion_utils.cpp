@@ -33,7 +33,6 @@
 #include <sup/epics/utils/pvxs_value_builder.h>
 
 #include <functional>
-#include <iostream>
 #include <map>
 #include <stdexcept>
 

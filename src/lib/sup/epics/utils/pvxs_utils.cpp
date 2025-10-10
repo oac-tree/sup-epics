@@ -85,7 +85,7 @@ std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
 
   if (pvxs_value.type() != pvxs::TypeCode::StructA)
   {
-    for (auto fld : pvxs_value.ichildren())
+    for (const auto& fld : pvxs_value.ichildren())
     {
       result.push_back(fld);
     }
@@ -104,7 +104,7 @@ std::vector<pvxs::Value> GetChildren(const pvxs::Value &pvxs_value)
 std::vector<std::string> GetMemberNames(const pvxs::Value &pvxs_value)
 {
   std::vector<std::string> result;
-  for (auto fld : pvxs_value.ichildren())
+  for (const auto& fld : pvxs_value.ichildren())
   {
     result.push_back(pvxs_value.nameOf(fld));
   }
