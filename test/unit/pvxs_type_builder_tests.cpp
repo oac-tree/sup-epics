@@ -20,6 +20,7 @@
 
 #include <sup/dto/anytype_helper.h>
 #include <sup/dto/anyvalue.h>
+#include <sup/dto/anyvalue_helper.h>
 #include <sup/epics/utils/dto_conversion_utils.h>
 #include <sup/epics/utils/pvxs_type_builder.h>
 #include <sup/epics/utils/pvxs_utils.h>
@@ -28,12 +29,25 @@
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 
+#include <iostream>
+
 using namespace ::sup::epics;
 
-//! Testing PvxsTypeBuilder class to build pvxs::TypeDef from AnyType's.
-
+/**
+ * @brief Tests for PVXSTypeBuilder class and BuildPVXSType() helper method.
+ */
 class PvxsTypeBuilderTests : public ::testing::Test
 {
+public:
+  /**
+   * @brief Returns a string representing PVXS type, using PVXS debug string.
+   */
+  static std::string GetPVXSTypeString(const pvxs::TypeDef& type_def)
+  {
+    std::ostringstream ostr;
+    ostr << type_def;
+    return ostr.str();
+  }
 };
 
 TEST_F(PvxsTypeBuilderTests, EmptyType)
@@ -51,8 +65,6 @@ TEST_F(PvxsTypeBuilderTests, EmptyType)
   EXPECT_EQ(ostr.str(), empty_type_string);
 }
 
-//! Testing GetPVXSType method to build pvxs::TypeDef from scalar-like types.
-
 TEST_F(PvxsTypeBuilderTests, ScalarType)
 {
   const sup::dto::AnyType any_type(sup::dto::SignedInteger32Type);
@@ -65,9 +77,9 @@ TEST_F(PvxsTypeBuilderTests, ScalarType)
   EXPECT_EQ(pvxs_value.nmembers(), 0);
 
   // tests for other basic scalars are done in DtoConversionUtilsTest::GetPVXSTypeCode
+  std::cout << "AnyType\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS\n" << pvxs_value.type() << "\n";
 }
-
-//! Build PVXS type from AnyType representing a struct with single field.
 
 TEST_F(PvxsTypeBuilderTests, StructWithSingleField)
 {
@@ -80,10 +92,12 @@ TEST_F(PvxsTypeBuilderTests, StructWithSingleField)
   auto names = GetMemberNames(pvxs_value);
   EXPECT_EQ(names, std::vector<std::string>({"signed"}));
   EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
+
+  std::cout << "AnyType\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS\n" << pvxs_value.type() << "\n";
 }
 
-//! Build PVXS value from AnyValue representing a struct with two fields.
-
+//! A struct with two scalar fields.
 TEST_F(PvxsTypeBuilderTests, StructWithTwoFields)
 {
   const sup::dto::AnyType any_type = {{"signed", {sup::dto::SignedInteger32Type}},
@@ -98,10 +112,16 @@ TEST_F(PvxsTypeBuilderTests, StructWithTwoFields)
 
   EXPECT_EQ(pvxs_value["signed"].type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value["bool"].type(), ::pvxs::TypeCode::Bool);
+
+  auto xxx = BuildPVXSType(any_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(any_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
 }
 
-//! Build PVXS type from AnyType representing a struct with two fields nested in parent struct.
-
+//! A struct with the nested struct (with two scalar fields).
 TEST_F(PvxsTypeBuilderTests, NestedStruct)
 {
   const sup::dto::AnyType two_scalars = {{"signed", {sup::dto::SignedInteger32Type}},
@@ -125,10 +145,16 @@ TEST_F(PvxsTypeBuilderTests, NestedStruct)
 
   EXPECT_EQ(pvxs_value["scalars.signed"].type(), ::pvxs::TypeCode::Int32);
   EXPECT_EQ(pvxs_value["scalars.bool"].type(), ::pvxs::TypeCode::Bool);
+
+  auto xxx = BuildPVXSType(any_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(any_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
 }
 
-//! Build PVXS type from AnyType representing a struct with two nested structs.
-
+//! A struct with two nested structs.
 TEST_F(PvxsTypeBuilderTests, TwoNestedStruct)
 {
   const std::string struct_name = "struct_name";
@@ -169,10 +195,16 @@ TEST_F(PvxsTypeBuilderTests, TwoNestedStruct)
   EXPECT_EQ(struct2_fields, std::vector<std::string>({"first", "second"}));
   EXPECT_EQ(pvxs_value["struct2.first"].type(), ::pvxs::TypeCode::Int8);
   EXPECT_EQ(pvxs_value["struct2.second"].type(), ::pvxs::TypeCode::Int8);
+
+  auto xxx = BuildPVXSType(any_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(any_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
 }
 
 //! Building array of PVXS values (exercise to understand PVXS better).
-
 TEST_F(PvxsTypeBuilderTests, PVXSTypeBasicsArrayOfIntegers)
 {
   {  // studying impliced sharing
@@ -200,8 +232,7 @@ TEST_F(PvxsTypeBuilderTests, PVXSTypeBasicsArrayOfIntegers)
   }
 }
 
-//! Build PVXS type from AnyType representing an array of integers.
-
+//! Array of integers.
 TEST_F(PvxsTypeBuilderTests, ArrayOfIntegers)
 {
   const int n_elements = 42;
@@ -214,6 +245,13 @@ TEST_F(PvxsTypeBuilderTests, ArrayOfIntegers)
   EXPECT_EQ(data.size(), 0);
 
   // we can't check much here, since n_elements is not a part of pvxs::TypeDef
+
+  auto xxx = BuildPVXSType(any_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(any_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
 }
 
 //! Building array of PVXS values  (exercise to understand PVXS better).
@@ -235,26 +273,62 @@ TEST_F(PvxsTypeBuilderTests, PVXSTypeArrayInStruct)
   EXPECT_EQ(data[1], 43);
 }
 
-//! Build PVXS type from AnyType representing an array of integers inside the struct.
+/*
+AnyType>
+struct struct_name
+    array: array
+        size: 2
+        element: int32
 
+PVXS Type>
+struct "struct_name" {
+    int32_t[] array
+}
+*/
+//! Structs contains an array of integers.
 TEST_F(PvxsTypeBuilderTests, ArrayInStruct)
 {
-  const int n_elements = 42;
+  const int n_elements = 2;
   const sup::dto::AnyType any_array(n_elements, sup::dto::SignedInteger32Type);
   const sup::dto::AnyType any_type = {{{"array", any_array}}, "struct_name"};
 
-  auto pvxs_value = BuildPVXSType(any_type).create();
+  auto pvxs_type_result = BuildPVXSType(any_type);
+  auto pvxs_value = pvxs_type_result.create();
   EXPECT_EQ(pvxs_value.id(), std::string("struct_name"));
 
   EXPECT_EQ(pvxs_value.type(), ::pvxs::TypeCode::Struct);
   EXPECT_EQ(pvxs_value["array"].type(), pvxs::TypeCode::Int32A);
   auto data = pvxs_value["array"].as<::pvxs::shared_array<const int32_t>>();
   EXPECT_EQ(data.size(), 0);
+
+  // Ugly way to check internal structure of PVXS Type.
+  const std::string expected_pvxs_type_string = R"RAW(struct "struct_name" {
+    int32_t[] array
+}
+)RAW";
+  EXPECT_EQ(GetPVXSTypeString(pvxs_type_result), expected_pvxs_type_string);
+
+  auto xxx = BuildPVXSType(any_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(any_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(any_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
 }
 
-//!  Build PVXS type from AnyType representing an array containing two structures. Each structure
-//!  has a single `field_name` field with a scalar.
+/*
+AnyType>
+array array_name
+    size: 2
+    element: struct struct_name
+        field_name: int32
 
+PVXS Type>
+struct[] "struct_name" {
+    int32_t field_name
+}
+*/
+//! Array contains a structure, where structure has a single field.
 TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
 {
   const std::string expected_struct_name("struct_name");
@@ -292,4 +366,194 @@ TEST_F(PvxsTypeBuilderTests, ArrayWithTwoStructureElements)
 
   EXPECT_EQ(array_data[0]["field_name"].as<int32_t>(), 42);
   EXPECT_EQ(array_data[1]["field_name"].as<int32_t>(), 43);
+
+  // Ugly way to check internal structure of PVXS Type.
+  const std::string expected_pvxs_type_string = R"RAW(struct[] "struct_name" {
+    int32_t field_name
+}
+)RAW";
+  EXPECT_EQ(GetPVXSTypeString(pvxs_type_result), expected_pvxs_type_string);
+
+  auto xxx = BuildPVXSType(array);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(array);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(array));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
+}
+
+/*
+AnyType>
+struct outside_struct_name
+ ArrayField: array array_of_structs_name
+     size: 2
+     element: struct internal_struct_name
+         int_field: int32
+
+PVXS Type>
+struct "outside_struct_name" {
+ struct[] "internal_struct_name" {
+     int32_t int_field
+ } ArrayField
+}
+ */
+//! Struct contains an array-of-structs, where a struct has single scalar field
+TEST_F(PvxsTypeBuilderTests, StructWithArrayOfStructsWithSingleField)
+{
+  const std::string internal_struct_name("internal_struct_name");
+  const sup::dto::AnyType internal_struct_type = {{{"int_field", sup::dto::SignedInteger32Type}},
+                                                  internal_struct_name};
+
+  const std::string array_of_structs_name("array_of_structs_name");
+  const sup::dto::AnyType array_type(2, internal_struct_type, array_of_structs_name);
+
+  const std::string outside_struct_name("outside_struct_name");
+  const sup::dto::AnyType outside_struct_type = {{{"ArrayField", array_type}}, outside_struct_name};
+
+  auto pvxs_type_result = BuildPVXSType(outside_struct_type);
+  // We can't check a type because of the lack of getters. We will check the value.
+  auto pvxs_value = pvxs_type_result.create();
+
+  EXPECT_EQ(pvxs_value.id(), outside_struct_name);
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::Struct);
+
+  EXPECT_EQ(pvxs_value["ArrayField"].type(), pvxs::TypeCode::StructA);
+
+  // Ugly way to check internal structure of PVXS Type.
+  const std::string expected_pvxs_type_string = R"RAW(struct "outside_struct_name" {
+    struct[] "internal_struct_name" {
+        int32_t int_field
+    } ArrayField
+}
+)RAW";
+  EXPECT_EQ(GetPVXSTypeString(pvxs_type_result), expected_pvxs_type_string);
+
+  auto xxx = BuildPVXSType(outside_struct_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(outside_struct_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(outside_struct_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
+}
+
+/*
+AnyType>
+struct outside_struct_name
+    ArrayField: array array_of_structs_name
+        size: 2
+        element: struct struct_with_scalar_array_name
+            ScalarArrayField: array
+                size: 2
+                element: int32
+
+PVXS Type>
+struct "outside_struct_name" {
+    struct[] "struct_with_scalar_array_name" {
+        int32_t[] ScalarArrayField
+    } ArrayField
+}
+*/
+//! Struct contains an array-of-structs, where a struct has a field with array of scalars.
+TEST_F(PvxsTypeBuilderTests, StructWithArrayOfStructsWithArrayOfScalar)
+{
+  const int n_elements = 2;
+  const sup::dto::AnyType internal_scalar_array(n_elements, sup::dto::SignedInteger32Type);
+
+  const std::string struct_with_scalar_array_name("struct_with_scalar_array_name");
+  const sup::dto::AnyType struct_with_scalar_array = {{{"ScalarArrayField", internal_scalar_array}},
+                                                      struct_with_scalar_array_name};
+
+  const std::string array_of_structs_name("array_of_structs_name");
+  const sup::dto::AnyType array_type(2, struct_with_scalar_array, array_of_structs_name);
+
+  const std::string outside_struct_name("outside_struct_name");
+  const sup::dto::AnyType outside_struct_type = {{{"ArrayField", array_type}}, outside_struct_name};
+
+  auto pvxs_type_result = BuildPVXSType(outside_struct_type);
+  // We can't check a type because of the lack of getters. We will check the value.
+  auto pvxs_value = pvxs_type_result.create();
+
+  EXPECT_EQ(pvxs_value.id(), outside_struct_name);
+  EXPECT_EQ(pvxs_value.type(), pvxs::TypeCode::Struct);
+
+  EXPECT_EQ(pvxs_value["ArrayField"].type(), pvxs::TypeCode::StructA);
+
+  // Ugly way to check internal structure of PVXS Type.
+  const std::string expected_pvxs_type_string = R"RAW(struct "outside_struct_name" {
+    struct[] "struct_with_scalar_array_name" {
+        int32_t[] ScalarArrayField
+    } ArrayField
+}
+)RAW";
+  EXPECT_EQ(GetPVXSTypeString(pvxs_type_result), expected_pvxs_type_string);
+
+  auto xxx = BuildPVXSType(outside_struct_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(outside_struct_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(outside_struct_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
+}
+
+/*
+struct outside_struct_name
+    ArrayOfStructField: array array_of_structs_name
+        size: 2
+        element: struct envelop_struct_name
+            StructField: struct struct_with_scalar_array_name
+                ScalarArrayField: array
+                    size: 2
+                    element: int32
+
+PVXS Type>
+struct "outside_struct_name" {
+    struct[] "struct_with_scalar_array_name" {
+        int32_t[] ScalarArrayField
+        int32_t[] StructField
+    } ArrayOfStructField
+}
+*/
+//! Struct contains an array-of-structs, where struct element has the following composition: it
+//! contains another struct with scalar array field.
+TEST_F(PvxsTypeBuilderTests, StructWithArrayOfStructsOfStructWithArrayOfScalar)
+{
+  const int n_elements = 2;
+  const sup::dto::AnyType internal_scalar_array(n_elements, sup::dto::SignedInteger32Type);
+
+  const std::string struct_with_scalar_array_name("struct_with_scalar_array_name");
+  const sup::dto::AnyType struct_with_scalar_array = {{{"ScalarArrayField", internal_scalar_array}},
+                                                      struct_with_scalar_array_name};
+
+  const std::string envelop_struct_name("envelop_struct_name");
+  const sup::dto::AnyType envelop_struct = {{{"StructField", struct_with_scalar_array}},
+                                            envelop_struct_name};
+
+  const std::string array_of_structs_name("array_of_structs_name");
+  const sup::dto::AnyType array_type(2, envelop_struct, array_of_structs_name);
+
+  const std::string outside_struct_name("outside_struct_name");
+  const sup::dto::AnyType outside_struct_type = {{{"ArrayOfStructField", array_type}},
+                                                 outside_struct_name};
+
+  auto pvxs_type_result = BuildPVXSType(outside_struct_type);
+  // We can't check a type because of the lack of getters. We will check the value.
+  auto pvxs_value = pvxs_type_result.create();
+
+  // Ugly way to check internal structure of PVXS Type.
+  const std::string expected_pvxs_type_string = R"RAW(struct "outside_struct_name" {
+    struct[] "struct_with_scalar_array_name" {
+        int32_t[] ScalarArrayField
+        int32_t[] StructField
+    } ArrayOfStructField
+}
+)RAW";
+  EXPECT_EQ(GetPVXSTypeString(pvxs_type_result), expected_pvxs_type_string);
+
+
+  auto xxx = BuildPVXSType(outside_struct_type);
+  std::cout << "=====================\n";
+  std::cout << "AnyType>\n" << sup::dto::PrintAnyType(outside_struct_type);
+  std::cout << "PVXS Type>\n" << xxx << "\n";
+  std::cout << "AnyValue>\n" << sup::dto::PrintAnyValue(sup::dto::AnyValue(outside_struct_type));
+  std::cout << "PVXS Value>\n" << pvxs_value << "\n";
 }
