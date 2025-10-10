@@ -122,8 +122,6 @@ TEST_F(AnyValueToPvxsAndBacExtendedTest, StructWithArrayOfStructOfStructArrayOfS
   const sup::dto::AnyValue outside_struct = {{{"ExternalArrayField", external_array}},
                                              outside_struct_name};
 
-  std::cout << sup::dto::PrintAnyValue(outside_struct) << "\n";
-
   auto pvxs_value = BuildPVXSValue(outside_struct);
 
   auto from_pvxs_anyvalue = BuildAnyValue(pvxs_value);
