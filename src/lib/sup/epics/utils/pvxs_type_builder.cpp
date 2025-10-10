@@ -48,6 +48,7 @@ struct PvxsTypeBuilder::PvxsTypeBuilderImpl
 {
   ::pvxs::TypeDef m_last_processed;
   std::stack<Node> m_struct_stack;
+  bool m_struct_array_mode_request{false};
 
   bool IsInArrayOfStructMode() const
   {
@@ -79,23 +80,10 @@ void PvxsTypeBuilder::StructProlog(const sup::dto::AnyType* anytype)
 {
   (void)anytype;
 
-  if (p_impl->IsInArrayOfStructMode())
+  if (p_impl->m_struct_array_mode_request)
   {
+    p_impl->m_struct_array_mode_request = false;
     // We are here because sup-dto wants to create a struct inside an array.
-
-    // Just a reminder that PVXS doesn't have a "struct" inside an "array". It has StructA object
-    // and it was already created.
-
-    // Now we would like to set the name for the struct element. From PVXS point of view it is too
-    // late. PVXS has two following features:
-    // - arrays do not have names
-    // - the name used during PVXS StructA creation will be propagated down and become the name of
-    //   the Struct element.
-
-    // Let's recreate the array using our struct name.
-
-    // Remove old StructA which doesn't have a proper name
-    p_impl->m_struct_stack.pop();
 
     // Create StructA which will play the role of array + struct simultaneously
     p_impl->m_struct_stack.push(
@@ -142,6 +130,15 @@ void PvxsTypeBuilder::MemberEpilog(const sup::dto::AnyType* anytype, const std::
 void PvxsTypeBuilder::ArrayProlog(const sup::dto::AnyType* anytype)
 {
   const auto type_code = GetPVXSTypeCode(*anytype);
+  if (type_code == pvxs::TypeCode::StructA)
+  {
+    // Just a reminder that PVXS doesn't have a "struct" inside an "array", it has separate
+    // StructA. object. We will create it later, on StructPrologue() section, to be able to plugin
+    // the name of a struct object into StructA.
+    p_impl->m_struct_array_mode_request = true;
+    return;
+  }
+
   p_impl->m_struct_stack.push({::pvxs::TypeDef(type_code), type_code});
 }
 
