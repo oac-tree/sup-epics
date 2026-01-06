@@ -26,7 +26,7 @@
     <artifactId>sup-epics</artifactId>
     <packaging>codac</packaging>
     <!-- See ChangeLog file for details -->
-    <version>1.9.0</version>
+    <version>1.10.0</version>
     <name>Supervision and automation system EPICS interface</name>
     <description>Library of SUP components for EPICS network protocol</description>
     <url>http://www.iter.org/</url>

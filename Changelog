@@ -1,3 +1,7 @@
+Changes for 1.10.0:
+
+- Update copyright year
+
 Changes for 1.9.0:
 
 - Bugfix (COA1756): fix AnyType to PVXS type conversion for StructWithArrayOfStructsOfStructWithArrayOfScalar

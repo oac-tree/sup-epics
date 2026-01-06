@@ -16,7 +16,7 @@
 # of the distribution package.
 
 cmake_minimum_required(VERSION 3.13...3.31)
-project(sup-epics-project VERSION 1.9.0 LANGUAGES CXX)
+project(sup-epics-project VERSION 1.10.0 LANGUAGES CXX)
 
 option(COVERAGE "Generate unit test coverage information" OFF)
 option(COA_PARASOFT_INTEGRATION "Parasoft integration" OFF)
