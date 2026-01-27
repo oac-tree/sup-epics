@@ -21,11 +21,12 @@
 
 #include "app_utils.h"
 
-#include <sup/epics/epics_protocol_factory.h>
-#include <sup/protocol/log_protocol_decorator.h>
-#include <sup/protocol/protocol_rpc_server.h>
+#include <sup/epics/pv_access_logging_server.h>
+#include <sup/epics/pv_access_rpc_server_config.h>
 
 #include <sup/cli/command_line_parser.h>
+#include <sup/protocol/log_protocol_decorator.h>
+#include <sup/protocol/protocol_rpc_server.h>
 
 #include <chrono>
 #include <functional>
@@ -83,7 +84,7 @@ int main(int argc, char* argv[])
   PvAccessRPCServerConfig server_config{service_name};
   auto rpc_logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2,
                               utils::kServerInputPacketTitle, utils::kServerOutputPacketTitle);
-  auto server = CreateLoggingEPICSRPCServer(server_config, protocol_server, rpc_logger);
+  PVAccessLoggingServer server{server_config, protocol_server, rpc_logger};
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));

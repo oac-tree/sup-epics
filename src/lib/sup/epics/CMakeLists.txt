@@ -38,6 +38,7 @@ install(FILES
   epics_protocol_factory.h
   pv_access_client_pv.h
   pv_access_client.h
+  pv_access_logging_server.h
   pv_access_rpc_client_config.h
   pv_access_rpc_client.h
   pv_access_rpc_server_config.h

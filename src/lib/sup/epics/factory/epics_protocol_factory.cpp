@@ -100,6 +100,18 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol));
 }
 
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
+  const PvAccessRPCServerConfig& server_config,
+  const sup::protocol::ProtocolRPCServerConfig& protocol_config,
+  std::unique_ptr<sup::protocol::Protocol> protocol,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
+{
+  auto factory_funct = [server_config, log_function](sup::dto::AnyFunctor& functor){
+    return std::make_unique<PVAccessLoggingServer>(server_config, functor, log_function);
+  };
+  return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol));
+}
+
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config, sup::protocol::PayloadEncoding encoding)
 {
@@ -107,13 +119,6 @@ std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
     return std::make_unique<PvAccessRPCClient>(client_config);
   };
   return sup::protocol::CreateRPCClientStack(factory_funct, encoding);
-}
-
-std::unique_ptr<sup::protocol::RPCServerInterface> CreateLoggingEPICSRPCServer(
-  const PvAccessRPCServerConfig& server_config, sup::dto::AnyFunctor& functor,
-  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
-{
-  return std::make_unique<PVAccessLoggingServer>(server_config, functor, log_function);
 }
 
 std::unique_ptr<sup::dto::AnyFunctor> CreateLoggingEPICSRPCClient(

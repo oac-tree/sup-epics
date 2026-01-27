@@ -136,6 +136,22 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   std::unique_ptr<sup::protocol::Protocol> protocol);
 
 /**
+ * @brief Helper function to create an EPICS RPC server stack with an injected logging function
+ * and Protocol.
+ *
+ * @param server_config Server configuration.
+ * @param protocol_config Protocol configuration.
+ * @param protocol Protocol to be injected.
+ * @param log_function Function to log the input and output of the AnyFunctor.
+ * @return EPICS RPC server stack.
+ */
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
+  const PvAccessRPCServerConfig& server_config,
+  const sup::protocol::ProtocolRPCServerConfig& protocol_config,
+  std::unique_ptr<sup::protocol::Protocol> protocol,
+  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
+
+/**
  * @brief Helper function to create an EPICS RPC client stack.
  *
  * @param client_config Client configuration.
@@ -145,19 +161,6 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
   sup::protocol::PayloadEncoding encoding = sup::protocol::PayloadEncoding::kBase64);
-
-/**
- * @brief Helper function to create an EPICS RPC server with an injected logging function
- * and AnyFunctor.
- *
- * @param server_config Server configuration.
- * @param functor AnyFunctor that serves as the backend of the server.
- * @param log_function Function to log the input and output of the AnyFunctor.
- * @return EPICS RPC server stack.
- */
-std::unique_ptr<sup::protocol::RPCServerInterface> CreateLoggingEPICSRPCServer(
-  const PvAccessRPCServerConfig& server_config, sup::dto::AnyFunctor& functor,
-  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
 
 /**
  * @brief Helper function to create an EPICS RPC client with an injected logging function.

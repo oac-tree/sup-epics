@@ -21,6 +21,9 @@
 #include <sup/epics-test/unit_test_helper.h>
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_client.h>
+#include <sup/epics/pv_access_logging_server.h>
+#include <sup/epics/pv_access_rpc_server_config.h>
+
 #include <sup/protocol/log_any_functor_decorator.h>
 
 #include <gtest/gtest.h>
@@ -72,8 +75,7 @@ TEST_F(PvAccessLoggingClientServerTests, PacketLogging)
   const std::string server_name = "LoggingClientServerTest::Server";
   const sup::epics::PvAccessRPCServerConfig server_config{server_name};
   auto client_config = sup::epics::GetDefaultRPCClientConfig(server_name);
-  auto server =
-      CreateLoggingEPICSRPCServer(server_config, fixed_reply_functor, server_log_function);
+  PVAccessLoggingServer server{server_config, fixed_reply_functor, server_log_function};
   auto client = CreateLoggingEPICSRPCClient(client_config, client_log_function);
   client->operator()(request);
   EXPECT_EQ(m_client_packages_sent.size(), 1);
