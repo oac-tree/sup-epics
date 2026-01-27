@@ -25,7 +25,6 @@
 #include "pv_access_server_pv_wrapper.h"
 
 #include <sup/epics/epics_protocol_factory.h>
-#include <sup/epics/pv_access_logging_server.h>
 #include <sup/epics/pv_access_rpc_server.h>
 
 #include <sup/protocol/exceptions.h>
@@ -106,10 +105,11 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   std::unique_ptr<sup::protocol::Protocol> protocol,
   sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
 {
-  auto factory_funct = [server_config, log_function](sup::dto::AnyFunctor& functor){
-    return std::make_unique<PVAccessLoggingServer>(server_config, functor, log_function);
+  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
+    return std::make_unique<PvAccessRPCServer>(server_config, functor);
   };
-  return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol));
+  return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol),
+                                             log_function);
 }
 
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(

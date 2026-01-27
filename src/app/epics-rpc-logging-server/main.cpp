@@ -21,8 +21,7 @@
 
 #include "app_utils.h"
 
-#include <sup/epics/pv_access_logging_server.h>
-#include <sup/epics/pv_access_rpc_server_config.h>
+#include <sup/epics/pv_access_rpc_server.h>
 
 #include <sup/cli/command_line_parser.h>
 
@@ -67,7 +66,8 @@ int main(int argc, char* argv[])
   PvAccessRPCServerConfig server_config{service_name};
   auto logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kServerInputPacketTitle,
                          utils::kServerOutputPacketTitle);
-  PVAccessLoggingServer server{server_config, *fixed_reply_functor, logger};
+  sup::protocol::LogAnyFunctorDecorator decorator{*fixed_reply_functor, logger};
+  PvAccessRPCServer server{server_config, decorator};
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));

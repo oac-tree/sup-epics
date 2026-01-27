@@ -21,8 +21,7 @@
 
 #include "app_utils.h"
 
-#include <sup/epics/pv_access_logging_server.h>
-#include <sup/epics/pv_access_rpc_server_config.h>
+#include <sup/epics/epics_protocol_factory.h>
 
 #include <sup/cli/command_line_parser.h>
 #include <sup/protocol/log_protocol_decorator.h>
@@ -76,15 +75,15 @@ int main(int argc, char* argv[])
   auto output_protocol_logger = std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
                                           utils::kServerProtocolOutputNormalTitle,
                                           utils::kServerProtocolOutputServiceTitle);
-  sup::protocol::LogProtocolDecorator protocol_decorator{
-    *fixed_output_protocol, input_protocol_logger, output_protocol_logger};
-  sup::protocol::ProtocolRPCServer protocol_server{protocol_decorator};
+  auto protocol_decorator = std::make_unique<sup::protocol::LogProtocolDecorator>(
+    *fixed_output_protocol, input_protocol_logger, output_protocol_logger);
 
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};
   auto rpc_logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2,
                               utils::kServerInputPacketTitle, utils::kServerOutputPacketTitle);
-  PVAccessLoggingServer server{server_config, protocol_server, rpc_logger};
+  auto server = CreateEPICSRPCServerStack(server_config, sup::protocol::ProtocolRPCServerConfig{},
+                                          std::move(protocol_decorator), rpc_logger);
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));
