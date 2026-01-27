@@ -63,14 +63,6 @@ std::unique_ptr<sup::protocol::ProcessVariable> EPICSProtocolFactory::CreateProc
   return iter->second(var_definition);
 }
 
-std::unique_ptr<sup::protocol::RPCServerInterface> EPICSProtocolFactory::CreateRPCServer(
-  sup::protocol::Protocol& protocol,
-  const sup::dto::AnyValue& server_definition) const
-{
-  auto server_config = utils::ParsePvAccessRPCServerConfig(server_definition);
-  return CreateEPICSRPCServerStack(protocol, server_config);
-}
-
 std::unique_ptr<sup::protocol::Protocol> EPICSProtocolFactory::CreateRPCClient(
   const sup::dto::AnyValue& client_definition) const
 {
@@ -98,12 +90,14 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAServerProcessVariable(
 }
 
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
-  sup::protocol::Protocol& protocol, const PvAccessRPCServerConfig& server_config)
+  const PvAccessRPCServerConfig& server_config,
+  const sup::protocol::ProtocolRPCServerConfig& protocol_config,
+  std::unique_ptr<sup::protocol::Protocol> protocol)
 {
   auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
     return std::make_unique<PvAccessRPCServer>(server_config, functor);
   };
-  return sup::protocol::CreateRPCServerStack(factory_funct, protocol);
+  return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol));
 }
 
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(

@@ -293,14 +293,14 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
 TEST_F(EPICSProtocolFactoryTest, RPCFactory)
 {
   const EPICSProtocolFactory factory;
-  TestProtocol test_protocol;
+  auto test_protocol = std::make_unique<TestProtocol>();
+  auto protocol_handle = test_protocol.get();
   const std::string service_name = "EPICSRPCFactory::TestServer";
 
   // Create RPC server stack
-  const sup::dto::AnyValue server_def = {{
-    { kServiceName, service_name }
-  }};
-  auto server = factory.CreateRPCServer(test_protocol, server_def);
+  auto server = CreateEPICSRPCServerStack(GetDefaultRPCServerConfig(service_name),
+                                          sup::protocol::ProtocolRPCServerConfig{},
+                                          std::move(test_protocol));
 
   // Create corresponding RPC client without encoding
   const sup::dto::AnyValue client_def_1 = {{
@@ -325,10 +325,10 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactory)
     { "counter", { sup::dto::UnsignedInteger16Type, 2u }},
     { "message", "ok" }
   }};
-  test_protocol.SetReply(reply);
+  protocol_handle->SetReply(reply);
   sup::dto::AnyValue output;
   EXPECT_EQ(client_1->Invoke(request, output), sup::protocol::Success);
-  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_EQ(output, reply);
 
   // Send request through client 2 and validate
@@ -336,27 +336,30 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactory)
   request["enabled"] = true;
   reply["counter"].ConvertFrom(42u);
   reply["message"] = "hello";
-  test_protocol.SetReply(reply);
+  protocol_handle->SetReply(reply);
   EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::Success);
-  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_EQ(output, reply);
 
   // Send request through client 2 with non-success reply
-  test_protocol.SetReply(reply, sup::protocol::ServerProtocolDecodingError);
+  protocol_handle->SetReply(reply, sup::protocol::ServerProtocolDecodingError);
   output = sup::dto::AnyValue{};
   EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::ServerProtocolDecodingError);
-  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_TRUE(sup::dto::IsEmptyValue(output));
 }
 
 TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
 {
   const EPICSProtocolFactory factory;
-  TestProtocol test_protocol;
+  auto test_protocol = std::make_unique<TestProtocol>();
+  auto protocol_handle = test_protocol.get();
   const std::string service_name = "EPICSRPCFactoryFunctions::TestServer";
 
   // Create RPC server stack
-  auto server = CreateEPICSRPCServerStack(test_protocol, GetDefaultRPCServerConfig(service_name));
+  auto server = CreateEPICSRPCServerStack(GetDefaultRPCServerConfig(service_name),
+                                          sup::protocol::ProtocolRPCServerConfig{},
+                                          std::move(test_protocol));
 
   // Create corresponding RPC client without encoding
   auto client_1 = CreateEPICSRPCClientStack(GetDefaultRPCClientConfig(service_name),
@@ -375,10 +378,10 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
     { "counter", { sup::dto::UnsignedInteger16Type, 2u }},
     { "message", "ok" }
   }};
-  test_protocol.SetReply(reply);
+  protocol_handle->SetReply(reply);
   sup::dto::AnyValue output;
   EXPECT_EQ(client_1->Invoke(request, output), sup::protocol::Success);
-  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_EQ(output, reply);
 
   // Send request through client 2 and validate
@@ -386,15 +389,15 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
   request["enabled"] = true;
   reply["counter"].ConvertFrom(42u);
   reply["message"] = "hello";
-  test_protocol.SetReply(reply);
+  protocol_handle->SetReply(reply);
   EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::Success);
-  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_EQ(output, reply);
 
   // Send request through client 2 with non-success reply
-  test_protocol.SetReply(reply, sup::protocol::ServerProtocolDecodingError);
+  protocol_handle->SetReply(reply, sup::protocol::ServerProtocolDecodingError);
   output = sup::dto::AnyValue{};
   EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::ServerProtocolDecodingError);
-  EXPECT_EQ(test_protocol.GetRequest(), request);
+  EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_TRUE(sup::dto::IsEmptyValue(output));
 }

@@ -34,13 +34,6 @@ namespace epics
 {
 namespace utils
 {
-PvAccessRPCServerConfig ParsePvAccessRPCServerConfig(const sup::dto::AnyValue& config)
-{
-  sup::protocol::ValidateConfigurationField(config, kServiceName, sup::dto::StringType);
-  auto service_name = config[kServiceName].As<std::string>();
-  return GetDefaultRPCServerConfig(service_name);
-}
-
 PvAccessRPCClientConfig ParsePvAccessRPCClientConfig(const sup::dto::AnyValue& config)
 {
   sup::protocol::ValidateConfigurationField(config, kServiceName, sup::dto::StringType);

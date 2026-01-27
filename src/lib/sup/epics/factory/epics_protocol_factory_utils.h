@@ -35,8 +35,6 @@ namespace epics
 {
 namespace utils
 {
-PvAccessRPCServerConfig ParsePvAccessRPCServerConfig(const sup::dto::AnyValue& config);
-
 PvAccessRPCClientConfig ParsePvAccessRPCClientConfig(const sup::dto::AnyValue& config);
 
 std::unique_ptr<sup::protocol::ProcessVariable> CreateChannelAccessClientVar(

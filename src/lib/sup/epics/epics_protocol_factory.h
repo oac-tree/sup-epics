@@ -27,6 +27,7 @@
 #include <sup/protocol/log_any_functor_decorator.h>
 #include <sup/protocol/protocol_factory.h>
 #include <sup/protocol/protocol_factory_utils.h>
+#include <sup/protocol/protocol_rpc_server_config.h>
 
 namespace sup
 {
@@ -73,20 +74,6 @@ public:
    */
   std::unique_ptr<sup::protocol::ProcessVariable> CreateProcessVariable(
     const sup::dto::AnyValue& var_definition) const override;
-
-  /**
-   * @brief Create EPICS RPC server stack with the injected protocol.
-   *
-   * @param protocol Protocol to inject.
-   * @param server_definition Configuration for the server. This is an AnyValue structure with
-   * the following field:
-   *   - ServiceName: mandatory string providing the service name on the network.
-   *
-   * @return EPICS RPC server stack.
-   */
-  std::unique_ptr<sup::protocol::RPCServerInterface> CreateRPCServer(
-    sup::protocol::Protocol& protocol,
-    const sup::dto::AnyValue& server_definition) const override;
 
   /**
    * @brief Create EPICS RPC client stack with a Procotol interface.
@@ -138,12 +125,15 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePVAServerProcessVariable(
 /**
  * @brief Helper function to create an EPICS RPC server stack with an injected Protocol.
  *
- * @param protocol Protocol to be injected.
  * @param server_config Server configuration.
+ * @param protocol_config Protocol configuration.
+ * @param protocol Protocol to be injected.
  * @return EPICS RPC server stack.
  */
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
-  sup::protocol::Protocol& protocol, const PvAccessRPCServerConfig& server_config);
+  const PvAccessRPCServerConfig& server_config,
+  const sup::protocol::ProtocolRPCServerConfig& protocol_config,
+  std::unique_ptr<sup::protocol::Protocol> protocol);
 
 /**
  * @brief Helper function to create an EPICS RPC client stack.
