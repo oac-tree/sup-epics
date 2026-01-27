@@ -23,9 +23,9 @@
 #include "channel_access_pv_wrapper.h"
 #include "pv_access_client_pv_wrapper.h"
 #include "pv_access_server_pv_wrapper.h"
-#include "pv_access_logging_server.h"
 
 #include <sup/epics/epics_protocol_factory.h>
+#include <sup/epics/pv_access_logging_server.h>
 #include <sup/epics/pv_access_rpc_server.h>
 
 #include <sup/protocol/exceptions.h>

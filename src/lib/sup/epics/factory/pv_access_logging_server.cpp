@@ -18,7 +18,7 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include "pv_access_logging_server.h"
+#include <sup/epics/pv_access_logging_server.h>
 
 namespace sup
 {
