@@ -69,21 +69,21 @@ int main(int argc, char* argv[])
   }
   auto fixed_output_protocol = utils::GetFixedOutputProtocol(parser);
 
-  auto input_protocol_logger = std::bind(utils::LogInputProtocolPacketToStdOut, _1, _2,
-                                         utils::kServerProtocolInputNormalTitle,
-                                         utils::kServerProtocolInputServiceTitle);
-  auto output_protocol_logger = std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
-                                          utils::kServerProtocolOutputNormalTitle,
-                                          utils::kServerProtocolOutputServiceTitle);
-  auto protocol_decorator = std::make_unique<sup::protocol::LogProtocolDecorator>(
-    *fixed_output_protocol, input_protocol_logger, output_protocol_logger);
+  sup::protocol::LoggingFunctions log_functions{};
+  log_functions.m_protocol_input_logger =
+    std::bind(utils::LogInputProtocolPacketToStdOut, _1, _2,
+              utils::kServerProtocolInputNormalTitle, utils::kServerProtocolInputServiceTitle);
+  log_functions.m_protocol_output_logger =
+    std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
+              utils::kServerProtocolOutputNormalTitle, utils::kServerProtocolOutputServiceTitle);
+  log_functions.m_network_logger =
+    std::bind(utils::LogNetworkPacketsToStdOut, _1, _2,
+              utils::kServerInputPacketTitle, utils::kServerOutputPacketTitle);
 
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};
-  auto rpc_logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2,
-                              utils::kServerInputPacketTitle, utils::kServerOutputPacketTitle);
   auto server = CreateEPICSRPCServerStack(server_config, sup::protocol::ProtocolRPCServerConfig{},
-                                          std::move(protocol_decorator), rpc_logger);
+                                          std::move(fixed_output_protocol), log_functions);
   while (true)
   {
     std::this_thread::sleep_for(std::chrono::seconds(1));

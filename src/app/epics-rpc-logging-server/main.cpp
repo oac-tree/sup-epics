@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   auto service_name = parser.GetValue<std::string>("--service");
   PvAccessRPCServerConfig server_config{service_name};
   auto logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kServerInputPacketTitle,
-                         utils::kServerOutputPacketTitle);
+                          utils::kServerOutputPacketTitle);
   sup::protocol::LogAnyFunctorDecorator decorator{*fixed_reply_functor, logger};
   PvAccessRPCServer server{server_config, decorator};
   while (true)

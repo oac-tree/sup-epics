@@ -142,14 +142,14 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
  * @param server_config Server configuration.
  * @param protocol_config Protocol configuration.
  * @param protocol Protocol to be injected.
- * @param log_function Function to log the input and output of the AnyFunctor.
+ * @param log_functions Functions to use for loggin network and/or protocol packets.
  * @return EPICS RPC server stack.
  */
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   const PvAccessRPCServerConfig& server_config,
   const sup::protocol::ProtocolRPCServerConfig& protocol_config,
   std::unique_ptr<sup::protocol::Protocol> protocol,
-  sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
+  sup::protocol::LoggingFunctions log_functions);
 
 /**
  * @brief Helper function to create an EPICS RPC client stack.
