@@ -112,6 +112,17 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
                                              log_functions);
 }
 
+std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
+  const PvAccessRPCServerConfig& server_config,
+  std::unique_ptr<sup::dto::AnyFunctor> functor,
+  const sup::protocol::LogAnyFunctorDecorator::LogFunction& log_function)
+{
+  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
+    return std::make_unique<PvAccessRPCServer>(server_config, functor);
+  };
+  return sup::protocol::CreateRPCServerStack(factory_funct, std::move(functor), log_function);
+}
+
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config, sup::protocol::PayloadEncoding encoding)
 {
