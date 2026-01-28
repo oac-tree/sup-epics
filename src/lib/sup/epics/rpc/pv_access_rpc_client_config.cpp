@@ -18,24 +18,20 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PV_ACCESS_RPC_SERVER_CONFIG_H_
-#define SUP_EPICS_PV_ACCESS_RPC_SERVER_CONFIG_H_
+#include <sup/epics/pv_access_rpc_client_config.h>
 
-#include <string>
+static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
 
 namespace sup
 {
 namespace epics
 {
-struct PvAccessRPCServerConfig
-{
-  std::string service_name;
-};
 
-PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name);
+PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)
+{
+  return { service_name, DEFAULT_TIMEOUT_SECONDS };
+}
 
 }  // namespace epics
 
 }  // namespace sup
-
-#endif  // SUP_EPICS_PV_ACCESS_RPC_SERVER_CONFIG_H_

@@ -21,7 +21,7 @@
 #ifndef SUP_EPICS_PV_ACCESS_RPC_CLIENT_H_
 #define SUP_EPICS_PV_ACCESS_RPC_CLIENT_H_
 
-#include "pv_access_rpc_client_config.h"
+#include <sup/epics/pv_access_rpc_client_config.h>
 
 #include <sup/dto/any_functor.h>
 
@@ -60,8 +60,6 @@ public:
 private:
   std::unique_ptr<PvAccessRPCClientImpl> m_impl;
 };
-
-PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name);
 
 }  // namespace epics
 

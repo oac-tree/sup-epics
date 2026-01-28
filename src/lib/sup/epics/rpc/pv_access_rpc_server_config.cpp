@@ -18,24 +18,18 @@
  * of the distribution package.
  *****************************************************************************/
 
-#ifndef SUP_EPICS_PV_ACCESS_RPC_SERVER_CONFIG_H_
-#define SUP_EPICS_PV_ACCESS_RPC_SERVER_CONFIG_H_
-
-#include <string>
+#include <sup/epics/pv_access_rpc_server_config.h>
 
 namespace sup
 {
 namespace epics
 {
-struct PvAccessRPCServerConfig
-{
-  std::string service_name;
-};
 
-PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name);
+PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name)
+{
+  return { service_name };
+}
 
 }  // namespace epics
 
 }  // namespace sup
-
-#endif  // SUP_EPICS_PV_ACCESS_RPC_SERVER_CONFIG_H_

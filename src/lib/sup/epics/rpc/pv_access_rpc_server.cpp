@@ -49,11 +49,6 @@ PvAccessRPCClient PvAccessRPCServer::CreateClient(const PvAccessRPCClientConfig&
   return PvAccessRPCClient{std::move(client_impl)};
 }
 
-PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name)
-{
-  return { service_name };
-}
-
 }  // namespace epics
 
 }  // namespace sup

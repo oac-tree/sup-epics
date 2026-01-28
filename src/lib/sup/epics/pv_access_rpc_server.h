@@ -21,7 +21,7 @@
 #ifndef SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
 #define SUP_EPICS_PV_ACCESS_RPC_SERVER_H_
 
-#include "pv_access_rpc_server_config.h"
+#include <sup/epics/pv_access_rpc_server_config.h>
 
 #include <sup/epics/pv_access_rpc_client.h>
 
@@ -62,8 +62,6 @@ public:
 private:
   std::unique_ptr<PvAccessRPCServerImpl> m_impl;
 };
-
-PvAccessRPCServerConfig GetDefaultRPCServerConfig(const std::string& service_name);
 
 }  // namespace epics
 

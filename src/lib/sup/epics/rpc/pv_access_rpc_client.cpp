@@ -26,8 +26,6 @@
 #include <sup/dto/anyvalue.h>
 #include <sup/protocol/protocol_result.h>
 
-static const double DEFAULT_TIMEOUT_SECONDS = 5.0;
-
 namespace sup
 {
 namespace epics
@@ -59,11 +57,6 @@ PvAccessRPCClient& PvAccessRPCClient::operator=(PvAccessRPCClient&& other) noexc
 sup::dto::AnyValue PvAccessRPCClient::operator()(const sup::dto::AnyValue& input)
 {
   return m_impl->operator()(input);
-}
-
-PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name)
-{
-  return { service_name, DEFAULT_TIMEOUT_SECONDS };
 }
 
 }  // namespace epics

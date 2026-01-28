@@ -33,6 +33,8 @@ struct PvAccessRPCClientConfig
   double timeout;
 };
 
+PvAccessRPCClientConfig GetDefaultRPCClientConfig(const std::string& service_name);
+
 }  // namespace epics
 
 }  // namespace sup
