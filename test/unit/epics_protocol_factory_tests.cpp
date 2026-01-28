@@ -20,7 +20,6 @@
 
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_client.h>
-#include <sup/epics/pv_access_rpc_server.h>
 
 #include <sup/dto/anyvalue.h>
 #include <sup/protocol/protocol_factory_utils.h>

@@ -21,7 +21,6 @@
 #include <sup/epics-test/unit_test_helper.h>
 #include <sup/epics/epics_protocol_factory.h>
 #include <sup/epics/pv_access_rpc_client.h>
-#include <sup/epics/pv_access_rpc_server.h>
 
 #include <sup/protocol/log_any_functor_decorator.h>
 
@@ -70,12 +69,12 @@ TEST_F(PvAccessLoggingClientServerTests, PacketLogging)
       {{"setpoint", {sup::dto::Float64Type, 3.14}}, {"enabled", false}}};
   const sup::dto::AnyValue reply = {
       {{"counter", {sup::dto::UnsignedInteger16Type, 42u}}, {"message", "ok"}}};
-  test::FixedReplyFunctor fixed_reply_functor(reply);
+  auto fixed_reply_functor = std::make_unique<test::FixedReplyFunctor>(reply);
   const std::string server_name = "LoggingClientServerTest::Server";
   const sup::epics::PvAccessRPCServerConfig server_config{server_name};
   auto client_config = sup::epics::GetDefaultRPCClientConfig(server_name);
-  sup::protocol::LogAnyFunctorDecorator decorator{fixed_reply_functor, server_log_function};
-  PvAccessRPCServer server{server_config, decorator};
+  auto server = CreateEPICSRPCServerStack(server_config, std::move(fixed_reply_functor),
+                                          server_log_function);
   auto client = CreateLoggingEPICSRPCClient(client_config, client_log_function);
   client->operator()(request);
   ASSERT_EQ(m_client_packages_sent.size(), 1);
