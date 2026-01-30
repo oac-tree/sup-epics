@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   auto client_config = utils::GetRPCClientConfiguration(parser);
   auto logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kClientInputPacketTitle,
                          utils::kClientOutputPacketTitle);
-  auto client = CreateLoggingEPICSRPCClient(client_config, logger);
+  auto client = CreateEPICSRPCClientStack(client_config, logger);
   auto response = (*client)(request);
   return 0;
 }

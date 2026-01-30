@@ -62,14 +62,6 @@ std::unique_ptr<sup::protocol::ProcessVariable> EPICSProtocolFactory::CreateProc
   return iter->second(var_definition);
 }
 
-std::unique_ptr<sup::protocol::Protocol> EPICSProtocolFactory::CreateRPCClient(
-  const sup::dto::AnyValue& client_definition) const
-{
-  auto client_config = utils::ParsePvAccessRPCClientConfig(client_definition);
-  auto encoding = sup::protocol::ParsePayloadEncoding(client_definition);
-  return CreateEPICSRPCClientStack(client_config, encoding);
-}
-
 std::unique_ptr<sup::protocol::ProcessVariable> CreateCAClientProcessVariable(
   const std::string& channel, const sup::dto::AnyType& var_type)
 {
@@ -124,19 +116,34 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
 }
 
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
-  const PvAccessRPCClientConfig& client_config, sup::protocol::PayloadEncoding encoding)
+  const PvAccessRPCClientConfig& client_config,
+  const sup::protocol::ProtocolRPCClientConfig& protocol_config)
 {
-  auto factory_funct = [client_config](){
+  auto factory_func = [client_config]() {
     return std::make_unique<PvAccessRPCClient>(client_config);
   };
-  return sup::protocol::CreateRPCClientStack(factory_funct, encoding);
+  return sup::protocol::CreateRPCClientStack(factory_func, protocol_config);
 }
 
-std::unique_ptr<sup::dto::AnyFunctor> CreateLoggingEPICSRPCClient(
+std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
+  const PvAccessRPCClientConfig& client_config,
+  const sup::protocol::ProtocolRPCClientConfig& protocol_config,
+  sup::protocol::LoggingFunctions log_functions)
+{
+  auto factory_func = [client_config]() {
+    return std::make_unique<PvAccessRPCClient>(client_config);
+  };
+  return sup::protocol::CreateRPCClientStack(factory_func, protocol_config, log_functions);
+}
+
+std::unique_ptr<sup::dto::AnyFunctor> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
   sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
 {
-  return std::make_unique<utils::LoggingEPICSRPCClient>(client_config, log_function);
+  auto factory_func = [client_config]() {
+    return std::make_unique<PvAccessRPCClient>(client_config);
+  };
+  return sup::protocol::CreateRPCClientStack(factory_func, log_function);
 }
 
 }  // namespace epics

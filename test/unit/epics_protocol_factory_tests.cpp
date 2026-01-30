@@ -289,65 +289,6 @@ TEST_F(EPICSProtocolFactoryTest, TwoChannelAccessPVWrapperClientCallback)
   EXPECT_EQ(client_cache, val_init);
 }
 
-TEST_F(EPICSProtocolFactoryTest, RPCFactory)
-{
-  const EPICSProtocolFactory factory;
-  auto test_protocol = std::make_unique<TestProtocol>();
-  auto protocol_handle = test_protocol.get();
-  const std::string service_name = "EPICSRPCFactory::TestServer";
-
-  // Create RPC server stack
-  auto server = CreateEPICSRPCServerStack(GetDefaultRPCServerConfig(service_name),
-                                          sup::protocol::ProtocolRPCServerConfig{},
-                                          std::move(test_protocol));
-
-  // Create corresponding RPC client without encoding
-  const sup::dto::AnyValue client_def_1 = {{
-    { kServiceName, service_name },
-    { sup::protocol::kEncoding, sup::protocol::kEncoding_None }
-  }};
-  auto client_1 = factory.CreateRPCClient(client_def_1);
-
-  // Create corresponding RPC client with base64 encoding
-  const sup::dto::AnyValue client_def_2 = {{
-    { kServiceName, service_name },
-    { sup::protocol::kEncoding, sup::protocol::kEncoding_Base64 }
-  }};
-  auto client_2 = factory.CreateRPCClient(client_def_2);
-
-  // Send request through client 1 and validate
-  sup::dto::AnyValue request = {{
-    { "setpoint", { sup::dto::Float64Type, 3.5 }},
-    { "enabled", false }
-  }};
-  sup::dto::AnyValue reply = {{
-    { "counter", { sup::dto::UnsignedInteger16Type, 2u }},
-    { "message", "ok" }
-  }};
-  protocol_handle->SetReply(reply);
-  sup::dto::AnyValue output;
-  EXPECT_EQ(client_1->Invoke(request, output), sup::protocol::Success);
-  EXPECT_EQ(protocol_handle->GetRequest(), request);
-  EXPECT_EQ(output, reply);
-
-  // Send request through client 2 and validate
-  request["setpoint"] = 1.0;
-  request["enabled"] = true;
-  reply["counter"].ConvertFrom(42u);
-  reply["message"] = "hello";
-  protocol_handle->SetReply(reply);
-  EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::Success);
-  EXPECT_EQ(protocol_handle->GetRequest(), request);
-  EXPECT_EQ(output, reply);
-
-  // Send request through client 2 with non-success reply
-  protocol_handle->SetReply(reply, sup::protocol::ServerProtocolDecodingError);
-  output = sup::dto::AnyValue{};
-  EXPECT_EQ(client_2->Invoke(request, output), sup::protocol::ServerProtocolDecodingError);
-  EXPECT_EQ(protocol_handle->GetRequest(), request);
-  EXPECT_TRUE(sup::dto::IsEmptyValue(output));
-}
-
 TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
 {
   const EPICSProtocolFactory factory;
@@ -361,12 +302,13 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
                                           std::move(test_protocol));
 
   // Create corresponding RPC client without encoding
-  auto client_1 = CreateEPICSRPCClientStack(GetDefaultRPCClientConfig(service_name),
-                                            sup::protocol::PayloadEncoding::kNone);
+  sup::protocol::ProtocolRPCClientConfig no_encoding{sup::protocol::PayloadEncoding::kNone};
+  auto client_1 = CreateEPICSRPCClientStack(GetDefaultRPCClientConfig(service_name), no_encoding);
 
   // Create corresponding RPC client with base64 encoding
+  sup::protocol::ProtocolRPCClientConfig base64_encoding{sup::protocol::PayloadEncoding::kBase64};
   auto client_2 = CreateEPICSRPCClientStack(GetDefaultRPCClientConfig(service_name),
-                                            sup::protocol::PayloadEncoding::kBase64);
+                                            base64_encoding);
 
   // Send request through client 1 and validate
   sup::dto::AnyValue request = {{

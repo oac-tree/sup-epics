@@ -46,19 +46,6 @@ std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessClientVar(
 std::unique_ptr<sup::protocol::ProcessVariable> CreatePvAccessServerVar(
   const sup::dto::AnyValue& config);
 
-class LoggingEPICSRPCClient : public sup::dto::AnyFunctor
-{
-public:
-  LoggingEPICSRPCClient(const PvAccessRPCClientConfig& config,
-                        sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
-
-  sup::dto::AnyValue operator()(const sup::dto::AnyValue& input) override;
-
-private:
-  std::unique_ptr<sup::dto::AnyFunctor> m_epics_client;
-  sup::protocol::LogAnyFunctorDecorator m_log_decorator;
-};
-
 }  // namespace utils
 
 }  // namespace epics

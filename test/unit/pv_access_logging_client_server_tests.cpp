@@ -75,7 +75,7 @@ TEST_F(PvAccessLoggingClientServerTests, PacketLogging)
   auto client_config = sup::epics::GetDefaultRPCClientConfig(server_name);
   auto server = CreateEPICSRPCServerStack(server_config, std::move(fixed_reply_functor),
                                           server_log_function);
-  auto client = CreateLoggingEPICSRPCClient(client_config, client_log_function);
+  auto client = CreateEPICSRPCClientStack(client_config, client_log_function);
   client->operator()(request);
   ASSERT_EQ(m_client_packages_sent.size(), 1);
   ASSERT_EQ(m_client_packages_received.size(), 1);

@@ -74,23 +74,6 @@ public:
    */
   std::unique_ptr<sup::protocol::ProcessVariable> CreateProcessVariable(
     const sup::dto::AnyValue& var_definition) const override;
-
-  /**
-   * @brief Create EPICS RPC client stack with a Procotol interface.
-   *
-   * @param client_definition Configuration for the client. This is an AnyValue structure with
-   * the following fields:
-   *   - ServiceName: mandatory string providing the service name on the network to connect to,
-   *   - Timeout: optional float64 field, providing the maximum timeout in seconds for requests
-   *              to the server. Default is 5 seconds.
-   *   - Encoding: optional string field providing the encoding used for the encapsulated
-   *               ProtocolRPCClient. Supported encodings are: 'None' and 'Base64'. Default is
-   *               'Base64'.
-   *
-   * @return EPICS RPC client stack.
-   */
-  std::unique_ptr<sup::protocol::Protocol> CreateRPCClient(
-    const sup::dto::AnyValue& client_definition) const override;
 };
 
 /**
@@ -136,7 +119,7 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   std::unique_ptr<sup::protocol::Protocol> protocol);
 
 /**
- * @brief Helper function to create an EPICS RPC server stack with an injected logging function
+ * @brief Helper function to create an EPICS RPC server stack with injected logging functions
  * and Protocol.
  *
  * @param server_config Server configuration.
@@ -169,12 +152,25 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
  * @brief Helper function to create an EPICS RPC client stack.
  *
  * @param client_config Client configuration.
- * @param encoding Optional encoding to be used in the RPC communication.
+ * @param protocol_config Protocol configuration.
  * @return EPICS RPC client stack.
  */
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
-  sup::protocol::PayloadEncoding encoding = sup::protocol::PayloadEncoding::kBase64);
+  const sup::protocol::ProtocolRPCClientConfig& protocol_config);
+
+/**
+ * @brief Helper function to create an EPICS RPC client stack with injected logging functions.
+ *
+ * @param client_config Client configuration.
+ * @param protocol_config Protocol configuration.
+ * @param log_functions Functions to use for loggin network and/or protocol packets.
+ * @return EPICS RPC client stack.
+ */
+std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
+  const PvAccessRPCClientConfig& client_config,
+  const sup::protocol::ProtocolRPCClientConfig& protocol_config,
+  sup::protocol::LoggingFunctions log_functions);
 
 /**
  * @brief Helper function to create an EPICS RPC client with an injected logging function.
@@ -183,7 +179,7 @@ std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
  * @param log_function Function to log the input and output of the AnyFunctor.
  * @return EPICS RPC client stack.
  */
-std::unique_ptr<sup::dto::AnyFunctor> CreateLoggingEPICSRPCClient(
+std::unique_ptr<sup::dto::AnyFunctor> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
   sup::protocol::LogAnyFunctorDecorator::LogFunction log_function);
 
