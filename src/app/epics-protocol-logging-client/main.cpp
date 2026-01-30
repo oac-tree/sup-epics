@@ -69,30 +69,31 @@ int main(int argc, char* argv[])
   }
   auto input = utils::GetFromJSONFile(parser);
 
-  auto client_config = utils::GetRPCClientConfiguration(parser);
-  auto rpc_logger = std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kClientInputPacketTitle,
-                              utils::kClientOutputPacketTitle);
-  auto client = CreateEPICSRPCClientStack(client_config, rpc_logger);
+  sup::protocol::LoggingFunctions log_functions{};
+  log_functions.m_protocol_input_logger =
+    std::bind(utils::LogInputProtocolPacketToStdOut, _1, _2,
+              utils::kClientProtocolInputNormalTitle,
+              utils::kClientProtocolInputServiceTitle);
+  log_functions.m_protocol_output_logger =
+    std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
+              utils::kClientProtocolOutputNormalTitle,
+              utils::kClientProtocolOutputServiceTitle);
+  log_functions.m_network_logger =
+    std::bind(utils::LogNetworkPacketsToStdOut, _1, _2, utils::kClientInputPacketTitle,
+              utils::kClientOutputPacketTitle);
 
+  auto client_config = utils::GetRPCClientConfiguration(parser);
   auto protocol_client_config = utils::GetProtocolRPCClientConfiguration(parser);
-  sup::protocol::ProtocolRPCClient protocol_client{*client, protocol_client_config};
-  auto input_protocol_logger = std::bind(utils::LogInputProtocolPacketToStdOut, _1, _2,
-                                         utils::kClientProtocolInputNormalTitle,
-                                         utils::kClientProtocolInputServiceTitle);
-  auto output_protocol_logger = std::bind(utils::LogOutputProtocolPacketToStdOut, _1, _2, _3,
-                                          utils::kClientProtocolOutputNormalTitle,
-                                          utils::kClientProtocolOutputServiceTitle);
-  sup::protocol::LogProtocolDecorator protocol_decorator{
-    protocol_client, input_protocol_logger, output_protocol_logger};
+  auto client = CreateEPICSRPCClientStack(client_config, protocol_client_config, log_functions);
 
   sup::dto::AnyValue output{};
   if (parser.IsSet("--service-packet"))
   {
-    auto response = protocol_decorator.Service(input, output);
+    auto response = client->Service(input, output);
   }
   else
   {
-    auto response = protocol_decorator.Invoke(input, output);
+    auto response = client->Invoke(input, output);
   }
   return 0;
 }
