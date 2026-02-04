@@ -36,6 +36,19 @@ namespace sup
 {
 namespace epics
 {
+
+EPICSRPCServerFactory::EPICSRPCServerFactory(const PvAccessRPCServerConfig& config)
+  : m_config{config}
+{}
+
+EPICSRPCServerFactory::~EPICSRPCServerFactory() = default;
+
+std::unique_ptr<sup::protocol::RPCServerInterface> EPICSRPCServerFactory::operator()(
+  sup::dto::AnyFunctor& functor)
+{
+  return std::make_unique<PvAccessRPCServer>(m_config, functor);
+}
+
 EPICSProtocolFactory::EPICSProtocolFactory() = default;
 
 EPICSProtocolFactory::~EPICSProtocolFactory() = default;
@@ -85,10 +98,8 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   const sup::protocol::ProtocolRPCServerConfig& protocol_config,
   std::unique_ptr<sup::protocol::Protocol> protocol)
 {
-  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
-    return std::make_unique<PvAccessRPCServer>(server_config, functor);
-  };
-  return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol));
+  EPICSRPCServerFactory factory{server_config};
+  return sup::protocol::CreateRPCServerStack(factory, protocol_config, std::move(protocol));
 }
 
 std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
@@ -97,10 +108,8 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   std::unique_ptr<sup::protocol::Protocol> protocol,
   sup::protocol::LoggingFunctions log_functions)
 {
-  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
-    return std::make_unique<PvAccessRPCServer>(server_config, functor);
-  };
-  return sup::protocol::CreateRPCServerStack(factory_funct, protocol_config, std::move(protocol),
+  EPICSRPCServerFactory factory{server_config};
+  return sup::protocol::CreateRPCServerStack(factory, protocol_config, std::move(protocol),
                                              log_functions);
 }
 
@@ -109,10 +118,8 @@ std::unique_ptr<sup::protocol::RPCServerInterface> CreateEPICSRPCServerStack(
   std::unique_ptr<sup::dto::AnyFunctor> functor,
   const sup::protocol::LogAnyFunctorDecorator::LogFunction& log_function)
 {
-  auto factory_funct = [server_config](sup::dto::AnyFunctor& functor){
-    return std::make_unique<PvAccessRPCServer>(server_config, functor);
-  };
-  return sup::protocol::CreateRPCServerStack(factory_funct, std::move(functor), log_function);
+  EPICSRPCServerFactory factory{server_config};
+  return sup::protocol::CreateRPCServerStack(factory, std::move(functor), log_function);
 }
 
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(

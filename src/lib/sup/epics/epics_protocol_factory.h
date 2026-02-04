@@ -48,6 +48,21 @@ const std::string kChannelName = "ChannelName";
 const std::string kVariableType = "VarType";
 const std::string kVariableValue = "VarValue";
 
+/**
+ * @brief Helper class that instantiates an EPICS RPC server. To be used with
+ * sup::protocol::CreateRPCServerStack.
+ */
+class EPICSRPCServerFactory
+{
+public:
+  explicit EPICSRPCServerFactory(const PvAccessRPCServerConfig& config);
+  ~EPICSRPCServerFactory();
+
+  std::unique_ptr<sup::protocol::RPCServerInterface> operator()(sup::dto::AnyFunctor& functor);
+private:
+  PvAccessRPCServerConfig m_config;
+};
+
 class EPICSProtocolFactory : public sup::protocol::ProtocolFactory
 {
 public:
