@@ -63,6 +63,21 @@ private:
   PvAccessRPCServerConfig m_config;
 };
 
+/**
+ * @brief Helper class that instantiates an EPICS RPC client. To be used with
+ * sup::protocol::CreateRPCClientStack.
+ */
+class EPICSRPCClientFactory
+{
+public:
+  explicit EPICSRPCClientFactory(const PvAccessRPCClientConfig& config);
+  ~EPICSRPCClientFactory();
+
+  std::unique_ptr<sup::dto::AnyFunctor> operator()();
+private:
+  PvAccessRPCClientConfig m_config;
+};
+
 class EPICSProtocolFactory : public sup::protocol::ProtocolFactory
 {
 public:

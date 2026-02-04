@@ -49,6 +49,17 @@ std::unique_ptr<sup::protocol::RPCServerInterface> EPICSRPCServerFactory::operat
   return std::make_unique<PvAccessRPCServer>(m_config, functor);
 }
 
+EPICSRPCClientFactory::EPICSRPCClientFactory(const PvAccessRPCClientConfig& config)
+  : m_config{config}
+{}
+
+EPICSRPCClientFactory::~EPICSRPCClientFactory() = default;
+
+std::unique_ptr<sup::dto::AnyFunctor> EPICSRPCClientFactory::operator()()
+{
+  return std::make_unique<PvAccessRPCClient>(m_config);
+}
+
 EPICSProtocolFactory::EPICSProtocolFactory() = default;
 
 EPICSProtocolFactory::~EPICSProtocolFactory() = default;
@@ -126,10 +137,8 @@ std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
   const sup::protocol::ProtocolRPCClientConfig& protocol_config)
 {
-  auto factory_func = [client_config]() {
-    return std::make_unique<PvAccessRPCClient>(client_config);
-  };
-  return sup::protocol::CreateRPCClientStack(factory_func, protocol_config);
+  EPICSRPCClientFactory factory{client_config};
+  return sup::protocol::CreateRPCClientStack(factory, protocol_config);
 }
 
 std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
@@ -137,20 +146,16 @@ std::unique_ptr<sup::protocol::Protocol> CreateEPICSRPCClientStack(
   const sup::protocol::ProtocolRPCClientConfig& protocol_config,
   sup::protocol::LoggingFunctions log_functions)
 {
-  auto factory_func = [client_config]() {
-    return std::make_unique<PvAccessRPCClient>(client_config);
-  };
-  return sup::protocol::CreateRPCClientStack(factory_func, protocol_config, log_functions);
+  EPICSRPCClientFactory factory{client_config};
+  return sup::protocol::CreateRPCClientStack(factory, protocol_config, log_functions);
 }
 
 std::unique_ptr<sup::dto::AnyFunctor> CreateEPICSRPCClientStack(
   const PvAccessRPCClientConfig& client_config,
   sup::protocol::LogAnyFunctorDecorator::LogFunction log_function)
 {
-  auto factory_func = [client_config]() {
-    return std::make_unique<PvAccessRPCClient>(client_config);
-  };
-  return sup::protocol::CreateRPCClientStack(factory_func, log_function);
+  EPICSRPCClientFactory factory{client_config};
+  return sup::protocol::CreateRPCClientStack(factory, log_function);
 }
 
 }  // namespace epics
