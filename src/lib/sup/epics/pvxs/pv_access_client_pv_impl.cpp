@@ -90,24 +90,34 @@ PvAccessClientPV::ExtendedValue PvAccessClientPVImpl::GetExtendedValue() const
 
 bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
 {
-  sup::dto::AnyValue copy;
+  sup::dto::AnyValue update{};
+  sup::dto::AnyType cache_type{};
   {
     std::lock_guard<std::mutex> lk(m_mon_mtx);
     if (!m_cache.connected)
     {
       return false;
     }
-    copy = m_cache.value;
+    cache_type = m_cache.value.GetType();
   }
   if (sup::dto::IsScalarValue(value))
   {
     throw std::runtime_error("Error in PvAccessClientPV: cannot set a scalar value");
   }
-  if (!sup::dto::TryAssignIfEmptyOrConvert(copy, value))
+  if (sup::dto::IsEmptyType(cache_type))
   {
-    return false;
+    update = value;
   }
-  auto pvxs_value = sup::epics::BuildPVXSValue(copy);
+  else
+  {
+    auto converted = sup::dto::TryConvertAllowExtraTargetFields(value, cache_type);
+    if (!converted.first)
+    {
+      return false;
+    }
+    update = converted.second;
+  }
+  auto pvxs_value = sup::epics::BuildPVXSValue(update);
 
   auto operation = m_context->put(m_channel_name)
                     .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })

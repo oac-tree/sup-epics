@@ -109,12 +109,12 @@ void PvAccessServerPV::OnSharedValueChanged(pvxs::server::SharedPV& /*pv*/,
 {
   {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_any_value = BuildAnyValue(value);
 
     // Simple copy doesn't work. We have to keep m_pvxs_cache internal storage's pointer alive
     // since server::SharedPV relies on that.
     (void)m_pvxs_cache.assign(value);
     m_shared_pv.post(m_pvxs_cache);
+    m_any_value = BuildAnyValue(m_pvxs_cache);
   }
   if (m_callback)
   {
