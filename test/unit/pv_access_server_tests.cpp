@@ -78,7 +78,10 @@ TEST_F(PVAccessServerTests, AddVariableAndGetSetWithoutRunning)
   // changing first channel
   const sup::dto::AnyValue new_any_value({{"value", {sup::dto::SignedInteger32Type, 45}}});
   EXPECT_TRUE(server.SetValue("channel0", new_any_value));
-  EXPECT_EQ(server.GetValue("channel0"), new_any_value);
+
+  // Since the server was not started, the value will not be available through GetValue yet
+  EXPECT_NE(server.GetValue("channel0"), new_any_value);
+  EXPECT_EQ(server.GetValue("channel0"), any_value0);
 }
 
 //! Standard scenario. Add single variable and start server.

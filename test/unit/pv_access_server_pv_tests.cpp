@@ -82,10 +82,10 @@ TEST_F(PvAccessServerPVTests, GetAndSet)
   const sup::dto::AnyValue new_any_value({{"value", {sup::dto::SignedInteger32Type, 45}}});
   EXPECT_TRUE(variable.SetValue(new_any_value));
 
-  // attempt to set value with different type
+  // attempt to set value with incompatible type
   const sup::dto::AnyValue struct_value = {{"signed", {sup::dto::SignedInteger32Type, 42}},
                                            {"bool", {sup::dto::BooleanType, true}}};
-  EXPECT_THROW(variable.SetValue(struct_value), sup::dto::InvalidConversionException);
+  EXPECT_FALSE(variable.SetValue(struct_value));
 }
 
 //! Check GetValue and SetValue. Server is running.

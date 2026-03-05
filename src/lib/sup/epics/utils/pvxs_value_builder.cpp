@@ -85,6 +85,8 @@ struct PvxsValueBuilder::PvxsValueBuilderImpl
 
   pvxs::Value &GetCurrent() { return m_nodes.top()->GetPvxsValueRef(); }
 
+  void Pop() { m_nodes.pop(); }
+
   PvxsBuilderNode *GetCurrentNode() const
   {
     if (m_nodes.empty())
@@ -128,7 +130,7 @@ void PvxsValueBuilder::StructMemberSeparator() {}
 void PvxsValueBuilder::StructEpilog(const sup::dto::AnyValue *anyvalue)
 {
   (void)anyvalue;
-  p_impl->m_nodes.pop();
+  p_impl->Pop();
 }
 
 void PvxsValueBuilder::MemberProlog(const sup::dto::AnyValue *anyvalue,
@@ -143,7 +145,7 @@ void PvxsValueBuilder::MemberEpilog(const sup::dto::AnyValue *anyvalue,
 {
   (void)anyvalue;
   (void)member_name;
-  p_impl->m_nodes.pop();
+  p_impl->Pop();
 }
 
 void PvxsValueBuilder::ArrayProlog(const sup::dto::AnyValue *anyvalue)
@@ -167,7 +169,7 @@ void PvxsValueBuilder::ArrayEpilog(const sup::dto::AnyValue *anyvalue)
 {
   (void)anyvalue;
   p_impl->GetCurrentNode()->Freeze();
-  p_impl->m_nodes.pop();
+  p_impl->Pop();
 }
 
 void PvxsValueBuilder::ScalarProlog(const sup::dto::AnyValue *anyvalue)
