@@ -20,6 +20,8 @@
 
 #include "sup/epics/pvxs/pv_access_server_pv.h"
 
+#include <sup/dto/anyvalue_helper.h>
+
 #include <stdexcept>
 
 namespace sup
@@ -63,16 +65,24 @@ bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
   {
     throw std::runtime_error("Error in PvAccessServerPV: cannot set a scalar value");
   }
+  sup::dto::AnyValue update{};
+  sup::dto::AnyType cache_type{};
   {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    if (sup::dto::IsEmptyValue(m_any_value))
+    std::lock_guard<std::mutex> lk(m_mutex);
+    cache_type = m_any_value.GetType();
+  }
+  if (sup::dto::IsEmptyType(cache_type))
+  {
+    update = value;
+  }
+  else
+  {
+    auto converted = sup::dto::TryConvertAllowExtraTargetFields(value, cache_type);
+    if (!converted.first)
     {
-      m_any_value = value;
+      return false;
     }
-    else
-    {
-      m_any_value.ConvertFrom(value);
-    }
+    update = converted.second;
   }
   // assigning value to shared variable
   if (m_shared_pv.isOpen())
@@ -81,8 +91,9 @@ bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
     // alive since server::SharedPV relies on that.
     {
       std::lock_guard<std::mutex> lock(m_mutex);
-      auto pvxs_value = BuildPVXSValue(m_any_value);
+      auto pvxs_value = BuildPVXSValue(update);
       (void)m_pvxs_cache.assign(pvxs_value);
+      m_any_value = BuildAnyValue(m_pvxs_cache);
     }
     m_shared_pv.post(m_pvxs_cache);
   }

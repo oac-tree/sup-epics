@@ -251,6 +251,43 @@ TEST_F(PvAccessClientServerIntegrationTests, ClientWithLessStructureFields)
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
 
+TEST_F(PvAccessClientServerIntegrationTests, ServerUpdateWithLessStructureFields)
+{
+  const std::string channel_name("channel1");
+
+  // creating server with single variable
+  PvAccessServer server(PvAccessServer::Isolated);
+  sup::dto::AnyValue any_value = {{
+    {"value", {sup::dto::SignedInteger32Type, 42}},
+    {"comment", "A comment the client does not update"},
+  }};
+  server.AddVariable(channel_name, any_value);
+
+  server.Start();
+
+  // Checking variable on server side
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == any_value; }));
+
+  // creating a client with single variable
+  PvAccessClient client = server.CreateClient();
+  client.AddVariable(channel_name);
+
+  // checking connection and updated values on server and client sides
+  EXPECT_TRUE(client.WaitForConnected(channel_name, 1.0));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == any_value; }));
+
+  // changing the value via the server with a conversion
+  const sup::dto::AnyValue update({{"value", {sup::dto::SignedInteger32Type, 43}}});
+  sup::dto::AnyValue expected = {{
+    {"value", {sup::dto::SignedInteger32Type, 43}},
+    {"comment", "A comment the client does not update"},
+  }};
+  EXPECT_TRUE(server.SetValue(channel_name, update));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return server.GetValue(channel_name) == expected; }))
+    << sup::dto::PrintAnyValue(server.GetValue(channel_name));
+  EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
+}
+
 TEST_F(PvAccessClientServerIntegrationTests, FromEnv)
 {
   const std::string channel_name("channel2");
