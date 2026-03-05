@@ -120,7 +120,15 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
   auto pvxs_value = sup::epics::BuildPVXSValue(update);
 
   auto operation = m_context->put(m_channel_name)
-                    .build([pvxs_value](pvxs::Value&& /*proto*/) { return pvxs_value; })
+                    .build([pvxs_value](pvxs::Value&& prototype)
+                      {
+                        auto pvxs_update = AdaptToPrototype(pvxs_value, prototype);
+                        if (!pvxs_update)
+                        {
+                          throw std::runtime_error("Could not convert value to prototype");
+                        }
+                        return pvxs_update.value();
+                      })
                     .exec();
   try
   {
@@ -131,6 +139,10 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
     return false;
   }
   catch (const pvxs::client::Interrupted& ex)
+  {
+    return false;
+  }
+  catch (const std::runtime_error& ex)
   {
     return false;
   }

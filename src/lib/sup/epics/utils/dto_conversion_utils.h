@@ -26,6 +26,7 @@
 
 #include <sup/epics/utils/dto_types_fwd.h>
 
+#include <optional>
 #include <string>
 
 namespace sup
@@ -57,6 +58,11 @@ namespace epics
 //! Builds AnyValue from PVXS's value. If PVXS value contains a struct with single field `value`,
 //! and this field is a scalar, it will be converted to a scalar AnyValue.
 ::sup::dto::AnyValue BuildScalarAwareAnyValue(const ::pvxs::Value& pvxs_value);
+
+//! Adapt a provide pvxs value, typically an update value, to the given prototype, marking fields
+//! that are absent in the value as not valid, i.e. not to be used for updates.
+std::optional<::pvxs::Value> AdaptToPrototype(const ::pvxs::Value& pvxs_value,
+                                              const ::pvxs::Value& prototype);
 
 }  // namespace epics
 
