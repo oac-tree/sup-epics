@@ -18,12 +18,105 @@
  * of the distribution package.
  *****************************************************************************/
 
-#include <gtest/gtest.h>
 #include <pvxs/data.h>
+
+#include <gtest/gtest.h>
 
 class PVXSValueTests : public ::testing::Test
 {
 };
+
+// Test demonstrating raw PVXS assign behavior with empty scalar members.
+
+TEST_F(PVXSValueTests, AssignScalarStructWithPartialStruct)
+{
+  // Target: struct with 3 scalar members
+  auto target =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "root_t",
+                      {pvxs::members::Float64("a"),
+                       pvxs::members::UInt16("b"),
+                       pvxs::members::Int32("c")})
+          .create();
+
+  // Source: struct with only middle 'b' member
+  auto source =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "root_t",
+                      {pvxs::members::UInt16("b")})
+          .create();
+  source["b"] = 42U;
+  // "nested" is present but has no members.
+
+  // Verify all nodes in the target are unmarked before assignment:
+  EXPECT_FALSE(target.isMarked(false));
+  EXPECT_FALSE(target["a"].isMarked(false));
+  EXPECT_FALSE(target["b"].isMarked(false));
+  EXPECT_FALSE(target["c"].isMarked(false));
+
+  // Assign source to target
+  target.assign(source);
+
+  // The top structure is still not marked
+  EXPECT_FALSE(target.isMarked(false));
+
+  // The integer field should be copied and marked
+  EXPECT_TRUE(target["b"].isMarked(false));
+  EXPECT_EQ(target["b"].as<u_int16_t>(), 42);
+
+  // The other scalar fields are unmarked
+  EXPECT_FALSE(target["a"].isMarked(false));
+  EXPECT_FALSE(target["c"].isMarked(false));
+}
+
+// Test demonstrating raw PVXS assign behavior with scalar and struct members.
+
+TEST_F(PVXSValueTests, AssignMixedStructWithPartialStruct)
+{
+  // Target: struct with 3 scalar members
+  auto target =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "root_t",
+                      {pvxs::members::Float64("a"),
+                       pvxs::members::Struct("nested", "nested_t",
+                                             {pvxs::members::Int32("a"),
+                                              pvxs::members::Float64("b")}),
+                       pvxs::members::UInt16("b"),
+                       pvxs::members::Int32("c")})
+          .create();
+
+  // Source: struct with only middle 'b' member
+  auto source =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Struct, "root_t",
+                      {pvxs::members::Struct("nested", "nested_t", {}),
+                       pvxs::members::UInt16("b")})
+          .create();
+  source["b"] = 42U;
+  // "nested" is present but has no members.
+
+  // Verify all nodes in the target are unmarked before assignment:
+  EXPECT_FALSE(target.isMarked(false));
+  EXPECT_FALSE(target["a"].isMarked(false));
+  EXPECT_FALSE(target["nested"].isMarked(false));
+  EXPECT_FALSE(target["nested"]["a"].isMarked(false));
+  EXPECT_FALSE(target["nested"]["b"].isMarked(false));
+  EXPECT_FALSE(target["b"].isMarked(false));
+  EXPECT_FALSE(target["c"].isMarked(false));
+
+  // Assign source to target
+  target.assign(source);
+
+  // The top structure is still not marked
+  EXPECT_FALSE(target.isMarked(false));
+
+  // The integer field should be copied and marked
+  EXPECT_TRUE(target["b"].isMarked(false));
+  EXPECT_EQ(target["b"].as<u_int16_t>(), 42);
+
+  // All other member fields are unmarked
+  EXPECT_FALSE(target["a"].isMarked(false));
+  EXPECT_FALSE(target["nested"].isMarked(false));
+  EXPECT_FALSE(target["nested"]["a"].isMarked(false));
+  EXPECT_FALSE(target["nested"]["b"].isMarked(false));
+  EXPECT_FALSE(target["c"].isMarked(false));
+}
 
 // Tests demonstrating raw PVXS assign behavior with empty struct members.
 

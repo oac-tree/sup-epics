@@ -62,7 +62,7 @@ namespace epics
 //! Adapt a provide pvxs value, typically an update value, to the given prototype, marking fields
 //! that are absent in the value as not valid, i.e. not to be used for updates.
 std::optional<::pvxs::Value> AdaptToPrototype(const ::pvxs::Value& pvxs_value,
-                                              const ::pvxs::Value& prototype);
+                                              ::pvxs::Value prototype);
 
 }  // namespace epics
 

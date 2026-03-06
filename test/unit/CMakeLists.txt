@@ -28,7 +28,7 @@ target_sources(${unit-tests}
   pv_access_server_pv_tests.cpp
   pv_access_server_tests.cpp
   pvxs_builder_nodes_tests.cpp
-  pvxs_builder_nodes_tests.cpp
+  pvxs_partial_assign_tests.cpp
   pvxs_type_builder_tests.cpp
   pvxs_value_tests.cpp
   pvxs_utils_tests.cpp

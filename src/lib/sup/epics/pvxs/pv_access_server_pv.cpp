@@ -91,13 +91,8 @@ bool PvAccessServerPV::SetValue(const dto::AnyValue& value)
     // alive since server::SharedPV relies on that.
     {
       std::lock_guard<std::mutex> lock(m_mutex);
-      auto pvxs_value = BuildPVXSValue(update);
-      auto pvxs_update = AdaptToPrototype(pvxs_value, m_pvxs_cache);
-      if (!pvxs_update)
-      {
-        return false;
-      }
-      (void)m_pvxs_cache.assign(pvxs_update.value());
+      auto pvxs_update = BuildPVXSValue(update);
+      (void)m_pvxs_cache.assign(pvxs_update);
       m_any_value = BuildAnyValue(m_pvxs_cache);
     }
     m_shared_pv.post(m_pvxs_cache);

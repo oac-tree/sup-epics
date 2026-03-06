@@ -106,7 +106,7 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
   }
   if (sup::dto::IsEmptyType(cache_type))
   {
-    update = value;
+    return false;
   }
   else
   {
@@ -122,7 +122,7 @@ bool PvAccessClientPVImpl::SetValue(const sup::dto::AnyValue& value)
   auto operation = m_context->put(m_channel_name)
                     .build([pvxs_value](pvxs::Value&& prototype)
                       {
-                        auto pvxs_update = AdaptToPrototype(pvxs_value, prototype);
+                        auto pvxs_update = AdaptToPrototype(pvxs_value, std::move(prototype));
                         if (!pvxs_update)
                         {
                           throw std::runtime_error("Could not convert value to prototype");

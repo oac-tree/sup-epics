@@ -286,7 +286,7 @@ TEST_F(PvAccessClientServerIntegrationTests, DISABLED_ClientWithLessStructureFie
   EXPECT_TRUE(BusyWaitFor(1.0, [&]() { return client.GetValue(channel_name) == expected; }));
 }
 
-TEST_F(PvAccessClientServerIntegrationTests, DISABLED_ClientWithLessStructureFields_Nested)
+TEST_F(PvAccessClientServerIntegrationTests, ClientWithLessStructureFields_Nested)
 {
   const std::string channel_name("channel1");
 
