@@ -30,6 +30,7 @@ target_sources(${unit-tests}
   pvxs_builder_nodes_tests.cpp
   pvxs_builder_nodes_tests.cpp
   pvxs_type_builder_tests.cpp
+  pvxs_value_tests.cpp
   pvxs_utils_tests.cpp
   pvxs_value_basics_tests.cpp
   pvxs_value_builder_extended_tests.cpp
