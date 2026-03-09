@@ -1,6 +1,7 @@
 Changes for 1.11.0:
 
 - Implement RPC server factory functions with ownership transfer
+- Allow partial updates in PvAccess client and server PVs
 
 Changes for 1.10.0:
 

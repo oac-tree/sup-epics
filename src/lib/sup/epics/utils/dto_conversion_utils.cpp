@@ -109,20 +109,6 @@ dto::AnyValue BuildScalarAwareAnyValue(const pvxs::Value& pvxs_value)
   return BuildAnyValue(to_convert);
 }
 
-std::optional<::pvxs::Value> AdaptToPrototype(const ::pvxs::Value& pvxs_value,
-                                              ::pvxs::Value prototype)
-{
-  try
-  {
-    prototype.assign(pvxs_value);
-    return prototype;
-  }
-  catch(const std::runtime_error& e)
-  {
-    return std::nullopt;
-  }
-}
-
 }  // namespace epics
 
 }  // namespace sup

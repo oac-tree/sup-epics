@@ -14,6 +14,13 @@ On the server side, there is:
 .. contents::
    :local:
 
+Partial updates
+---------------
+
+Both client and server PVs allow to set partial values. This means that the update value may contain
+less structure member fields, at any depth, than the underlying value. This only applies to structures
+and cannot be used to do partial array updates.
+
 Restrictions on types
 ---------------------
 
@@ -21,5 +28,4 @@ Not all types supported by ``AnyValue`` are currently supported for PvAccess PVs
 
 * Scalar nodes (inside a structure or array) of the type ``char8`` will be converted to ``uint8``;
 * Scalar values are not supported at the top level;
-* Arrays of structures are not supported;
 * Arrays, both when top level or as members of a struct, cannot be named.
