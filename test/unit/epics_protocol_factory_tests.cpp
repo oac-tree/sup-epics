@@ -342,3 +342,42 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctions)
   EXPECT_EQ(protocol_handle->GetRequest(), request);
   EXPECT_TRUE(sup::dto::IsEmptyValue(output));
 }
+
+TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctionsWithLogging)
+{
+  auto test_protocol = std::make_unique<TestProtocol>();
+  auto protocol_handle = test_protocol.get();
+  const std::string service_name = "EPICSRPCFactoryFunctionsWithLogging::TestServer";
+
+  int server_log_count = 0;
+  int client_log_count = 0;
+  sup::protocol::LoggingFunctions server_log_functions;
+  server_log_functions.m_network_logger =
+    [&server_log_count](const sup::dto::AnyValue&,
+                        sup::protocol::LogAnyFunctorDecorator::PacketDirection)
+    { ++server_log_count; };
+  sup::protocol::LoggingFunctions client_log_functions;
+  client_log_functions.m_network_logger =
+    [&client_log_count](const sup::dto::AnyValue&,
+                        sup::protocol::LogAnyFunctorDecorator::PacketDirection)
+    { ++client_log_count; };
+
+  auto server = CreateEPICSRPCServerStack(GetDefaultRPCServerConfig(service_name),
+                                          sup::protocol::ProtocolRPCServerConfig{},
+                                          std::move(test_protocol),
+                                          server_log_functions);
+
+  sup::protocol::ProtocolRPCClientConfig client_config{sup::protocol::PayloadEncoding::kNone};
+  auto client = CreateEPICSRPCClientStack(GetDefaultRPCClientConfig(service_name),
+                                          client_config,
+                                          client_log_functions);
+
+  sup::dto::AnyValue request = {{ { "x", { sup::dto::Float64Type, 1.0 }} }};
+  sup::dto::AnyValue reply = {{ { "y", { sup::dto::Float64Type, 2.0 }} }};
+  protocol_handle->SetReply(reply);
+  sup::dto::AnyValue output;
+  EXPECT_EQ(client->Invoke(request, output), sup::protocol::Success);
+  EXPECT_EQ(output, reply);
+  EXPECT_GT(server_log_count, 0);
+  EXPECT_GT(client_log_count, 0);
+}
