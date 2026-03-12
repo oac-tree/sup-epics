@@ -56,7 +56,7 @@ class EPICSRPCServerFactory
 {
 public:
   explicit EPICSRPCServerFactory(const PvAccessRPCServerConfig& config);
-  ~EPICSRPCServerFactory();
+  ~EPICSRPCServerFactory() = default;
 
   EPICSRPCServerFactory(const EPICSRPCServerFactory&) = default;
   EPICSRPCServerFactory& operator=(const EPICSRPCServerFactory&) = default;
@@ -76,7 +76,7 @@ class EPICSRPCClientFactory
 {
 public:
   explicit EPICSRPCClientFactory(const PvAccessRPCClientConfig& config);
-  ~EPICSRPCClientFactory();
+  ~EPICSRPCClientFactory() = default;
 
   EPICSRPCClientFactory(const EPICSRPCClientFactory&) = default;
   EPICSRPCClientFactory& operator=(const EPICSRPCClientFactory&) = default;
