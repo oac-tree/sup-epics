@@ -50,7 +50,7 @@ void AssignToPVXSScalar(const sup::dto::AnyValue& any_value, pvxs::Value& pvxs_v
 template <typename T>
 void AssignToAnyValueScalar(const pvxs::Value& pvxs_value, sup::dto::AnyValue& any_value)
 {
-  any_value = pvxs_value.as<T>();
+  any_value = sup::dto::AnyValue{pvxs_value.as<T>()};
 }
 
 //! Assign array elements from AnyValue to pre-created PVXS value.
@@ -77,7 +77,7 @@ template <typename T>
 
   for (size_t i = 0; i < data.size(); ++i)
   {
-    result[i] = static_cast<T>(data[i]);
+    result[i] = sup::dto::AnyValue{static_cast<T>(data[i])};
   }
 
   return result;
