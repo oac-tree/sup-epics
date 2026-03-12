@@ -58,6 +58,11 @@ public:
   explicit EPICSRPCServerFactory(const PvAccessRPCServerConfig& config);
   ~EPICSRPCServerFactory();
 
+  EPICSRPCServerFactory(const EPICSRPCServerFactory&) = default;
+  EPICSRPCServerFactory& operator=(const EPICSRPCServerFactory&) = default;
+  EPICSRPCServerFactory(EPICSRPCServerFactory&&) = default;
+  EPICSRPCServerFactory& operator=(EPICSRPCServerFactory&&) = default;
+
   std::unique_ptr<sup::protocol::RPCServerInterface> operator()(sup::dto::AnyFunctor& functor);
 private:
   PvAccessRPCServerConfig m_config;
@@ -72,6 +77,11 @@ class EPICSRPCClientFactory
 public:
   explicit EPICSRPCClientFactory(const PvAccessRPCClientConfig& config);
   ~EPICSRPCClientFactory();
+
+  EPICSRPCClientFactory(const EPICSRPCClientFactory&) = default;
+  EPICSRPCClientFactory& operator=(const EPICSRPCClientFactory&) = default;
+  EPICSRPCClientFactory(EPICSRPCClientFactory&&) = default;
+  EPICSRPCClientFactory& operator=(EPICSRPCClientFactory&&) = default;
 
   std::unique_ptr<sup::dto::AnyFunctor> operator()();
 private:
