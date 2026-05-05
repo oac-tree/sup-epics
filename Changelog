@@ -1,3 +1,7 @@
+Changes for 1.12.0:
+
+- Remove obsolete comment
+
 Changes for 1.11.0:
 
 - Implement RPC server factory functions with ownership transfer

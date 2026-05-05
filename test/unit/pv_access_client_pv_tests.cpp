@@ -284,8 +284,6 @@ TEST_F(PvAccessClientPVTests, SetFromClient)
 //! The client gets the structure from the server and sets the value of one field three times in a
 //! row without any extra delays. This led to the situation, where every next operation, destroys
 //! the one being executed. The test checks the last value on the server side.
-//!
-//! This test often hangs and it is disabled for the moment. FIXME.
 
 TEST_F(PvAccessClientPVTests, MultipleSetFromClient)
 {
