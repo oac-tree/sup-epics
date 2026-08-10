@@ -18,6 +18,10 @@
  * of the distribution package.
  *****************************************************************************/
 
+#include "sup/epics/rpc/pv_access_rpc_utils.h"
+#include "sup/epics/utils/dto_conversion_utils.h"
+
+#include <sup/dto/any_functor.h>
 #include <sup/dto/anyvalue.h>
 #include <sup/epics-test/unit_test_helper.h>
 #include <sup/epics/pv_access_rpc_client.h>
@@ -26,7 +30,22 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 using namespace sup::epics;
+
+namespace
+{
+// Functor whose invocation always throws, to exercise HandleRPCCall's error path.
+class ThrowingFunctor : public sup::dto::AnyFunctor
+{
+public:
+  sup::dto::AnyValue operator()(const sup::dto::AnyValue&) override
+  {
+    throw std::runtime_error("handler failure");
+  }
+};
+}  // namespace
 
 class PvAccessRPCUtilsTests : public ::testing::Test
 {
@@ -80,6 +99,20 @@ TEST_F(PvAccessRPCUtilsTests, HandleRPCCall)
   auto reply = client(payload);
   EXPECT_TRUE(sup::protocol::utils::CheckReplyFormat(reply));
   EXPECT_EQ(reply[sup::protocol::constants::REPLY_PAYLOAD], array);
+}
+
+// HandleRPCCall returns a server encoding error reply when the handler throws.
+TEST_F(PvAccessRPCUtilsTests, HandleRPCCallHandlerThrows)
+{
+  ThrowingFunctor handler;
+  const sup::dto::AnyValue request = {{{"field_name", {sup::dto::SignedInteger32Type, 42}}},
+                                      "struct_name"};
+  const auto pvxs_request = BuildPVXSValue(request);
+
+  const auto pvxs_reply = utils::HandleRPCCall(handler, pvxs_request);
+  const auto reply = BuildAnyValue(pvxs_reply);
+  EXPECT_EQ(reply,
+            sup::protocol::utils::CreateRPCReply(sup::protocol::ServerNetworkEncodingError));
 }
 
 PvAccessRPCUtilsTests::PvAccessRPCUtilsTests() = default;

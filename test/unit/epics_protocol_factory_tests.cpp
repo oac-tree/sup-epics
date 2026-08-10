@@ -22,6 +22,7 @@
 #include <sup/epics/pv_access_rpc_client.h>
 
 #include <sup/dto/anyvalue.h>
+#include <sup/protocol/exceptions.h>
 #include <sup/protocol/protocol_factory_utils.h>
 
 #include <gtest/gtest.h>
@@ -380,4 +381,27 @@ TEST_F(EPICSProtocolFactoryTest, RPCFactoryFunctionsWithLogging)
   EXPECT_EQ(output, reply);
   EXPECT_GT(server_log_count, 0);
   EXPECT_GT(client_log_count, 0);
+}
+
+// CreateProcessVariable throws when the process variable class is unknown.
+TEST_F(EPICSProtocolFactoryTest, CreateProcessVariableUnknownClass)
+{
+  const sup::dto::AnyValue config = {{
+    { kProcessVariableClass, "NonExistentProcessVariableClass" }
+  }};
+  EXPECT_THROW(m_factory.CreateProcessVariable(config), sup::protocol::InvalidOperationException);
+}
+
+// A PvAccess client variable without a server never becomes available and cannot be set.
+TEST_F(EPICSProtocolFactoryTest, PvAccessClientVariableNotConnected)
+{
+  const sup::dto::AnyValue client_config = {{
+    { kProcessVariableClass, kPvAccessClientClass },
+    { kChannelName, "PvAccessClientNotConnectedTests:NoServer" }
+  }};
+  auto client_var = m_factory.CreateProcessVariable(client_config);
+
+  EXPECT_FALSE(client_var->WaitForAvailable(0.1));
+  const sup::dto::AnyValue value = {sup::dto::SignedInteger32Type, 42};
+  EXPECT_FALSE(client_var->SetValue(value, 0.1));
 }

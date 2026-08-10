@@ -25,6 +25,8 @@
 #include <pvxs/data.h>
 #include <pvxs/nt.h>
 
+#include <stdexcept>
+
 using namespace ::sup::epics;
 
 class AnyValueScalarConversionUtilsTests : public ::testing::Test
@@ -657,4 +659,12 @@ TEST_F(AnyValueScalarConversionUtilsTests, GetAnyValueFromScalarArray)
     pvxs_value = std::string(1025, 'a');
     EXPECT_THROW(GetAnyValueFromScalarArray(pvxs_value), std::runtime_error);
   }
+}
+
+// AssignAnyValueToPVXSValueScalarArray rejects non-array AnyValues.
+TEST_F(AnyValueScalarConversionUtilsTests, AssignScalarArrayRejectsNonArray)
+{
+  const sup::dto::AnyValue scalar = {sup::dto::SignedInteger32Type, 42};
+  pvxs::Value pvxs_value;
+  EXPECT_THROW(AssignAnyValueToPVXSValueScalarArray(scalar, pvxs_value), std::runtime_error);
 }

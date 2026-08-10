@@ -27,6 +27,8 @@
 #include <pvxs/nt.h>
 #include <pvxs/sharedArray.h>
 
+#include <stdexcept>
+
 using namespace ::sup::epics;
 
 class AnyValueFromPVXSBuilderTests : public ::testing::Test
@@ -547,4 +549,12 @@ TEST_F(AnyValueFromPVXSBuilderTests, StructureWithArrayWithStructure)
   auto any_value = BuildAnyValue(pvxs_value);
 
   EXPECT_EQ(any_value, expected_struct_value);
+}
+
+// BuildAnyValue throws for a PVXS value whose type code is unsupported (e.g. Union).
+TEST_F(AnyValueFromPVXSBuilderTests, UnsupportedPvxsValueThrows)
+{
+  auto pvxs_value =
+      ::pvxs::TypeDef(::pvxs::TypeCode::Union, {pvxs::members::Int32("choice")}).create();
+  EXPECT_THROW(BuildAnyValue(pvxs_value), std::runtime_error);
 }
